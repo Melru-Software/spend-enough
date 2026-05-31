@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zeroline — live now, plan well</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bone: #f4efe6;
+    --bone-2: #ebe4d6;
+    --ink: #1a1814;
+    --ink-soft: #3d3830;
+    --ink-mute: #6b6356;
+    --ink-faint: #8a8173;
+    --rust: #b85c38;
+    --rust-deep: #8a4226;
+    --moss: #5b6e3a;
+    --moss-deep: #3e4d28;
+    --gold: #c9a449;
+    --paper: #fbf8f1;
+    --line: #d4cab8;
+    --line-soft: #e2dac8;
+    --danger: #a8331f;
+    --danger-soft: #d8856f;
+    --shadow-sm: 0 1px 0 rgba(26,24,20,0.04), 0 1px 2px rgba(26,24,20,0.06);
+    --shadow-md: 0 2px 4px rgba(26,24,20,0.06), 0 8px 24px rgba(26,24,20,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    background: var(--bone);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(184,92,56,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(91,110,58,0.04) 0%, transparent 50%);
+  }
+
+  .serif { font-family: 'Fraunces', Georgia, serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ========== HEADER ========== */
+  header {
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--paper);
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--rust);
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 2px;
+    transform: translateY(-2px);
+  }
+  .tagline { color: var(--ink-mute); font-size: 13px; font-style: italic; font-family: 'Fraunces', serif; }
+  .scenarios-bar { display: flex; gap: 8px; align-items: center; }
+  .scenario-pill {
+    padding: 6px 14px; border: 1px solid var(--line); background: var(--paper);
+    color: var(--ink-soft); font-size: 12px; border-radius: 100px; cursor: pointer;
+    transition: all 0.15s ease; font-weight: 500; font-family: inherit;
+  }
+  .scenario-pill:hover { border-color: var(--ink); background: var(--bone-2); }
+
+  /* ========== ONBOARDING ========== */
+  .onboarding { max-width: 720px; margin: 0 auto; padding: 64px 40px; }
+  .onboard-hero { margin-bottom: 48px; text-align: center; }
+  .onboard-eyebrow { text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; color: var(--rust); font-weight: 600; margin-bottom: 18px; }
+  .onboard-title { font-family: 'Fraunces', serif; font-size: clamp(38px, 6vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 22px; }
+  .onboard-title em { font-style: italic; color: var(--rust); font-weight: 500; }
+  .onboard-sub { font-size: 17px; color: var(--ink-mute); max-width: 520px; margin: 0 auto; line-height: 1.6; }
+  .onboard-fine { font-size: 12px; color: var(--ink-faint); margin-top: 18px; }
+  .onboard-fine a { color: var(--rust); }
+  .onboard-step { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 32px; margin-bottom: 14px; box-shadow: var(--shadow-sm); }
+  .step-number { font-family: 'Fraunces', serif; font-size: 13px; color: var(--rust); font-style: italic; margin-bottom: 8px; }
+  .step-title { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .step-hint { color: var(--ink-mute); font-size: 14px; margin-bottom: 22px; }
+  .field-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  .field-grid.cols-1 { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute); font-weight: 600; }
+  .field input, .field select { background: var(--bone); border: 1px solid var(--line); padding: 11px 14px; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--ink); border-radius: 2px; transition: border-color 0.15s ease; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--ink); }
+  .field-hint { font-size: 11px; color: var(--ink-faint); }
+  .field-hint .helper-trigger { background: none; border: none; color: var(--rust); cursor: pointer; font-size: 11px; text-decoration: underline; padding: 0; font-family: inherit; }
+  .step-actions { display: flex; justify-content: center; gap: 12px; margin-top: 28px; }
+  .btn-primary { background: var(--ink); color: var(--paper); border: none; padding: 14px 28px; font-size: 15px; font-weight: 600; border-radius: 3px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s ease; }
+  .btn-primary:hover { background: var(--rust); }
+  .btn-secondary { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); padding: 14px 22px; font-size: 14px; border-radius: 3px; cursor: pointer; font-family: inherit; }
+  .btn-secondary:hover { border-color: var(--ink); }
+  .validation-msg { color: var(--danger); font-size: 13px; text-align: center; margin-top: 14px; min-height: 18px; }
+</style>
+</head>
+<style>
+  /* ========== DASHBOARD LAYOUT ========== */
+  .dashboard { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 73px); }
+  .sidebar { background: var(--paper); border-right: 1px solid var(--line); padding: 22px 20px; overflow-y: auto; }
+  .sidebar-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
+  .sidebar-section:last-child { border-bottom: none; }
+  .sidebar-heading { text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .sidebar-sub { font-size: 11px; color: var(--ink-mute); margin-bottom: 12px; }
+  .preset-btn { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--bone); padding: 9px 11px; font-size: 12px; color: var(--ink-soft); margin-bottom: 5px; border-radius: 3px; font-family: inherit; cursor: pointer; transition: border-color 0.15s ease; }
+  .preset-btn:hover { border-color: var(--rust); color: var(--ink); }
+  .preset-icon { color: var(--rust); font-style: italic; font-family: 'Fraunces', serif; margin-right: 5px; }
+  .toggle-group { display: flex; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+  .toggle-btn { flex: 1; padding: 7px 4px; font-size: 11px; text-align: center; border: none; cursor: pointer; font-family: inherit; background: var(--bone); color: var(--ink-mute); transition: all 0.12s ease; }
+  .toggle-btn:hover { background: var(--bone-2); }
+  .toggle-btn.active { background: var(--ink); color: var(--paper); }
+  .control { margin-bottom: 14px; }
+  .control-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+  .control-label { font-size: 12px; color: var(--ink-soft); }
+  .control-value { font-size: 12px; font-weight: 600; color: var(--ink); font-family: 'JetBrains Mono', monospace; }
+  .control input[type=range] { width: 100%; height: 4px; -webkit-appearance: none; appearance: none; background: var(--line); border-radius: 2px; outline: none; }
+  .control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; transition: background 0.12s; }
+  .control input[type=range]::-webkit-slider-thumb:hover { background: var(--rust); }
+  .control input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; border: none; }
+  .control input[type=number] { width: 100%; background: var(--bone); border: 1px solid var(--line); padding: 7px 9px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink); border-radius: 2px; }
+  .control input[type=number]:focus { outline: none; border-color: var(--ink); }
+  .help-mark { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-mute); font-size: 9px; font-style: italic; margin-left: 4px; cursor: help; font-family: 'Fraunces', serif; }
+  .more-toggle { display: block; width: 100%; text-align: left; border: none; background: transparent; padding: 8px 0 0; font-size: 12px; color: var(--rust); font-family: inherit; cursor: pointer; }
+  .more-toggle:hover { text-decoration: underline; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .checkbox-row input { width: 14px; height: 14px; accent-color: var(--ink); }
+  .checkbox-row label { font-size: 12px; color: var(--ink-soft); cursor: pointer; }
+  .acct-grid { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; }
+  .acct-grid label { font-size: 12px; color: var(--ink-soft); }
+  .acct-grid input { width: 110px; background: var(--bone); border: 1px solid var(--line); padding: 6px 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink); border-radius: 2px; text-align: right; }
+
+  /* ========== MAIN ========== */
+  .main { padding: 24px 32px; overflow-y: auto; max-width: 1100px; }
+  .disclaimer-bar { background: var(--bone-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px 16px; font-size: 12px; line-height: 1.5; color: var(--ink-mute); margin-bottom: 18px; }
+  .disclaimer-bar strong { color: var(--ink-soft); font-weight: 600; }
+  .disclaimer-bar a { color: var(--rust); cursor: pointer; }
+  .impact-banner { background: var(--bone-2); border-radius: 4px; padding: 11px 16px; font-size: 12px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 16px; }
+  .impact-banner strong { color: var(--ink); }
+  .impact-banner button { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: 12px; text-decoration: underline; padding: 0; }
+
+  /* Verdict */
+  .verdict { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 24px 28px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
+  .verdict-eye { text-transform: uppercase; letter-spacing: 0.15em; font-size: 10px; font-weight: 700; margin-bottom: 8px; }
+  .verdict-eye.good { color: var(--moss); }
+  .verdict-eye.mid { color: var(--gold); }
+  .verdict-eye.bad { color: var(--danger); }
+  .verdict-head { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 400; color: var(--ink); line-height: 1.25; margin-bottom: 10px; letter-spacing: -0.01em; }
+  .verdict-body { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+  .verdict-caveat { font-size: 12px; color: var(--ink-faint); margin-top: 10px; font-style: italic; }
+
+  /* Sections */
+  .section-heading { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: var(--ink); margin: 26px 0 4px; }
+  .section-sub { font-size: 12px; color: var(--ink-mute); line-height: 1.5; margin-bottom: 14px; }
+
+  /* Confidence bands */
+  .bands { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+  .band { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; }
+  .band-label { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .band-sub { font-size: 11px; color: var(--ink-mute); margin-bottom: 8px; }
+  .band-value { font-size: 17px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .band.warn .band-value { color: var(--danger); }
+  .band.ok .band-value { color: var(--moss); }
+  .band.neutral .band-value { color: var(--ink-soft); }
+
+  /* Chart */
+  .chart-card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 18px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
+  .chart-wrap { position: relative; height: 280px; }
+  .chart-wrap.short { height: 200px; }
+
+  /* Tables */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 18px; }
+  .data-table th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); color: var(--ink-mute); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); color: var(--ink-soft); }
+  .data-table tr.current-row { background: var(--bone-2); }
+  .data-table .tag-current { display: inline-block; background: var(--rust); color: var(--paper); font-size: 9px; padding: 1px 6px; border-radius: 2px; margin-left: 6px; vertical-align: 1px; font-weight: 600; }
+  .data-table .fail { color: var(--danger); font-weight: 600; }
+  .data-table .clickable { cursor: pointer; }
+  .data-table .clickable:hover { background: var(--bone-2); }
+
+  /* Stress cards */
+  .scenario-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+  .scenario-card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s ease; }
+  .scenario-card:hover { border-color: var(--rust); }
+  .scenario-card.failed { border-left: 3px solid var(--danger-soft); }
+  .scenario-card.survived { border-left: 3px solid var(--moss); }
+  .scenario-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .scenario-years { font-size: 11px; color: var(--ink-mute); margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; }
+  .scenario-result { font-size: 13px; font-weight: 600; }
+  .scenario-result.ok { color: var(--moss); }
+  .scenario-result.fail { color: var(--danger); }
+  .scenario-desc { font-size: 11px; color: var(--ink-mute); margin-top: 5px; line-height: 1.4; }
+  .scenario-card.add { border-style: dashed; display: flex; align-items: center; justify-content: center; color: var(--ink-faint); font-size: 13px; }
+
+  /* Flexibility */
+  .flex-box { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 16px 20px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; text-align: center; }
+  .flex-label { font-size: 11px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .flex-value { font-size: 18px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .flex-arrow { font-size: 20px; color: var(--rust); }
+  .flex-note { font-size: 12px; color: var(--ink-mute); line-height: 1.5; margin-bottom: 18px; }
+
+  /* SS comparison */
+  .ss-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+  .ss-card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px; text-align: center; cursor: pointer; transition: border-color 0.15s ease; }
+  .ss-card:hover { border-color: var(--rust); }
+  .ss-card.highlight { border: 2px solid var(--moss); }
+  .ss-age { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 500; color: var(--ink); }
+  .ss-label { font-size: 10px; color: var(--ink-mute); margin: 2px 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .ss-benefit { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+  .ss-success { font-size: 13px; font-weight: 600; }
+
+  /* Assumptions + resources */
+  .assumptions-section { margin: 8px 0 18px; }
+  .assumptions-section summary { font-size: 13px; color: var(--rust); cursor: pointer; font-weight: 500; }
+  .assumptions-section .assumptions-body { font-size: 12px; color: var(--ink-mute); line-height: 1.7; margin-top: 10px; padding-left: 4px; }
+  .assumptions-section .assumptions-body strong { color: var(--ink-soft); }
+  .resources { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 18px; }
+  .resources a { color: var(--rust); font-size: 13px; text-decoration: none; margin-right: 16px; }
+  .resources a:hover { text-decoration: underline; }
+  .resources p { font-size: 12px; color: var(--ink-mute); line-height: 1.6; margin-top: 8px; }
+
+  /* Stat cards */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+  .stat-card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; }
+  .stat-label { font-size: 11px; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-value { font-size: 20px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--ink); }
+
+  /* Saved scenarios */
+  .scenario-save-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .scenario-save-row input { flex: 1; background: var(--bone); border: 1px solid var(--line); padding: 8px 10px; font-size: 13px; border-radius: 2px; font-family: inherit; }
+  .saved-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line-soft); font-size: 12px; }
+  .saved-item button { background: none; border: none; color: var(--rust); cursor: pointer; font-size: 11px; font-family: inherit; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(26,24,20,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+  .modal { background: var(--paper); border-radius: 6px; max-width: 600px; max-height: 80vh; overflow-y: auto; padding: 32px; box-shadow: var(--shadow-md); }
+  .modal h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; margin-bottom: 16px; }
+  .modal p { font-size: 13px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 12px; }
+  .modal .modal-close { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-mute); }
+
+  .detail-narrative { background: var(--bone-2); border-radius: 4px; padding: 14px 18px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
+
+  @media (max-width: 860px) {
+    .dashboard { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
+    .bands, .scenario-cards, .ss-grid, .stat-row { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<script>
+"use strict";
+
+/* ============================================================================
+   ZEROLINE — TABLE OF CONTENTS
+   ----------------------------------------------------------------------------
+   1. CONSTANTS & HISTORICAL DATA ...... FINAL_AGE, HISTORICAL_RETURNS, scenarios
+   2. SIMULATION ENGINE ................ withdrawWithTax, simulateOnce,
+                                         runFixed / runHistorical / runMonteCarlo,
+                                         runForState, findMaxSpend, summarize
+   3. TAX & SOCIAL SECURITY ESTIMATORS . brackets, estimateNetIncome, estimateSSBenefit
+   4. STATE ............................ DEFAULT_STATE, SAMPLE_STATE, live globals
+   5. PRESETS .......................... generatePresets (+ applyPreset near bottom)
+   6. FORMAT HELPERS ................... fmtMoney, periodsLabel, etc.
+   7. ONBOARDING VIEW .................. renderOnboarding, finishOnboarding, validation
+   8. DASHBOARD VIEW ................... renderDashboard, sidebar, verdict, empty state
+   9. SECTION RENDERERS ................ bands, explorer, stress tests, SS, tax, etc.
+  10. CHARTS .......................... drawMainChart, drawCashflowChart
+  11. INPUT HANDLERS / PRESETS / SAVE .. update, sliders, applyPreset, scenarios
+  12. MODALS .......................... about, disclaimer, helpers
+  13. INIT ............................ render()
+
+   NOTE: behavior is in today's (real, inflation-adjusted) dollars throughout.
+============================================================================ */
+
+const FINAL_AGE = 100;
+const CURRENT_YEAR = new Date().getFullYear();
+
+// S&P 500 annual REAL (inflation-adjusted) total returns, dividends reinvested.
+// Source: us500.com / Shiller CPI series, 1926-2025. Stored as decimals.
+const HISTORICAL_START_YEAR = 1926;
+const HISTORICAL_RETURNS = [
+  0.1288,0.4067,0.453,-0.0895,-0.1976,-0.3752,0.0232,0.5283,-0.0292,0.4338,
+  0.3201,-0.3684,0.3487,-0.0041,-0.1042,-0.1958,0.1037,0.2228,0.1706,0.3344,
+  -0.2218,-0.0288,0.0244,0.213,0.2434,0.17,0.1749,-0.0173,0.5376,0.3108,
+  0.0347,-0.1329,0.4088,0.1006,-0.0088,0.2605,-0.0993,0.2082,0.1536,0.1033,
+  -0.1307,0.2032,0.0605,-0.1384,-0.0148,0.1069,0.1506,-0.215,-0.3455,0.283,
+  0.181,-0.1301,-0.0226,0.0455,0.1769,-0.127,0.1707,0.1808,0.0223,0.2691,
+  0.1738,0.0079,0.1167,0.2584,-0.0868,0.266,0.0459,0.0713,-0.0131,0.3417,
+  0.1901,0.3113,0.2654,0.1788,-0.1208,-0.1323,-0.2391,0.2631,0.0738,0.0144,
+  0.1292,0.0137,-0.3707,0.2311,0.1336,-0.0083,0.1402,0.3043,0.1283,0.0065,
+  0.0969,0.1931,-0.0617,0.2855,0.1681,0.2024,-0.2307,0.222,0.2151,0.148
+];
+
+const HISTORICAL_END_YEAR = HISTORICAL_START_YEAR + HISTORICAL_RETURNS.length - 1;
+
+function getHistoricalSequence(startYear, numYears) {
+  const startIdx = startYear - HISTORICAL_START_YEAR;
+  if (startIdx < 0 || startIdx + numYears > HISTORICAL_RETURNS.length) return null;
+  return HISTORICAL_RETURNS.slice(startIdx, startIdx + numYears);
+}
+
+const AVG_HISTORICAL_RETURN = HISTORICAL_RETURNS.reduce((a, b) => a + b, 0) / HISTORICAL_RETURNS.length;
+
+// Named historical scenarios for stress tests
+const HISTORICAL_SCENARIOS = [
+  { id: 'depression', name: 'Great Depression', startYear: 1929, description: 'Markets lost most of their real value over three years; deflation followed.' },
+  { id: 'postwar', name: 'Post-war boom', startYear: 1950, description: 'Strong growth and rising wages through the 1950s and 60s.' },
+  { id: 'stagflation', name: '1970s stagflation', startYear: 1969, description: 'High inflation and oil shocks; real returns were negative for a decade.' },
+  { id: 'reagan', name: '1980s bull market', startYear: 1982, description: 'Falling interest rates fueled a long equity rally.' },
+  { id: 'dotcom', name: 'Dot-com to 2008', startYear: 2000, description: 'Two major crashes within a decade — a hard sequence for retirees.' },
+];
+
+// ============================================================================
+// SIMULATION ENGINE
+// ============================================================================
+
+function withdrawWithTax(netNeed, accts, strategy, age, state) {
+  // Returns { gross, tax, drawn: {traditional, roth, taxable} }
+  // netNeed is the after-tax cash required from the portfolio.
+  // We gross up per account so that (gross - tax) covers netNeed.
+  const penalty = age < 59.5 ? 0.10 : 0;
+  const effRate = {
+    traditional: Math.min(0.95, state.taxRate + penalty),
+    roth: penalty, // contributions assumed tax-free; only early penalty applies
+    taxable: state.capGainsTax * 0.5, // ~half the withdrawal is gain, taxed at cap gains
+  };
+  const order = strategy === 'taxSmart'
+    ? ['taxable', 'traditional', 'roth']
+    : null;
+
+  const drawn = { traditional: 0, roth: 0, taxable: 0 };
+  let tax = 0;
+  let gross = 0;
+
+  if (strategy === 'proportional') {
+    const total = accts.traditional + accts.roth + accts.taxable;
+    if (total <= 0) return { gross: netNeed, tax: 0, drawn };
+    for (const k of ['traditional', 'roth', 'taxable']) {
+      const share = netNeed * (accts[k] / total);
+      const g = share / (1 - effRate[k]);
+      drawn[k] = g;
+      tax += g * effRate[k];
+      gross += g;
+    }
+    return { gross, tax, drawn };
+  }
+
+  // taxSmart: draw in order, grossing up per account
+  let remaining = netNeed;
+  for (const k of order) {
+    if (remaining <= 0) break;
+    const avail = accts[k];
+    if (avail <= 0) continue;
+    // Max net we can get from this account = avail * (1 - effRate)
+    const maxNet = avail * (1 - effRate[k]);
+    const takeNet = Math.min(remaining, maxNet);
+    const g = takeNet / (1 - effRate[k]);
+    drawn[k] = g;
+    tax += g * effRate[k];
+    gross += g;
+    remaining -= takeNet;
+  }
+  if (remaining > 0) {
+    // Not enough across accounts; reflect the shortfall as extra gross
+    gross += remaining;
+  }
+  return { gross, tax, drawn };
+}
+
+function simulateOnce(state, returnSeries) {
+  const years = [];
+  let portfolio = state.portfolio;
+  let yourSalary = state.yourIncome;
+  let partnerSalary = state.partnerIncome;
+  const mortgagePayoffAge = state.mortgagePayoffAge;
+  let broken = false;
+  let flexCutCount = 0;
+  let refWithdrawRate = null; // set on first withdrawal year; guardrails compare against this
+
+  // Per-account tracking (only if enabled)
+  const useAccts = state.accountsEnabled;
+  let accts = useAccts
+    ? { traditional: state.accounts.traditional, roth: state.accounts.roth, taxable: state.accounts.taxable }
+    : null;
+  if (useAccts) {
+    portfolio = accts.traditional + accts.roth + accts.taxable;
+  }
+
+  for (let i = 0; i < state.targetAge - state.age + 1; i++) {
+    const age = state.age + i;
+    const partnerAge = state.partnerAge + i;
+    const year = CURRENT_YEAR + i;
+
+    if (broken) {
+      years.push({ year, age, partnerAge, portfolioStart: 0, portfolio: 0, yourIncome: 0, partnerIncome: 0, ssIncome: 0, spending: 0, withdrawal: 0, housing: 0, tax: 0, marketReturn: 0, flexed: false, ranOut: true });
+      continue;
+    }
+
+    let yourIncomeThisYear = age >= state.yourStopWorkAge ? 0 : yourSalary;
+    let partnerIncomeThisYear = (state.hasPartner && partnerAge >= state.partnerStopWorkAge) ? 0 : (state.hasPartner ? partnerSalary : 0);
+
+    if (state.yourPartTimeAmount > 0 && age >= state.yourPartTimeStart && age < state.yourPartTimeEnd) yourIncomeThisYear += state.yourPartTimeAmount;
+    if (state.partnerPartTimeAmount > 0 && partnerAge >= state.partnerPartTimeStart && partnerAge < state.partnerPartTimeEnd) partnerIncomeThisYear += state.partnerPartTimeAmount;
+
+    let ssIncome = 0;
+    if (age >= state.ssStartAge) ssIncome += state.yourSSAmount;
+    if (state.hasPartner && partnerAge >= state.ssStartAge) ssIncome += state.partnerSSAmount;
+
+    const housing = age < mortgagePayoffAge ? state.housing : 0;
+
+    let spend = age >= state.slowDownAge ? state.lateSpending : state.spending;
+
+    // Compute income first (independent of spend)
+    const grossIncome = yourIncomeThisYear + partnerIncomeThisYear + ssIncome;
+    const taxedIncome = (yourIncomeThisYear + partnerIncomeThisYear) * state.taxRate + ssIncome * (state.taxRate * 0.5);
+    const netIncome = grossIncome - taxedIncome;
+
+    // One-time events + home sale inflows/outflows
+    let eventAdj = 0;
+    if (state.oneTimeEvents && state.oneTimeEvents.length) {
+      for (const ev of state.oneTimeEvents) { if (ev.age === age && ev.amount) eventAdj += ev.amount; }
+    }
+    if (state.homeSaleAge && age === state.homeSaleAge) eventAdj += state.homeSaleProceeds;
+
+    // Provisional portfolio withdrawal need at base spend
+    let provisionalNeed = (spend + housing) - netIncome - eventAdj;
+
+    // Withdrawal-rate guardrails: cut when drawing too hard, boost when genuinely flush.
+    // Reference rate is set in the first year of meaningful portfolio withdrawal.
+    // This ensures cuts fire in stressed sequences and boosts only when there's real surplus.
+    let flexed = false;
+    if (state.guardrailsEnabled && provisionalNeed > 0 && portfolio > 0) {
+      const rate = provisionalNeed / portfolio;
+      if (refWithdrawRate === null) {
+        refWithdrawRate = rate; // first withdrawal year sets the reference
+      } else {
+        const band = 0.20; // ±20% of reference rate as guardrail band
+        if (rate > refWithdrawRate * (1 + band)) {
+          // Drawing too hard — cut spending
+          spend = spend * (1 - state.guardrailCutPct);
+          flexed = true; flexCutCount++;
+        } else if (rate < refWithdrawRate * (1 - band)) {
+          // Genuinely flush — allow boost
+          spend = spend * (1 + state.guardrailBoostPct);
+          flexed = true;
+        }
+      }
+    }
+
+    const totalSpend = spend + housing;
+    let netNeed = totalSpend - netIncome - eventAdj;
+
+    let withdrawal = 0;
+    let taxThisYear = 0;
+
+    if (netNeed > 0) {
+      if (useAccts) {
+        const res = withdrawWithTax(netNeed, accts, state.withdrawalStrategy, age, state);
+        withdrawal = res.gross;
+        taxThisYear = res.tax;
+        accts.traditional = Math.max(0, accts.traditional - res.drawn.traditional);
+        accts.roth = Math.max(0, accts.roth - res.drawn.roth);
+        accts.taxable = Math.max(0, accts.taxable - res.drawn.taxable);
+      } else {
+        withdrawal = netNeed / (1 - state.capGainsTax);
+        taxThisYear = withdrawal - netNeed;
+      }
+    } else {
+      // Surplus: add to portfolio (and to taxable account if tracking)
+      withdrawal = netNeed; // negative
+      if (useAccts) accts.taxable += -netNeed;
+    }
+
+    const portfolioStart = portfolio;
+    portfolio -= withdrawal;
+
+    const realReturn = returnSeries[i] !== undefined ? returnSeries[i] : state.returnRate;
+    portfolio = portfolio * (1 + realReturn);
+    if (useAccts) {
+      accts.traditional *= (1 + realReturn);
+      accts.roth *= (1 + realReturn);
+      accts.taxable *= (1 + realReturn);
+    }
+
+    let ranOutThisYear = false;
+    if (portfolio <= 0) { portfolio = 0; ranOutThisYear = true; broken = true; if (useAccts) { accts.traditional = accts.roth = accts.taxable = 0; } }
+
+    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn: realReturn, flexed, ranOut: ranOutThisYear || broken });
+
+    yourSalary *= (1 + (state.yourIncomeGrowth || 0));
+    partnerSalary *= (1 + (state.partnerIncomeGrowth || 0));
+  }
+  years.flexCutCount = flexCutCount;
+  years.finalAccounts = useAccts ? { traditional: accts.traditional, roth: accts.roth, taxable: accts.taxable } : null;
+  return years;
+}
+
+function randNormal(mean, stdDev) {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  return z * stdDev + mean;
+}
+
+function pctOf(sortedVals, p) { return sortedVals[Math.min(sortedVals.length - 1, Math.floor(sortedVals.length * p))]; }
+
+function buildPercentiles(allRuns, yearCount) {
+  const percentiles = [];
+  for (let y = 0; y < yearCount; y++) {
+    const vals = allRuns.map(r => r[y].portfolio).sort((a, b) => a - b);
+    percentiles.push({
+      year: allRuns[0][y].year, age: allRuns[0][y].age,
+      p10: pctOf(vals, 0.10), p25: pctOf(vals, 0.25), p50: pctOf(vals, 0.50),
+      p75: pctOf(vals, 0.75), p90: pctOf(vals, 0.90),
+      ranOutPct: allRuns.filter(r => r[y].ranOut).length / allRuns.length,
+    });
+  }
+  return percentiles;
+}
+
+function summarize(allRuns, yearCount, mode, labels) {
+  const percentiles = buildPercentiles(allRuns, yearCount);
+  const successCount = allRuns.filter(r => r[r.length - 1].portfolio > 0).length;
+  const total = allRuns.length;
+  const finals = allRuns.map(r => r[r.length - 1].portfolio).sort((a, b) => a - b);
+  const medianFinal = finals[Math.floor(finals.length / 2)];
+  const runOutAges = allRuns.map(r => { const f = r.find(y => y.ranOut); return f ? f.age : null; }).filter(x => x !== null).sort((a, b) => a - b);
+  const medianRunOutAge = runOutAges.length ? runOutAges[Math.floor(runOutAges.length / 2)] : null;
+  const failures = [];
+  allRuns.forEach((run, i) => { const f = run.find(y => y.ranOut); if (f) failures.push({ label: labels ? labels[i] : String(i), ranOutAge: f.age }); });
+  failures.sort((a, b) => a.ranOutAge - b.ranOutAge);
+  return { percentiles, successRate: successCount / total, successCount, totalPeriods: total, medianFinal, medianRunOutAge, failures, medianRun: allRuns[Math.floor(allRuns.length / 2)], mode };
+}
+
+function runMonteCarlo(state, numSims = 500) {
+  const yearCount = state.targetAge - state.age + 1;
+  const allRuns = [];
+  for (let s = 0; s < numSims; s++) {
+    const seq = [];
+    for (let y = 0; y < yearCount; y++) seq.push(randNormal(state.returnRate, state.returnStdDev));
+    allRuns.push(simulateOnce(state, seq));
+  }
+  return summarize(allRuns, yearCount, 'montecarlo', null);
+}
+
+function runHistorical(state) {
+  const yearCount = state.targetAge - state.age + 1;
+  const maxStart = HISTORICAL_END_YEAR - yearCount + 1;
+  const allRuns = []; const labels = [];
+  for (let sy = HISTORICAL_START_YEAR; sy <= maxStart; sy++) {
+    const seq = getHistoricalSequence(sy, yearCount);
+    if (!seq) continue;
+    allRuns.push(simulateOnce(state, seq));
+    labels.push(sy + '\u2013' + (sy + yearCount - 1));
+  }
+  // If horizon too long for any full window, fall back to padded windows
+  if (allRuns.length === 0) {
+    for (let sy = HISTORICAL_START_YEAR; sy <= HISTORICAL_END_YEAR - 10; sy++) {
+      const avail = getHistoricalSequence(sy, HISTORICAL_END_YEAR - sy + 1);
+      const seq = [...avail]; while (seq.length < yearCount) seq.push(AVG_HISTORICAL_RETURN);
+      allRuns.push(simulateOnce(state, seq));
+      labels.push(sy + '\u2013' + (sy + yearCount - 1) + '*');
+    }
+  }
+  return summarize(allRuns, yearCount, 'historical', labels);
+}
+
+function runFixed(state) {
+  const yearCount = state.targetAge - state.age + 1;
+  const seq = new Array(yearCount).fill(state.returnRate);
+  const run = simulateOnce(state, seq);
+  const finalBal = run[run.length - 1].portfolio;
+  const runOut = run.find(y => y.ranOut);
+  return {
+    percentiles: run.map(y => ({ year: y.year, age: y.age, p10: y.portfolio, p25: y.portfolio, p50: y.portfolio, p75: y.portfolio, p90: y.portfolio, ranOutPct: y.ranOut ? 1 : 0 })),
+    successRate: finalBal > 0 ? 1 : 0, successCount: finalBal > 0 ? 1 : 0, totalPeriods: 1,
+    medianFinal: finalBal, medianRunOutAge: runOut ? runOut.age : null, failures: runOut ? [{ label: 'fixed', ranOutAge: runOut.age }] : [],
+    medianRun: run, mode: 'fixed',
+  };
+}
+
+function runForState(s) {
+  // Merge with defaults so any missing fields (e.g. targetAge) get filled in
+  const merged = Object.assign({}, DEFAULT_STATE, s);
+  return merged.simMode === 'historical' ? runHistorical(merged) : merged.simMode === 'montecarlo' ? runMonteCarlo(merged) : runFixed(merged);
+}
+
+function runNamedScenario(state, scenario) {
+  const yearCount = state.targetAge - state.age + 1;
+  let seq = getHistoricalSequence(scenario.startYear, yearCount);
+  let padded = false;
+  if (!seq) {
+    const avail = getHistoricalSequence(scenario.startYear, HISTORICAL_END_YEAR - scenario.startYear + 1) || [];
+    seq = [...avail]; while (seq.length < yearCount) seq.push(AVG_HISTORICAL_RETURN);
+    padded = true;
+  }
+  return { years: simulateOnce(state, seq), scenario, padded };
+}
+
+// Max sustainable spend (deterministic): highest spend landing at buffer at age 100.
+function findMaxSpend(state) {
+  const buffer = state.endGoalBuffer || 0;
+  let low = 5000, high = 600000, best = low, bestFinal = null;
+  for (let i = 0; i < 18; i++) {
+    const mid = (low + high) / 2;
+    const ratio = state.spending > 0 ? (state.lateSpending / state.spending) : 1;
+    const r = runFixed({ ...state, spending: mid, lateSpending: mid * ratio });
+    if (r.medianRunOutAge === null && r.medianFinal >= buffer) { best = mid; bestFinal = r.medianFinal; low = mid; }
+    else high = mid;
+  }
+  return { spend: best, medianFinal: bestFinal };
+}
+
+// ============================================================================
+// TAX & SOCIAL SECURITY ESTIMATORS (approximations; for the helper modals)
+// ============================================================================
+const FED_BRACKETS_2026 = {
+  single: [[0,0.10],[12400,0.12],[50400,0.22],[105700,0.24],[201775,0.32],[256225,0.35],[640600,0.37]],
+  mfj: [[0,0.10],[24800,0.12],[100800,0.22],[211400,0.24],[403550,0.32],[512450,0.35],[768700,0.37]],
+};
+const FED_STANDARD_DEDUCTION_2026 = { single: 16100, mfj: 32200 };
+const CA_BRACKETS_2025 = {
+  single: [[0,0.01],[10756,0.02],[25499,0.04],[40245,0.06],[55866,0.08],[70606,0.093],[360659,0.103],[432787,0.113],[721314,0.123]],
+  mfj: [[0,0.01],[21512,0.02],[50998,0.04],[80490,0.06],[111732,0.08],[141212,0.093],[721318,0.103],[865574,0.113],[1442628,0.123]],
+};
+const CA_STANDARD_DEDUCTION_2025 = { single: 5706, mfj: 11412 };
+const CA_MENTAL_HEALTH_THRESHOLD = 1000000;
+const SS_WAGE_BASE_2026 = 184500, MEDICARE_RATE = 0.0145, SS_RATE = 0.062, ADD_MEDICARE_RATE = 0.009;
+const ADD_MEDICARE_THRESHOLD = { single: 200000, mfj: 250000 };
+const STATE_CONFIG = {
+  CA: { name: 'California', brackets: CA_BRACKETS_2025, standardDeduction: CA_STANDARD_DEDUCTION_2025, mentalHealthSurcharge: true },
+  NY: { name: 'New York', flatApprox: 0.065 },
+  TX: { name: 'Texas (no state tax)', flatApprox: 0 },
+  FL: { name: 'Florida (no state tax)', flatApprox: 0 },
+  WA: { name: 'Washington (no state tax)', flatApprox: 0 },
+  NV: { name: 'Nevada (no state tax)', flatApprox: 0 },
+  OTHER: { name: 'Other / approximate', flatApprox: 0.05 },
+};
+function taxFromBrackets(taxable, brackets) {
+  if (taxable <= 0) return 0;
+  let tax = 0;
+  for (let i = 0; i < brackets.length; i++) {
+    const [lower, rate] = brackets[i];
+    const upper = i < brackets.length - 1 ? brackets[i + 1][0] : Infinity;
+    if (taxable > lower) tax += (Math.min(taxable, upper) - lower) * rate; else break;
+  }
+  return tax;
+}
+function estimateNetIncome({ gross, filingStatus = 'mfj', stateCode = 'CA', pretax = 0 }) {
+  if (gross <= 0) return { net: 0, federal: 0, state: 0, fica: 0, totalTax: 0, effectiveRate: 0 };
+  const w = Math.max(0, gross - pretax);
+  const federal = taxFromBrackets(Math.max(0, w - FED_STANDARD_DEDUCTION_2026[filingStatus]), FED_BRACKETS_2026[filingStatus]);
+  const sc = STATE_CONFIG[stateCode] || STATE_CONFIG.OTHER;
+  let stateTax = 0;
+  if (sc.brackets) {
+    const st = Math.max(0, w - sc.standardDeduction[filingStatus]);
+    stateTax = taxFromBrackets(st, sc.brackets[filingStatus]);
+    if (sc.mentalHealthSurcharge && st > CA_MENTAL_HEALTH_THRESHOLD) stateTax += (st - CA_MENTAL_HEALTH_THRESHOLD) * 0.01;
+  } else stateTax = w * (sc.flatApprox || 0);
+  const fica = Math.min(w, SS_WAGE_BASE_2026) * SS_RATE + w * MEDICARE_RATE + Math.max(0, w - ADD_MEDICARE_THRESHOLD[filingStatus]) * ADD_MEDICARE_RATE;
+  const totalTax = federal + stateTax + fica;
+  return { net: gross - totalTax - pretax, federal: Math.round(federal), state: Math.round(stateTax), fica: Math.round(fica), totalTax: Math.round(totalTax), effectiveRate: totalTax / gross };
+}
+function estimateSSBenefit(annualGross) {
+  if (annualGross <= 0) return 0;
+  const aime = Math.min(annualGross, SS_WAGE_BASE_2026) / 12;
+  const bend1 = 1286, bend2 = 7749;
+  let pia;
+  if (aime <= bend1) pia = aime * 0.9;
+  else if (aime <= bend2) pia = bend1 * 0.9 + (aime - bend1) * 0.32;
+  else pia = bend1 * 0.9 + (bend2 - bend1) * 0.32 + (aime - bend2) * 0.15;
+  return Math.round(pia * 12);
+}
+
+// ============================================================================
+// STATE
+// ============================================================================
+const DEFAULT_STATE = {
+  age: 0, partnerAge: 0, hasPartner: false,
+  portfolio: 0,
+  spending: 0, lateSpending: 0, slowDownAge: 75,
+  housing: 0, mortgagePayoffAge: 60,
+  yourIncome: 0, yourStopWorkAge: 65, yourIncomeGrowth: 0.01,
+  partnerIncome: 0, partnerStopWorkAge: 65, partnerIncomeGrowth: 0.01,
+  yourPartTimeAmount: 0, yourPartTimeStart: 65, yourPartTimeEnd: 70,
+  partnerPartTimeAmount: 0, partnerPartTimeStart: 65, partnerPartTimeEnd: 70,
+  ssStartAge: 67, yourSSAmount: 0, partnerSSAmount: 0,
+  oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0,
+  returnRate: 0.05, returnStdDev: 0.15,
+  taxRate: 0.18, capGainsTax: 0.15,
+  filingStatus: 'mfj', stateCode: 'OTHER',
+  simMode: 'historical',
+  targetAge: 100,
+  successThreshold: 0.85, endGoalBuffer: 0,
+  // Spending flexibility (percentage-based guardrails)
+  guardrailsEnabled: true, guardrailCutPct: 0.25, guardrailBoostPct: 0.20,
+  guardrailTriggerDown: -0.10, guardrailTriggerUp: 0.10,
+  // Account types
+  accountsEnabled: false,
+  accounts: { traditional: 0, roth: 0, taxable: 0 },
+  withdrawalStrategy: 'taxSmart',
+};
+
+const SAMPLE_STATE = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), {
+  age: 52, partnerAge: 50, hasPartner: true,
+  portfolio: 700000, spending: 80000, lateSpending: 65000, slowDownAge: 75,
+  housing: 24000, mortgagePayoffAge: 62,
+  yourIncome: 120000, yourStopWorkAge: 62,
+  partnerIncome: 0, partnerStopWorkAge: 60,
+  ssStartAge: 67, yourSSAmount: 30000, partnerSSAmount: 18000,
+  accountsEnabled: true, accounts: { traditional: 280000, roth: 150000, taxable: 270000 },
+});
+
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+let activeView = 'onboarding';
+let savedScenarios = JSON.parse(localStorage.getItem('zeroline_scenarios') || '[]');
+let chart = null, cashflowChart = null;
+let lastSimResult = null;
+let baselineState = null, baselineResult = null;
+let maxSpendCache = null, maxSpendStale = true;
+let spendingLevelsCache = null, spendingLevelsStale = true;
+let showMoreOptions = false;
+let isFirstDashboard = true;
+let maxSpendView = false;
+let cashflowMode = 'net';
+let presetNote = null;     // transient note describing arbitrary assumptions a preset made
+let viewingSample = false; // true when the user loaded the sample scenario
+
+// ============================================================================
+// DYNAMIC PRESETS
+// ============================================================================
+function generatePresets(s) {
+  const presets = [];
+  if (s.age < 60 && s.yourStopWorkAge > s.age) presets.push({ id: 'stopNow', label: 'I stop working now' });
+  if (s.age < 58 && s.yourStopWorkAge > s.age + 5) presets.push({ id: 'retire5early', label: 'Retire 5 years early' });
+  presets.push({ id: 'maxSpend', label: 'What can I spend?' });
+  if (s.hasPartner && s.partnerIncome === 0 && s.partnerAge < s.partnerStopWorkAge) presets.push({ id: 'partnerReturns', label: 'Partner returns to work' });
+  if (s.ssStartAge !== 70 && s.yourSSAmount > 0) presets.push({ id: 'delaySS', label: 'Delay Social Security to 70' });
+  // DISABLED: "Pay off the house in 5 years" silently dropped housing cost early
+  // with no modeled cost, because we don't track mortgage principal — misleadingly
+  // optimistic. Re-enable once a mortgage P&I / remaining-balance input exists.
+  // if (s.housing > 0 && s.mortgagePayoffAge > s.age + 5) presets.push({ id: 'payoffFast', label: 'Pay off the house in 5 years' });
+  if (!s.homeSaleAge && s.age < 72) presets.push({ id: 'sellHome', label: 'Sell the home at 70' });
+  if (s.age > 45) presets.push({ id: 'ltc', label: 'Add long-term care at 85' });
+  return presets.slice(0, 6);
+}
+
+// ============================================================================
+// FORMATTING
+// ============================================================================
+function fmtMoney(n) {
+  if (n === null || n === undefined || isNaN(n)) return '\u2014';
+  const r = Math.round(n);
+  return '$' + r.toLocaleString('en-US');
+}
+function fmtMoneyShort(n) {
+  if (n === null || n === undefined || isNaN(n)) return '\u2014';
+  const a = Math.abs(n);
+  if (a >= 1e6) return (n < 0 ? '-' : '') + '$' + (a / 1e6).toFixed(a >= 1e7 ? 0 : 1) + 'M';
+  if (a >= 1e3) return (n < 0 ? '-' : '') + '$' + Math.round(a / 1e3) + 'k';
+  return fmtMoney(n);
+}
+function periodsLabel(result) {
+  if (result.mode === 'historical') return result.successCount + ' of ' + result.totalPeriods + ' historical periods';
+  if (result.mode === 'montecarlo') return Math.round(result.successRate * 100) + '% of simulations';
+  return result.successRate >= 1 ? 'lasts to age 100' : 'runs out early';
+}
+
+const app = document.getElementById('app');
+const modalRoot = document.getElementById('modal-root');
+
+function render() { if (activeView === 'onboarding') renderOnboarding(); else renderDashboard(); }
+
+// ============================================================================
+// ONBOARDING
+// ============================================================================
+function renderOnboarding() {
+  app.innerHTML = `
+    <header>
+      <div class="logo"><span class="logo-dot"></span>Zeroline</div>
+      <div class="tagline">a working name \u00b7 live now, plan well</div>
+    </header>
+    <div class="onboarding">
+      <div class="onboard-hero">
+        <div class="onboard-eyebrow">a planner, not a calculator</div>
+        <h1 class="onboard-title">Find the line<br/>between <em>now</em> and <em>later</em>.</h1>
+        <p class="onboard-sub">Most retirement tools tell you how to never run out of money. This one helps you spend enough to enjoy your life \u2014 without leaving a fortune you never used, or running short.</p>
+        <p style="margin-top:16px"><a onclick="showAbout()" style="color:var(--rust);cursor:pointer;font-size:14px;font-family:'Fraunces',serif;font-style:italic">Why we built this \u2192</a></p>
+        <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a> \u00b7 <a onclick="loadSample()">See a sample first</a></p>
+      </div>
+
+      <div class="onboard-step">
+        <div class="step-number">i. The basics</div>
+        <h2 class="step-title">Who's in the picture?</h2>
+        <p class="step-hint">Just enough to get started \u2014 you can refine everything later.</p>
+        <div class="field-grid">
+          <div class="field"><label>Your age</label><input type="number" id="ob_age" value="${state.age || ''}" placeholder="e.g. 45" min="18" max="90"/></div>
+          <div class="field"><label>Partner's age <span style="text-transform:none;font-weight:400;color:var(--ink-mute);">(blank if none)</span></label><input type="number" id="ob_partnerAge" value="${state.partnerAge || ''}" placeholder="optional" min="0" max="90"/></div>
+        </div>
+      </div>
+
+      <div class="onboard-step">
+        <div class="step-number">ii. What you have & spend</div>
+        <h2 class="step-title">The pile and the burn</h2>
+        <p class="step-hint">Total invested savings, and what you spend in a typical year.</p>
+        <div class="field-grid">
+          <div class="field"><label>Investment portfolio</label><input type="number" id="ob_portfolio" min="0" value="${state.portfolio || ''}" placeholder="e.g. 600000" step="10000"/><span class="field-hint">401k, IRA, brokerage \u2014 combined</span></div>
+          <div class="field"><label>Annual spending</label><input type="number" id="ob_spending" min="0" value="${state.spending || ''}" placeholder="e.g. 70000" step="5000"/><span class="field-hint">What you spend now excluding housing, or leave blank to find out what you could afford</span></div>
+        </div>
+      </div>
+
+      <div class="onboard-step">
+        <div class="step-number">iii. Income & housing</div>
+        <h2 class="step-title">What you earn and what housing costs</h2>
+        <p class="step-hint">Current income before tax, and your housing costs including mortgage, taxes, and insurance.</p>
+        <div class="field-grid">
+          <div class="field"><label>Your gross income</label><input type="number" id="ob_yourIncome" min="0" value="${state.yourIncome || ''}" placeholder="e.g. 110000" step="5000"/><span class="field-hint">Before tax \u00b7 You can adjust tax settings later</span></div>
+          <div class="field"><label>Partner's gross income</label><input type="number" id="ob_partnerIncome" min="0" value="${state.partnerIncome || ''}" placeholder="0 if none" step="5000"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
+          <div class="field"><label>Annual housing cost</label><input type="number" id="ob_housing" min="0" value="${state.housing || ''}" placeholder="e.g. 24000" step="1000"/><span class="field-hint">Mortgage + taxes + insurance</span></div>
+          <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100"/><span class="field-hint">When housing cost drops</span></div>
+        </div>
+      </div>
+
+      <div class="onboard-step">
+        <div class="step-number">iv. The safety net</div>
+        <h2 class="step-title">Social Security</h2>
+        <p class="step-hint">A rough annual figure is fine \u2014 your ssa.gov statement has the exact number.</p>
+        <div class="field-grid">
+          <div class="field"><label>Your SS at full age</label><input type="number" id="ob_yourSS" min="0" value="${state.yourSSAmount || ''}" placeholder="e.g. 30000" step="1000"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper()">estimate from income</button></span></div>
+          <div class="field"><label>Partner's SS at full age</label><input type="number" id="ob_partnerSS" min="0" value="${state.partnerSSAmount || ''}" placeholder="0 if none" step="1000"/><span class="field-hint">Annual \u00b7 in today's dollars</span></div>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn-primary" onclick="finishOnboarding()">See the picture <span>\u2192</span></button>
+      </div>
+      <div class="validation-msg" id="ob_validation"></div>
+    </div>
+  `;
+}
+
+function num(id) { const el = document.getElementById(id); const v = parseFloat(el && el.value); return isNaN(v) ? 0 : v; }
+
+window.finishOnboarding = function() {
+  const age = num('ob_age');
+  const pAge = num('ob_partnerAge');
+  const portfolio = num('ob_portfolio');
+  const spending = num('ob_spending');
+  const setErr = (msg) => { const el = document.getElementById('ob_validation'); if (el) el.textContent = msg; };
+
+  // ---- Input validation (hard gates) ----
+  if (!age || age < 18 || age > 90) { setErr('Please enter an age between 18 and 90.'); return; }
+  if (pAge > 0 && (pAge < 18 || pAge > 90)) { setErr("Partner's age should be between 18 and 90, or left blank."); return; }
+  if (portfolio <= 0) { setErr('Enter your investment portfolio to get started.'); return; }
+  if (portfolio > 100000000) { setErr('That portfolio looks unusually large \u2014 please double-check the figure.'); return; }
+  if (spending < 0 || num('ob_yourIncome') < 0 || num('ob_partnerIncome') < 0 || num('ob_housing') < 0) { setErr('Amounts can\u2019t be negative.'); return; }
+  setErr('');
+
+  viewingSample = false; // user is entering their own numbers
+  state.age = age;
+  state.partnerAge = pAge;
+  state.hasPartner = pAge >= 18;
+  state.portfolio = portfolio;
+  state.spending = spending;
+  state.lateSpending = spending > 0 ? Math.round(spending * 0.85) : 0;
+  state.slowDownAge = 75;
+  state.yourIncome = num('ob_yourIncome');
+  state.partnerIncome = num('ob_partnerIncome');
+  state.housing = num('ob_housing');
+  state.mortgagePayoffAge = num('ob_mortgagePayoff') || 60;
+  state.yourSSAmount = num('ob_yourSS');
+  state.partnerSSAmount = num('ob_partnerSS');
+  // Reset any preset-derived state (home sale, life events) so nothing carries over
+  state.homeSaleAge = null;
+  state.homeSaleProceeds = 0;
+  state.oneTimeEvents = [];
+  // Auto-compute effective tax rate from income
+  const totalGross = state.yourIncome + state.partnerIncome;
+  if (totalGross > 0) {
+    const taxEst = estimateNetIncome({ gross: totalGross, filingStatus: state.filingStatus, stateCode: state.stateCode });
+    state.taxRate = Math.round(taxEst.effectiveRate * 100) / 100;
+  }
+  if (state.yourStopWorkAge < state.age) state.yourStopWorkAge = Math.max(state.age + 1, 65);
+  if (state.partnerStopWorkAge < state.partnerAge) state.partnerStopWorkAge = Math.max(state.partnerAge + 1, 65);
+
+  // If spending was left blank, auto-find max spend
+  if (spending <= 0) {
+    state.simMode = 'fixed';
+    const ms = findMaxSpend(state);
+    state.spending = Math.round(ms.spend / 1000) * 1000;
+    state.lateSpending = Math.round(state.spending * 0.85);
+    maxSpendView = true;
+  }
+
+  activeView = 'dashboard';
+  maxSpendStale = true; spendingLevelsStale = true;
+  baselineState = JSON.parse(JSON.stringify(state));
+  baselineResult = null;
+  render();
+};
+
+window.loadSample = function() {
+  state = JSON.parse(JSON.stringify(SAMPLE_STATE));
+  activeView = 'dashboard';
+  viewingSample = true;
+  presetNote = null;
+  maxSpendStale = true; spendingLevelsStale = true;
+  baselineState = JSON.parse(JSON.stringify(state));
+  baselineResult = null;
+  render();
+};
+
+window.goToOnboarding = function() { activeView = 'onboarding'; viewingSample = false; render(); };
+window.dismissSample = function() { viewingSample = false; render(); };
+window.resetToDefaults = function() {
+  if (confirm('Reset to your starting values?')) { state = JSON.parse(JSON.stringify(baselineState || DEFAULT_STATE)); maxSpendStale = true; spendingLevelsStale = true; render(); }
+};
+
+// ============================================================================
+// DASHBOARD
+// ============================================================================
+function renderDashboard() {
+  const result = runForState(state);
+  lastSimResult = result;
+  if (!baselineResult) baselineResult = result;
+  const verdict = getVerdict(result);
+  const presets = generatePresets(state);
+
+  if (maxSpendStale) { maxSpendCache = findMaxSpend(state); maxSpendStale = false; }
+
+  const sidebar = `
+    <aside class="sidebar" role="complementary" aria-label="Planning controls">
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Mode</div>
+        <div class="sidebar-sub">How returns are modeled</div>
+        <div class="toggle-group">
+          <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
+          <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''}" onclick="setMode('montecarlo')">Simulated</button>
+          <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
+        </div>
+        <div style="font-size:10px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Tests your plan against every rolling period of real market returns since 1926.':state.simMode==='montecarlo'?'Runs 500 randomized simulations to show the range of possible outcomes.':'Projects a single path using a steady assumed return.'}</div>
+        ${state.simMode==='fixed' ? `<div class="control" style="margin-top:10px">
+          <div class="control-row"><span class="control-label">Real return</span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
+          <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)"/>
+        </div>` : ''}
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Your plan</div>
+        <div class="control">
+          <div class="control-row"><span class="control-label">Portfolio</span><span class="control-value">${fmtMoney(state.portfolio)}</span></div>
+          <input type="range" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)"/>
+        </div>
+        <div class="control">
+          <div class="control-row"><span class="control-label">Your income</span><span class="control-value">${fmtMoney(state.yourIncome)}</span></div>
+          <input type="range" min="0" max="500000" step="5000" value="${state.yourIncome}" oninput="slideLive(this,'yourIncome',this.value)" onchange="sliderCommit('yourIncome',this.value)"/>
+        </div>
+        ${state.hasPartner ? `<div class="control">
+          <div class="control-row"><span class="control-label">Partner's income</span><span class="control-value">${fmtMoney(state.partnerIncome)}</span></div>
+          <input type="range" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)"/>
+        </div>` : ''}
+        <div class="control">
+          <div class="control-row"><span class="control-label">Your retirement age</span><span class="control-value">${state.yourStopWorkAge}</span></div>
+          <input type="range" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)"/>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Try a scenario</div>
+        ${presets.map((p, i) => `<button class="preset-btn" onclick="applyPreset('${p.id}')"><span class="preset-icon">${roman(i+1)}.</span> ${p.label}</button>`).join('')}
+        ${presetNote ? `<div style="margin-top:8px;padding:8px 10px;background:var(--bone-2);border-left:2px solid var(--rust);border-radius:3px;font-size:11px;color:var(--ink-soft);line-height:1.5">${presetNote}</div>` : ''}
+      </div>
+
+      <div class="sidebar-section">
+        <button class="more-toggle" onclick="toggleMore()">${showMoreOptions?'\u2212 Fewer options':'+ More options'}</button>
+        ${showMoreOptions ? moreOptionsHTML() : ''}
+      </div>
+
+      ${renderSidebarImpact()}
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Saved scenarios</div>
+        <div class="scenario-save-row"><input type="text" id="scenarioName" placeholder="Name this scenario"/><button class="scenario-pill" onclick="saveScenario()">Save</button></div>
+        ${savedScenarios.map((sc, i) => `<div class="saved-item"><span>${sc.name}</span><span><button onclick="loadScenario(${i})">load</button> \u00b7 <button onclick="deleteScenario(${i})">\u00d7</button></span></div>`).join('') || '<div style="font-size:11px;color:var(--ink-faint)">None yet</div>'}
+        ${savedScenarios.length >= 2 ? `<button class="more-toggle" style="margin-top:6px" onclick="showComparison()">Compare scenarios</button>` : ''}
+      </div>
+    </aside>`;
+
+  // ---- Empty / degenerate state: no portfolio to project ----
+  if (state.portfolio <= 0) {
+    app.innerHTML = `
+      <header role="banner">
+        <div class="logo"><span class="logo-dot"></span>Zeroline</div>
+        <div class="scenarios-bar">
+          <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
+          <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
+        </div>
+      </header>
+      <div class="dashboard">${sidebar}
+        <div class="main" id="main-content" role="main">
+          <div class="verdict">
+            <div class="verdict-head serif">Enter a portfolio to begin</div>
+            <div class="verdict-body">There\u2019s nothing to project yet \u2014 your investment portfolio is set to ${fmtMoney(state.portfolio)}. Use the <strong>Portfolio</strong> slider on the left, or <a onclick="goToOnboarding()" style="color:var(--rust);cursor:pointer">edit your basics</a> to enter your savings.</div>
+          </div>
+          <div style="text-align:center;padding:12px 0 4px;font-size:11px;color:var(--ink-faint)">Educational tool, not financial advice. <a onclick="showFullDisclaimer()" style="color:var(--rust);cursor:pointer">Disclaimer</a></div>
+        </div>
+      </div>`;
+    if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
+    return;
+  }
+
+  const yearCount = state.targetAge - state.age + 1;
+
+  const main = `
+    <div class="main" id="main-content" role="main">
+      ${viewingSample ? `<div style="margin-bottom:18px;padding:12px 14px;background:var(--bone-2);border:1px solid var(--line);border-left:3px solid var(--rust);border-radius:4px;font-size:13px;color:var(--ink-soft);line-height:1.55;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+        <span><strong>You\u2019re viewing a sample</strong> \u2014 a ${state.age}-year-old couple with ${fmtMoney(state.portfolio)} saved, spending ${fmtMoney(state.spending)}/yr. Explore the sliders and scenarios on the left to see how the picture moves, then click <strong>Edit basics</strong> to enter your own numbers.</span>
+        <button onclick="dismissSample()" aria-label="Dismiss" style="flex:none;border:none;background:none;color:var(--ink-faint);font-size:18px;line-height:1;cursor:pointer;padding:0">\u00d7</button>
+      </div>` : ''}
+      <div class="verdict" aria-live="polite">
+        <div class="verdict-head">${verdict.headline}</div>
+        <div class="verdict-body">${verdict.body}</div>
+        ${verdict.caveat ? `<div class="verdict-caveat">${verdict.caveat}</div>` : ''}
+      </div>
+
+      <div class="section-heading">Portfolio projection</div>
+      <div class="section-sub">${state.simMode==='historical' ? 'The shaded area shows the range across all '+result.totalPeriods+' historical periods. The line is the median.' : state.simMode==='montecarlo' ? 'The shaded area shows the range across 500 simulations. The line is the median outcome.' : ''}</div>
+      <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
+      ${renderEventTimeline()}
+
+      ${state.simMode !== 'fixed' ? renderBands(result) : ''}
+
+      ${state.simMode==='historical' ? renderStressTests() : ''}
+
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:26px">
+        <div class="section-heading" style="margin:0">Cashflow</div>
+        <div class="toggle-group" style="width:auto">
+          <button class="toggle-btn cf-toggle ${cashflowMode==='net'?'active':''}" data-mode="net" onclick="setCashflowMode('net')" style="padding:5px 12px;font-size:11px">Net flow</button>
+          <button class="toggle-btn cf-toggle ${cashflowMode==='breakdown'?'active':''}" data-mode="breakdown" onclick="setCashflowMode('breakdown')" style="padding:5px 12px;font-size:11px">Breakdown</button>
+        </div>
+      </div>
+      <div class="section-sub" id="cf-desc">${cashflowMode==='net' ? 'Green bars mean you\'re adding to the portfolio. Red means you\'re drawing from it.' : 'Income sources stacked against spending. The gap is what comes from or goes to the portfolio.'}</div>
+      <div class="chart-card"><div class="chart-wrap short"><canvas id="cashflowChart"></canvas></div></div>
+
+      ${state.simMode==='historical' ? renderFlexibilityImpact() : ''}
+
+      <div class="section-heading">Explore spending levels</div>
+      <div class="section-sub">Click a row to apply that spending level and see how it changes the projection.</div>
+      ${renderSpendingExplorer()}
+
+      ${state.yourSSAmount > 0 ? renderSSComparison() : ''}
+
+      ${state.accountsEnabled ? renderTaxComparison() : ''}
+
+      ${renderAssumptions(result)}
+      ${renderResources()}
+      <div style="text-align:center;padding:12px 0 4px;font-size:11px;color:var(--ink-faint)">Educational tool, not financial advice. <a onclick="showFullDisclaimer()" style="color:var(--rust);cursor:pointer">Disclaimer</a></div>
+    </div>`;
+
+  app.innerHTML = `
+    <header role="banner">
+      <a href="#main-content" style="position:absolute;left:-9999px;top:auto;padding:8px 16px;background:var(--ink);color:var(--paper);z-index:200;font-size:13px" onfocus="this.style.left='0';this.style.top='0'" onblur="this.style.left='-9999px'">Skip to content</a>
+      <div class="logo"><span class="logo-dot"></span>Zeroline</div>
+      <div class="scenarios-bar">
+        <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
+        <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
+      </div>
+    </header>
+    <div class="dashboard">${sidebar}${main}</div>`;
+
+  // Scroll to top only on first dashboard load
+  if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
+
+  drawMainChart(result);
+  drawCashflowChart(result);
+
+  // Accessibility: auto-label range inputs from nearby control-label
+  document.querySelectorAll('.control').forEach(c => {
+    const label = c.querySelector('.control-label');
+    const input = c.querySelector('input[type=range], input[type=number]');
+    if (label && input && !input.getAttribute('aria-label')) {
+      input.setAttribute('aria-label', label.textContent.trim());
+    }
+  });
+  // Label clickable table rows
+  document.querySelectorAll('.data-table .clickable').forEach(row => {
+    row.setAttribute('role', 'button');
+    row.setAttribute('tabindex', '0');
+    row.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } });
+  });
+  // Label SS cards
+  document.querySelectorAll('.ss-card[onclick]').forEach(card => {
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } });
+  });
+  // Label scenario cards
+  document.querySelectorAll('.scenario-card[onclick]').forEach(card => {
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } });
+  });
+}
+
+function roman(n) { return ['i','ii','iii','iv','v','vi','vii','viii'][n-1] || String(n); }
+
+function moreOptionsHTML() {
+  const effRate = state.taxRate ? (state.taxRate * 100).toFixed(0) : '18';
+  return `
+    <div style="margin-top:12px">
+      <div class="sidebar-heading" style="margin-top:0">Spending</div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Annual spending</span><span class="control-value">${fmtMoney(state.spending)}</span></div>
+        <input type="range" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)"/>
+      </div>
+
+      <div class="sidebar-heading" style="margin-top:14px">Plan to age</div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Target age</span><span class="control-value">${state.targetAge}</span></div>
+        <input type="range" min="70" max="110" step="1" value="${state.targetAge}" oninput="slideLive(this,'targetAge',this.value)" onchange="sliderCommit('targetAge',this.value)"/>
+      </div>
+
+      <div class="sidebar-heading" style="margin-top:14px">Late-life spending</div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">After age ${state.slowDownAge}</span><span class="control-value">${fmtMoney(state.lateSpending)}</span></div>
+        <input type="range" min="10000" max="400000" step="1000" value="${state.lateSpending}" oninput="slideLive(this,'lateSpending',this.value)" onchange="sliderCommit('lateSpending',this.value)"/>
+      </div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Changes at age</span><span class="control-value">${state.slowDownAge}</span></div>
+        <input type="range" min="55" max="95" step="1" value="${state.slowDownAge}" oninput="slideLive(this,'slowDownAge',this.value)" onchange="sliderCommit('slowDownAge',this.value)"/>
+      </div>
+
+      ${state.hasPartner ? `<div class="sidebar-heading" style="margin-top:14px">Partner</div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Partner's retirement age</span><span class="control-value">${state.partnerStopWorkAge}</span></div>
+        <input type="range" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)"/>
+      </div>` : ''}
+
+      <div class="sidebar-heading" style="margin-top:14px">Income growth</div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Real income growth</span><span class="control-value">${(state.yourIncomeGrowth*100).toFixed(1)}%</span></div>
+        <input type="range" min="0" max="5" step="0.25" value="${state.yourIncomeGrowth*100}" oninput="updateLive2(this,'yourIncomeGrowth','partnerIncomeGrowth',this.value/100)" onchange="state.partnerIncomeGrowth=this.value/100;sliderCommit('yourIncomeGrowth',this.value/100)"/>
+      </div>
+
+      <div class="sidebar-heading" style="margin-top:14px">Taxes</div>
+      <div style="font-size:10px;color:var(--ink-faint);margin-bottom:8px">Used to estimate take-home pay and withdrawal taxes.</div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Filing status</span></div>
+        <select onchange="updateTax('filingStatus',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:12px;font-family:inherit;border-radius:2px;color:var(--ink)">
+          <option value="mfj" ${state.filingStatus==='mfj'?'selected':''}>Married filing jointly</option>
+          <option value="single" ${state.filingStatus==='single'?'selected':''}>Single</option>
+        </select>
+      </div>
+      <div class="control" style="margin-top:8px">
+        <div class="control-row"><span class="control-label">State</span></div>
+        <select onchange="updateTax('stateCode',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:12px;font-family:inherit;border-radius:2px;color:var(--ink)">
+          ${Object.keys(STATE_CONFIG).map(k => `<option value="${k}" ${state.stateCode===k?'selected':''}>${STATE_CONFIG[k].name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="font-size:11px;color:var(--ink-mute);margin-top:8px">Estimated effective rate: <strong style="font-family:'JetBrains Mono',monospace">${effRate}%</strong></div>
+
+      <div class="sidebar-heading" style="margin-top:14px">Housing</div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Annual housing cost</span><span class="control-value">${fmtMoney(state.housing)}</span></div>
+        <input type="range" min="0" max="120000" step="1000" value="${state.housing}" oninput="slideLive(this,'housing',this.value)" onchange="sliderCommit('housing',this.value)"/>
+      </div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Mortgage paid off at age</span><span class="control-value">${state.mortgagePayoffAge}</span></div>
+        <input type="range" min="${state.age}" max="90" step="1" value="${state.mortgagePayoffAge}" oninput="slideLive(this,'mortgagePayoffAge',this.value)" onchange="sliderCommit('mortgagePayoffAge',this.value)"/>
+      </div>
+
+      <div class="sidebar-heading" style="margin-top:14px">Investment assumptions</div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Real return<span class="help-mark" title="Return after inflation. 5% real \u2248 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
+        <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)"/>
+      </div>
+      ${state.simMode==='montecarlo' ? `<div class="control">
+        <div class="control-row"><span class="control-label">Volatility</span><span class="control-value">${(state.returnStdDev*100).toFixed(0)}%</span></div>
+        <input type="range" min="5" max="25" step="1" value="${state.returnStdDev*100}" oninput="slideLive(this,'returnStdDev',this.value/100)" onchange="sliderCommit('returnStdDev',this.value/100)"/>
+      </div>` : ''}
+
+      <div class="sidebar-heading" style="margin-top:14px">Account types</div>
+      <div class="checkbox-row"><input type="checkbox" id="cb_accts" ${state.accountsEnabled?'checked':''} onchange="update('accountsEnabled', this.checked)"/><label for="cb_accts">Separate account types</label></div>
+      ${state.accountsEnabled ? `
+        <div class="acct-grid" style="margin-bottom:10px">
+          <label>Traditional</label><input type="number" value="${state.accounts.traditional}" min="0" onchange="updateAccount('traditional', +this.value)"/>
+          <label>Roth</label><input type="number" value="${state.accounts.roth}" onchange="updateAccount('roth', +this.value)"/>
+          <label>Taxable</label><input type="number" value="${state.accounts.taxable}" onchange="updateAccount('taxable', +this.value)"/>
+        </div>
+        <div class="control">
+          <div class="control-row"><span class="control-label">Withdrawal order</span></div>
+          <div class="toggle-group">
+            <button class="toggle-btn ${state.withdrawalStrategy==='proportional'?'active':''}" onclick="update('withdrawalStrategy','proportional')">Proportional</button>
+            <button class="toggle-btn ${state.withdrawalStrategy==='taxSmart'?'active':''}" onclick="update('withdrawalStrategy','taxSmart')">Tax-aware</button>
+          </div>
+        </div>` : ''}
+
+      <div class="sidebar-heading" style="margin-top:14px">Life events</div>
+      <div style="font-size:10px;color:var(--ink-faint);margin-bottom:8px">One-time income or expenses at a specific age. Use negative for costs.</div>
+      ${(state.oneTimeEvents || []).map((ev, i) => `<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;font-size:11px">
+        <span style="color:var(--ink-soft);flex:1">${ev.label || 'Event'} at ${ev.age}</span>
+        <span style="font-family:'JetBrains Mono',monospace;color:${ev.amount>=0?'var(--moss)':'var(--danger)'}">${fmtMoneyShort(ev.amount)}</span>
+        <button onclick="removeEvent(${i})" style="background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:0 2px">\u00d7</button>
+      </div>`).join('')}
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:4px;margin-top:6px">
+        <input type="text" id="ev_label" placeholder="e.g. Sell home" style="font-size:11px;padding:5px 6px;background:var(--bone);border:1px solid var(--line);border-radius:2px;font-family:inherit"/>
+        <input type="number" id="ev_age" placeholder="Age" style="width:48px;font-size:11px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:center;font-family:'JetBrains Mono',monospace"/>
+        <input type="number" id="ev_amount" placeholder="$" step="10000" style="width:72px;font-size:11px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:right;font-family:'JetBrains Mono',monospace"/>
+      </div>
+      <button onclick="addEvent()" style="font-size:11px;color:var(--rust);background:none;border:none;cursor:pointer;padding:4px 0;font-family:inherit;margin-top:4px">+ Add event</button>
+    </div>`;
+}
+
+// ===== VERDICT =====
+function getVerdict(result) {
+  const v = { tier: 'good', eyebrow: '', headline: '', body: '', caveat: '' };
+  const yc = state.targetAge - state.age + 1;
+  if (result.mode === 'historical') {
+    const { successCount, totalPeriods, failures } = result;
+    const rate = successCount / totalPeriods;
+    v.tier = rate >= 0.9 ? 'good' : rate >= 0.7 ? 'mid' : 'bad';
+    if (successCount === totalPeriods) {
+      v.headline = 'This scenario lasted through every historical period since 1926';
+      v.body = 'We tested your plan against every rolling ' + yc + '-year period of real U.S. stock market returns since 1926, ' + totalPeriods + ' periods in total. Each includes actual sequences of booms, crashes, and everything between. This spending level survived them all, including the Great Depression, 1970s stagflation, and 2008.';
+    } else {
+      v.headline = 'This scenario lasted in ' + successCount + ' of ' + totalPeriods + ' historical periods';
+      const failCount = totalPeriods - successCount;
+      const worst = failures[0];
+      if (maxSpendView) {
+        v.body = fmtMoney(state.spending) + '/yr is the theoretical maximum at a steady ' + (state.returnRate*100).toFixed(1) + '% return. But real markets don\u2019t deliver steady returns. Bad years early in retirement can deplete a portfolio even if the long-run average is fine. Against actual market history, this spending level only survived ' + successCount + ' of ' + totalPeriods + ' periods. Use the spending explorer below to find a level that holds up in more historical environments.';
+      } else {
+        v.body = 'We tested your plan against every rolling ' + yc + '-year period of real U.S. stock market returns since 1926, ' + totalPeriods + ' periods in total.';
+        if (rate >= 0.85) {
+          v.body += ' In ' + failCount + ' period' + (failCount > 1 ? 's' : '') + ', the portfolio was depleted before age ' + state.targetAge + '.' + (worst ? ' The hardest started in ' + worst.label.split('\u2013')[0] + ' (depleted around age ' + worst.ranOutAge + ').' : '') + ' These failures tended to cluster around prolonged downturns.';
+        } else if (rate >= 0.6) {
+          v.body += ' In ' + failCount + ' of those periods, the portfolio ran out before age ' + state.targetAge + '.' + (worst ? ' The worst sequence started in ' + worst.label.split('\u2013')[0] + '.' : '') + ' At this spending level, the outcome depends heavily on which market environment you retire into.';
+        } else {
+          v.body += ' In ' + failCount + ' of ' + totalPeriods + ' periods, the portfolio was depleted. This spending level is risky by historical standards. Consider reducing spending or exploring other adjustments.';
+        }
+      }
+    }
+    v.caveat = 'Past performance does not predict future results.';
+  } else if (result.mode === 'montecarlo') {
+    const rate = result.successRate;
+    v.tier = rate >= 0.9 ? 'good' : rate >= 0.7 ? 'mid' : 'bad';
+    v.headline = 'The portfolio lasted to age ' + state.targetAge + ' in ' + Math.round(rate * 100) + '% of simulations';
+    if (maxSpendView) {
+      v.body = fmtMoney(state.spending) + '/yr is the theoretical maximum at a steady return, but with realistic market volatility, this level only holds up ' + Math.round(rate * 100) + '% of the time. The spending explorer below shows what level of spending succeeds in more simulations.';
+    } else {
+      v.body = 'Across 500 simulations with ' + (state.returnStdDev*100).toFixed(0) + '% annual volatility around a ' + (state.returnRate*100).toFixed(1) + '% real return, the median ending balance was ' + fmtMoneyShort(result.medianFinal) + '.';
+    }
+  } else {
+    const lasts = result.successRate >= 1;
+    v.tier = lasts ? 'good' : 'bad';
+    if (maxSpendView) {
+      v.headline = 'The most you could spend is about ' + fmtMoney(state.spending) + ' per year';
+      v.body = lasts ? 'At a steady ' + (state.returnRate*100).toFixed(1) + '% real return, this is the highest annual spending that keeps your portfolio lasting to age ' + state.targetAge + '. Your ending balance would be near zero, meaning you used almost everything. Adjust the return rate or switch to Historical mode to see how this holds up against real market environments.' : 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, the portfolio would be depleted around age ' + result.medianRunOutAge + '. Try reducing the rate of return to see a more conservative estimate.';
+    } else {
+      v.headline = lasts ? 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, the portfolio lasts past age ' + state.targetAge : 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, the portfolio is depleted around age ' + result.medianRunOutAge;
+      v.body = lasts ? 'Ending balance at age ' + state.targetAge + ' would be about ' + fmtMoneyShort(result.medianFinal) + '. Real markets are bumpier than this, try Historical or Simulated mode to see the range of outcomes.' : 'This assumes the same return every year. Real sequences vary, try Historical mode to stress-test it.';
+    }
+  }
+  return v;
+}
+
+// ===== IMPACT BANNER =====
+function computeImpact() {
+  if (!baselineState || !baselineResult) return null;
+  const fields = { spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: 'Your retirement age', partnerStopWorkAge: "Partner's retirement age", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', homeSaleAge: 'Home sale age', returnRate: 'Return' };
+  const changes = [];
+  for (const k in fields) {
+    if (JSON.stringify(baselineState[k]) !== JSON.stringify(state[k])) {
+      let from = baselineState[k], to = state[k];
+      if (k === 'spending' || k === 'lateSpending' || k === 'portfolio') { from = fmtMoneyShort(from); to = fmtMoneyShort(to); }
+      else if (k === 'returnRate') { from = (from*100).toFixed(1)+'%'; to = (to*100).toFixed(1)+'%'; }
+      changes.push(fields[k] + ' ' + (from===null?'\u2014':from) + ' \u2192 ' + (to===null?'\u2014':to));
+    }
+  }
+  if (!changes.length) return null;
+  const successDelta = result_rate(lastSimResult) - result_rate(baselineResult);
+  const finalDelta = lastSimResult.medianFinal - baselineResult.medianFinal;
+  return { changes, successDelta, finalDelta };
+}
+function result_rate(r) { return r.successRate; }
+function renderSidebarImpact() {
+  const im = computeImpact();
+  if (!im) return '';
+  const fdTxt = (im.finalDelta >= 0 ? '+' : '') + fmtMoneyShort(im.finalDelta);
+  return `<div class="sidebar-section" style="background:var(--bone-2);margin:-4px -20px 14px;padding:12px 20px;border-bottom:1px solid var(--line-soft)">
+    <div style="font-size:11px;color:var(--ink-soft);line-height:1.5"><strong style="color:var(--ink)">Changed:</strong> ${im.changes.slice(0,3).join(', ')}${im.changes.length>3?' + '+(im.changes.length-3)+' more':''}</div>
+    <div style="font-size:11px;color:var(--ink-mute);margin-top:3px">${fdTxt} median ending balance</div>
+    <button style="font-size:10px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit" onclick="resetBaseline()">Set current as new baseline</button>
+  </div>`;
+}
+
+// ===== STAT CARDS =====
+function renderStatCards(result) {
+  const ms = maxSpendCache ? maxSpendCache.spend : null;
+  const peak = Math.max(...result.percentiles.map(p => p.p50));
+  return `<div class="stat-row">
+    <div class="stat-card" title="The middle outcome across all ${result.mode==='historical'?'historical periods':'simulations'}. Half did better, half did worse."><div class="stat-label">Median ending balance<span class="help-mark">i</span></div><div class="stat-value">${fmtMoneyShort(result.medianFinal)}</div></div>
+    <div class="stat-card" title="The highest portfolio value reached in the median path. Shows when you have the most financial flexibility."><div class="stat-label">Peak balance<span class="help-mark">i</span></div><div class="stat-value">${fmtMoneyShort(peak)}</div></div>
+    <div class="stat-card" title="The highest annual spending where the portfolio still lasts to age ${state.targetAge} at a steady return. A starting point, not a recommendation."><div class="stat-label">Most you could spend<span class="help-mark">i</span></div><div class="stat-value">${ms ? fmtMoneyShort(ms) : '\u2014'}</div></div>
+    <div class="stat-card" title="The age at which the portfolio hits zero in the median outcome. If blank, you don't run out before age ${state.targetAge}."><div class="stat-label">Runs out<span class="help-mark">i</span></div><div class="stat-value">${result.medianRunOutAge ? 'age '+result.medianRunOutAge : 'never'}</div></div>
+  </div>`;
+}
+
+// ===== CONFIDENCE BANDS =====
+function renderBands(result) {
+  const last = result.percentiles[result.percentiles.length - 1];
+  if (result.mode === 'fixed') {
+    return `<div class="bands"><div class="band neutral" style="grid-column:1/-1"><div class="band-label">Projected ending balance</div><div class="band-sub">At a steady ${(state.returnRate*100).toFixed(1)}% real return</div><div class="band-value">${last.p50 <= 0 ? 'Depleted at age '+result.medianRunOutAge : fmtMoneyShort(last.p50)}</div></div></div>`;
+  }
+  const consTxt = last.p10 <= 0 ? 'Ran out by ' + (result.failures[0] ? 'age '+result.failures[0].ranOutAge : 'age '+state.targetAge) : fmtMoneyShort(last.p10);
+  return `<div class="bands">
+    <div class="band warn"><div class="band-label">Conservative</div><div class="band-sub">Worst 10%</div><div class="band-value">${consTxt}</div></div>
+    <div class="band ok"><div class="band-label">Likely outcome</div><div class="band-sub">Middle 50%</div><div class="band-value">${fmtMoneyShort(last.p25)}\u2013${fmtMoneyShort(last.p75)}</div></div>
+    <div class="band neutral"><div class="band-label">Optimistic</div><div class="band-sub">Best 10%</div><div class="band-value">${fmtMoneyShort(last.p90)}</div></div>
+  </div>`;
+}
+
+// ===== EVENT TIMELINE =====
+function renderEventTimeline() {
+  const events = [];
+  if (state.yourStopWorkAge > state.age && state.yourIncome > 0) events.push({ age: state.yourStopWorkAge, label: 'You retire', detail: 'Income drops from ' + fmtMoneyShort(state.yourIncome) + ' to $0' });
+  if (state.hasPartner && state.partnerStopWorkAge > state.partnerAge && state.partnerIncome > 0) events.push({ age: state.partnerStopWorkAge, label: 'Partner retires', detail: 'Partner income drops to $0' });
+  if (state.housing > 0 && state.mortgagePayoffAge > state.age) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr housing cost drops' });
+  if (state.ssStartAge > state.age && (state.yourSSAmount > 0 || state.partnerSSAmount > 0)) events.push({ age: state.ssStartAge, label: 'Social Security begins', detail: fmtMoneyShort(state.yourSSAmount + state.partnerSSAmount) + '/yr starts' });
+  if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending changes', detail: fmtMoneyShort(state.spending) + ' \u2192 ' + fmtMoneyShort(state.lateSpending) + '/yr' });
+  if (state.homeSaleAge) events.push({ age: state.homeSaleAge, label: 'Home sale', detail: fmtMoneyShort(state.homeSaleProceeds) + ' added to portfolio' });
+  if (state.oneTimeEvents) state.oneTimeEvents.forEach(ev => events.push({ age: ev.age, label: ev.label, detail: fmtMoneyShort(ev.amount) }));
+  events.sort((a, b) => a.age - b.age);
+  if (!events.length) return '';
+  return `<div style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:18px;padding:0 4px">${events.map(ev =>
+    `<div style="font-size:11px;color:var(--ink-mute);background:var(--paper);border:1px solid var(--line-soft);border-radius:3px;padding:4px 8px" title="${ev.detail}"><span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink-soft);margin-right:4px">${ev.age}</span>${ev.label}</div>`
+  ).join('')}</div>`;
+}
+
+// ===== SPENDING EXPLORER =====
+function computeSpendingLevels() {
+  if (!spendingLevelsStale && spendingLevelsCache) return spendingLevelsCache;
+  const base = state.spending || 50000;
+  const ratio = state.spending > 0 ? state.lateSpending / state.spending : 0.85;
+  const mults = [0.8, 0.9, 1.0, 1.1, 1.2];
+  const rows = mults.map(m => {
+    const spend = Math.round(base * m / 1000) * 1000;
+    const ts = { ...state, spending: spend, lateSpending: Math.round(spend * ratio) };
+    const r = runForState(ts);
+    const last = r.percentiles[r.percentiles.length - 1];
+    return { spending: spend, successRate: r.successRate, successCount: r.successCount, totalPeriods: r.totalPeriods, medianFinal: r.medianFinal, p10: last.p10, isCurrent: spend === (Math.round(base/1000)*1000) && m === 1.0 };
+  });
+  spendingLevelsCache = rows; spendingLevelsStale = false;
+  return rows;
+}
+function renderSpendingExplorer() {
+  const rows = computeSpendingLevels();
+  const isHist = state.simMode === 'historical';
+  return `<table class="data-table"><thead><tr><th>Annual spending</th><th>${isHist?'Historical success':'Success'}</th><th>Median ending</th><th>Worst case</th></tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.isCurrent?'current-row':''} clickable" onclick="applySpending(${r.spending})" title="Click to set spending to ${fmtMoney(r.spending)}/yr"><td>${fmtMoney(r.spending)}/yr ${r.isCurrent?'<span class="tag-current">current</span>':''}</td><td>${isHist ? r.successCount+' of '+r.totalPeriods : Math.round(r.successRate*100)+'%'}</td><td>${fmtMoneyShort(r.medianFinal)}</td><td>${r.p10<=0?'<span class="fail">Ran out</span>':fmtMoneyShort(r.p10)}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+// ===== FLEXIBILITY IMPACT =====
+function renderFlexibilityImpact() {
+  const isHist = state.simMode === 'historical';
+  const withFlex = runForState({ ...state, guardrailsEnabled: true });
+  const withoutFlex = runForState({ ...state, guardrailsEnabled: false });
+  const fmtShort = (r) => isHist ? r.successCount + '/' + r.totalPeriods : Math.round(r.successRate * 100) + '%';
+  const improved = isHist ? (withFlex.successCount > withoutFlex.successCount) : (withFlex.successRate > withoutFlex.successRate);
+  const activeLeft = !state.guardrailsEnabled;
+  const activeRight = state.guardrailsEnabled;
+
+  return `<div class="section-heading">Spending flexibility</div>
+    <div class="section-sub">What happens if you adjust spending when your portfolio is under pressure?</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
+      <div onclick="update('guardrailsEnabled',false)" style="background:var(--paper);border:${activeLeft?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeLeft?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:${activeLeft?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeLeft?'700':'500'}">Fixed spending</div>
+        <div style="font-size:28px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--ink)">${fmtShort(withoutFlex)}</div>
+        <div style="font-size:10px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
+      </div>
+      <div onclick="update('guardrailsEnabled',true)" style="background:var(--paper);border:${activeRight?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeRight?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:${activeRight?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeRight?'700':'500'}">With flexibility</div>
+        <div style="font-size:28px;font-weight:600;font-family:'JetBrains Mono',monospace;color:${improved?'var(--moss)':'var(--ink)'}">${fmtShort(withFlex)}</div>
+        <div style="font-size:10px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)">
+          <div>
+            <div style="font-size:10px;color:var(--ink-mute);margin-bottom:3px">Cut</div>
+            <div style="display:inline-flex;align-items:baseline;gap:1px">
+              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailCutPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailCutPct',+this.value/100)" style="width:42px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:12px;color:var(--ink-mute)">%</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--ink-mute);margin-bottom:3px">Boost</div>
+            <div style="display:inline-flex;align-items:baseline;gap:1px">
+              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailBoostPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailBoostPct',+this.value/100)" style="width:42px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:12px;color:var(--ink-mute)">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex-note">${state.guardrailsEnabled && improved ? 'Cutting spending by '+Math.round(state.guardrailCutPct*100)+'% when your portfolio is stressed improves outcomes. The trade-off: in some years you\u2019d live on less, but the portfolio recovers faster.' : state.guardrailsEnabled ? 'At these settings, flexibility has minimal impact on outcomes.' : 'With fixed spending, the same amount is withdrawn every year regardless of market conditions.'}</div>`;
+}
+
+// ===== STRESS TESTS =====
+function renderStressTests() {
+  const cards = HISTORICAL_SCENARIOS.map(s => {
+    const run = runNamedScenario(state, s);
+    const final = run.years[run.years.length - 1];
+    const survived = !run.years.some(y => y.ranOut);
+    const ranOut = run.years.find(y => y.ranOut);
+    return `<div class="scenario-card ${survived?'survived':'failed'}" onclick="showScenarioDetail('${s.id}')">
+      <div class="scenario-name">${s.name}</div>
+      <div class="scenario-years">${s.startYear}\u2013${s.startYear + (state.targetAge - state.age)}${run.padded?'*':''}</div>
+      <div class="scenario-result ${survived?'ok':'fail'}">${survived ? 'Ended with '+fmtMoneyShort(final.portfolio) : 'Ran out at age '+ranOut.age}</div>
+      <div class="scenario-desc">${s.description}</div>
+    </div>`;
+  }).join('');
+  return `<div class="section-heading">Historical stress tests</div>
+    <div class="section-sub">How this scenario would have played out starting in specific market environments.</div>
+    <div class="scenario-cards">${cards}</div>`;
+}
+
+// ===== SS COMPARISON =====
+function renderSSComparison() {
+  const ages = [62, 67, 70];
+  const factors = { 62: 0.70, 67: 1.00, 70: 1.24 };
+  const baseYour = state.ssStartAge === 67 ? state.yourSSAmount : state.yourSSAmount / (factors[state.ssStartAge] || 1);
+  const basePartner = state.ssStartAge === 67 ? state.partnerSSAmount : state.partnerSSAmount / (factors[state.ssStartAge] || 1);
+  const isHist = state.simMode === 'historical';
+  const cards = ages.map(a => {
+    const ts = { ...state, ssStartAge: a, yourSSAmount: Math.round(baseYour * factors[a]), partnerSSAmount: Math.round(basePartner * factors[a]) };
+    const r = runForState(ts);
+    const benefit = ts.yourSSAmount + ts.partnerSSAmount;
+    const label = a === 62 ? 'Early' : a === 67 ? 'Full retirement' : 'Delayed';
+    const highlight = a === state.ssStartAge ? 'highlight' : '';
+    return `<div class="ss-card ${highlight}" onclick="applySSAge(${a})" style="cursor:pointer" title="Click to use age ${a}"><div class="ss-age">${a}</div><div class="ss-label">${label}</div><div class="ss-benefit">${fmtMoney(benefit)}/yr</div><div class="ss-success" style="color:${r.successRate>=0.85?'var(--moss)':r.successRate>=0.6?'var(--gold)':'var(--danger)'}">${isHist ? 'Survived ' + r.successCount+' of '+r.totalPeriods : Math.round(r.successRate*100)+'%'}</div></div>`;
+  }).join('');
+  return `<div class="section-heading">Social Security claiming</div>
+    <div class="section-sub">Claiming earlier means smaller payments for more years; later means larger payments for fewer. Click a card to see what happens if you claim at that age.</div>
+    <div class="ss-grid">${cards}</div>`;
+}
+
+// ===== TAX COMPARISON =====
+function renderTaxComparison() {
+  // Use fixed mode for clean apples-to-apples comparison regardless of current mode
+  const propState = { ...state, withdrawalStrategy: 'proportional' };
+  const smartState = { ...state, withdrawalStrategy: 'taxSmart' };
+  const prop = runFixed(propState);
+  const smart = runFixed(smartState);
+  const taxTotal = (r) => r.medianRun ? Math.round(r.medianRun.reduce((s, y) => s + (y.tax || 0), 0)) : 0;
+  const propTax = taxTotal(prop), smartTax = taxTotal(smart);
+  // After-tax ending wealth: Roth is worth 100%, traditional worth (1-taxRate), taxable worth (1-capGainsTax*0.5)
+  const afterTaxWealth = (r) => {
+    const fa = r.medianRun && r.medianRun.finalAccounts;
+    if (!fa) return r.medianFinal;
+    return fa.roth + fa.traditional * (1 - state.taxRate) + fa.taxable * (1 - state.capGainsTax * 0.5);
+  };
+  const propATW = afterTaxWealth(prop), smartATW = afterTaxWealth(smart);
+  const smartBetter = smartATW > propATW;
+  return `<div class="section-heading">Withdrawal strategy</div>
+    <div class="section-sub">How you draw from different account types affects after-tax wealth. Preserving Roth (tax-free) growth typically leaves more usable money. These are simplified estimates at a steady ${(state.returnRate*100).toFixed(1)}% return.</div>
+    <table class="data-table"><thead><tr><th></th><th>Proportional</th><th>Tax-aware order</th></tr></thead><tbody>
+      <tr><td>After-tax ending wealth</td><td>${fmtMoneyShort(propATW)}</td><td style="color:${smartBetter?'var(--moss)':'var(--ink-soft)'};font-weight:600">${fmtMoneyShort(smartATW)}</td></tr>
+      <tr><td>Estimated total tax paid</td><td>${fmtMoneyShort(propTax)}</td><td>${fmtMoneyShort(smartTax)}</td></tr>
+      <tr><td>Pre-tax ending balance</td><td>${fmtMoneyShort(prop.medianFinal)}</td><td>${fmtMoneyShort(smart.medianFinal)}</td></tr>
+    </tbody></table>
+    <div class="flex-note">Tax-aware ordering (taxable \u2192 traditional \u2192 Roth) preserves tax-free Roth growth. It may show higher nominal tax, but the leftover money is worth more after tax. Estimated difference in after-tax wealth: ${fmtMoneyShort(Math.abs(smartATW - propATW))}. A tax professional can model your specific situation.</div>`;
+}
+
+// ===== ASSUMPTIONS + RESOURCES =====
+function renderAssumptions(result) {
+  return `<details class="assumptions-section"><summary>Assumptions used in this projection</summary><div class="assumptions-body">
+    Returns: ${state.simMode==='historical' ? 'actual S&P 500 real returns, 1926\u20132025' : state.simMode==='montecarlo' ? (state.returnRate*100).toFixed(1)+'% real average, '+(state.returnStdDev*100).toFixed(0)+'% volatility' : 'steady '+(state.returnRate*100).toFixed(1)+'% real'} \u00b7
+    All amounts in today's dollars \u00b7
+    Income tax ${(state.taxRate*100).toFixed(0)}% effective, capital gains ${(state.capGainsTax*100).toFixed(0)}% \u00b7
+    Spending ${fmtMoney(state.spending)}/yr${state.lateSpending!==state.spending?', '+fmtMoney(state.lateSpending)+' after age '+state.slowDownAge:''}${state.guardrailsEnabled?' \u00b7 flexible \u00b1'+Math.round(state.guardrailCutPct*100)+'%':''}.
+    <br/><br/><strong>Not modeled:</strong> healthcare costs before Medicare (65), Required Minimum Distributions at 73, Medicare premium surcharges, Roth conversions, or life events not entered. Actual results will differ.
+  </div></details>`;
+}
+function renderResources() {
+  return `<div class="resources"><div class="section-heading" style="margin-top:0">Working with a professional</div>
+    <div style="margin-top:6px"><a href="https://www.napfa.org/find-an-advisor" target="_blank">Fee-only advisors (NAPFA)</a><a href="https://www.letsmakeaplan.org/" target="_blank">Certified planners (CFP)</a><a href="https://www.aicpa.org" target="_blank">Tax professionals</a></div>
+    <p>This tool is a starting point. A qualified professional can assess your full picture and account for factors not modeled here.</p></div>`;
+}
+
+// ============================================================================
+// CHARTS
+// ============================================================================
+function drawMainChart(result) {
+  const ctx = document.getElementById('mainChart'); if (!ctx) return;
+  if (chart) chart.destroy();
+  const p = result.percentiles;
+  const labels = p.map(x => x.age);
+  const fill = (data, color, alpha) => ({ data, borderColor: color, backgroundColor: alpha, borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.1 });
+  const datasets = [];
+  if (result.mode !== 'fixed') {
+    datasets.push({ label: 'p90', data: p.map(x => x.p90), borderColor: 'transparent', backgroundColor: 'rgba(91,110,58,0.10)', pointRadius: 0, fill: '+1', tension: 0.1 });
+    datasets.push({ label: 'p10', data: p.map(x => x.p10), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, tension: 0.1 });
+    datasets.push({ label: 'p75', data: p.map(x => x.p75), borderColor: 'transparent', backgroundColor: 'rgba(91,110,58,0.16)', pointRadius: 0, fill: '+1', tension: 0.1 });
+    datasets.push({ label: 'p25', data: p.map(x => x.p25), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, tension: 0.1 });
+  }
+  datasets.push(Object.assign(fill(p.map(x => x.p50), '#b85c38', 'transparent'), { label: 'Median', borderWidth: 2 }));
+
+  // Key event ages for annotations
+  const events = [];
+  if (state.yourStopWorkAge > state.age && state.yourStopWorkAge < state.targetAge) events.push({ age: state.yourStopWorkAge, label: 'Retire' });
+  if (state.ssStartAge > state.age) events.push({ age: state.ssStartAge, label: 'SS starts' });
+  if (state.mortgagePayoffAge > state.age && state.housing > 0) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
+  if (state.homeSaleAge) events.push({ age: state.homeSaleAge, label: 'Home sale' });
+  if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending drops' });
+
+  // Chart.js plugin for vertical annotation lines
+  const annotationPlugin = {
+    id: 'eventAnnotations',
+    afterDraw(chart) {
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+      const ctx2 = chart.ctx;
+      // Sort events and calculate pixel positions to detect collisions
+      const positioned = events.map(ev => {
+        const idx = labels.indexOf(ev.age);
+        if (idx < 0) return null;
+        return { ...ev, idx, x: xScale.getPixelForValue(idx) };
+      }).filter(Boolean);
+      // Stagger labels that are too close (within 60px)
+      positioned.forEach((ev, i) => {
+        ev.yOffset = 0;
+        for (let j = 0; j < i; j++) {
+          if (Math.abs(positioned[j].x - ev.x) < 60) {
+            ev.yOffset = (positioned[j].yOffset === 0) ? -12 : 0;
+          }
+        }
+      });
+      positioned.forEach(ev => {
+        ctx2.save();
+        ctx2.strokeStyle = '#d4cab8';
+        ctx2.lineWidth = 1;
+        ctx2.setLineDash([4, 3]);
+        ctx2.beginPath();
+        ctx2.moveTo(ev.x, yScale.top);
+        ctx2.lineTo(ev.x, yScale.bottom);
+        ctx2.stroke();
+        ctx2.setLineDash([]);
+        ctx2.fillStyle = '#8a8173';
+        ctx2.font = '10px Inter Tight, sans-serif';
+        ctx2.textAlign = 'center';
+        ctx2.fillText(ev.label, ev.x, yScale.top - 4 + ev.yOffset);
+        ctx2.restore();
+      });
+    }
+  };
+
+  // Crosshair plugin: draws a vertical line at hover position
+  const crosshairPlugin = {
+    id: 'crosshair',
+    afterDraw(chart) {
+      if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
+        const x = chart.tooltip._active[0].element.x;
+        const yScale = chart.scales.y;
+        const ctx2 = chart.ctx;
+        ctx2.save();
+        ctx2.strokeStyle = 'rgba(26,24,20,0.15)';
+        ctx2.lineWidth = 1;
+        ctx2.beginPath();
+        ctx2.moveTo(x, yScale.top);
+        ctx2.lineTo(x, yScale.bottom);
+        ctx2.stroke();
+        ctx2.restore();
+      }
+    }
+  };
+
+  // Enhanced tooltip showing breakdown
+  const medianRun = result.medianRun;
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets },
+    plugins: [annotationPlugin, crosshairPlugin],
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 16 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: {
+        mode: 'index', intersect: false,
+        callbacks: {
+          title: (t) => 'Age ' + t[0].label,
+          label: (c) => {
+            if (!['Median','p10','p90'].includes(c.dataset.label)) return null;
+            const lines = [c.dataset.label + ': ' + fmtMoneyShort(c.parsed.y)];
+            if (c.dataset.label === 'Median' && medianRun && medianRun[c.dataIndex]) {
+              const yr = medianRun[c.dataIndex];
+              if (yr.yourIncome > 0) lines.push('Income: ' + fmtMoneyShort(yr.yourIncome + yr.partnerIncome));
+              if (yr.ssIncome > 0) lines.push('Social Security: ' + fmtMoneyShort(yr.ssIncome));
+              lines.push('Spending: ' + fmtMoneyShort(yr.spending));
+              if (yr.withdrawal > 0) lines.push('Withdrawal: ' + fmtMoneyShort(yr.withdrawal));
+            }
+            return lines;
+          },
+          afterBody: (t) => {
+            const idx = t[0].dataIndex;
+            const age = labels[idx];
+            const ev = events.find(e => e.age === age);
+            return ev ? ['\u2192 ' + ev.label] : [];
+          }
+        },
+        filter: (t) => ['Median','p10','p90'].includes(t.dataset.label)
+      } },
+      scales: {
+        x: { title: { display: true, text: 'Age', color: '#6b6356', font: { size: 11 } }, ticks: { color: '#8a8173', maxTicksLimit: 10 }, grid: { color: 'rgba(212,202,184,0.4)' } },
+        y: { ticks: { color: '#8a8173', callback: (v) => fmtMoneyShort(v) }, grid: { color: 'rgba(212,202,184,0.4)' } }
+      }
+    }
+  });
+}
+let cashflowRows = null;
+
+function computeCashflowData(rows, mode) {
+  if (mode === 'breakdown') {
+    return {
+      d0: { data: rows.map(y => y.yourIncome + y.partnerIncome), bg: 'rgba(91,110,58,0.6)', label: 'Work income' },
+      d1: { data: rows.map(y => y.ssIncome), bg: 'rgba(201,164,73,0.7)', label: 'Social Security' },
+      d2: { data: rows.map(y => -(y.spending)), bg: 'rgba(184,92,56,0.5)', label: 'Spending' },
+    };
+  }
+  const netData = rows.map(y => {
+    const gross = y.yourIncome + y.partnerIncome + y.ssIncome;
+    const tax = y.tax || ((y.yourIncome + y.partnerIncome) * state.taxRate + y.ssIncome * state.taxRate * 0.5);
+    return Math.round(gross - tax - y.spending);
+  });
+  return {
+    d0: { data: netData.map(v => Math.max(0, v)), bg: 'rgba(91,110,58,0.7)', label: 'Surplus' },
+    d1: { data: netData.map(() => 0), bg: 'transparent', label: '' },
+    d2: { data: netData.map(v => Math.min(0, v)), bg: 'rgba(184,92,56,0.6)', label: 'Deficit' },
+  };
+}
+
+function drawCashflowChart(result) {
+  const ctx = document.getElementById('cashflowChart'); if (!ctx) return;
+  const rows = result.medianRun || [];
+  if (!rows.length) return;
+  cashflowRows = rows;
+  const labels = rows.map(y => y.age);
+  const d = computeCashflowData(rows, cashflowMode);
+
+  // If chart exists but canvas was replaced by re-render, destroy stale chart
+  if (cashflowChart && cashflowChart.canvas !== ctx) {
+    cashflowChart.destroy();
+    cashflowChart = null;
+  }
+
+  if (cashflowChart) {
+    // Update existing chart for animation
+    cashflowChart.data.labels = labels;
+    cashflowChart.data.datasets[0].data = d.d0.data;
+    cashflowChart.data.datasets[0].backgroundColor = d.d0.bg;
+    cashflowChart.data.datasets[0].label = d.d0.label;
+    cashflowChart.data.datasets[1].data = d.d1.data;
+    cashflowChart.data.datasets[1].backgroundColor = d.d1.bg;
+    cashflowChart.data.datasets[1].label = d.d1.label;
+    cashflowChart.data.datasets[2].data = d.d2.data;
+    cashflowChart.data.datasets[2].backgroundColor = d.d2.bg;
+    cashflowChart.data.datasets[2].label = d.d2.label;
+    cashflowChart.options.plugins.legend.display = (cashflowMode === 'breakdown');
+    cashflowChart.update();
+    return;
+  }
+
+  cashflowChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label: d.d0.label, data: d.d0.data, backgroundColor: d.d0.bg, stack: 'in', borderRadius: 1 },
+      { label: d.d1.label, data: d.d1.data, backgroundColor: d.d1.bg, stack: 'in', borderRadius: 1 },
+      { label: d.d2.label, data: d.d2.data, backgroundColor: d.d2.bg, stack: 'out', borderRadius: 1 },
+    ] },
+    options: { responsive: true, maintainAspectRatio: false,
+      animation: { duration: 700, easing: 'easeInOutQuart' },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: cashflowMode === 'breakdown', labels: { color: '#6b6356', font: { size: 11 }, boxWidth: 10, padding: 12, filter: (item) => item.text !== '' } },
+        tooltip: { mode: 'index', intersect: false, callbacks: {
+          title: (t) => 'Age ' + t[0].label,
+          label: (c) => {
+            if (c.dataset.label === '') return null;
+            const yr = cashflowRows && cashflowRows[c.dataIndex];
+            if (cashflowMode === 'breakdown') {
+              return c.dataset.label + ': ' + fmtMoneyShort(Math.abs(c.parsed.y));
+            }
+            const net = yr ? Math.round((yr.yourIncome + yr.partnerIncome + yr.ssIncome) - ((yr.yourIncome + yr.partnerIncome) * state.taxRate + yr.ssIncome * state.taxRate * 0.5) - yr.spending) : c.parsed.y;
+            if (c.datasetIndex === 1) return null;
+            const lines = [(net >= 0 ? 'Surplus: +' : 'Deficit: ') + fmtMoneyShort(net) + '/yr'];
+            if (yr) {
+              if (yr.yourIncome + yr.partnerIncome > 0) lines.push('Income: ' + fmtMoneyShort(yr.yourIncome + yr.partnerIncome));
+              if (yr.ssIncome > 0) lines.push('SS: ' + fmtMoneyShort(yr.ssIncome));
+              lines.push('Spending: ' + fmtMoneyShort(yr.spending));
+            }
+            return lines;
+          }
+        },
+        filter: (t) => t.dataset.label !== ''
+        }
+      },
+      scales: {
+        x: { stacked: true, ticks: { color: '#8a8173', maxTicksLimit: 10 }, grid: { display: false } },
+        y: { stacked: true, ticks: { color: '#8a8173', callback: (v) => { const a = Math.abs(v); return (v < 0 ? '-' : '') + (a >= 1e6 ? '$'+(a/1e6).toFixed(0)+'M' : a >= 1e3 ? '$'+Math.round(a/1e3)+'k' : '$'+a); } }, grid: { color: 'rgba(212,202,184,0.4)' } }
+      }
+    }
+  });
+}
+
+// ============================================================================
+// UPDATES & HANDLERS
+// ============================================================================
+function invalidateCaches() { maxSpendStale = true; spendingLevelsStale = true; }
+window.update = function(key, val) { state[key] = val; maxSpendView = false; presetNote = null; invalidateCaches(); render(); };
+window.updateAccount = function(key, val) { state.accounts[key] = val; state.portfolio = state.accounts.traditional + state.accounts.roth + state.accounts.taxable; invalidateCaches(); render(); };
+
+window.addEvent = function() {
+  const label = (document.getElementById('ev_label').value || '').trim() || 'Event';
+  const age = parseInt(document.getElementById('ev_age').value);
+  const amount = parseFloat(document.getElementById('ev_amount').value);
+  if (!age || isNaN(amount)) return;
+  if (!state.oneTimeEvents) state.oneTimeEvents = [];
+  state.oneTimeEvents.push({ label, age, amount });
+  invalidateCaches(); render();
+};
+window.removeEvent = function(i) {
+  state.oneTimeEvents.splice(i, 1);
+  invalidateCaches(); render();
+};
+window.updateTax = function(key, val) {
+  state[key] = val;
+  // Recompute effective tax rate from income and tax settings
+  const gross = state.yourIncome + state.partnerIncome;
+  if (gross > 0) {
+    const r = estimateNetIncome({ gross, filingStatus: state.filingStatus, stateCode: state.stateCode });
+    state.taxRate = Math.round(r.effectiveRate * 100) / 100;
+  }
+  invalidateCaches(); render();
+};
+window.setMode = function(m) { state.simMode = m; presetNote = null; invalidateCaches(); render(); };
+window.setCashflowMode = function(m) {
+  cashflowMode = m;
+  if (cashflowChart && cashflowRows) {
+    const d = computeCashflowData(cashflowRows, m);
+    cashflowChart.data.datasets[0].data = d.d0.data;
+    cashflowChart.data.datasets[0].backgroundColor = d.d0.bg;
+    cashflowChart.data.datasets[0].label = d.d0.label;
+    cashflowChart.data.datasets[1].data = d.d1.data;
+    cashflowChart.data.datasets[1].backgroundColor = d.d1.bg;
+    cashflowChart.data.datasets[1].label = d.d1.label;
+    cashflowChart.data.datasets[2].data = d.d2.data;
+    cashflowChart.data.datasets[2].backgroundColor = d.d2.bg;
+    cashflowChart.data.datasets[2].label = d.d2.label;
+    cashflowChart.options.plugins.legend.display = (m === 'breakdown');
+    cashflowChart.update();
+  }
+  // Update toggle buttons without destroying the chart
+  document.querySelectorAll('.cf-toggle').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === m);
+  });
+  // Update description
+  const desc = document.getElementById('cf-desc');
+  if (desc) desc.textContent = m === 'net' ? "Green bars mean you're adding to the portfolio. Red means you're drawing from it." : "Income sources stacked against spending. The gap is what comes from or goes to the portfolio.";
+};
+window.toggleMore = function() { showMoreOptions = !showMoreOptions; render(); };
+
+// Live updates: immediate label + debounced chart, full render on release
+let liveTimer = null;
+let liveChartTimer = null;
+
+function fmtSliderVal(key, val) {
+  if (['guardrailCutPct','guardrailBoostPct'].includes(key)) return Math.round(val * 100) + '%';
+  if (['returnRate','returnStdDev','yourIncomeGrowth','partnerIncomeGrowth'].includes(key)) return (val * 100).toFixed(1) + '%';
+  if (['slowDownAge','yourStopWorkAge','partnerStopWorkAge','ssStartAge','mortgagePayoffAge'].includes(key)) return String(Math.round(val));
+  return fmtMoney(val);
+}
+
+// Called on every oninput (during drag) — updates label + debounced chart
+window.slideLive = function(el, key, rawVal) {
+  const val = +rawVal;
+  state[key] = val;
+  // Immediate label update
+  const row = el.parentElement.querySelector('.control-value');
+  if (row) row.textContent = fmtSliderVal(key, val);
+  // Debounced chart redraw (fast, keeps slider alive)
+  clearTimeout(liveChartTimer);
+  liveChartTimer = setTimeout(() => {
+    invalidateCaches();
+    const result = runForState(state); lastSimResult = result;
+    drawMainChart(result); drawCashflowChart(result);
+  }, 150);
+};
+
+// Called on onchange (slider release) — full render with all sections
+window.sliderCommit = function(key, rawVal) {
+  state[key] = +rawVal;
+  maxSpendView = false;
+  presetNote = null;
+  // Sync accounts proportionally when portfolio changes
+  if (key === 'portfolio' && state.accountsEnabled) {
+    const total = state.accounts.traditional + state.accounts.roth + state.accounts.taxable;
+    if (total > 0) {
+      const ratio = state.portfolio / total;
+      state.accounts.traditional = Math.round(state.accounts.traditional * ratio);
+      state.accounts.roth = Math.round(state.accounts.roth * ratio);
+      state.accounts.taxable = Math.round(state.accounts.taxable * ratio);
+    }
+  }
+  invalidateCaches();
+  const scrollY = window.scrollY;
+  render();
+  window.scrollTo(0, scrollY);
+};
+
+window.updateLive2 = function(el, k1, k2, rawVal) {
+  const val = +rawVal;
+  state[k1] = val; state[k2] = val;
+  const row = el.parentElement.querySelector('.control-value');
+  if (row) row.textContent = fmtSliderVal(k1, val);
+  clearTimeout(liveChartTimer);
+  liveChartTimer = setTimeout(() => { invalidateCaches(); const r = runForState(state); lastSimResult = r; drawMainChart(r); drawCashflowChart(r); }, 150);
+};
+
+window.resetBaseline = function() { baselineState = JSON.parse(JSON.stringify(state)); baselineResult = lastSimResult; render(); };
+
+window.applySSAge = function(age) {
+  const factors = { 62: 0.70, 67: 1.00, 70: 1.24 };
+  const curFactor = factors[state.ssStartAge] || 1;
+  const newFactor = factors[age] || 1;
+  // Convert current amounts back to FRA-basis, then apply new factor
+  state.yourSSAmount = Math.round((state.yourSSAmount / curFactor) * newFactor);
+  state.partnerSSAmount = Math.round((state.partnerSSAmount / curFactor) * newFactor);
+  state.ssStartAge = age;
+  invalidateCaches(); render();
+};
+
+window.applySpending = function(spend) {
+  const ratio = state.spending > 0 ? state.lateSpending / state.spending : 0.85;
+  state.spending = spend;
+  state.lateSpending = Math.round(spend * ratio);
+  invalidateCaches(); render();
+};
+
+// ===== PRESETS =====
+window.applyPreset = function(id) {
+  presetNote = null; // cleared on each apply; set below for presets with arbitrary assumptions
+  switch (id) {
+    case 'stopNow': state.yourStopWorkAge = state.age; if (state.hasPartner) state.partnerStopWorkAge = state.partnerAge; break;
+    case 'retire5early': state.yourStopWorkAge = Math.max(state.age, state.yourStopWorkAge - 5); break;
+    case 'maxSpend': { state.simMode = 'fixed'; const ms = findMaxSpend(state); const ratio = state.spending > 0 ? state.lateSpending/state.spending : 0.85; state.spending = Math.round(ms.spend/1000)*1000; state.lateSpending = Math.round(state.spending*ratio); maxSpendView = true; break; }
+    case 'partnerReturns':
+      state.partnerIncome = state.partnerIncome > 0 ? state.partnerIncome : 60000;
+      state.partnerStopWorkAge = Math.max(state.partnerAge + 5, 60);
+      presetNote = `Assumed your partner earns ${fmtMoney(state.partnerIncome)}/yr until age ${state.partnerStopWorkAge}. Adjust both under \u201cMore options.\u201d`;
+      break;
+    case 'delaySS': state.ssStartAge = 70; { const f = 1.24; state.yourSSAmount = Math.round(state.yourSSAmount * f); state.partnerSSAmount = Math.round(state.partnerSSAmount * f); } presetNote = 'Estimated benefits boosted ~24% for claiming at 70 instead of full age. Use your ssa.gov figure for precision.'; break;
+    case 'sellHome': if (!state.oneTimeEvents) state.oneTimeEvents = []; state.oneTimeEvents.push({ label: 'Home sale', age: 70, amount: 400000 }); presetNote = 'Assumed a one-time inflow of ' + fmtMoney(400000) + ' at age 70. Edit the amount and age under life events.'; break;
+    case 'ltc': if (!state.oneTimeEvents) state.oneTimeEvents = []; for (let a = 85; a < 90; a++) state.oneTimeEvents.push({ label: 'Long-term care', age: a, amount: -90000 }); presetNote = 'Assumed ' + fmtMoney(90000) + '/yr of long-term-care cost from age 85 to 89. Edit under life events.'; break;
+  }
+  invalidateCaches(); render();
+};
+
+// ===== SAVE / LOAD SCENARIOS =====
+window.saveScenario = function() {
+  const el = document.getElementById('scenarioName'); const name = (el.value || '').trim();
+  if (!name) { el.focus(); return; }
+  if (savedScenarios.length >= 8) { alert('Max 8 saved scenarios. Delete one first.'); return; }
+  savedScenarios.push({ name, state: JSON.parse(JSON.stringify(state)) });
+  localStorage.setItem('zeroline_scenarios', JSON.stringify(savedScenarios));
+  render();
+};
+window.loadScenario = function(i) { state = JSON.parse(JSON.stringify(savedScenarios[i].state)); invalidateCaches(); render(); };
+window.deleteScenario = function(i) { savedScenarios.splice(i, 1); localStorage.setItem('zeroline_scenarios', JSON.stringify(savedScenarios)); render(); };
+
+// ============================================================================
+// MODALS
+// ============================================================================
+function openModal(html) { modalRoot.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog" aria-modal="true"><button class="modal-close" onclick="closeModal()" aria-label="Close">\u00d7</button>${html}</div></div>`; }
+window.closeModal = function() { modalRoot.innerHTML = ''; };
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modalRoot.innerHTML) closeModal(); });
+
+window.showFullDisclaimer = function() {
+  openModal(`<h2>Important disclaimer</h2>
+    <p>This tool is provided for educational purposes only and does not constitute financial, investment, tax, or legal advice.</p>
+    <p>The results shown are hypothetical projections based on your inputs and historical data. They are not predictions of future performance and should not be the sole basis for any financial decision.</p>
+    <p>Your actual results will depend on factors this tool cannot model, including actual market performance, tax law changes, inflation, health, and life events.</p>
+    <p>Before making major decisions, consult a qualified financial advisor, tax professional, or estate-planning attorney. This tool creates no advisory or fiduciary relationship.</p>`);
+};
+
+window.showComparison = function() {
+  if (savedScenarios.length < 2) return;
+  const rows = savedScenarios.map(sc => {
+    const r = runForState(sc.state);
+    const isHist = sc.state.simMode === 'historical';
+    return {
+      name: sc.name,
+      spending: sc.state.spending,
+      portfolio: sc.state.portfolio,
+      retireAge: sc.state.yourStopWorkAge,
+      mode: sc.state.simMode === 'montecarlo' ? 'Simulated' : sc.state.simMode === 'historical' ? 'Historical' : 'Fixed',
+      success: isHist ? r.successCount + '/' + r.totalPeriods : sc.state.simMode === 'montecarlo' ? Math.round(r.successRate * 100) + '%' : (r.successRate >= 1 ? 'Lasts' : 'Runs out'),
+      medianFinal: r.medianFinal,
+      tier: r.successRate >= 0.9 ? 'good' : r.successRate >= 0.7 ? 'mid' : 'bad',
+    };
+  });
+  const table = `<table class="data-table"><thead><tr><th>Scenario</th><th>Spending</th><th>Portfolio</th><th>Retire at</th><th>Mode</th><th>Outcome</th><th>Median ending</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td style="font-weight:600">${r.name}</td><td>${fmtMoney(r.spending)}/yr</td><td>${fmtMoneyShort(r.portfolio)}</td><td>${r.retireAge}</td><td>${r.mode}</td><td style="color:var(--${r.tier==='good'?'moss':r.tier==='mid'?'gold':'danger'});font-weight:600">${r.success}</td><td>${fmtMoneyShort(r.medianFinal)}</td></tr>`).join('')}
+  </tbody></table>`;
+  openModal(`<h2>Compare scenarios</h2>
+    <p style="margin-bottom:16px">Side-by-side comparison of your saved scenarios.</p>
+    ${table}
+    <p style="font-size:11px;color:var(--ink-faint);margin-top:12px">Each scenario is run with its own mode and settings. Click "load" in the sidebar to explore any scenario in detail.</p>`);
+};
+
+window.showAbout = function() {
+  openModal(`<h2>Why this exists</h2>
+    <p>Most retirement planning tools are designed around one fear: running out of money. They tell you to save more, spend less, and build a cushion big enough that you'll never touch zero. That's not bad advice. But it has a cost nobody talks about.</p>
+    <p>If you're 55 with a million dollars and you spend like you have half that because a calculator told you to be careful, you don't get those years back. The vacations you skipped, the experiences you postponed, the generosity you deferred. Dying with two million dollars in the bank isn't a success story. It's a planning failure in the other direction.</p>
+    <p>Bill Perkins made this case in <em>Die With Zero</em>, and it changed how a lot of people think about money and time. But knowing you should spend more and knowing how much you can safely spend are two different problems. The book gives you the philosophy. This tool gives you the math.</p>
+    <p>You put in your numbers. It tests your plan against every real U.S. market environment since 1926 and shows you what would have happened. Not a single prediction, but a range. Where does it hold up? Where does it break? How much room do you actually have? The answers are yours to interpret. We don't tell you what to do. We show you the trade-offs and let you decide.</p>
+    <p>This isn't financial advice and we're not advisors. It's a planning tool for people who want to make informed choices about how to use the money they've worked for.</p>`);
+};
+
+window.showScenarioDetail = function(id) {
+  const s = HISTORICAL_SCENARIOS.find(x => x.id === id); if (!s) return;
+  const run = runNamedScenario(state, s);
+  const years = run.years;
+  const survived = !years.some(y => y.ranOut);
+  const final = years[years.length - 1];
+  // worst drawdown
+  let peak = years[0].portfolio, maxDD = 0, ddAge = years[0].age;
+  years.forEach(y => { if (y.portfolio > peak) peak = y.portfolio; const dd = peak > 0 ? (peak - y.portfolio) / peak : 0; if (dd > maxDD) { maxDD = dd; ddAge = y.age; } });
+  const crashYears = years.filter(y => y.marketReturn <= -0.15).length;
+  let narrative = 'Starting in ' + s.startYear + ', ';
+  if (maxDD > 0.25) narrative += 'the portfolio saw a drawdown of about ' + Math.round(maxDD * 100) + '% (around age ' + ddAge + '). ';
+  if (crashYears > 0) narrative += 'There were ' + crashYears + ' year' + (crashYears > 1 ? 's' : '') + ' with a real market drop over 15%. ';
+  narrative += survived ? 'The portfolio still lasted to age ' + state.targetAge + ', ending near ' + fmtMoneyShort(final.portfolio) + '.' : 'The portfolio was depleted around age ' + years.find(y => y.ranOut).age + '.';
+
+  const sampleRows = years.filter((y, i) => i % 5 === 0 || y.ranOut).slice(0, 16);
+  const table = `<table class="data-table"><thead><tr><th>Age</th><th>Market</th><th>Portfolio</th><th>Spending</th></tr></thead><tbody>${sampleRows.map(y => `<tr><td>${y.age}</td><td style="color:${y.marketReturn<0?'var(--danger)':'var(--moss)'}">${(y.marketReturn*100).toFixed(0)}%</td><td>${fmtMoneyShort(y.portfolio)}</td><td>${fmtMoneyShort(y.spending)}</td></tr>`).join('')}</tbody></table>`;
+  openModal(`<h2>${s.name} \u00b7 ${s.startYear}\u2013${s.startYear + (state.targetAge - state.age)}${run.padded?'*':''}</h2>
+    <div class="detail-narrative">${narrative}</div>
+    ${table}
+    ${run.padded ? '<p style="font-size:11px;color:var(--ink-faint)">*This horizon extends beyond available history; later years use the long-run average return.</p>' : ''}
+    <p style="font-size:11px;color:var(--ink-faint)">Past performance does not predict future results.</p>`);
+};
+
+// ===== TAX / SS HELPERS (onboarding) =====
+window.openTaxHelper = function() {
+  openModal(`<h2>Estimate take-home income</h2>
+    <p>Enter gross household income to see a rough net (after federal, state, and FICA).</p>
+    <div class="field"><label>Gross annual income</label><input type="number" id="th_gross" placeholder="e.g. 150000"/></div>
+    <div class="field" style="margin-top:10px"><label>Filing status</label><select id="th_filing"><option value="mfj">Married filing jointly</option><option value="single">Single</option></select></div>
+    <div class="field" style="margin-top:10px"><label>State</label><select id="th_state">${Object.keys(STATE_CONFIG).map(k => `<option value="${k}">${STATE_CONFIG[k].name}</option>`).join('')}</select></div>
+    <div style="margin-top:14px"><button class="btn-primary" onclick="runTaxHelper()">Estimate</button></div>
+    <div id="th_result" style="margin-top:14px;font-size:13px;color:var(--ink-soft)"></div>`);
+};
+window.runTaxHelper = function() {
+  const gross = parseFloat(document.getElementById('th_gross').value) || 0;
+  const filing = document.getElementById('th_filing').value;
+  const st = document.getElementById('th_state').value;
+  const r = estimateNetIncome({ gross, filingStatus: filing, stateCode: st });
+  document.getElementById('th_result').innerHTML = `Estimated net: <strong>${fmtMoney(r.net)}</strong> (federal ${fmtMoney(r.federal)}, state ${fmtMoney(r.state)}, FICA ${fmtMoney(r.fica)}). Effective rate ${(r.effectiveRate*100).toFixed(1)}%. <br/><span style="font-size:11px;color:var(--ink-faint)">A rough estimate, not tax advice.</span>`;
+};
+window.openSSHelper = function() {
+  openModal(`<h2>Estimate Social Security</h2>
+    <p>A rough estimate from your typical career income. Your ssa.gov statement is the official figure.</p>
+    <div class="field"><label>Typical annual income (today's $)</label><input type="number" id="ss_gross" placeholder="e.g. 90000"/></div>
+    <div style="margin-top:14px"><button class="btn-primary" onclick="runSSHelper()">Estimate</button></div>
+    <div id="ss_result" style="margin-top:14px;font-size:13px;color:var(--ink-soft)"></div>`);
+};
+window.runSSHelper = function() {
+  const g = parseFloat(document.getElementById('ss_gross').value) || 0;
+  const b = estimateSSBenefit(g);
+  document.getElementById('ss_result').innerHTML = `Estimated benefit at full retirement age: <strong>${fmtMoney(b)}/yr</strong> (${fmtMoney(Math.round(b/12))}/mo).<br/><span style="font-size:11px;color:var(--ink-faint)">Approximate \u2014 your ssa.gov statement is authoritative.</span>`;
+};
+
+// ============================================================================
+// INIT
+// ============================================================================
+render();
+</script>
+</body>
+</html>

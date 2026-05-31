@@ -1,0 +1,10 @@
+# OS / editor cruft
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
+
+# Node (for tests / tooling only — app itself has no build step)
+node_modules/
+npm-debug.log*
