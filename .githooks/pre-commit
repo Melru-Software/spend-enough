@@ -1,0 +1,17 @@
+#!/bin/sh
+# Pre-commit hook: run the engine test suite; block the commit if it fails.
+# Enabled via `git config core.hooksPath .githooks` (see README).
+# Bypass intentionally with: git commit --no-verify
+command -v node >/dev/null 2>&1 || export PATH="/opt/homebrew/bin:$PATH"
+if ! command -v node >/dev/null 2>&1; then
+  echo "pre-commit: node not found on PATH — skipping tests. Install Node to enable." >&2
+  exit 0
+fi
+ROOT="$(git rev-parse --show-toplevel)"
+echo "pre-commit: running engine tests…"
+if node "$ROOT/tests.js"; then
+  exit 0
+else
+  echo "pre-commit: tests FAILED — commit blocked. Fix the tests or use 'git commit --no-verify' to override." >&2
+  exit 1
+fi
