@@ -470,7 +470,7 @@ const DEFAULT_STATE = {
   returnRate: 0.05, returnStdDev: 0.15,
   taxRate: 0.18, capGainsTax: 0.15,
   filingStatus: 'mfj', stateCode: 'OTHER',
-  simMode: 'historical',
+  simMode: 'fixed',
   targetAge: 100,
   successThreshold: 0.85, endGoalBuffer: 0,
   // Spending flexibility (percentage-based guardrails). The band is hard-coded as ±20%

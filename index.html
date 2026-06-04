@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Zeroline — live now, plan well</title>
+<title>Spend Enough</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -45,8 +45,33 @@
       radial-gradient(circle at 80% 100%, rgba(91,110,58,0.04) 0%, transparent 50%);
   }
 
-  .serif { font-family: 'Fraunces', Georgia, serif; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
+  /* Data tables - horizontal scroll on mobile */
+  .data-table { width: 100%; border-collapse: collapse; }
+  @media (max-width: 768px) {
+    .data-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -20px; padding: 0 20px; }
+  }
+  
+  /* Improve touch targets */
+  button, input[type="button"], input[type="submit"], input[type="range"], .clickable { 
+    min-height: 44px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  input[type="range"] { cursor: pointer; }
+  
+  /* Better modal behavior on mobile */
+  .modal-overlay { padding: 16px; }
+  @media (max-width: 480px) {
+    .modal-overlay { align-items: flex-start; padding-top: 20px; }
+    .modal { max-width: calc(100vw - 32px); max-height: calc(100vh - 40px); }
+  }
+  
+  /* Prevent zoom on input focus (iOS) */
+  input[type="text"], input[type="number"], input[type="email"], input[type="tel"], select, textarea {
+    font-size: 16px !important;
+  }
 
   /* ========== HEADER ========== */
   header {
@@ -114,10 +139,21 @@
 </head>
 <style>
   /* ========== DASHBOARD LAYOUT ========== */
-  .dashboard { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 73px); }
-  .sidebar { background: var(--paper); border-right: 1px solid var(--line); padding: 22px 20px; overflow-y: auto; }
+  .dashboard { display: grid; grid-template-columns: 280px 1fr; grid-template-areas: "mode mode" "sidebar main"; min-height: calc(100vh - 73px); }
+  .sidebar { grid-area: sidebar; background: var(--paper); border-right: 1px solid var(--line); padding: 22px 20px; overflow-y: auto; }
   .sidebar-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
   .sidebar-section:last-child { border-bottom: none; }
+  
+  /* Mode selector - separate from sidebar */
+  .mode-selector {
+    grid-area: mode;
+    padding: 20px;
+    background: var(--paper);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+  .mode-selector .toggle-group { margin-bottom: 8px; }
   .sidebar-heading { text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
   .sidebar-sub { font-size: 11px; color: var(--ink-mute); margin-bottom: 12px; }
   .preset-btn { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--bone); padding: 9px 11px; font-size: 12px; color: var(--ink-soft); margin-bottom: 5px; border-radius: 3px; font-family: inherit; cursor: pointer; transition: border-color 0.15s ease; }
@@ -148,7 +184,7 @@
   .acct-grid input { width: 110px; background: var(--bone); border: 1px solid var(--line); padding: 6px 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink); border-radius: 2px; text-align: right; }
 
   /* ========== MAIN ========== */
-  .main { padding: 24px 32px; overflow-y: auto; max-width: 1100px; }
+  .main { grid-area: main; padding: 24px 32px; overflow-y: auto; max-width: 1100px; }
   .disclaimer-bar { background: var(--bone-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px 16px; font-size: 12px; line-height: 1.5; color: var(--ink-mute); margin-bottom: 18px; }
   .disclaimer-bar strong { color: var(--ink-soft); font-weight: 600; }
   .disclaimer-bar a { color: var(--rust); cursor: pointer; }
@@ -165,6 +201,24 @@
   .verdict-head { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 400; color: var(--ink); line-height: 1.25; margin-bottom: 10px; letter-spacing: -0.01em; }
   .verdict-body { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
   .verdict-caveat { font-size: 12px; color: var(--ink-faint); margin-top: 10px; font-style: italic; }
+  .verdict-wedge { margin-top: 14px; padding: 12px 16px; background: rgba(184,92,56,0.06); border-left: 3px solid var(--rust); border-radius: 0 4px 4px 0; font-size: 15px; color: var(--ink); line-height: 1.5; }
+  .verdict-wedge .wedge-amount { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--rust); font-size: 16px; }
+  .verdict-wedge .wedge-sub { font-size: 12px; color: var(--ink-mute); margin-top: 4px; }
+
+  .toggle-btn.locked { opacity: 0.7; }
+  .toggle-btn.locked .lock-icon { font-size: 10px; margin-left: 3px; }
+  .unlock-prompt { margin-top: 8px; padding: 10px 14px; background: rgba(184,92,56,0.06); border-radius: 4px; font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
+  .unlock-prompt a { color: var(--rust); cursor: pointer; text-decoration: underline; }
+  .unlock-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .unlock-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--paper); }
+  .unlock-input-row button { padding: 10px 16px; background: var(--rust); color: var(--paper); border: none; border-radius: 3px; font-family: inherit; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .unlock-input-row button:hover { background: var(--rust-deep); }
+  
+  /* Unlock modal improvements */
+  .modal h2 { color: var(--ink); }
+  .modal ul { list-style: none; padding: 0; }
+  .modal ul li { position: relative; padding-left: 20px; }
+  .modal ul li:before { content: "✓"; position: absolute; left: 0; color: var(--moss); font-weight: 600; }
 
   /* Sections */
   .section-heading { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: var(--ink); margin: 26px 0 4px; }
@@ -258,9 +312,292 @@
   .detail-narrative { background: var(--bone-2); border-radius: 4px; padding: 14px 18px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
 
   @media (max-width: 860px) {
-    .dashboard { grid-template-columns: 1fr; }
+    .dashboard { grid-template-columns: 1fr; grid-template-areas: "mode" "sidebar" "main"; }
     .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
     .bands, .scenario-cards, .ss-grid, .stat-row { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Tablet & Small Screens (768px and below) */
+  @media (max-width: 768px) {
+    .dashboard { display: flex; flex-direction: column; }
+    .main { order: 1; }
+    .mode-selector { 
+      order: 1.1;
+      position: sticky;
+      top: 0;
+      background: var(--bone);
+      border: none;
+      border-bottom: 1px solid var(--line-soft);
+      border-radius: 0;
+      margin: 0 -20px 0 -20px;
+      padding: 14px 20px;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(26,24,20,0.06);
+    }
+    .sidebar {
+      order: 2;
+    }
+    
+    body { font-size: 14px; }
+    header { padding: 14px 20px; }
+    .logo { font-size: 20px; }
+    .scenarios-bar { gap: 6px; flex-wrap: wrap; }
+    
+    .sidebar { max-height: none; border-bottom: 1px solid var(--line); }
+    .main { padding: 16px 20px; max-width: 100%; }
+    
+    .sidebar-section { margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line-soft); }
+    .sidebar-section:last-child { border-bottom: none; }
+    
+    .control { margin-bottom: 14px; }
+    .control-row { font-size: 13px; }
+    
+    .toggle-group { gap: 4px; }
+    .toggle-btn { padding: 8px 12px; font-size: 12px; }
+    
+    /* Desktop: show sliders, hide number inputs */
+  .slider-input { display: block; }
+  .mobile-input { display: none; }
+  
+  /* Mobile: hide sliders, show number inputs */
+  @media (max-width: 768px) {
+    .slider-input { display: none; }
+    .mobile-input { 
+      display: block;
+      width: 100%;
+      min-height: 40px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--paper);
+      color: var(--ink);
+      margin-top: 6px;
+    }
+    .mobile-input:focus {
+      outline: none;
+      border-color: var(--rust);
+      box-shadow: 0 0 0 2px rgba(184,92,56,0.1);
+    }
+  }
+    width: 100%;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+  
+  /* Webkit browsers (Chrome, Safari) */
+  input[type="range"]::-webkit-slider-track {
+    background: var(--line-soft);
+    height: 6px;
+    border-radius: 3px;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--rust);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(26,24,20,0.15);
+    border: 2px solid var(--paper);
+  }
+  
+  input[type="range"]::-webkit-slider-thumb:active {
+    box-shadow: 0 2px 8px rgba(26,24,20,0.25);
+    transform: scale(1.15);
+  }
+  
+  /* Firefox */
+  input[type="range"]::-moz-range-track {
+    background: var(--line-soft);
+    height: 6px;
+    border-radius: 3px;
+    border: none;
+  }
+  
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--rust);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(26,24,20,0.15);
+    border: 2px solid var(--paper);
+  }
+  
+  input[type="range"]::-moz-range-thumb:active {
+    box-shadow: 0 2px 8px rgba(26,24,20,0.25);
+    transform: scale(1.15);
+  }
+  
+  /* Control row - improved spacing */
+  /* Slider + Input - mobile friendly */
+  .control { margin-bottom: 14px; }
+  .control-row { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .control-label { flex: 1; font-size: inherit; }
+  .control-value { font-weight: 500; color: var(--ink); white-space: nowrap; }
+  
+  .control-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .control-input-row input[type="number"] {
+    width: 100px;
+    padding: 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  
+  @media (max-width: 768px) {
+    .control { margin-bottom: 16px; }
+    .control-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+    
+    .control-input-row {
+      width: 100%;
+      flex-direction: column;
+    }
+    .control-input-row input[type="number"] {
+      width: 100%;
+      min-height: 40px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+  }
+  }
+    input[type="number"], input[type="text"], select { 
+      min-height: 40px; padding: 10px 12px; font-size: 14px;
+    }
+    
+    .preset-btn { padding: 10px 14px; font-size: 13px; margin-bottom: 6px; }
+    .more-toggle { padding: 10px 14px; font-size: 13px; }
+    .scenario-pill, .btn-primary { min-height: 40px; font-size: 13px; padding: 10px 14px; }
+    
+    .verdict { padding: 18px 16px; margin-bottom: 14px; }
+    .verdict-head { font-size: 20px; }
+    .verdict-body { font-size: 13px; }
+    .verdict-wedge { padding: 10px 12px; margin-top: 12px; }
+    .verdict-wedge .wedge-amount { font-size: 14px; }
+    
+    .section-heading { font-size: 16px; margin: 20px 0 4px; }
+    .section-sub { font-size: 11px; margin-bottom: 12px; }
+    
+    .chart-card { margin-bottom: 16px; }
+    .chart-wrap { min-height: 200px; }
+    .chart-wrap.short { min-height: 120px; }
+    
+    .band { padding: 12px 14px; }
+    .band-label { font-size: 12px; }
+    .band-value { font-size: 14px; }
+    
+    .stat-card { padding: 12px 14px; }
+    .stat-label { font-size: 11px; }
+    .stat-value { font-size: 13px; }
+    
+    .data-table { font-size: 12px; }
+    .data-table th, .data-table td { padding: 8px 6px; }
+    
+    .ss-card, .scenario-card { padding: 14px; margin: 6px 0; }
+    .ss-card-label { font-size: 12px; }
+    .ss-card-value { font-size: 14px; }
+    
+    .modal { max-width: 90vw; padding: 20px; }
+    .modal h2 { font-size: 18px; }
+    .modal p { font-size: 13px; }
+    
+    .unlock-input-row { flex-direction: column; }
+    .unlock-input-row input, .unlock-input-row button { width: 100%; min-height: 44px; }
+    
+    .field { margin-bottom: 12px; }
+    .field label { font-size: 13px; }
+    .field input, .field select { min-height: 40px; font-size: 14px; }
+    .field-hint { font-size: 11px; }
+  }
+
+  /* Mobile (480px and below) */
+  @media (max-width: 480px) {
+    html { font-size: 14px; }
+    body { font-size: 14px; }
+    
+    header { padding: 12px 16px; }
+    .logo { font-size: 18px; }
+    .tagline { font-size: 11px; }
+    
+    .onboarding { padding: 32px 20px; max-width: 100%; }
+    .onboard-hero { margin-bottom: 28px; }
+    .onboard-title { font-size: 28px; line-height: 1.2; }
+    .onboard-sub { font-size: 14px; }
+    
+    .onboard-step { margin-bottom: 24px; padding: 16px 0; }
+    .step-number { font-size: 11px; }
+    .step-title { font-size: 16px; }
+    .step-hint { font-size: 12px; }
+    
+    .field-grid { grid-template-columns: 1fr; gap: 12px; }
+    .field { margin-bottom: 0; }
+    
+    .scenarios-bar { gap: 4px; }
+    .scenario-pill { padding: 8px 12px; font-size: 12px; }
+    
+    .toggle-btn { padding: 7px 10px; font-size: 11px; }
+    .sidebar-heading { font-size: 13px; }
+    .sidebar-sub { font-size: 11px; }
+    
+    .verdict { padding: 14px 12px; }
+    .verdict-head { font-size: 18px; line-height: 1.3; }
+    .verdict-body { font-size: 12px; }
+    
+    .chart-wrap { min-height: 160px; }
+    .chart-wrap.short { min-height: 100px; }
+    
+    .bands { grid-template-columns: 1fr; gap: 8px; }
+    .stat-row { grid-template-columns: 1fr; gap: 8px; }
+    
+    .modal { padding: 16px; border-radius: 4px; }
+    .modal h2 { font-size: 16px; margin-bottom: 12px; }
+    .modal p { font-size: 12px; line-height: 1.5; }
+    .modal-close { font-size: 18px; top: 10px; right: 10px; }
+    
+    .data-table { font-size: 11px; }
+    .data-table th, .data-table td { padding: 6px 4px; }
+    
+    .event-row { padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
+    .event-age { font-size: 12px; font-weight: 600; }
+    .event-label { font-size: 12px; }
+    .event-detail { font-size: 10px; }
+    
+    .scenario-card, .ss-card { padding: 10px 12px; }
+    .scenario-card p { font-size: 11px; }
+    
+    .preset-btn { padding: 8px 12px; font-size: 12px; margin-bottom: 6px; width: 100%; }
+    .more-toggle { padding: 8px 12px; font-size: 12px; width: 100%; }
+  }
+
+  /* Very Small Screens (320px) */
+  @media (max-width: 360px) {
+    .onboarding { padding: 24px 16px; }
+    .onboard-title { font-size: 24px; }
+    .onboard-sub { font-size: 13px; }
+    
+    .verdict-head { font-size: 16px; }
+    .section-heading { font-size: 14px; }
+    
+    .toggle-btn { padding: 6px 8px; font-size: 10px; }
+    input[type="number"], input[type="text"], select { padding: 8px 10px; font-size: 13px; }
   }
 </style>
 <body>
@@ -269,27 +606,6 @@
 <script src="engine.js"></script>
 <script>
 "use strict";
-
-/* ============================================================================
-   FINANCIAL PLANNER — UI  (index.html)
-   ----------------------------------------------------------------------------
-   The simulation engine, tax/SS estimators, DEFAULT_STATE and SAMPLE_STATE live
-   in engine.js (loaded just above) and are exposed here as globals. This file is
-   UI only. Table of contents:
-
-   A. STATE ............................ live globals (state, caches, view flags)
-   B. PRESETS .......................... generatePresets (+ applyPreset near bottom)
-   C. FORMAT HELPERS ................... fmtMoney, periodsLabel, etc.
-   D. ONBOARDING VIEW .................. renderOnboarding, finishOnboarding, validation
-   E. DASHBOARD VIEW ................... renderDashboard, sidebar, verdict, empty state
-   F. SECTION RENDERERS ................ bands, explorer, stress tests, SS, tax, etc.
-   G. CHARTS ........................... drawMainChart, drawCashflowChart
-   H. INPUT HANDLERS / PRESETS / SAVE .. update, sliders, applyPreset, scenarios
-   I. MODALS ........................... about, disclaimer, helpers
-   J. INIT ............................. render()
-
-   NOTE: behavior is in today's (real, inflation-adjusted) dollars throughout.
-============================================================================ */
 
 /* ----------------------------------------------------------------------------
    Simulation engine, estimators, DEFAULT_STATE and SAMPLE_STATE now live in
@@ -309,8 +625,46 @@ let showMoreOptions = false;
 let isFirstDashboard = true;
 let maxSpendView = false;
 let cashflowMode = 'net';
-let presetNote = null;     // transient note describing arbitrary assumptions a preset made
-let viewingSample = false; // true when the user loaded the sample scenario
+
+// ============================================================================
+// PAID UNLOCK
+// ============================================================================
+function isPaid() { return !!localStorage.getItem('spendenough_key'); }
+
+window.showUnlockModal = function() {
+  openModal(`<h2>Is your plan truly safe?</h2>
+    <p style="font-size:15px;line-height:1.7;margin-bottom:16px">The projection above shows your plan at one steady return rate. But markets don't deliver steady returns.</p>
+    <p style="font-size:15px;line-height:1.7;margin-bottom:18px"><strong>Upgrade to see how your plan would have fared in:</strong></p>
+    <ul style="margin-left:20px;margin-bottom:18px;font-size:14px;line-height:1.8;color:var(--ink-soft)">
+      <li>The 1970s stagflation</li>
+      <li>The 1987 crash and recovery</li>
+      <li>The 2000–2002 tech crash</li>
+      <li>The 2008 financial crisis</li>
+      <li>Every other rolling period since 1926</li>
+    </ul>
+    <div style="background:rgba(184,92,56,0.06);padding:14px 16px;border-left:3px solid var(--rust);border-radius:0 4px 4px 0;margin-bottom:18px">
+      <p style="font-size:13px;color:var(--ink);margin:0"><strong>Unlock includes:</strong> Historical stress testing, Social Security claiming analysis, withdrawal strategy comparison, spending flexibility modeling, scenario comparison, and export.</p>
+    </div>
+    <p style="font-size:13px;color:var(--ink-mute);margin-bottom:16px;margin-top:16px">One-time payment. No subscription. No account. Your numbers stay on your device.</p>
+    <div class="unlock-input-row">
+      <input type="text" id="unlockKeyInput" placeholder="Paste your license key" />
+      <button onclick="submitUnlockKey()" style="background:var(--rust);color:var(--paper);border:none;padding:10px 16px;border-radius:3px;font-weight:600;cursor:pointer;font-size:14px">Unlock</button>
+    </div>
+    <p style="margin-top:14px;font-size:12px;text-align:center"><a href="#" onclick="closeModal();return false" style="color:var(--rust);text-decoration:none;cursor:pointer">Continue with the free version</a></p>`);
+};
+
+window.submitUnlockKey = function() {
+  const input = document.getElementById('unlockKeyInput');
+  const key = input ? input.value.trim() : '';
+  if (key.length >= 8) {
+    localStorage.setItem('spendenough_key', key);
+    closeModal();
+    render();
+  } else if (input) {
+    input.style.borderColor = 'var(--danger)';
+    input.setAttribute('placeholder', 'Key must be at least 8 characters');
+  }
+};
 
 // ============================================================================
 // DYNAMIC PRESETS
@@ -322,10 +676,7 @@ function generatePresets(s) {
   presets.push({ id: 'maxSpend', label: 'What can I spend?' });
   if (s.hasPartner && s.partnerIncome === 0 && s.partnerAge < s.partnerStopWorkAge) presets.push({ id: 'partnerReturns', label: 'Partner returns to work' });
   if (s.ssStartAge !== 70 && s.yourSSAmount > 0) presets.push({ id: 'delaySS', label: 'Delay Social Security to 70' });
-  // DISABLED: "Pay off the house in 5 years" silently dropped housing cost early
-  // with no modeled cost, because we don't track mortgage principal — misleadingly
-  // optimistic. Re-enable once a mortgage P&I / remaining-balance input exists.
-  // if (s.housing > 0 && s.mortgagePayoffAge > s.age + 5) presets.push({ id: 'payoffFast', label: 'Pay off the house in 5 years' });
+  if (s.housing > 0 && s.mortgagePayoffAge > s.age + 5) presets.push({ id: 'payoffFast', label: 'Pay off the house in 5 years' });
   if (!s.homeSaleAge && s.age < 72) presets.push({ id: 'sellHome', label: 'Sell the home at 70' });
   if (s.age > 45) presets.push({ id: 'ltc', label: 'Add long-term care at 85' });
   return presets.slice(0, 6);
@@ -363,22 +714,22 @@ function render() { if (activeView === 'onboarding') renderOnboarding(); else re
 function renderOnboarding() {
   app.innerHTML = `
     <header>
-      <div class="logo"><span class="logo-dot"></span>Zeroline</div>
-      <div class="tagline">a working name \u00b7 live now, plan well</div>
+      <div class="logo"><span class="logo-dot"></span>Spend Enough</div>
+      <div class="tagline">live now, plan well</div>
     </header>
     <div class="onboarding">
       <div class="onboard-hero">
-        <div class="onboard-eyebrow">a planner, not a calculator</div>
-        <h1 class="onboard-title">Find the line<br/>between <em>now</em> and <em>later</em>.</h1>
-        <p class="onboard-sub">Most retirement tools tell you how to never run out of money. This one helps you spend enough to enjoy your life \u2014 without leaving a fortune you never used, or running short.</p>
-        <p style="margin-top:16px"><a onclick="showAbout()" style="color:var(--rust);cursor:pointer;font-size:14px;font-family:'Fraunces',serif;font-style:italic">Why we built this \u2192</a></p>
-        <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a> \u00b7 <a onclick="loadSample()">See a sample first</a></p>
+        <div class="onboard-eyebrow">Answer the hard question first</div>
+        <h1 class="onboard-title">How much is<br/>enough?</h1>
+        <p class="onboard-sub">Most tools help you hoard. We help you spend wisely. Enter your numbers and see: can you actually afford the life you want, or are you leaving a fortune unspent?</p>
+        <p style="margin-top:16px"><a onclick="showAbout()" style="color:var(--rust);cursor:pointer;font-size:14px;font-family:'Fraunces',serif;font-style:italic">Why this matters \u2192</a></p>
+        <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a> \u00b7 <a onclick="loadSample()">See a sample</a></p>
       </div>
 
       <div class="onboard-step">
         <div class="step-number">i. The basics</div>
-        <h2 class="step-title">Who's in the picture?</h2>
-        <p class="step-hint">Just enough to get started \u2014 you can refine everything later.</p>
+        <h2 class="step-title">Your timeline</h2>
+        <p class="step-hint">How old are you now, and when do you want to retire?</p>
         <div class="field-grid">
           <div class="field"><label>Your age</label><input type="number" id="ob_age" value="${state.age || ''}" placeholder="e.g. 45" min="18" max="90"/></div>
           <div class="field"><label>Partner's age <span style="text-transform:none;font-weight:400;color:var(--ink-mute);">(blank if none)</span></label><input type="number" id="ob_partnerAge" value="${state.partnerAge || ''}" placeholder="optional" min="0" max="90"/></div>
@@ -387,18 +738,18 @@ function renderOnboarding() {
 
       <div class="onboard-step">
         <div class="step-number">ii. What you have & spend</div>
-        <h2 class="step-title">The pile and the burn</h2>
-        <p class="step-hint">Total invested savings, and what you spend in a typical year.</p>
+        <h2 class="step-title">Your savings and spending</h2>
+        <p class="step-hint">How much you've saved, and what you spend each year.</p>
         <div class="field-grid">
           <div class="field"><label>Investment portfolio</label><input type="number" id="ob_portfolio" min="0" value="${state.portfolio || ''}" placeholder="e.g. 600000" step="10000"/><span class="field-hint">401k, IRA, brokerage \u2014 combined</span></div>
-          <div class="field"><label>Annual spending</label><input type="number" id="ob_spending" min="0" value="${state.spending || ''}" placeholder="e.g. 70000" step="5000"/><span class="field-hint">What you spend now excluding housing, or leave blank to find out what you could afford</span></div>
+          <div class="field"><label>Annual spending</label><input type="number" id="ob_spending" min="0" value="${state.spending || ''}" placeholder="e.g. 70000" step="5000"/><span class="field-hint">Leave blank to find your "enough" number</span></div>
         </div>
       </div>
 
       <div class="onboard-step">
         <div class="step-number">iii. Income & housing</div>
-        <h2 class="step-title">What you earn and what housing costs</h2>
-        <p class="step-hint">Current income before tax, and your housing costs including mortgage, taxes, and insurance.</p>
+        <h2 class="step-title">Other income and housing</h2>
+        <p class="step-hint">Work income, partner income, and housing costs.</p>
         <div class="field-grid">
           <div class="field"><label>Your gross income</label><input type="number" id="ob_yourIncome" min="0" value="${state.yourIncome || ''}" placeholder="e.g. 110000" step="5000"/><span class="field-hint">Before tax \u00b7 You can adjust tax settings later</span></div>
           <div class="field"><label>Partner's gross income</label><input type="number" id="ob_partnerIncome" min="0" value="${state.partnerIncome || ''}" placeholder="0 if none" step="5000"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
@@ -429,21 +780,13 @@ function num(id) { const el = document.getElementById(id); const v = parseFloat(
 
 window.finishOnboarding = function() {
   const age = num('ob_age');
-  const pAge = num('ob_partnerAge');
   const portfolio = num('ob_portfolio');
   const spending = num('ob_spending');
-  const setErr = (msg) => { const el = document.getElementById('ob_validation'); if (el) el.textContent = msg; };
+  if (age < 18) { document.getElementById('ob_validation').textContent = 'Please enter your age to continue.'; return; }
+  if (portfolio <= 0) { document.getElementById('ob_validation').textContent = 'Enter your portfolio value to get started.'; return; }
 
-  // ---- Input validation (hard gates) ----
-  if (!age || age < 18 || age > 90) { setErr('Please enter an age between 18 and 90.'); return; }
-  if (pAge > 0 && (pAge < 18 || pAge > 90)) { setErr("Partner's age should be between 18 and 90, or left blank."); return; }
-  if (portfolio <= 0) { setErr('Enter your investment portfolio to get started.'); return; }
-  if (portfolio > 100000000) { setErr('That portfolio looks unusually large \u2014 please double-check the figure.'); return; }
-  if (spending < 0 || num('ob_yourIncome') < 0 || num('ob_partnerIncome') < 0 || num('ob_housing') < 0) { setErr('Amounts can\u2019t be negative.'); return; }
-  setErr('');
-
-  viewingSample = false; // user is entering their own numbers
   state.age = age;
+  const pAge = num('ob_partnerAge');
   state.partnerAge = pAge;
   state.hasPartner = pAge >= 18;
   state.portfolio = portfolio;
@@ -488,16 +831,13 @@ window.finishOnboarding = function() {
 window.loadSample = function() {
   state = JSON.parse(JSON.stringify(SAMPLE_STATE));
   activeView = 'dashboard';
-  viewingSample = true;
-  presetNote = null;
   maxSpendStale = true; spendingLevelsStale = true;
   baselineState = JSON.parse(JSON.stringify(state));
   baselineResult = null;
   render();
 };
 
-window.goToOnboarding = function() { activeView = 'onboarding'; viewingSample = false; render(); };
-window.dismissSample = function() { viewingSample = false; render(); };
+window.goToOnboarding = function() { activeView = 'onboarding'; render(); };
 window.resetToDefaults = function() {
   if (confirm('Reset to your starting values?')) { state = JSON.parse(JSON.stringify(baselineState || DEFAULT_STATE)); maxSpendStale = true; spendingLevelsStale = true; render(); }
 };
@@ -506,6 +846,8 @@ window.resetToDefaults = function() {
 // DASHBOARD
 // ============================================================================
 function renderDashboard() {
+  // Force free users back to fixed mode
+  if (!isPaid() && state.simMode !== 'fixed') { state.simMode = 'fixed'; }
   const result = runForState(state);
   lastSimResult = result;
   if (!baselineResult) baselineResult = result;
@@ -514,47 +856,52 @@ function renderDashboard() {
 
   if (maxSpendStale) { maxSpendCache = findMaxSpend(state); maxSpendStale = false; }
 
+  const modeSelector = `
+    <div class="mode-selector" role="group" aria-label="Analysis mode">
+      <div class="sidebar-heading">Mode</div>
+      <div class="sidebar-sub">How returns are modeled</div>
+      <div class="toggle-group">
+        <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
+        <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
+        <button class="toggle-btn ${state.simMode==='historical'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('historical')">Historical${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
+      </div>
+      <div style="font-size:10px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Tests your plan against every rolling period of real market returns since 1926.':state.simMode==='montecarlo'?'Runs 500 randomized simulations to show the range of possible outcomes.':'Projects a single path using a steady assumed return.'}</div>
+      ${state.simMode==='fixed' ? `<div class="control" style="margin-top:10px">
+        <div class="control-row"><span class="control-label">Real return</span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
+        <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
+        <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" placeholder="%" class="mobile-input"/>
+      </div>` : ''}
+    </div>
+  `;
+
   const sidebar = `
     <aside class="sidebar" role="complementary" aria-label="Planning controls">
-      <div class="sidebar-section">
-        <div class="sidebar-heading">Mode</div>
-        <div class="sidebar-sub">How returns are modeled</div>
-        <div class="toggle-group">
-          <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
-          <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''}" onclick="setMode('montecarlo')">Simulated</button>
-          <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
-        </div>
-        <div style="font-size:10px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Tests your plan against every rolling period of real market returns since 1926.':state.simMode==='montecarlo'?'Runs 500 randomized simulations to show the range of possible outcomes.':'Projects a single path using a steady assumed return.'}</div>
-        ${state.simMode==='fixed' ? `<div class="control" style="margin-top:10px">
-          <div class="control-row"><span class="control-label">Real return</span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
-          <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)"/>
-        </div>` : ''}
-      </div>
-
-      <div class="sidebar-section">
         <div class="sidebar-heading">Your plan</div>
         <div class="control">
           <div class="control-row"><span class="control-label">Portfolio</span><span class="control-value">${fmtMoney(state.portfolio)}</span></div>
-          <input type="range" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)"/>
+          <input type="range" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)" class="slider-input"/>
+          <input type="number" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)" placeholder="Amount" class="mobile-input"/>
         </div>
         <div class="control">
           <div class="control-row"><span class="control-label">Your income</span><span class="control-value">${fmtMoney(state.yourIncome)}</span></div>
-          <input type="range" min="0" max="500000" step="5000" value="${state.yourIncome}" oninput="slideLive(this,'yourIncome',this.value)" onchange="sliderCommit('yourIncome',this.value)"/>
+          <input type="range" min="0" max="500000" step="5000" value="${state.yourIncome}" oninput="slideLive(this,'yourIncome',this.value)" onchange="sliderCommit('yourIncome',this.value)" class="slider-input"/>
+          <input type="number" min="0" max="500000" step="5000" value="${state.yourIncome}" oninput="slideLive(this,'yourIncome',this.value)" onchange="sliderCommit('yourIncome',this.value)" placeholder="Annual income" class="mobile-input"/>
         </div>
         ${state.hasPartner ? `<div class="control">
           <div class="control-row"><span class="control-label">Partner's income</span><span class="control-value">${fmtMoney(state.partnerIncome)}</span></div>
-          <input type="range" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)"/>
+          <input type="range" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)" class="slider-input"/>
+          <input type="number" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)" placeholder="Annual income" class="mobile-input"/>
         </div>` : ''}
         <div class="control">
           <div class="control-row"><span class="control-label">Your retirement age</span><span class="control-value">${state.yourStopWorkAge}</span></div>
-          <input type="range" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)"/>
+          <input type="range" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)" class="slider-input"/>
+          <input type="number" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
         </div>
       </div>
 
       <div class="sidebar-section">
         <div class="sidebar-heading">Try a scenario</div>
         ${presets.map((p, i) => `<button class="preset-btn" onclick="applyPreset('${p.id}')"><span class="preset-icon">${roman(i+1)}.</span> ${p.label}</button>`).join('')}
-        ${presetNote ? `<div style="margin-top:8px;padding:8px 10px;background:var(--bone-2);border-left:2px solid var(--rust);border-radius:3px;font-size:11px;color:var(--ink-soft);line-height:1.5">${presetNote}</div>` : ''}
       </div>
 
       <div class="sidebar-section">
@@ -572,41 +919,15 @@ function renderDashboard() {
       </div>
     </aside>`;
 
-  // ---- Empty / degenerate state: no portfolio to project ----
-  if (state.portfolio <= 0) {
-    app.innerHTML = `
-      <header role="banner">
-        <div class="logo"><span class="logo-dot"></span>Zeroline</div>
-        <div class="scenarios-bar">
-          <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
-          <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
-        </div>
-      </header>
-      <div class="dashboard">${sidebar}
-        <div class="main" id="main-content" role="main">
-          <div class="verdict">
-            <div class="verdict-head serif">Enter a portfolio to begin</div>
-            <div class="verdict-body">There\u2019s nothing to project yet \u2014 your investment portfolio is set to ${fmtMoney(state.portfolio)}. Use the <strong>Portfolio</strong> slider on the left, or <a onclick="goToOnboarding()" style="color:var(--rust);cursor:pointer">edit your basics</a> to enter your savings.</div>
-          </div>
-          <div style="text-align:center;padding:12px 0 4px;font-size:11px;color:var(--ink-faint)">Educational tool, not financial advice. <a onclick="showFullDisclaimer()" style="color:var(--rust);cursor:pointer">Disclaimer</a></div>
-        </div>
-      </div>`;
-    if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
-    return;
-  }
-
   const yearCount = state.targetAge - state.age + 1;
 
   const main = `
     <div class="main" id="main-content" role="main">
-      ${viewingSample ? `<div style="margin-bottom:18px;padding:12px 14px;background:var(--bone-2);border:1px solid var(--line);border-left:3px solid var(--rust);border-radius:4px;font-size:13px;color:var(--ink-soft);line-height:1.55;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
-        <span><strong>You\u2019re viewing a sample</strong> \u2014 a ${state.age}-year-old couple with ${fmtMoney(state.portfolio)} saved, spending ${fmtMoney(state.spending)}/yr. Explore the sliders and scenarios on the left to see how the picture moves, then click <strong>Edit basics</strong> to enter your own numbers.</span>
-        <button onclick="dismissSample()" aria-label="Dismiss" style="flex:none;border:none;background:none;color:var(--ink-faint);font-size:18px;line-height:1;cursor:pointer;padding:0">\u00d7</button>
-      </div>` : ''}
       <div class="verdict" aria-live="polite">
         <div class="verdict-head">${verdict.headline}</div>
         <div class="verdict-body">${verdict.body}</div>
         ${verdict.caveat ? `<div class="verdict-caveat">${verdict.caveat}</div>` : ''}
+        ${verdict.wedge ? `<div class="verdict-wedge">You're on track to leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
       </div>
 
       <div class="section-heading">Portfolio projection</div>
@@ -634,9 +955,9 @@ function renderDashboard() {
       <div class="section-sub">Click a row to apply that spending level and see how it changes the projection.</div>
       ${renderSpendingExplorer()}
 
-      ${state.yourSSAmount > 0 ? renderSSComparison() : ''}
+      ${(state.simMode==='historical' || state.simMode==='montecarlo') && state.yourSSAmount > 0 ? renderSSComparison() : ''}
 
-      ${state.accountsEnabled ? renderTaxComparison() : ''}
+      ${(state.simMode==='historical' || state.simMode==='montecarlo') && state.accountsEnabled ? renderTaxComparison() : ''}
 
       ${renderAssumptions(result)}
       ${renderResources()}
@@ -646,13 +967,13 @@ function renderDashboard() {
   app.innerHTML = `
     <header role="banner">
       <a href="#main-content" style="position:absolute;left:-9999px;top:auto;padding:8px 16px;background:var(--ink);color:var(--paper);z-index:200;font-size:13px" onfocus="this.style.left='0';this.style.top='0'" onblur="this.style.left='-9999px'">Skip to content</a>
-      <div class="logo"><span class="logo-dot"></span>Zeroline</div>
+      <div class="logo"><span class="logo-dot"></span>Spend Enough</div>
       <div class="scenarios-bar">
         <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
       </div>
     </header>
-    <div class="dashboard">${sidebar}${main}</div>`;
+    <div class="dashboard">${main}${modeSelector}${sidebar}</div>`;
 
   // Scroll to top only on first dashboard load
   if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
@@ -697,7 +1018,8 @@ function moreOptionsHTML() {
       <div class="sidebar-heading" style="margin-top:0">Spending</div>
       <div class="control">
         <div class="control-row"><span class="control-label">Annual spending</span><span class="control-value">${fmtMoney(state.spending)}</span></div>
-        <input type="range" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)"/>
+        <input type="range" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)" class="slider-input"/>
+        <input type="number" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)" placeholder="Annual amount" class="mobile-input"/>
       </div>
 
       <div class="sidebar-heading" style="margin-top:14px">Plan to age</div>
@@ -757,12 +1079,14 @@ function moreOptionsHTML() {
 
       <div class="sidebar-heading" style="margin-top:14px">Investment assumptions</div>
       <div class="control">
-        <div class="control-row"><span class="control-label">Real return<span class="help-mark" title="Return after inflation. 5% real \u2248 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
-        <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)"/>
+        <div class="control-row"><span class="control-label">Real return<span class="help-mark" title="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
+        <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
+        <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" placeholder="%" class="mobile-input"/>
       </div>
       ${state.simMode==='montecarlo' ? `<div class="control">
         <div class="control-row"><span class="control-label">Volatility</span><span class="control-value">${(state.returnStdDev*100).toFixed(0)}%</span></div>
-        <input type="range" min="5" max="25" step="1" value="${state.returnStdDev*100}" oninput="slideLive(this,'returnStdDev',this.value/100)" onchange="sliderCommit('returnStdDev',this.value/100)"/>
+        <input type="range" min="5" max="25" step="1" value="${state.returnStdDev*100}" oninput="slideLive(this,'returnStdDev',this.value/100)" onchange="sliderCommit('returnStdDev',this.value/100)" class="slider-input"/>
+        <input type="number" min="5" max="25" step="1" value="${(state.returnStdDev*100).toFixed(0)}" oninput="slideLive(this,'returnStdDev',this.value/100)" onchange="sliderCommit('returnStdDev',this.value/100)" placeholder="%" class="mobile-input"/>
       </div>` : ''}
 
       <div class="sidebar-heading" style="margin-top:14px">Account types</div>
@@ -844,6 +1168,17 @@ function getVerdict(result) {
     } else {
       v.headline = lasts ? 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, the portfolio lasts past age ' + state.targetAge : 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, the portfolio is depleted around age ' + result.medianRunOutAge;
       v.body = lasts ? 'Ending balance at age ' + state.targetAge + ' would be about ' + fmtMoneyShort(result.medianFinal) + '. Real markets are bumpier than this, try Historical or Simulated mode to see the range of outcomes.' : 'This assumes the same return every year. Real sequences vary, try Historical mode to stress-test it.';
+    }
+  }
+  // "Money left on the table" wedge
+  if (!maxSpendView && result.medianFinal > 10000 && !result.medianRunOutAge) {
+    v.wedge = fmtMoneyShort(result.medianFinal);
+    if (result.mode === 'historical') {
+      v.wedgeSub = 'In the median historical outcome, this is what would be left at age ' + state.targetAge + '. That\'s money you could be using.';
+    } else if (result.mode === 'montecarlo') {
+      v.wedgeSub = 'In the median simulation, this is what would remain at age ' + state.targetAge + '.';
+    } else {
+      v.wedgeSub = 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, this is what you\'d have left at age ' + state.targetAge + '. That\'s money you could be enjoying now.';
     }
   }
   return v;
@@ -1297,7 +1632,7 @@ function drawCashflowChart(result) {
 // UPDATES & HANDLERS
 // ============================================================================
 function invalidateCaches() { maxSpendStale = true; spendingLevelsStale = true; }
-window.update = function(key, val) { state[key] = val; maxSpendView = false; presetNote = null; invalidateCaches(); render(); };
+window.update = function(key, val) { state[key] = val; maxSpendView = false; invalidateCaches(); render(); };
 window.updateAccount = function(key, val) { state.accounts[key] = val; state.portfolio = state.accounts.traditional + state.accounts.roth + state.accounts.taxable; invalidateCaches(); render(); };
 
 window.addEvent = function() {
@@ -1323,7 +1658,10 @@ window.updateTax = function(key, val) {
   }
   invalidateCaches(); render();
 };
-window.setMode = function(m) { state.simMode = m; presetNote = null; invalidateCaches(); render(); };
+window.setMode = function(m) {
+  if ((m === 'historical' || m === 'montecarlo') && !isPaid()) { showUnlockModal(); return; }
+  state.simMode = m; invalidateCaches(); render();
+};
 window.setCashflowMode = function(m) {
   cashflowMode = m;
   if (cashflowChart && cashflowRows) {
@@ -1381,7 +1719,6 @@ window.slideLive = function(el, key, rawVal) {
 window.sliderCommit = function(key, rawVal) {
   state[key] = +rawVal;
   maxSpendView = false;
-  presetNote = null;
   // Sync accounts proportionally when portfolio changes
   if (key === 'portfolio' && state.accountsEnabled) {
     const total = state.accounts.traditional + state.accounts.roth + state.accounts.taxable;
@@ -1429,19 +1766,15 @@ window.applySpending = function(spend) {
 
 // ===== PRESETS =====
 window.applyPreset = function(id) {
-  presetNote = null; // cleared on each apply; set below for presets with arbitrary assumptions
   switch (id) {
     case 'stopNow': state.yourStopWorkAge = state.age; if (state.hasPartner) state.partnerStopWorkAge = state.partnerAge; break;
     case 'retire5early': state.yourStopWorkAge = Math.max(state.age, state.yourStopWorkAge - 5); break;
     case 'maxSpend': { state.simMode = 'fixed'; const ms = findMaxSpend(state); const ratio = state.spending > 0 ? state.lateSpending/state.spending : 0.85; state.spending = Math.round(ms.spend/1000)*1000; state.lateSpending = Math.round(state.spending*ratio); maxSpendView = true; break; }
-    case 'partnerReturns':
-      state.partnerIncome = state.partnerIncome > 0 ? state.partnerIncome : 60000;
-      state.partnerStopWorkAge = Math.max(state.partnerAge + 5, 60);
-      presetNote = `Assumed your partner earns ${fmtMoney(state.partnerIncome)}/yr until age ${state.partnerStopWorkAge}. Adjust both under \u201cMore options.\u201d`;
-      break;
-    case 'delaySS': state.ssStartAge = 70; { const f = 1.24; state.yourSSAmount = Math.round(state.yourSSAmount * f); state.partnerSSAmount = Math.round(state.partnerSSAmount * f); } presetNote = 'Estimated benefits boosted ~24% for claiming at 70 instead of full age. Use your ssa.gov figure for precision.'; break;
-    case 'sellHome': if (!state.oneTimeEvents) state.oneTimeEvents = []; state.oneTimeEvents.push({ label: 'Home sale', age: 70, amount: 400000 }); presetNote = 'Assumed a one-time inflow of ' + fmtMoney(400000) + ' at age 70. Edit the amount and age under life events.'; break;
-    case 'ltc': if (!state.oneTimeEvents) state.oneTimeEvents = []; for (let a = 85; a < 90; a++) state.oneTimeEvents.push({ label: 'Long-term care', age: a, amount: -90000 }); presetNote = 'Assumed ' + fmtMoney(90000) + '/yr of long-term-care cost from age 85 to 89. Edit under life events.'; break;
+    case 'partnerReturns': state.partnerIncome = state.partnerIncome > 0 ? state.partnerIncome : 60000; state.partnerStopWorkAge = Math.max(state.partnerAge + 5, 60); break;
+    case 'delaySS': state.ssStartAge = 70; { const f = 1.24; state.yourSSAmount = Math.round(state.yourSSAmount * f); state.partnerSSAmount = Math.round(state.partnerSSAmount * f); } break;
+    case 'payoffFast': state.mortgagePayoffAge = state.age + 5; break;
+    case 'sellHome': if (!state.oneTimeEvents) state.oneTimeEvents = []; state.oneTimeEvents.push({ label: 'Home sale', age: 70, amount: 400000 }); break;
+    case 'ltc': if (!state.oneTimeEvents) state.oneTimeEvents = []; for (let a = 85; a < 90; a++) state.oneTimeEvents.push({ label: 'Long-term care', age: a, amount: -90000 }); break;
   }
   invalidateCaches(); render();
 };
@@ -1499,12 +1832,14 @@ window.showComparison = function() {
 };
 
 window.showAbout = function() {
-  openModal(`<h2>Why this exists</h2>
-    <p>Most retirement planning tools are designed around one fear: running out of money. They tell you to save more, spend less, and build a cushion big enough that you'll never touch zero. That's not bad advice. But it has a cost nobody talks about.</p>
-    <p>If you're 55 with a million dollars and you spend like you have half that because a calculator told you to be careful, you don't get those years back. The vacations you skipped, the experiences you postponed, the generosity you deferred. Dying with two million dollars in the bank isn't a success story. It's a planning failure in the other direction.</p>
-    <p>Bill Perkins made this case in <em>Die With Zero</em>, and it changed how a lot of people think about money and time. But knowing you should spend more and knowing how much you can safely spend are two different problems. The book gives you the philosophy. This tool gives you the math.</p>
-    <p>You put in your numbers. It tests your plan against every real U.S. market environment since 1926 and shows you what would have happened. Not a single prediction, but a range. Where does it hold up? Where does it break? How much room do you actually have? The answers are yours to interpret. We don't tell you what to do. We show you the trade-offs and let you decide.</p>
-    <p>This isn't financial advice and we're not advisors. It's a planning tool for people who want to make informed choices about how to use the money they've worked for.</p>`);
+  openModal(`<h2>Why Spend Enough exists</h2>
+    <p>Most retirement planning tools are built around one fear: running out of money. They tell you to save more, spend less, and build a cushion so enormous you'll never risk zero. That's not bad advice. But it has a cost nobody talks about.</p>
+    <p>If you're 55 with a million dollars saved and a calculator tells you to spend like you have half that to be "safe," you lose something money can't buy back: time. The trips you skip. The moments you defer. The years you could have lived well instead of hoarding.</p>
+    <p>Bill Perkins made this case in <em>Die With Zero</em>. The insight is powerful: spending your life's earnings while you can enjoy them isn't failure. It's the point.</p>
+    <p>But philosophy and math are different problems. Knowing you <em>should</em> spend more and knowing <em>how much</em> you can safely spend are two separate things.</p>
+    <p>Spend Enough answers the second question. You enter your numbers. We test your plan against every real U.S. market period since 1926 to show you what would have happened. Not a prediction—a range. Where does your plan hold up? Where does it break? How much room do you actually have to live?</p>
+    <p>We don't tell you what to do. We show you the trade-offs so you can decide.</p>
+    <p>This is an educational planning tool, not financial advice. Consult a qualified advisor before making major decisions.</p>`);
 };
 
 window.showScenarioDetail = function(id) {
