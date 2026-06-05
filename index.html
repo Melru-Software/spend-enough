@@ -329,8 +329,8 @@
       border: none;
       border-bottom: 1px solid var(--line-soft);
       border-radius: 0;
-      margin: 0 -20px 0 -20px;
-      padding: 14px 20px;
+      margin: 0 0 8px 0;
+      padding: 16px 20px;
       z-index: 10;
       box-shadow: 0 2px 4px rgba(26,24,20,0.06);
     }
@@ -355,10 +355,21 @@
     .toggle-group { gap: 4px; }
     .toggle-btn { padding: 8px 12px; font-size: 12px; }
     
-    /* Desktop: show sliders, hide number inputs */
+  }
+
+  /* Desktop default: sliders visible, number inputs hidden */
   .slider-input { display: block; }
   .mobile-input { display: none; }
-  
+
+  /* Range input base reset (its selector was dropped by an earlier edit) */
+  input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+
   /* Mobile: hide sliders, show number inputs */
   @media (max-width: 768px) {
     .slider-input { display: none; }
@@ -380,12 +391,6 @@
       border-color: var(--rust);
       box-shadow: 0 0 0 2px rgba(184,92,56,0.1);
     }
-  }
-    width: 100%;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
   }
   
   /* Webkit browsers (Chrome, Safari) */
