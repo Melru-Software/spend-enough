@@ -139,7 +139,7 @@
 </head>
 <style>
   /* ========== DASHBOARD LAYOUT ========== */
-  .dashboard { display: grid; grid-template-columns: 280px 1fr; grid-template-areas: "mode mode" "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
+  .dashboard { display: grid; grid-template-columns: 280px 1fr; grid-template-areas: "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
   .resources-row { grid-area: resources; padding: 0 32px 28px; max-width: 1100px; }
   .sidebar { grid-area: sidebar; background: var(--paper); border-right: 1px solid var(--line); padding: 22px 20px; overflow-y: auto; }
   .sidebar-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
@@ -209,6 +209,10 @@
   .toggle-btn.locked { opacity: 0.7; }
   .toggle-btn.locked .lock-icon { font-size: 10px; margin-left: 3px; }
   .unlock-prompt { margin-top: 8px; padding: 10px 14px; background: rgba(184,92,56,0.06); border-radius: 4px; font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
+  /* Free-tier preview of paid settings: visible but non-interactive */
+  .locked-note { margin: 8px 0; padding: 8px 10px; background: var(--bone-2); border-left: 2px solid var(--rust); border-radius: 3px; font-size: 11px; color: var(--ink-soft); line-height: 1.5; }
+  .link-btn { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: 11px; text-decoration: underline; padding: 0; }
+  .locked-preview { border: none; padding: 0; margin: 0; min-width: 0; opacity: 0.5; pointer-events: none; }
   .unlock-prompt a { color: var(--rust); cursor: pointer; text-decoration: underline; }
   .unlock-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
   .unlock-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--paper); }
@@ -313,7 +317,7 @@
   .detail-narrative { background: var(--bone-2); border-radius: 4px; padding: 14px 18px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
 
   @media (max-width: 860px) {
-    .dashboard { grid-template-columns: 1fr; grid-template-areas: "mode" "sidebar" "main" "resources"; }
+    .dashboard { grid-template-columns: 1fr; grid-template-areas: "sidebar" "main" "resources"; }
     .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
     .bands, .scenario-cards, .ss-grid, .stat-row { grid-template-columns: 1fr 1fr; }
   }
@@ -876,21 +880,20 @@ function renderDashboard() {
 
   if (maxSpendStale) { maxSpendCache = findMaxSpend(state); maxSpendStale = false; }
 
-  const modeSelector = `
-    <div class="mode-selector" role="group" aria-label="Analysis mode">
-      <div class="sidebar-heading">Mode</div>
-      <div class="sidebar-sub">How returns are modeled</div>
-      <div class="toggle-group">
-        <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
-        <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
-        <button class="toggle-btn ${state.simMode==='historical'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('historical')">Historical${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
-      </div>
-      <div style="font-size:10px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Tests your plan against every rolling period of real market returns since 1926.':state.simMode==='montecarlo'?'Runs 500 randomized simulations to show the range of possible outcomes.':'Projects a single path using a steady assumed return.'}</div>
-    </div>
-  `;
-
   const sidebar = `
     <aside class="sidebar" role="complementary" aria-label="Planning controls">
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Mode</div>
+        <div class="sidebar-sub">How returns are modeled</div>
+        <div class="toggle-group">
+          <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
+          <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
+          <button class="toggle-btn ${state.simMode==='historical'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('historical')">Historical${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
+        </div>
+        <div style="font-size:10px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Tests your plan against every rolling period of real market returns since 1926.':state.simMode==='montecarlo'?'Runs 500 randomized simulations to show the range of possible outcomes.':'Projects a single path using a steady assumed return.'}</div>
+      </div>
+
+      <div class="sidebar-section">
         <div class="sidebar-heading">Your plan</div>
         ${state.simMode==='fixed' ? `<div class="control">
           <div class="control-row"><span class="control-label">Real return<span class="help-mark" title="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
@@ -930,10 +933,11 @@ function renderDashboard() {
       </div>
 
       <div class="sidebar-section">
-        ${isPaid()
-          ? `<button class="more-toggle" onclick="toggleMore()">${showMoreOptions?'\u2212 Fewer options':'+ More options'}</button>
-        ${showMoreOptions ? moreOptionsHTML() : ''}`
-          : `<button class="more-toggle locked-row" onclick="showUnlockModal()">+ More options <span class="lock-icon">&#x1f512;</span></button>`}
+        <button class="more-toggle" onclick="toggleMore()">${showMoreOptions?'\u2212 Fewer options':'+ More options'}${!isPaid()?' <span class="lock-icon">&#x1f512;</span>':''}</button>
+        ${showMoreOptions ? (isPaid()
+          ? moreOptionsHTML()
+          : `<div class="locked-note">These settings are part of the paid plan. <button class="link-btn" onclick="showUnlockModal()">Unlock to adjust \u2192</button></div>
+        <fieldset class="locked-preview" disabled>${moreOptionsHTML()}</fieldset>`) : ''}
       </div>
 
       ${renderSidebarImpact()}
@@ -1001,7 +1005,7 @@ function renderDashboard() {
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
       </div>
     </header>
-    <div class="dashboard">${main}${modeSelector}${sidebar}<div class="resources-row">${renderResources()}</div></div>`;
+    <div class="dashboard">${main}${sidebar}<div class="resources-row">${renderResources()}</div></div>`;
 
   // Scroll to top only on first dashboard load
   if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
