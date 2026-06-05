@@ -139,7 +139,8 @@
 </head>
 <style>
   /* ========== DASHBOARD LAYOUT ========== */
-  .dashboard { display: grid; grid-template-columns: 280px 1fr; grid-template-areas: "mode mode" "sidebar main"; min-height: calc(100vh - 73px); }
+  .dashboard { display: grid; grid-template-columns: 280px 1fr; grid-template-areas: "mode mode" "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
+  .resources-row { grid-area: resources; padding: 0 32px 28px; max-width: 1100px; }
   .sidebar { grid-area: sidebar; background: var(--paper); border-right: 1px solid var(--line); padding: 22px 20px; overflow-y: auto; }
   .sidebar-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
   .sidebar-section:last-child { border-bottom: none; }
@@ -312,7 +313,7 @@
   .detail-narrative { background: var(--bone-2); border-radius: 4px; padding: 14px 18px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
 
   @media (max-width: 860px) {
-    .dashboard { grid-template-columns: 1fr; grid-template-areas: "mode" "sidebar" "main"; }
+    .dashboard { grid-template-columns: 1fr; grid-template-areas: "mode" "sidebar" "main" "resources"; }
     .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
     .bands, .scenario-cards, .ss-grid, .stat-row { grid-template-columns: 1fr 1fr; }
   }
@@ -370,27 +371,41 @@
     background: transparent;
   }
 
-  /* Mobile: hide sliders, show number inputs */
+  /* Mobile: compact inline inputs — label on the left, small editable value on the right */
   @media (max-width: 768px) {
     .slider-input { display: none; }
-    .mobile-input { 
+    .control {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      column-gap: 12px;
+      margin-bottom: 12px;
+    }
+    .control-row { margin-bottom: 0; min-width: 0; }
+    .control-row .control-value { display: none; }     /* value lives in the input now */
+    /* Any slider still shown (e.g. advanced controls without a number field) spans full width below the label */
+    .control input[type="range"] { grid-column: 1 / -1; }
+    .mobile-input {
       display: block;
-      width: 100%;
-      min-height: 40px;
-      padding: 10px 12px;
+      grid-column: 2;
+      width: 104px;
+      text-align: right;
+      min-height: 36px;
+      padding: 8px 10px;
       border: 1px solid var(--line);
       border-radius: 3px;
       font-size: 14px;
       font-family: 'JetBrains Mono', monospace;
       background: var(--paper);
       color: var(--ink);
-      margin-top: 6px;
+      margin-top: 0;
     }
     .mobile-input:focus {
       outline: none;
       border-color: var(--rust);
       box-shadow: 0 0 0 2px rgba(184,92,56,0.1);
     }
+    .resources-row { padding: 0 20px 24px; order: 3; }
   }
   
   /* Webkit browsers (Chrome, Safari) */
@@ -871,21 +886,26 @@ function renderDashboard() {
         <button class="toggle-btn ${state.simMode==='historical'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('historical')">Historical${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
       </div>
       <div style="font-size:10px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Tests your plan against every rolling period of real market returns since 1926.':state.simMode==='montecarlo'?'Runs 500 randomized simulations to show the range of possible outcomes.':'Projects a single path using a steady assumed return.'}</div>
-      ${state.simMode==='fixed' ? `<div class="control" style="margin-top:10px">
-        <div class="control-row"><span class="control-label">Real return</span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
-        <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
-        <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" placeholder="%" class="mobile-input"/>
-      </div>` : ''}
     </div>
   `;
 
   const sidebar = `
     <aside class="sidebar" role="complementary" aria-label="Planning controls">
         <div class="sidebar-heading">Your plan</div>
+        ${state.simMode==='fixed' ? `<div class="control">
+          <div class="control-row"><span class="control-label">Real return<span class="help-mark" title="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
+          <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
+          <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" placeholder="%" class="mobile-input"/>
+        </div>` : ''}
         <div class="control">
           <div class="control-row"><span class="control-label">Portfolio</span><span class="control-value">${fmtMoney(state.portfolio)}</span></div>
           <input type="range" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)" class="slider-input"/>
           <input type="number" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)" placeholder="Amount" class="mobile-input"/>
+        </div>
+        <div class="control">
+          <div class="control-row"><span class="control-label">Annual spending</span><span class="control-value">${fmtMoney(state.spending)}</span></div>
+          <input type="range" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)" class="slider-input"/>
+          <input type="number" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)" placeholder="Annual amount" class="mobile-input"/>
         </div>
         <div class="control">
           <div class="control-row"><span class="control-label">Your income</span><span class="control-value">${fmtMoney(state.yourIncome)}</span></div>
@@ -910,17 +930,21 @@ function renderDashboard() {
       </div>
 
       <div class="sidebar-section">
-        <button class="more-toggle" onclick="toggleMore()">${showMoreOptions?'\u2212 Fewer options':'+ More options'}</button>
-        ${showMoreOptions ? moreOptionsHTML() : ''}
+        ${isPaid()
+          ? `<button class="more-toggle" onclick="toggleMore()">${showMoreOptions?'\u2212 Fewer options':'+ More options'}</button>
+        ${showMoreOptions ? moreOptionsHTML() : ''}`
+          : `<button class="more-toggle locked-row" onclick="showUnlockModal()">+ More options <span class="lock-icon">&#x1f512;</span></button>`}
       </div>
 
       ${renderSidebarImpact()}
 
       <div class="sidebar-section">
         <div class="sidebar-heading">Saved scenarios</div>
-        <div class="scenario-save-row"><input type="text" id="scenarioName" placeholder="Name this scenario"/><button class="scenario-pill" onclick="saveScenario()">Save</button></div>
+        ${isPaid()
+          ? `<div class="scenario-save-row"><input type="text" id="scenarioName" placeholder="Name this scenario"/><button class="scenario-pill" onclick="saveScenario()">Save</button></div>
         ${savedScenarios.map((sc, i) => `<div class="saved-item"><span>${sc.name}</span><span><button onclick="loadScenario(${i})">load</button> \u00b7 <button onclick="deleteScenario(${i})">\u00d7</button></span></div>`).join('') || '<div style="font-size:11px;color:var(--ink-faint)">None yet</div>'}
-        ${savedScenarios.length >= 2 ? `<button class="more-toggle" style="margin-top:6px" onclick="showComparison()">Compare scenarios</button>` : ''}
+        ${savedScenarios.length >= 2 ? `<button class="more-toggle" style="margin-top:6px" onclick="showComparison()">Compare scenarios</button>` : ''}`
+          : `<button class="more-toggle locked-row" onclick="showUnlockModal()">Save &amp; compare scenarios <span class="lock-icon">&#x1f512;</span></button>`}
       </div>
     </aside>`;
 
@@ -965,7 +989,6 @@ function renderDashboard() {
       ${(state.simMode==='historical' || state.simMode==='montecarlo') && state.accountsEnabled ? renderTaxComparison() : ''}
 
       ${renderAssumptions(result)}
-      ${renderResources()}
       <div style="text-align:center;padding:12px 0 4px;font-size:11px;color:var(--ink-faint)">Educational tool, not financial advice. <a onclick="showFullDisclaimer()" style="color:var(--rust);cursor:pointer">Disclaimer</a></div>
     </div>`;
 
@@ -978,7 +1001,7 @@ function renderDashboard() {
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
       </div>
     </header>
-    <div class="dashboard">${main}${modeSelector}${sidebar}</div>`;
+    <div class="dashboard">${main}${modeSelector}${sidebar}<div class="resources-row">${renderResources()}</div></div>`;
 
   // Scroll to top only on first dashboard load
   if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
@@ -1020,14 +1043,7 @@ function moreOptionsHTML() {
   const effRate = state.taxRate ? (state.taxRate * 100).toFixed(0) : '18';
   return `
     <div style="margin-top:12px">
-      <div class="sidebar-heading" style="margin-top:0">Spending</div>
-      <div class="control">
-        <div class="control-row"><span class="control-label">Annual spending</span><span class="control-value">${fmtMoney(state.spending)}</span></div>
-        <input type="range" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)" class="slider-input"/>
-        <input type="number" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)" placeholder="Annual amount" class="mobile-input"/>
-      </div>
-
-      <div class="sidebar-heading" style="margin-top:14px">Plan to age</div>
+      <div class="sidebar-heading" style="margin-top:0">Plan to age</div>
       <div class="control">
         <div class="control-row"><span class="control-label">Target age</span><span class="control-value">${state.targetAge}</span></div>
         <input type="range" min="70" max="110" step="1" value="${state.targetAge}" oninput="slideLive(this,'targetAge',this.value)" onchange="sliderCommit('targetAge',this.value)"/>
