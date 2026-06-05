@@ -140,7 +140,7 @@
 <style>
   /* ========== DASHBOARD LAYOUT ========== */
   .dashboard { display: grid; grid-template-columns: 280px 1fr; grid-template-areas: "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
-  .resources-row { grid-area: resources; padding: 0 32px 28px; max-width: 1100px; }
+  .resources-row { grid-area: resources; border-top: 1px solid var(--line); padding: 22px 32px 30px; text-align: center; }
   .sidebar { grid-area: sidebar; background: var(--paper); border-right: 1px solid var(--line); padding: 22px 20px; overflow-y: auto; }
   .sidebar-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
   .sidebar-section:last-child { border-bottom: none; }
@@ -290,7 +290,7 @@
   .assumptions-section summary { font-size: 13px; color: var(--rust); cursor: pointer; font-weight: 500; }
   .assumptions-section .assumptions-body { font-size: 12px; color: var(--ink-mute); line-height: 1.7; margin-top: 10px; padding-left: 4px; }
   .assumptions-section .assumptions-body strong { color: var(--ink-soft); }
-  .resources { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 18px; }
+  .resources { max-width: 720px; margin: 0 auto; }
   .resources a { color: var(--rust); font-size: 13px; text-decoration: none; margin-right: 16px; }
   .resources a:hover { text-decoration: underline; }
   .resources p { font-size: 12px; color: var(--ink-mute); line-height: 1.6; margin-top: 8px; }
@@ -317,7 +317,7 @@
   .detail-narrative { background: var(--bone-2); border-radius: 4px; padding: 14px 18px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
 
   @media (max-width: 860px) {
-    .dashboard { grid-template-columns: 1fr; grid-template-areas: "sidebar" "main" "resources"; }
+    .dashboard { grid-template-columns: 1fr; grid-template-areas: "main" "sidebar" "resources"; }
     .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
     .bands, .scenario-cards, .ss-grid, .stat-row { grid-template-columns: 1fr 1fr; }
   }
@@ -410,7 +410,7 @@
       border-color: var(--rust);
       box-shadow: 0 0 0 2px rgba(184,92,56,0.1);
     }
-    .resources-row { padding: 0 20px 24px; order: 3; }
+    .resources-row { padding: 22px 20px 24px; order: 3; }
   }
   
   /* Desktop slider styling lives in the .control input[type=range] rules above
@@ -1425,14 +1425,15 @@ function drawMainChart(result) {
         if (idx < 0) return null;
         return { ...ev, idx, x: xScale.getPixelForValue(idx) };
       }).filter(Boolean);
-      // Stagger labels that are too close (within 60px)
-      positioned.forEach((ev, i) => {
-        ev.yOffset = 0;
-        for (let j = 0; j < i; j++) {
-          if (Math.abs(positioned[j].x - ev.x) < 60) {
-            ev.yOffset = (positioned[j].yOffset === 0) ? -12 : 0;
-          }
-        }
+      // Assign each label to the lowest stagger row with no nearby label, so labels that
+      // share an age (or sit close together) stack vertically instead of overlapping.
+      positioned.sort((a, b) => a.x - b.x);
+      const rowLastX = [];
+      positioned.forEach(ev => {
+        let row = 0;
+        while (rowLastX[row] !== undefined && Math.abs(rowLastX[row] - ev.x) < 64) row++;
+        ev.row = row;
+        rowLastX[row] = ev.x;
       });
       positioned.forEach(ev => {
         ctx2.save();
@@ -1447,7 +1448,7 @@ function drawMainChart(result) {
         ctx2.fillStyle = '#8a8173';
         ctx2.font = '10px Inter Tight, sans-serif';
         ctx2.textAlign = 'center';
-        ctx2.fillText(ev.label, ev.x, yScale.top - 4 + ev.yOffset);
+        ctx2.fillText(ev.label, ev.x, yScale.top - 4 - ev.row * 12);
         ctx2.restore();
       });
     }
@@ -1481,7 +1482,7 @@ function drawMainChart(result) {
     plugins: [annotationPlugin, crosshairPlugin],
     options: {
       responsive: true, maintainAspectRatio: false,
-      layout: { padding: { top: 16 } },
+      layout: { padding: { top: 34 } },
       interaction: { mode: 'index', intersect: false },
       plugins: { legend: { display: false }, tooltip: {
         mode: 'index', intersect: false,
