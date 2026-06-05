@@ -155,9 +155,9 @@
   .toggle-btn:hover { background: var(--bone-2); }
   .toggle-btn.active { background: var(--ink); color: var(--paper); }
   .control { margin-bottom: 14px; }
-  .control-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
-  .control-label { font-size: 12px; color: var(--ink-soft); }
-  .control-value { font-size: 12px; font-weight: 600; color: var(--ink); font-family: 'JetBrains Mono', monospace; }
+  .control-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .control-label { color: var(--ink-soft); flex: 1; font-size: inherit; }
+  .control-value { font-size: 12px; font-weight: 500; color: var(--ink); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
   .control input[type=range] { width: 100%; height: 4px; -webkit-appearance: none; appearance: none; background: var(--line); border-radius: 2px; outline: none; }
   .control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; transition: background 0.12s; }
   .control input[type=range]::-webkit-slider-thumb:hover { background: var(--rust); }
@@ -343,8 +343,7 @@
     
     .sidebar-section { margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line-soft); }
     .sidebar-section:last-child { border-bottom: none; }
-    
-    .control { margin-bottom: 14px; }
+
     .control-row { font-size: 13px; }
     
     .toggle-group { gap: 4px; }
@@ -406,22 +405,9 @@
   /* Desktop slider styling lives in the .control input[type=range] rules above
      (thin track + small thumb). The oversized touch-scale styling was removed. */
   
-  /* Control row - improved spacing */
-  /* Slider + Input - mobile friendly */
-  .control { margin-bottom: 14px; }
-  .control-row { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-  .control-label { flex: 1; font-size: inherit; }
-  .control-value { font-weight: 500; color: var(--ink); white-space: nowrap; }
 
   @media (max-width: 768px) {
     .control { margin-bottom: 16px; }
-    .control-row { flex-direction: column; align-items: flex-start; gap: 6px; }
     input[type="number"], input[type="text"], select {
       min-height: 40px; padding: 10px 12px; font-size: 14px;
     }
