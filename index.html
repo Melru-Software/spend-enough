@@ -218,7 +218,20 @@
   .unlock-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--paper); }
   .unlock-input-row button { padding: 10px 16px; background: var(--rust); color: var(--paper); border: none; border-radius: 3px; font-family: inherit; font-weight: 600; font-size: 13px; cursor: pointer; }
   .unlock-input-row button:hover { background: var(--rust-deep); }
-  
+  /* Free vs Pro comparison (unlock modal) */
+  .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .compare-col { border: 1px solid var(--line); border-radius: 5px; padding: 14px 16px; background: var(--bone); min-width: 0; }
+  .compare-col.pro { border-color: var(--rust); background: rgba(184,92,56,0.05); }
+  .compare-head { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: var(--ink); }
+  .compare-col.pro .compare-head { color: var(--rust-deep); }
+  .compare-sub { font-size: 10px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .compare-plus { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .compare-list { list-style: none; margin: 0; padding: 0; }
+  .compare-list li { font-size: 12px; color: var(--ink-soft); line-height: 1.4; padding: 6px 0 6px 18px; position: relative; border-top: 1px solid var(--line-soft); }
+  .compare-list li:first-child { border-top: none; }
+  .compare-list li::before { content: '\2713'; position: absolute; left: 0; top: 6px; color: var(--moss); font-weight: 700; }
+  .compare-col.pro .compare-list li::before { color: var(--rust); }
+
   /* Unlock modal improvements */
   .modal h2 { color: var(--ink); }
   .modal ul { list-style: none; padding: 0; }
@@ -613,20 +626,34 @@ let cashflowMode = 'net';
 function isPaid() { return !!localStorage.getItem('spendenough_key'); }
 
 window.showUnlockModal = function() {
-  openModal(`<h2>Is your plan truly safe?</h2>
-    <p style="font-size:15px;line-height:1.7;margin-bottom:16px">The projection above shows your plan at one steady return rate. But markets don't deliver steady returns.</p>
-    <p style="font-size:15px;line-height:1.7;margin-bottom:18px"><strong>Upgrade to see how your plan would have fared in:</strong></p>
-    <ul style="margin-left:20px;margin-bottom:18px;font-size:14px;line-height:1.8;color:var(--ink-soft)">
-      <li>The 1970s stagflation</li>
-      <li>The 1987 crash and recovery</li>
-      <li>The 2000–2002 tech crash</li>
-      <li>The 2008 financial crisis</li>
-      <li>Every other rolling period since 1926</li>
-    </ul>
-    <div style="background:rgba(184,92,56,0.06);padding:14px 16px;border-left:3px solid var(--rust);border-radius:0 4px 4px 0;margin-bottom:18px">
-      <p style="font-size:13px;color:var(--ink);margin:0"><strong>Unlock includes:</strong> Historical stress testing, Social Security claiming analysis, withdrawal strategy comparison, spending flexibility modeling, scenario comparison, and export.</p>
+  openModal(`<h2>Free vs. Pro</h2>
+    <p style="margin-bottom:16px">You're on the free version. A one-time unlock adds deeper analysis and saving. Here's the full picture:</p>
+    <div class="compare-grid">
+      <div class="compare-col">
+        <div class="compare-head">Free</div>
+        <div class="compare-sub">What you have now</div>
+        <ul class="compare-list">
+          <li>Steady-return projection</li>
+          <li>Core inputs — savings, spending, income, retirement age</li>
+          <li>What-if preset scenarios</li>
+          <li>Spending explorer &amp; cashflow view</li>
+        </ul>
+      </div>
+      <div class="compare-col pro">
+        <div class="compare-head">Pro</div>
+        <div class="compare-sub">One-time unlock</div>
+        <div class="compare-plus">Everything in Free, plus:</div>
+        <ul class="compare-list">
+          <li>Historical backtesting against every market period since 1926</li>
+          <li>Monte Carlo simulation — the full range of outcomes</li>
+          <li>Advanced settings — taxes, account types, withdrawal order, life events</li>
+          <li>Social Security claiming analysis</li>
+          <li>Spending-flexibility modeling</li>
+          <li>Save &amp; compare scenarios</li>
+        </ul>
+      </div>
     </div>
-    <p style="font-size:13px;color:var(--ink-mute);margin-bottom:16px;margin-top:16px">One-time payment. No subscription. No account. Your numbers stay on your device.</p>
+    <p style="font-size:13px;color:var(--ink-mute);margin:16px 0 14px">One-time payment. No subscription. No account. Your numbers stay on your device.</p>
     <div class="unlock-input-row">
       <input type="text" id="unlockKeyInput" placeholder="Paste your license key" />
       <button onclick="submitUnlockKey()" style="background:var(--rust);color:var(--paper);border:none;padding:10px 16px;border-radius:3px;font-weight:600;cursor:pointer;font-size:14px">Unlock</button>
