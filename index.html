@@ -52,7 +52,7 @@
   }
   
   /* Improve touch targets */
-  button, input[type="button"], input[type="submit"], input[type="range"], .clickable { 
+  button, input[type="button"], input[type="submit"], .clickable {
     min-height: 44px;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -375,12 +375,13 @@
     background: transparent;
   }
 
-  /* Mobile: compact inline inputs — label on the left, small editable value on the right */
-  @media (max-width: 768px) {
+  /* Narrow/mobile: swap sliders for compact inline inputs at the same point the layout
+     collapses to a single column (860px), so we never show wide sliders in a narrow column. */
+  @media (max-width: 860px) {
     .slider-input { display: none; }
     .control {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr 100px;
       align-items: center;
       column-gap: 12px;
       margin-bottom: 12px;
@@ -392,7 +393,7 @@
     .mobile-input {
       display: block;
       grid-column: 2;
-      width: 104px;
+      width: 100%;
       text-align: right;
       min-height: 36px;
       padding: 8px 10px;
@@ -412,52 +413,8 @@
     .resources-row { padding: 0 20px 24px; order: 3; }
   }
   
-  /* Webkit browsers (Chrome, Safari) */
-  input[type="range"]::-webkit-slider-track {
-    background: var(--line-soft);
-    height: 6px;
-    border-radius: 3px;
-  }
-  
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--rust);
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(26,24,20,0.15);
-    border: 2px solid var(--paper);
-  }
-  
-  input[type="range"]::-webkit-slider-thumb:active {
-    box-shadow: 0 2px 8px rgba(26,24,20,0.25);
-    transform: scale(1.15);
-  }
-  
-  /* Firefox */
-  input[type="range"]::-moz-range-track {
-    background: var(--line-soft);
-    height: 6px;
-    border-radius: 3px;
-    border: none;
-  }
-  
-  input[type="range"]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--rust);
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(26,24,20,0.15);
-    border: 2px solid var(--paper);
-  }
-  
-  input[type="range"]::-moz-range-thumb:active {
-    box-shadow: 0 2px 8px rgba(26,24,20,0.25);
-    transform: scale(1.15);
-  }
+  /* Desktop slider styling lives in the .control input[type=range] rules above
+     (thin track + small thumb). The oversized touch-scale styling was removed. */
   
   /* Control row - improved spacing */
   /* Slider + Input - mobile friendly */
