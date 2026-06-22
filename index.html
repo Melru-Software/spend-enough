@@ -15,12 +15,12 @@
     --ink: #1a1814;
     --ink-soft: #3d3830;
     --ink-mute: #6b6356;
-    --ink-faint: #8a8173;
-    --rust: #b85c38;
+    --ink-faint: #75695a;
+    --rust: #a04a28;
     --rust-deep: #8a4226;
     --moss: #5b6e3a;
     --moss-deep: #3e4d28;
-    --gold: #c9a449;
+    --gold: #7d6420;
     --paper: #fbf8f1;
     --line: #d4cab8;
     --line-soft: #e2dac8;
@@ -139,7 +139,7 @@
 </head>
 <style>
   /* ========== DASHBOARD LAYOUT ========== */
-  .dashboard { display: grid; grid-template-columns: 280px 1fr; grid-template-areas: "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
+  .dashboard { display: grid; grid-template-columns: 320px 1fr; grid-template-areas: "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
   .resources-row { grid-area: resources; border-top: 1px solid var(--line); padding: 22px 32px 30px; text-align: center; }
   .sidebar { grid-area: sidebar; background: var(--paper); border-right: 1px solid var(--line); padding: 22px 20px; overflow-y: auto; }
   .sidebar-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
@@ -1050,10 +1050,10 @@ function moreOptionsHTML() {
         <span style="font-family:'JetBrains Mono',monospace;color:${ev.amount>=0?'var(--moss)':'var(--danger)'}">${fmtMoneyShort(ev.amount)}</span>
         <button onclick="removeEvent(${i})" style="background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:0 2px">\u00d7</button>
       </div>`).join('')}
-      <div style="display:grid;grid-template-columns:1fr auto auto;gap:4px;margin-top:6px">
-        <input type="text" id="ev_label" placeholder="e.g. Sell home" style="font-size:11px;padding:5px 6px;background:var(--bone);border:1px solid var(--line);border-radius:2px;font-family:inherit"/>
-        <input type="number" id="ev_age" placeholder="Age" style="width:48px;font-size:11px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:center;font-family:'JetBrains Mono',monospace"/>
-        <input type="number" id="ev_amount" placeholder="$" step="10000" style="width:72px;font-size:11px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:right;font-family:'JetBrains Mono',monospace"/>
+      <div style="display:grid;grid-template-columns:1fr 52px 96px;gap:4px;margin-top:6px">
+        <input type="text" id="ev_label" placeholder="e.g. Sell home" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:11px;padding:5px 6px;background:var(--bone);border:1px solid var(--line);border-radius:2px;font-family:inherit"/>
+        <input type="number" id="ev_age" placeholder="Age" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:11px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:center;font-family:'JetBrains Mono',monospace"/>
+        <input type="number" id="ev_amount" placeholder="$" step="10000" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:11px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:right;font-family:'JetBrains Mono',monospace"/>
       </div>
       <button onclick="addEvent()" style="font-size:11px;color:var(--rust);background:none;border:none;cursor:pointer;padding:4px 0;font-family:inherit;margin-top:4px">+ Add event</button>
     </div>`;
@@ -1358,7 +1358,7 @@ function drawMainChart(result) {
     datasets.push({ label: 'p75', data: p.map(x => x.p75), borderColor: 'transparent', backgroundColor: 'rgba(91,110,58,0.16)', pointRadius: 0, fill: '+1', tension: 0.1 });
     datasets.push({ label: 'p25', data: p.map(x => x.p25), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, tension: 0.1 });
   }
-  datasets.push(Object.assign(fill(p.map(x => x.p50), '#b85c38', 'transparent'), { label: 'Median', borderWidth: 2 }));
+  datasets.push(Object.assign(fill(p.map(x => x.p50), '#a04a28', 'transparent'), { label: 'Median', borderWidth: 2 }));
 
   // Key event ages for annotations
   const events = [];
@@ -1401,7 +1401,7 @@ function drawMainChart(result) {
         ctx2.lineTo(ev.x, yScale.bottom);
         ctx2.stroke();
         ctx2.setLineDash([]);
-        ctx2.fillStyle = '#8a8173';
+        ctx2.fillStyle = '#75695a';
         ctx2.font = '10px Inter Tight, sans-serif';
         ctx2.textAlign = 'center';
         ctx2.fillText(ev.label, ev.x, yScale.top - 4 - ev.row * 12);
@@ -1466,8 +1466,8 @@ function drawMainChart(result) {
         filter: (t) => ['Median','p10','p90'].includes(t.dataset.label)
       } },
       scales: {
-        x: { title: { display: true, text: 'Age', color: '#6b6356', font: { size: 11 } }, ticks: { color: '#8a8173', maxTicksLimit: 10 }, grid: { color: 'rgba(212,202,184,0.4)' } },
-        y: { ticks: { color: '#8a8173', callback: (v) => fmtMoneyShort(v) }, grid: { color: 'rgba(212,202,184,0.4)' } }
+        x: { title: { display: true, text: 'Age', color: '#6b6356', font: { size: 11 } }, ticks: { color: '#75695a', maxTicksLimit: 10 }, grid: { color: 'rgba(212,202,184,0.4)' } },
+        y: { ticks: { color: '#75695a', callback: (v) => fmtMoneyShort(v) }, grid: { color: 'rgba(212,202,184,0.4)' } }
       }
     }
   });
@@ -1560,8 +1560,8 @@ function drawCashflowChart(result) {
         }
       },
       scales: {
-        x: { stacked: true, ticks: { color: '#8a8173', maxTicksLimit: 10 }, grid: { display: false } },
-        y: { stacked: true, ticks: { color: '#8a8173', callback: (v) => { const a = Math.abs(v); return (v < 0 ? '-' : '') + (a >= 1e6 ? '$'+(a/1e6).toFixed(0)+'M' : a >= 1e3 ? '$'+Math.round(a/1e3)+'k' : '$'+a); } }, grid: { color: 'rgba(212,202,184,0.4)' } }
+        x: { stacked: true, ticks: { color: '#75695a', maxTicksLimit: 10 }, grid: { display: false } },
+        y: { stacked: true, ticks: { color: '#75695a', callback: (v) => { const a = Math.abs(v); return (v < 0 ? '-' : '') + (a >= 1e6 ? '$'+(a/1e6).toFixed(0)+'M' : a >= 1e3 ? '$'+Math.round(a/1e3)+'k' : '$'+a); } }, grid: { color: 'rgba(212,202,184,0.4)' } }
       }
     }
   });
@@ -1575,10 +1575,16 @@ window.update = function(key, val) { state[key] = val; maxSpendView = false; inv
 window.updateAccount = function(key, val) { state.accounts[key] = val; state.portfolio = state.accounts.traditional + state.accounts.roth + state.accounts.taxable; invalidateCaches(); render(); };
 
 window.addEvent = function() {
+  const ageEl = document.getElementById('ev_age');
+  const amountEl = document.getElementById('ev_amount');
+  const age = parseInt(ageEl.value);
+  const amount = parseFloat(amountEl.value);
+  const ageInvalid = !age;
+  const amountInvalid = isNaN(amount);
+  ageEl.style.outline = ageInvalid ? '2px solid var(--danger)' : '';
+  amountEl.style.outline = amountInvalid ? '2px solid var(--danger)' : '';
+  if (ageInvalid || amountInvalid) return;
   const label = (document.getElementById('ev_label').value || '').trim() || 'Event';
-  const age = parseInt(document.getElementById('ev_age').value);
-  const amount = parseFloat(document.getElementById('ev_amount').value);
-  if (!age || isNaN(amount)) return;
   if (!state.oneTimeEvents) state.oneTimeEvents = [];
   state.oneTimeEvents.push({ label, age, amount });
   invalidateCaches(); render();
