@@ -1106,6 +1106,7 @@ function renderDashboard() {
       <div class="verdict" aria-live="polite">
         <div class="verdict-head">${verdict.headline}</div>
         <div class="verdict-body">${verdict.lead}</div>
+        ${verdict.wedge ? `<div class="verdict-wedge">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
       </div>
 
       <div class="section-heading">Portfolio projection</div>
@@ -1115,7 +1116,6 @@ function renderDashboard() {
       <div class="verdict-notes">
         <p>${verdict.detail}</p>
         ${verdict.caveat ? `<p class="verdict-caveat">${verdict.caveat}</p>` : ''}
-        ${verdict.wedge ? `<div class="verdict-wedge">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
       </div>
 
       ${renderReadFirst(result)}
