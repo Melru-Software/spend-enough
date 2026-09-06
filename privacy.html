@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy policy · Spend Enough</title>
+<meta name="description" content="What Spend Enough collects (almost nothing), why, and your choices." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bone: #f4efe6; --ink: #1a1814; --ink-soft: #3d3830; --ink-mute: #6b6356; --rust: #a04a28; --paper: #fbf8f1; --line: #d4cab8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter Tight', system-ui, sans-serif; background: var(--bone); color: var(--ink); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  header { padding: 18px 32px; border-bottom: 1px solid var(--line); background: var(--paper); display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; display: inline-flex; align-items: baseline; gap: 6px; }
+  .logo-dot { width: 8px; height: 8px; background: var(--rust); border-radius: 50%; display: inline-block; transform: translateY(-2px); }
+  header nav a { color: var(--ink-mute); text-decoration: none; margin-left: 18px; font-size: 14px; }
+  header nav a:hover { color: var(--ink); }
+  main { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-family: 'Fraunces', serif; font-size: 40px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 8px; }
+  .updated { color: var(--ink-mute); font-size: 14px; margin-bottom: 32px; }
+  h2 { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 500; margin: 36px 0 10px; letter-spacing: -0.01em; }
+  p, li { color: var(--ink-soft); margin-bottom: 12px; }
+  ul { padding-left: 22px; }
+  strong { color: var(--ink); }
+  a { color: var(--rust); }
+  .todo { background: rgba(160,74,40,0.08); border-left: 3px solid var(--rust); padding: 8px 12px; font-size: 14px; color: var(--ink-soft); margin: 12px 0; }
+  footer { border-top: 1px solid var(--line); padding: 24px 32px; text-align: center; font-size: 13px; color: var(--ink-mute); }
+  footer a { color: var(--rust); text-decoration: none; margin: 0 6px; }
+  @media (max-width: 600px) { header { padding: 14px 20px; } main { padding: 32px 20px 60px; } h1 { font-size: 30px; } }
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="index.html"><span class="logo-dot"></span>Spend Enough</a>
+  <nav><a href="app.html">Open the app</a><a href="terms.html">Terms</a></nav>
+</header>
+<main>
+  <h1>Privacy policy</h1>
+  <p class="updated">Last updated: [DATE]</p>
+
+  <h2>Who we are</h2>
+  <p>Spend Enough is made by [BUSINESS NAME]. You can reach us at <a href="mailto:[CONTACT EMAIL]">[CONTACT EMAIL]</a>.</p>
+
+  <h2>The short version</h2>
+  <p>The app runs in your browser. The numbers you enter never leave your device. We do not have accounts, so we do not have a database of users. If you buy the paid version, our payment processor collects your email and payment details, and we receive your email address and a license key. We use basic, privacy-respecting analytics to count page views and a handful of events so we can tell whether the app is working for people. That is the whole list.</p>
+
+  <h2>What we collect, and why</h2>
+  <p><strong>Your financial inputs.</strong> Savings, income, spending, ages, and everything else you type into the app are stored in your browser's local storage on your own device so they are still there when you come back. They are never sent to us. Clearing your browser data removes them. If you save a scenario, it stays in your browser unless you choose to share it.</p>
+  <p><strong>Your license key.</strong> When you unlock the paid version, the key is stored in your browser's local storage on your device. The app checks only that it has the right shape; it does not send it anywhere.</p>
+  <div class="todo">TODO (Phase 6): if the app later verifies keys against the payment processor's API, add: "When you enter a key, the app sends the key (and only the key) to [PAYMENT PROCESSOR] to confirm it is valid."</div>
+  <p><strong>Your email address, at purchase only.</strong> If you buy the paid version, [PAYMENT PROCESSOR] collects your email address, payment method, and billing details. We receive your email address, the product you bought, and your license key. We use your email to deliver the license key, send receipts, and handle refunds and support. We do not add you to a marketing list unless you separately ask to be on one.</p>
+  <p><strong>Analytics.</strong> We use [ANALYTICS PROVIDER] to count page views and a small number of events (for example, that a scenario was run, that the unlock screen was shown, or that a purchase completed). The intent is that this data cannot identify you and does not include any of the numbers you enter.</p>
+  <div class="todo">TODO: confirm with the chosen provider and state precisely whether cookies are set, whether IP addresses are stored or truncated, and whether any identifier persists between visits.</div>
+  <p><strong>Server logs.</strong> Our hosting provider, [HOST], may record standard technical information when your browser requests the site, such as IP address, browser type, and the time of the request. We use this only to keep the site running and to diagnose problems.</p>
+  <div class="todo">TODO: confirm the host's log retention period and state it.</div>
+
+  <h2>What we do not do</h2>
+  <ul>
+    <li>We do not sell your information.</li>
+    <li>We do not have your financial inputs, so we cannot see, share, or lose them.</li>
+    <li>We do not run advertising or share data with ad networks.</li>
+    <li>We do not build a profile of you.</li>
+  </ul>
+
+  <h2>Third parties</h2>
+  <p>We rely on a few services to run the product. Each has its own privacy policy that governs the data it handles directly.</p>
+  <ul>
+    <li>[PAYMENT PROCESSOR] (planned: Lemon Squeezy), which processes payments, collects sales tax as the merchant of record, and delivers license keys.</li>
+    <li>[ANALYTICS PROVIDER], for anonymous usage counts.</li>
+    <li>[HOST], which serves the site.</li>
+    <li>jsDelivr, a content delivery network that serves the Chart.js charting library the app uses, and Google Fonts, which serves the typefaces. Your browser requests those files directly from them.</li>
+  </ul>
+
+  <h2>Where data is kept and for how long</h2>
+  <p>Your inputs stay in your browser until you clear them. Purchase records (email, product, license key) are kept for as long as we need them to support your license, comply with tax and accounting law, and handle refunds and disputes. Analytics data is kept according to [ANALYTICS PROVIDER]'s retention policy.</p>
+  <div class="todo">TODO: state the analytics retention period.</div>
+
+  <h2>Your choices and rights</h2>
+  <p>You can delete your inputs at any time by clearing the app's data in your browser. You can ask us to delete your purchase email by writing to <a href="mailto:[CONTACT EMAIL]">[CONTACT EMAIL]</a>; we will do so unless we need to keep a record for tax, accounting, or dispute purposes, in which case we will tell you. Depending on where you live, you may have additional rights to access, correct, port, or restrict the use of your personal data, and to complain to a supervisory authority. Write to us and we will help.</p>
+  <div class="todo">TODO: if selling to EU/UK residents through Lemon Squeezy, confirm whether [BUSINESS NAME] is a controller for the purchase email and add the required GDPR disclosures (legal basis, international transfer mechanism). If selling to California residents, review CCPA thresholds.</div>
+
+  <h2>Children</h2>
+  <p>The app is not intended for anyone under 18, and we do not knowingly collect information from children.</p>
+
+  <h2>Changes</h2>
+  <p>If we change this policy we will update the date at the top and, for meaningful changes, post a notice in the app.</p>
+
+  <h2>Contact</h2>
+  <p>[BUSINESS NAME]<br/><a href="mailto:[CONTACT EMAIL]">[CONTACT EMAIL]</a><br/>[MAILING ADDRESS, if required in your jurisdiction]</p>
+</main>
+<footer>Educational modelling tool, not financial, tax, investment, or legal advice. <a href="terms.html">Terms</a> · <a href="index.html">Home</a></footer>
+<script src="config.js"></script>
+</body>
+</html>
