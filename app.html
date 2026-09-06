@@ -188,10 +188,6 @@
 
   /* Verdict */
   .verdict { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 24px 28px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
-  .verdict-eye { text-transform: uppercase; letter-spacing: 0.15em; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
-  .verdict-eye.good { color: var(--moss); }
-  .verdict-eye.mid { color: var(--gold); }
-  .verdict-eye.bad { color: var(--danger); }
   .verdict-head { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 400; color: var(--ink); line-height: 1.25; margin-bottom: 10px; letter-spacing: -0.01em; }
   .verdict-body { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
   .verdict-caveat { font-size: 14px; color: var(--ink-faint); margin-top: 10px; font-style: italic; }
@@ -201,12 +197,10 @@
 
   .toggle-btn.locked { opacity: 0.7; }
   .toggle-btn.locked .lock-icon { font-size: 14px; margin-left: 3px; }
-  .unlock-prompt { margin-top: 8px; padding: 10px 14px; background: rgba(184,92,56,0.06); border-radius: 4px; font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
   /* Free-tier preview of paid settings: visible but non-interactive */
   .locked-note { margin: 8px 0; padding: 8px 10px; background: var(--bone-2); border-left: 2px solid var(--rust); border-radius: 3px; font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
   .link-btn { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: 14px; text-decoration: underline; padding: 0; }
   .locked-preview { border: none; padding: 0; margin: 0; min-width: 0; opacity: 0.5; pointer-events: none; }
-  .unlock-prompt a { color: var(--rust); cursor: pointer; text-decoration: underline; }
   .unlock-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
   .unlock-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 14px; background: var(--paper); }
   .unlock-input-row button { padding: 10px 16px; background: var(--rust); color: var(--paper); border: none; border-radius: 3px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
@@ -316,11 +310,30 @@
   .faq-body ul { padding-left: 18px; margin: 6px 0; }
   .faq-body ul li { margin-bottom: 4px; }
 
-  /* Stat cards */
-  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
-  .stat-card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; }
-  .stat-label { font-size: 14px; color: var(--ink-mute); margin-bottom: 4px; }
-  .stat-value { font-size: 20px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--ink); }
+  /* Assumptions panel + "Read this first" */
+  .assumptions, .read-first { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
+  .assumptions summary, .read-first summary { cursor: pointer; padding: 14px 18px; font-weight: 600; font-size: 15px; color: var(--ink-soft); list-style: none; display: flex; align-items: center; gap: 10px; }
+  .assumptions summary::-webkit-details-marker, .read-first summary::-webkit-details-marker { display: none; }
+  .assumptions summary::after, .read-first summary::after { content: '+'; color: var(--ink-mute); font-size: 18px; margin-left: auto; }
+  .assumptions[open] summary::after, .read-first[open] summary::after { content: '\2212'; }
+  .asm-hint { font-weight: 400; color: var(--ink-mute); font-size: 14px; }
+  .asm-body, .read-first-body { padding: 0 18px 16px; }
+  .read-first-body p { font-size: 14px; color: var(--ink-soft); line-height: 1.65; margin-bottom: 10px; }
+  .read-first-body p:last-child { margin-bottom: 0; }
+  .asm-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line-soft); font-size: 14px; line-height: 1.6; color: var(--ink-soft); }
+  .asm-label { font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; padding-top: 3px; }
+  .asm-text strong { color: var(--ink); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .asm-input { width: 64px; text-align: right; font-family: 'JetBrains Mono', monospace; background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 2px 4px; color: var(--ink); min-height: 0; margin: 0 2px; }
+  .asm-range { width: 100%; max-width: 320px; display: block; margin-top: 8px; height: 4px; -webkit-appearance: none; appearance: none; background: var(--line); border-radius: 2px; }
+  .asm-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; }
+  .asm-range::-moz-range-thumb { width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; border: none; }
+  .asm-toggle { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; cursor: pointer; color: var(--ink-soft); }
+  .asm-toggle input { accent-color: var(--ink); }
+  .asm-sources { font-size: 13px; color: var(--ink-faint); margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); line-height: 1.5; }
+  .asm-sources a { color: var(--rust); }
+  .teaser-row { margin: 4px 0 18px; }
+  .compare-table td:first-child { color: var(--ink-mute); }
+  @media (max-width: 600px) { .asm-row { grid-template-columns: 1fr; gap: 4px; } }
 
   /* Saved scenarios */
   .scenario-save-row { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -340,7 +353,7 @@
   @media (max-width: 860px) {
     .dashboard { grid-template-columns: 1fr; grid-template-areas: "main" "sidebar" "resources"; }
     .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
-    .bands, .scenario-cards, .ss-grid, .stat-row { grid-template-columns: 1fr 1fr; }
+    .bands, .scenario-cards, .ss-grid { grid-template-columns: 1fr 1fr; }
   }
 
   /* Tablet & Small Screens (768px and below) */
@@ -451,9 +464,6 @@
     .band-label { font-size: 14px; }
     .band-value { font-size: 14px; }
     
-    .stat-card { padding: 12px 14px; }
-    .stat-label { font-size: 14px; }
-    .stat-value { font-size: 14px; }
     
     .data-table { font-size: 14px; }
     .data-table th, .data-table td { padding: 8px 6px; }
@@ -510,7 +520,6 @@
     .chart-wrap.short { min-height: 100px; }
     
     .bands { grid-template-columns: 1fr; gap: 8px; }
-    .stat-row { grid-template-columns: 1fr; gap: 8px; }
     
     .modal { padding: 16px; border-radius: 4px; }
     .modal h2 { font-size: 16px; margin-bottom: 12px; }
@@ -545,6 +554,10 @@
 <div id="app"></div>
 <div id="modal-root"></div>
 <div id="tip-popup"></div>
+<script src="config.js"></script>
+<script>/* Optional privacy-respecting analytics (Plausible/Fathom-style), only when config.js sets it. */
+(function(){var c=window.SPENDENOUGH_CONFIG||{};if(!c.analyticsScript)return;var s=document.createElement('script');s.defer=true;s.src=c.analyticsScript;if(c.analyticsSite){s.setAttribute('data-domain',c.analyticsSite);s.setAttribute('data-site',c.analyticsSite);}document.head.appendChild(s);})();
+window.track=function(n){try{if(window.plausible)window.plausible(n);else if(window.fathom&&window.fathom.trackEvent)window.fathom.trackEvent(n);}catch(e){}};</script>
 <script src="engine.js"></script>
 <script>
 "use strict";
@@ -560,31 +573,64 @@ let activeView = 'onboarding';
 let savedScenarios = JSON.parse(localStorage.getItem('zeroline_scenarios') || '[]');
 let chart = null, cashflowChart = null;
 let lastSimResult = null;
-let baselineState = null, baselineResult = null;
-let maxSpendCache = null, maxSpendStale = true;
+let baselineState = null, baselineResult = null, baselineName = 'Starting point';
+let compareOn = false;
+let maxSpendStale = true;
 let spendingLevelsCache = null, spendingLevelsStale = true;
 let showMoreOptions = false;
 let isFirstDashboard = true;
 let maxSpendView = false;
 let cashflowMode = 'net';
+let assumptionsOpen = false;
+let readFirstOpen = true;
+
+// Deployment config (config.js, public values only) and feature flags.
+const CONFIG = Object.assign({ checkoutUrl: '', price: '$39', emailEndpoint: '' }, window.SPENDENOUGH_CONFIG || {});
+// Presets that invent a dollar figure (home sale $400k at 70, long-term care $90k x 5)
+// stay off until the owner decides on defaults. See LAUNCH.md: never invent assumptions.
+const FLAGS = { hardcodedPresets: false };
+// Lemon Squeezy license keys are UUIDs. Anything else is not a key.
+const KEY_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const pct = (x, d) => ((+x || 0) * 100).toFixed(d === undefined ? 1 : d) + '%';
 
 // ============================================================================
 // PAID UNLOCK
 // ============================================================================
-function isPaid() { return !!localStorage.getItem('spendenough_key'); }
+function isPaid() { const k = localStorage.getItem('spendenough_key'); return !!k && KEY_RE.test(k); }
+
+// After checkout the buyer lands on app.html?key=<license key>; store it and clean the URL.
+// (Phase 6: point the provider's redirect here if it can insert the key; otherwise the
+// buyer pastes the key from the receipt email.)
+(function acceptKeyFromUrl() {
+  try {
+    const u = new URL(location.href);
+    const k = (u.searchParams.get('key') || '').trim();
+    if (k && KEY_RE.test(k)) {
+      localStorage.setItem('spendenough_key', k);
+      track('purchased');
+      u.searchParams.delete('key');
+      history.replaceState(null, '', u.pathname + (u.searchParams.toString() ? '?' + u.searchParams.toString() : '') + u.hash);
+    }
+  } catch (e) { /* ignore malformed URLs */ }
+})();
 
 window.showUnlockModal = function() {
+  track('hit_paywall');
+  const buy = CONFIG.checkoutUrl
+    ? `<a class="btn-primary" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" onclick="track('clicked_checkout')" style="width:100%;justify-content:center;text-decoration:none">Unlock Pro &middot; ${CONFIG.price} one-time</a>`
+    : `<button class="btn-primary" disabled style="width:100%;justify-content:center;opacity:0.6;cursor:default">Unlock Pro &middot; ${CONFIG.price} one-time &middot; checkout opening soon</button>`;
   openModal(`<h2>Free vs. Pro</h2>
-    <p style="margin-bottom:16px">You're on the free version. A one-time unlock adds deeper analysis and saving. Here's the full picture:</p>
+    <p style="margin-bottom:16px">You're on the free version. A one-time unlock adds scenario comparison and the deeper analysis. Here's the full picture:</p>
     <div class="compare-grid">
       <div class="compare-col">
         <div class="compare-head">Free</div>
         <div class="compare-sub">What you have now</div>
         <ul class="compare-list">
-          <li>Steady-return projection</li>
-          <li>Core inputs — savings, spending, income, retirement age</li>
-          <li>What-if preset scenarios</li>
-          <li>Spending explorer &amp; cashflow view</li>
+          <li>Historical mode: your plan run through every market period since 1926, with the full range on the chart</li>
+          <li>Core inputs: savings, spending, income, retirement age</li>
+          <li>What-if presets</li>
+          <li>Spending explorer</li>
+          <li>Every assumption visible and editable: asset mix, fees, taxes, guardrails</li>
         </ul>
       </div>
       <div class="compare-col pro">
@@ -592,18 +638,22 @@ window.showUnlockModal = function() {
         <div class="compare-sub">One-time unlock</div>
         <div class="compare-plus">Everything in Free, plus:</div>
         <ul class="compare-list">
-          <li>Historical backtesting against every market period since 1926</li>
-          <li>Monte Carlo simulation — the full range of outcomes</li>
-          <li>Advanced settings — taxes, account types, withdrawal order, life events</li>
-          <li>Social Security claiming analysis</li>
-          <li>Spending-flexibility modeling</li>
-          <li>Save &amp; compare scenarios</li>
+          <li>Side-by-side scenario comparison: change a decision, see both futures on one chart</li>
+          <li>Percentile bands and five named historical stress tests</li>
+          <li>Spending-flexibility comparison</li>
+          <li>Social Security claiming comparison</li>
+          <li>Cashflow chart</li>
+          <li>Simulated (Monte Carlo) mode</li>
+          <li>Planning options: plan-to age, late-life spending, housing payoff, income growth</li>
+          <li>Account types, withdrawal order, life events</li>
+          <li>Save up to 8 scenarios</li>
         </ul>
       </div>
     </div>
-    <p style="font-size:14px;color:var(--ink-mute);margin:16px 0 14px">One-time payment. No subscription. No account. Your numbers stay on your device.</p>
+    <div style="margin:16px 0 10px">${buy}</div>
+    <p style="font-size:14px;color:var(--ink-mute);margin:0 0 14px;text-align:center">One-time payment. No subscription. No account. Your numbers stay on your device.<br/>Educational modelling tool, not financial advice.</p>
     <div class="unlock-input-row">
-      <input type="text" id="unlockKeyInput" placeholder="Paste your license key" />
+      <input type="text" id="unlockKeyInput" placeholder="Already bought? Paste your license key" autocomplete="off" />
       <button onclick="submitUnlockKey()" style="background:var(--rust);color:var(--paper);border:none;padding:10px 16px;border-radius:3px;font-weight:600;cursor:pointer;font-size:14px">Unlock</button>
     </div>
     <p style="margin-top:14px;font-size:14px;text-align:center"><a href="#" onclick="closeModal();return false" style="color:var(--rust);text-decoration:none;cursor:pointer">Continue with the free version</a></p>`);
@@ -612,13 +662,14 @@ window.showUnlockModal = function() {
 window.submitUnlockKey = function() {
   const input = document.getElementById('unlockKeyInput');
   const key = input ? input.value.trim() : '';
-  if (key.length >= 8) {
+  if (KEY_RE.test(key)) {
     localStorage.setItem('spendenough_key', key);
     closeModal();
     render();
   } else if (input) {
     input.style.borderColor = 'var(--danger)';
-    input.setAttribute('placeholder', 'Key must be at least 8 characters');
+    input.value = '';
+    input.setAttribute('placeholder', 'That is not a license key (they look like xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)');
   }
 };
 
@@ -749,14 +800,11 @@ function generatePresets(s) {
     presets.push({ id: 'earlySS', label: 'Claim Social Security at 62' });
   }
 
-  // ---- Housing ----
-  // payoffFast removed from free presets — requires balance/rate inputs to model correctly
-  if (s.housing > 0 && !s.homeSaleAge && s.age < 72) {
-    presets.push({ id: 'sellHome', label: 'Sell the home at 70' });
+  // ---- Presets with invented dollar amounts (flag-gated, see FLAGS) ----
+  if (FLAGS.hardcodedPresets) {
+    if (s.housing > 0 && s.age < 72) presets.push({ id: 'sellHome', label: 'Sell the home at 70' });
+    if (s.age > 45) presets.push({ id: 'ltc', label: 'Add long-term care at 85' });
   }
-
-  // ---- Long-term care ----
-  if (s.age > 45) presets.push({ id: 'ltc', label: 'Add long-term care at 85' });
 
   return presets.slice(0, 6);
 }
@@ -778,9 +826,15 @@ function fmtMoneyShort(n) {
 }
 function periodsLabel(result) {
   if (result.mode === 'historical') return result.successCount + ' of ' + result.totalPeriods + ' historical periods';
-  if (result.mode === 'montecarlo') return Math.round(result.successRate * 100) + '% of simulations';
-  return result.successRate >= 1 ? 'lasts to age 100' : 'runs out early';
+  if (result.mode === 'montecarlo') return Math.round(result.successRate * 100) + '% of ' + result.mcSims + ' simulated futures';
+  return result.successRate >= 1 ? 'lasts to age ' + state.targetAge : 'runs out at age ' + result.medianRunOutAge;
 }
+function succLabel(r) {
+  if (!r) return '';
+  return r.mode === 'historical' ? r.successCount + '/' + r.totalPeriods : r.mode === 'montecarlo' ? Math.round(r.successRate * 100) + '%' : (r.successRate >= 1 ? 'lasts' : 'runs out');
+}
+function modeName(m) { return m === 'historical' ? 'Historical' : m === 'montecarlo' ? 'Simulated' : 'Fixed'; }
+function mixLabel() { return Math.round(state.stockPct * 100) + '/' + Math.round((1 - state.stockPct) * 100); }
 
 const app = document.getElementById('app');
 const modalRoot = document.getElementById('modal-root');
@@ -814,7 +868,7 @@ function positionTip(e) {
 function renderOnboarding() {
   app.innerHTML = `
     <header>
-      <div class="logo"><span class="logo-dot"></span>Spend Enough</div>
+      <a class="logo" href="index.html" style="text-decoration:none;color:inherit"><span class="logo-dot"></span>Spend Enough</a>
       <div class="tagline">live now, plan well</div>
     </header>
     <div class="onboarding">
@@ -904,19 +958,19 @@ window.finishOnboarding = function() {
   state.homeSaleAge = null;
   state.homeSaleProceeds = 0;
   state.oneTimeEvents = [];
-  // Auto-compute effective tax rate from income
-  const totalGross = state.yourIncome + state.partnerIncome;
-  if (totalGross > 0) {
-    const taxEst = estimateNetIncome({ gross: totalGross, filingStatus: state.filingStatus, stateCode: state.stateCode });
-    state.taxRate = Math.round(taxEst.effectiveRate * 100) / 100;
-  }
+  // Auto-estimate tax rates from income: the wage rate includes payroll tax, the
+  // retirement rate (traditional withdrawals, half of SS) is federal + state only.
+  applyEstimatedTaxRates();
   if (state.yourStopWorkAge < state.age) state.yourStopWorkAge = Math.max(state.age + 1, 65);
   if (state.partnerStopWorkAge < state.partnerAge) state.partnerStopWorkAge = Math.max(state.partnerAge + 1, 65);
 
-  // If spending was left blank, auto-find max spend
+  // The first thing a stranger sees is the range, not a single line.
+  state.simMode = 'historical';
+
+  // If spending was left blank, find the most they could spend and still make it through
+  // at least 85% of history (steady spending, guardrails off), with the 85% late-life ratio.
   if (spending <= 0) {
-    state.simMode = 'fixed';
-    const ms = findMaxSpend(state);
+    const ms = findMaxSpendAtSuccess({ ...state, spending: 100000, lateSpending: 85000 });
     state.spending = Math.round(ms.spend / 1000) * 1000;
     state.lateSpending = Math.round(state.spending * 0.85);
     maxSpendView = true;
@@ -925,7 +979,8 @@ window.finishOnboarding = function() {
   activeView = 'dashboard';
   maxSpendStale = true; spendingLevelsStale = true;
   baselineState = JSON.parse(JSON.stringify(state));
-  baselineResult = null;
+  baselineResult = null; baselineName = 'Starting point'; compareOn = false;
+  track('ran_model');
   render();
 };
 
@@ -934,7 +989,7 @@ window.loadSample = function() {
   activeView = 'dashboard';
   maxSpendStale = true; spendingLevelsStale = true;
   baselineState = JSON.parse(JSON.stringify(state));
-  baselineResult = null;
+  baselineResult = null; baselineName = 'Starting point'; compareOn = false;
   render();
 };
 
@@ -947,15 +1002,16 @@ window.resetToDefaults = function() {
 // DASHBOARD
 // ============================================================================
 function renderDashboard() {
-  // Force free users back to fixed mode
-  if (!isPaid() && state.simMode !== 'fixed') { state.simMode = 'fixed'; }
+  // Simulated (Monte Carlo) mode is Pro; Fixed and Historical are free.
+  if (!isPaid() && state.simMode === 'montecarlo') { state.simMode = 'historical'; }
   const result = runForState(state);
   lastSimResult = result;
-  if (!baselineResult) baselineResult = result;
+  // The baseline is always re-run in the CURRENT mode so deltas and the side-by-side
+  // compare like with like, even if the saved baseline used another mode.
+  baselineResult = baselineState ? runForState({ ...baselineState, simMode: state.simMode }) : result;
+  const canCompare = compareOn && isPaid() && !!baselineState;
   const verdict = getVerdict(result);
   const presets = generatePresets(state);
-
-  if (maxSpendStale) { maxSpendCache = findMaxSpend(state); maxSpendStale = false; }
 
   const sidebar = `
     <aside class="sidebar" role="complementary" aria-label="Planning controls">
@@ -963,11 +1019,11 @@ function renderDashboard() {
         <div class="sidebar-heading">Mode</div>
         <div class="sidebar-sub">How returns are modeled</div>
         <div class="toggle-group">
-          <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
+          <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
           <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
-          <button class="toggle-btn ${state.simMode==='historical'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('historical')">Historical${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
+          <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
         </div>
-        <div style="font-size:14px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Tests your plan against every rolling period of real market returns since 1926.':state.simMode==='montecarlo'?'Runs 500 randomized simulations to show the range of possible outcomes.':'Projects a single path using a steady assumed return.'}</div>
+        <div style="font-size:14px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Runs your plan through every rolling period of real U.S. market returns since 1926 for your '+mixLabel()+' stock/bond mix.':state.simMode==='montecarlo'?'Runs '+state.mcSims+' randomized futures drawn from a bell curve matched to your mix’s history (change it under Assumptions).':'Projects a single path at one steady real return. No range.'}</div>
       </div>
 
       <div class="sidebar-section">
@@ -1032,59 +1088,63 @@ function renderDashboard() {
         <div class="sidebar-heading">Saved scenarios</div>
         ${isPaid()
           ? `<div class="scenario-save-row"><input type="text" id="scenarioName" placeholder="Name this scenario"/><button class="scenario-pill" onclick="saveScenario()">Save</button></div>
-        ${savedScenarios.map((sc, i) => `<div class="saved-item"><span>${sc.name}</span><span><button onclick="loadScenario(${i})">load</button> \u00b7 <button onclick="deleteScenario(${i})">\u00d7</button></span></div>`).join('') || ''}
-        ${savedScenarios.length >= 2 ? `<button class="more-toggle" style="margin-top:6px" onclick="showComparison()">Compare scenarios</button>` : ''}`
+        ${savedScenarios.map((sc, i) => `<div class="saved-item"><span>${sc.name}</span><span><button onclick="loadScenario(${i})">load</button> \u00b7 <button onclick="compareWith(${i})" title="Show this scenario next to your current settings">compare</button> \u00b7 <button onclick="deleteScenario(${i})" aria-label="Delete ${sc.name}">\u00d7</button></span></div>`).join('') || '<div style="font-size:13px;color:var(--ink-faint)">Save a scenario, then use \u201ccompare\u201d to put it next to your current settings.</div>'}`
           : `<button class="more-toggle locked-row" onclick="showUnlockModal()">Save &amp; compare scenarios <span class="lock-icon">&#x1f512;</span></button>`}
       </div>
     </aside>`;
 
-  const yearCount = state.targetAge - state.age + 1;
-
+  const notFixed = state.simMode !== 'fixed';
   const main = `
     <div class="main" id="main-content" role="main">
       <div class="verdict" aria-live="polite">
         <div class="verdict-head">${verdict.headline}</div>
         <div class="verdict-body">${verdict.body}</div>
         ${verdict.caveat ? `<div class="verdict-caveat">${verdict.caveat}</div>` : ''}
-        ${verdict.wedge ? `<div class="verdict-wedge">You're on track to leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
+        ${verdict.wedge ? `<div class="verdict-wedge">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
       </div>
 
+      ${renderReadFirst()}
+
       <div class="section-heading">Portfolio projection</div>
-      <div class="section-sub">${state.simMode==='historical' ? 'The shaded area shows the range across all '+result.totalPeriods+' historical periods. The line is the median.' : state.simMode==='montecarlo' ? 'The shaded area shows the range across 500 simulations. The line is the median outcome.' : ''}</div>
+      <div class="section-sub">${state.simMode==='historical' ? 'The shaded area is the range across all '+result.totalPeriods+' historical periods: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : state.simMode==='montecarlo' ? 'The shaded area is the range across '+result.mcSims+' simulated futures: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : 'One steady-return path, so there is no range. Switch to Historical mode to see one.'}${canCompare ? ' The dashed line and faint band are the baseline.' : ''}</div>
       <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
       ${renderEventTimeline()}
 
-      ${state.simMode !== 'fixed' ? renderBands(result) : ''}
+      ${renderAssumptions(result)}
 
-      ${state.simMode==='historical' ? renderStressTests() : ''}
+      ${canCompare ? renderCompareSummary(baselineResult, result) : ''}
 
-      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:26px">
+      ${isPaid() ? (notFixed ? renderBands(result) : '') : `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">Unlock side-by-side comparison, percentile bands, stress tests and more <span class="lock-icon">&#x1f512;</span></button>`}
+
+      ${isPaid() && state.simMode==='historical' ? renderStressTests() : ''}
+
+      ${isPaid() ? `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:26px">
         <div class="section-heading" style="margin:0">Cashflow</div>
         <div class="toggle-group" style="width:auto">
           <button class="toggle-btn cf-toggle ${cashflowMode==='net'?'active':''}" data-mode="net" onclick="setCashflowMode('net')" style="padding:5px 12px;font-size:14px">Net flow</button>
           <button class="toggle-btn cf-toggle ${cashflowMode==='breakdown'?'active':''}" data-mode="breakdown" onclick="setCashflowMode('breakdown')" style="padding:5px 12px;font-size:14px">Breakdown</button>
         </div>
       </div>
-      <div class="section-sub" id="cf-desc">${cashflowMode==='net' ? 'Green bars mean you\'re adding to the portfolio. Red means you\'re drawing from it.' : 'Income sources stacked against spending. The gap is what comes from or goes to the portfolio.'}</div>
-      <div class="chart-card"><div class="chart-wrap short"><canvas id="cashflowChart"></canvas></div></div>
+      <div class="section-sub" id="cf-desc">${cashflowMode==='net' ? 'Green bars mean you\'re adding to the portfolio. Red means you\'re drawing from it. Shown for the median path.' : 'Income sources stacked against spending, for the median path. The gap is what comes from or goes to the portfolio.'}</div>
+      <div class="chart-card"><div class="chart-wrap short"><canvas id="cashflowChart"></canvas></div></div>` : ''}
 
-      ${state.simMode==='historical' ? renderFlexibilityImpact() : ''}
+      ${isPaid() && notFixed ? renderFlexibilityImpact() : ''}
 
       <div class="section-heading">Explore spending levels</div>
       <div class="section-sub">Click a row to apply that spending level and see how it changes the projection.</div>
       ${renderSpendingExplorer()}
 
-      ${(state.simMode==='historical' || state.simMode==='montecarlo') && state.yourSSAmount > 0 ? renderSSComparison() : ''}
+      ${isPaid() && notFixed && state.yourSSAmount > 0 ? renderSSComparison() : ''}
 
-      ${(state.simMode==='historical' || state.simMode==='montecarlo') && state.accountsEnabled ? renderTaxComparison() : ''}
+      ${isPaid() && notFixed && state.accountsEnabled ? renderTaxComparison() : ''}
 
-      <div style="text-align:center;padding:12px 0 4px;font-size:14px;color:var(--ink-faint)">Educational tool, not financial advice. <a onclick="showFullDisclaimer()" style="color:var(--rust);cursor:pointer">Disclaimer</a></div>
+      <div class="disclaimer-bar" style="margin-top:22px">These results are an educational model, not advice. The tool does not know your full situation, and it treats taxes, Social Security, and healthcare in simplified ways. What you see is a range of outcomes under the assumptions shown, built from past market returns and randomized simulations. Past performance does not predict future results. Before you make a decision based on these numbers, talk to a qualified financial, tax, or legal professional who can look at the whole picture. <a onclick="showFullDisclaimer()">Full disclaimer</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></div>
     </div>`;
 
   app.innerHTML = `
     <header role="banner">
       <a href="#main-content" style="position:absolute;left:-9999px;top:auto;padding:8px 16px;background:var(--ink);color:var(--paper);z-index:200;font-size:14px" onfocus="this.style.left='0';this.style.top='0'" onblur="this.style.left='-9999px'">Skip to content</a>
-      <div class="logo"><span class="logo-dot"></span>Spend Enough</div>
+      <a class="logo" href="index.html" style="text-decoration:none;color:inherit"><span class="logo-dot"></span>Spend Enough</a>
       <div class="scenarios-bar">
         <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
@@ -1095,8 +1155,8 @@ function renderDashboard() {
   // Scroll to top only on first dashboard load
   if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
 
-  drawMainChart(result);
-  drawCashflowChart(result);
+  drawMainChart(result, canCompare ? baselineResult : null);
+  if (isPaid()) drawCashflowChart(result);
 
   // Accessibility: auto-label range inputs from nearby control-label
   document.querySelectorAll('.control').forEach(c => {
@@ -1166,14 +1226,8 @@ function moreOptionsHTML() {
       </div>
       ${state.housing > 0 && state.mortgagePayoffAge > state.age + 2 ? `<button onclick="showPayoffModal()" style="margin-top:6px;font-size:14px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">+ Model accelerated payoff \u2192</button>` : ''}
 
-      ${state.simMode==='montecarlo' ? `<div class="sidebar-heading" style="margin-top:14px">Investment assumptions</div><div class="control">
-        <div class="control-row"><span class="control-label">Volatility</span><span class="control-value">${(state.returnStdDev*100).toFixed(0)}%</span></div>
-        <input type="range" min="5" max="25" step="1" value="${state.returnStdDev*100}" oninput="slideLive(this,'returnStdDev',this.value/100)" onchange="sliderCommit('returnStdDev',this.value/100)" class="slider-input"/>
-        <input type="number" min="5" max="25" step="1" value="${(state.returnStdDev*100).toFixed(0)}" oninput="slideLive(this,'returnStdDev',this.value/100)" onchange="sliderCommit('returnStdDev',this.value/100)" placeholder="%" class="mobile-input"/>
-      </div>` : ''}
-
       <div class="sidebar-heading" style="margin-top:14px">Taxes</div>
-      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">Used to estimate take-home pay and withdrawal taxes.</div>
+      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">Used to estimate the tax rates shown under Assumptions, where you can also edit them directly.</div>
       <div class="control">
         <div class="control-row"><span class="control-label">Filing status</span></div>
         <select onchange="updateTax('filingStatus',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:14px;font-family:inherit;border-radius:2px;color:var(--ink)">
@@ -1187,7 +1241,7 @@ function moreOptionsHTML() {
           ${Object.keys(STATE_CONFIG).map(k => `<option value="${k}" ${state.stateCode===k?'selected':''}>${STATE_CONFIG[k].name}</option>`).join('')}
         </select>
       </div>
-      <div style="font-size:14px;color:var(--ink-mute);margin-top:8px">Estimated effective rate: <strong style="font-family:'JetBrains Mono',monospace">${effRate}%</strong></div>
+      <div style="font-size:14px;color:var(--ink-mute);margin-top:8px">Estimated rate on wages: <strong style="font-family:'JetBrains Mono',monospace">${effRate}%</strong> &middot; in retirement: <strong style="font-family:'JetBrains Mono',monospace">${Math.round(retirementTaxRate(state)*100)}%</strong></div>
 
       <div class="sidebar-heading" style="margin-top:14px">Account types</div>
       <div class="checkbox-row"><input type="checkbox" id="cb_accts" ${state.accountsEnabled?'checked':''} onchange="toggleAccounts(this.checked)"/><label for="cb_accts">Separate account types</label></div>
@@ -1230,90 +1284,87 @@ function moreOptionsHTML() {
 
 // ===== VERDICT =====
 function getVerdict(result) {
-  const v = { tier: 'good', eyebrow: '', headline: '', body: '', caveat: '' };
+  const v = { headline: '', body: '', caveat: '' };
   const yc = state.targetAge - state.age + 1;
+  const cuts = result.medianRunFlexCuts || 0;
+  const flexNote = state.guardrailsEnabled && cuts > 0 ? ' The median path includes spending cuts in ' + cuts + ' year' + (cuts > 1 ? 's' : '') + ' (guardrails are on; see Assumptions).' : '';
+  const threshold = Math.round((state.successThreshold || 0.85) * 100);
   if (result.mode === 'historical') {
-    const { successCount, totalPeriods, failures } = result;
+    const { successCount, totalPeriods, failures, windows } = result;
     const rate = successCount / totalPeriods;
-    v.tier = rate >= 0.9 ? 'good' : rate >= 0.7 ? 'mid' : 'bad';
-    if (successCount === totalPeriods) {
-      v.headline = 'This scenario lasted through every historical period since 1926';
-      v.body = 'We tested your plan against every rolling ' + yc + '-year period of real U.S. stock market returns since 1926, ' + totalPeriods + ' periods in total. Each includes actual sequences of booms, crashes, and everything between. This spending level survived them all, including the Great Depression, 1970s stagflation, and 2008.';
+    const tested = 'We ran your plan through every rolling ' + yc + '-year stretch of real U.S. market returns since 1926 for a ' + mixLabel() + ' stock/bond mix: ' + totalPeriods + ' periods, starting ' + windows.firstStart + ' through ' + windows.lastStart + '.';
+    if (maxSpendView) {
+      v.headline = 'You could spend about ' + fmtMoney(state.spending) + ' a year and still make it through ' + successCount + ' of ' + totalPeriods + ' historical periods';
+      v.body = 'This is the highest spending level that lasted to age ' + state.targetAge + ' in at least ' + threshold + '% of history with steady spending and no cuts. ' + tested + ' The spending explorer below shows how the count moves if you spend a little more or less.';
+    } else if (successCount === totalPeriods) {
+      v.headline = 'This plan lasted through every historical period since 1926';
+      v.body = tested + ' This spending level survived them all, including the Great Depression, 1970s stagflation, and 2008.' + flexNote + ' Surviving every period, including 1929, usually means there is room to spend more.';
     } else {
-      v.headline = 'This scenario lasted in ' + successCount + ' of ' + totalPeriods + ' historical periods';
+      v.headline = 'This plan lasted in ' + successCount + ' of ' + totalPeriods + ' historical periods';
       const failCount = totalPeriods - successCount;
       const worst = failures[0];
-      if (maxSpendView) {
-        v.body = fmtMoney(state.spending) + '/yr is the theoretical maximum at a steady ' + (state.returnRate*100).toFixed(1) + '% return. But real markets don\u2019t deliver steady returns. Bad years early in retirement can deplete a portfolio even if the long-run average is fine. Against actual market history, this spending level only survived ' + successCount + ' of ' + totalPeriods + ' periods. Use the spending explorer below to find a level that holds up in more historical environments.';
-      } else {
-        v.body = 'We tested your plan against every rolling ' + yc + '-year period of real U.S. stock market returns since 1926, ' + totalPeriods + ' periods in total.';
-        if (rate >= 0.85) {
-          v.body += ' In ' + failCount + ' period' + (failCount > 1 ? 's' : '') + ', the portfolio was depleted before age ' + state.targetAge + '.' + (worst ? ' The hardest started in ' + worst.label.split('\u2013')[0] + ' (depleted around age ' + worst.ranOutAge + ').' : '') + ' These failures tended to cluster around prolonged downturns.';
-        } else if (rate >= 0.6) {
-          v.body += ' In ' + failCount + ' of those periods, the portfolio ran out before age ' + state.targetAge + '.' + (worst ? ' The worst sequence started in ' + worst.label.split('\u2013')[0] + '.' : '') + ' At this spending level, the outcome depends heavily on which market environment you retire into.';
-        } else {
-          v.body += ' In ' + failCount + ' of ' + totalPeriods + ' periods, the portfolio was depleted. This spending level is risky by historical standards. Consider reducing spending or exploring other adjustments.';
-        }
-      }
+      v.body = tested + ' In ' + failCount + ' period' + (failCount > 1 ? 's' : '') + ' the portfolio ran out before age ' + state.targetAge + (worst ? '; the hardest started in ' + worst.label.split('\u2013')[0] + ' and ran out around age ' + worst.ranOutAge : '') + '.' + (failCount > 1 ? ' Among the periods that failed, half had run out by age ' + result.medianRunOutAge + '.' : '') + flexNote;
+      if (rate >= 0.85) v.body += ' Failures cluster around retiring into a long downturn.';
+      else if (rate >= 0.6) v.body += ' At this spending level the outcome depends heavily on which market you retire into.';
+      else v.body += ' This spending level is risky by historical standards. Try a lower level in the spending explorer.';
     }
-    v.caveat = 'Past performance does not predict future results.';
+    v.caveat = 'Past performance does not predict future results. These ' + totalPeriods + ' periods overlap heavily and all come from one country\u2019s history.';
   } else if (result.mode === 'montecarlo') {
     const rate = result.successRate;
-    v.tier = rate >= 0.9 ? 'good' : rate >= 0.7 ? 'mid' : 'bad';
-    v.headline = 'The portfolio lasted to age ' + state.targetAge + ' in ' + Math.round(rate * 100) + '% of simulations';
-    if (maxSpendView) {
-      v.body = fmtMoney(state.spending) + '/yr is the theoretical maximum at a steady return, but with realistic market volatility, this level only holds up ' + Math.round(rate * 100) + '% of the time. The spending explorer below shows what level of spending succeeds in more simulations.';
-    } else {
-      v.body = 'Across 500 simulations with ' + (state.returnStdDev*100).toFixed(0) + '% annual volatility around a ' + (state.returnRate*100).toFixed(1) + '% real return, the median ending balance was ' + fmtMoneyShort(result.medianFinal) + '.';
-    }
+    const src = mcParams(state).fromHistory ? 'the historical figures for your ' + mixLabel() + ' mix' : 'figures you set';
+    v.headline = 'The portfolio lasted to age ' + state.targetAge + ' in ' + Math.round(rate * 100) + '% of ' + result.mcSims + ' simulated futures';
+    v.body = (maxSpendView ? fmtMoney(state.spending) + ' a year is the most that made it through ' + threshold + '% of history. In ' : 'In ') + result.mcSims + ' randomized futures with ' + pct(result.mcSd, 1) + ' volatility around a ' + pct(result.mcMean, 1) + ' average real return (' + src + '), the median ending balance was ' + fmtMoneyShort(result.medianFinal) + '.' + flexNote;
+    v.caveat = 'Each future is a random draw from a bell curve. Real markets have fatter tails and streaks. Re-roll the seed under Assumptions to see how much the number moves.';
   } else {
     const lasts = result.successRate >= 1;
-    v.tier = lasts ? 'good' : 'bad';
+    const r = pct(state.returnRate, 1);
     if (maxSpendView) {
-      v.headline = 'The most you could spend is about ' + fmtMoney(state.spending) + ' per year';
-      v.body = lasts ? 'At a steady ' + (state.returnRate*100).toFixed(1) + '% real return, this is the highest annual spending that keeps your portfolio lasting to age ' + state.targetAge + '. Your ending balance would be near zero, meaning you used almost everything. Adjust the return rate or switch to Historical mode to see how this holds up against real market environments.' : 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, the portfolio would be depleted around age ' + result.medianRunOutAge + '. Try reducing the rate of return to see a more conservative estimate.';
+      v.headline = 'At a steady ' + r + ' return, the most you could spend is about ' + fmtMoney(state.spending) + ' a year';
+      v.body = lasts ? 'This is the highest annual spending that keeps the portfolio going to age ' + state.targetAge + ' if returns were the same every year. Real markets are not steady, and bad years early on can sink a plan whose average is fine. Switch to Historical mode to see how this level held up in real sequences.' : 'At a steady ' + r + ' return the portfolio would run out around age ' + result.medianRunOutAge + '.';
     } else {
-      v.headline = lasts ? 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, the portfolio lasts past age ' + state.targetAge : 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, the portfolio is depleted around age ' + result.medianRunOutAge;
-      v.body = lasts ? 'Ending balance at age ' + state.targetAge + ' would be about ' + fmtMoneyShort(result.medianFinal) + '. Real markets are bumpier than this, try Historical or Simulated mode to see the range of outcomes.' : 'This assumes the same return every year. Real sequences vary, try Historical mode to stress-test it.';
+      v.headline = lasts ? 'At a steady ' + r + ' return, the portfolio lasts past age ' + state.targetAge : 'At a steady ' + r + ' return, the portfolio runs out around age ' + result.medianRunOutAge;
+      v.body = (lasts ? 'Ending balance at age ' + state.targetAge + ' would be about ' + fmtMoneyShort(result.medianFinal) + '. ' : '') + 'This assumes the same return every year, so it hides sequence-of-returns risk. Historical mode runs the same plan through every real market stretch since 1926.' + flexNote;
     }
+    v.caveat = 'A steady-return projection is a sanity check, not a range.';
   }
-  // "Money left on the table" wedge
-  if (!maxSpendView && result.medianFinal > 10000 && !result.medianRunOutAge) {
+  // "Money left on the table" wedge: the median outcome's ending balance.
+  if (!maxSpendView && result.medianFinal > 10000) {
     v.wedge = fmtMoneyShort(result.medianFinal);
-    if (result.mode === 'historical') {
-      v.wedgeSub = 'In the median historical outcome, this is what would be left at age ' + state.targetAge + '. That\'s money you could be using.';
-    } else if (result.mode === 'montecarlo') {
-      v.wedgeSub = 'In the median simulation, this is what would remain at age ' + state.targetAge + '.';
-    } else {
-      v.wedgeSub = 'At a steady ' + (state.returnRate*100).toFixed(1) + '% return, this is what you\'d have left at age ' + state.targetAge + '. That\'s money you could be enjoying now.';
-    }
+    if (result.mode === 'historical') v.wedgeSub = 'Half of the ' + result.totalPeriods + ' historical periods ended with more than this at age ' + state.targetAge + ', half with less. That is money you could be using.';
+    else if (result.mode === 'montecarlo') v.wedgeSub = 'Half of the simulated futures ended with more than this at age ' + state.targetAge + ', half with less.';
+    else v.wedgeSub = 'At a steady ' + pct(state.returnRate, 1) + ' return, this is what you would have left at age ' + state.targetAge + '.';
   }
   return v;
 }
 
 // ===== IMPACT BANNER =====
+const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax' });
+function fmtField(k, v) {
+  if (['spending','lateSpending','portfolio','yourIncome','partnerIncome','housing'].includes(k)) return fmtMoneyShort(v);
+  if (['returnRate','stockPct'].includes(k)) return pct(v, k === 'stockPct' ? 0 : 1);
+  if (k === 'feeRate') return pct(v, 2);
+  if (['taxRate','capGainsTax'].includes(k)) return pct(v, 0);
+  if (k === 'guardrailsEnabled') return v ? 'on' : 'off';
+  return String(v);
+}
 function computeImpact() {
   if (!baselineState || !baselineResult) return null;
-  const fields = { spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', homeSaleAge: 'Home sale age', returnRate: 'Return' };
+  const fields = IMPACT_FIELDS();
   const changes = [];
   for (const k in fields) {
     if (!fields[k]) continue;
-    if (JSON.stringify(baselineState[k]) !== JSON.stringify(state[k])) {
-      let from = baselineState[k], to = state[k];
-      if (k === 'spending' || k === 'lateSpending' || k === 'portfolio') { from = fmtMoneyShort(from); to = fmtMoneyShort(to); }
-      else if (k === 'returnRate') { from = (from*100).toFixed(1)+'%'; to = (to*100).toFixed(1)+'%'; }
-      changes.push({ key: k, label: fields[k], from, to });
-    }
+    if (JSON.stringify(baselineState[k]) !== JSON.stringify(state[k])) changes.push({ key: k, label: fields[k], from: fmtField(k, baselineState[k]), to: fmtField(k, state[k]) });
   }
   if (!changes.length) return null;
-  const successDelta = result_rate(lastSimResult) - result_rate(baselineResult);
-  const finalDelta = lastSimResult.medianFinal - baselineResult.medianFinal;
-  return { changes, successDelta, finalDelta };
+  return { changes, successDelta: lastSimResult.successRate - baselineResult.successRate, finalDelta: lastSimResult.medianFinal - baselineResult.medianFinal };
 }
-function result_rate(r) { return r.successRate; }
 function renderSidebarImpact() {
   const im = computeImpact();
-  if (!im) return '';
+  const compareBtn = `<button style="font-size:13px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;margin-top:2px" onclick="toggleCompare()">${compareOn && isPaid() ? 'Stop comparing' : 'Compare side by side'}${!isPaid() ? ' &#x1f512;' : ''}</button>`;
+  if (!im) {
+    if (compareOn && isPaid()) return `<div style="background:var(--bone-2);margin:-4px -20px 10px;padding:8px 20px;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--ink-mute)">Comparing against <strong style="color:var(--ink)">${baselineName}</strong>. Change something to see the two futures diverge. ${compareBtn}</div>`;
+    return '';
+  }
   const fdTxt = (im.finalDelta >= 0 ? '+' : '') + fmtMoneyShort(im.finalDelta);
   const changeRows = im.changes.map(c =>
     `<div style="display:flex;align-items:baseline;gap:6px;line-height:1;margin-bottom:3px">
@@ -1322,22 +1373,82 @@ function renderSidebarImpact() {
     </div>`
   ).join('');
   return `<div style="background:var(--bone-2);margin:-4px -20px 10px;padding:8px 20px;border-bottom:1px solid var(--line-soft)">
+    <div style="font-size:12px;color:var(--ink-mute);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em">Versus ${baselineName}</div>
     ${changeRows}
-    <div style="font-size:13px;color:var(--ink-mute);margin-top:6px;padding-top:6px;border-top:1px solid var(--line-soft)">${fdTxt} median ending balance</div>
-    <button style="font-size:13px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;margin-top:2px" onclick="resetBaseline()">Set current as new baseline</button>
+    <div style="font-size:13px;color:var(--ink-mute);margin-top:6px;padding-top:6px;border-top:1px solid var(--line-soft)">Success ${succLabel(baselineResult)} \u2192 <strong style="color:var(--ink)">${succLabel(lastSimResult)}</strong> &middot; ${fdTxt} median ending</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <button style="font-size:13px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;margin-top:2px" onclick="resetBaseline()">Set current as new baseline</button>
+      ${compareBtn}
+    </div>
   </div>`;
 }
 
-// ===== STAT CARDS =====
-function renderStatCards(result) {
-  const ms = maxSpendCache ? maxSpendCache.spend : null;
-  const peak = Math.max(...result.percentiles.map(p => p.p50));
-  return `<div class="stat-row">
-    <div class="stat-card"><div class="stat-label">Median ending balance<span class="help-mark" data-tip="The middle outcome across all ${result.mode==='historical'?'historical periods':'simulations'}. Half did better, half did worse.">i</span></div><div class="stat-value">${fmtMoneyShort(result.medianFinal)}</div></div>
-    <div class="stat-card"><div class="stat-label">Peak balance<span class="help-mark" data-tip="The highest portfolio value reached in the median path. Shows when you have the most financial flexibility.">i</span></div><div class="stat-value">${fmtMoneyShort(peak)}</div></div>
-    <div class="stat-card"><div class="stat-label">Most you could spend<span class="help-mark" data-tip="The highest annual spending where the portfolio lasts to age ${state.targetAge} at a steady ${(state.returnRate*100).toFixed(1)}% return — the same number the 'What can I spend?' preset uses. Real markets are bumpier, so historical mode may show a lower safe level.">i</span></div><div class="stat-value">${ms ? fmtMoneyShort(ms) : '\u2014'}</div></div>
-    <div class="stat-card"><div class="stat-label">Runs out<span class="help-mark" data-tip="The age at which the portfolio hits zero in the median outcome. If blank, you don't run out before age ${state.targetAge}.">i</span></div><div class="stat-value">${result.medianRunOutAge ? 'age '+result.medianRunOutAge : 'never'}</div></div>
-  </div>`;
+// ===== READ THIS FIRST =====
+function renderReadFirst() {
+  return `<details class="read-first" ${readFirstOpen ? 'open' : ''} ontoggle="readFirstOpen=this.open">
+    <summary>Read this first: what these numbers are, and what they are not</summary>
+    <div class="read-first-body">
+      <p>These numbers are a model of your inputs, not a forecast of your life. Everything is in today’s dollars, so inflation is already accounted for.</p>
+      <p><strong>What the model does well.</strong> It takes what you have, what comes in and goes out, and the ages you set, and runs that plan through real market history and through randomized futures. It shows which decisions move the outcome a lot and which barely register, what a bad stretch of markets at the wrong time would have done, and how much you could spend and still make it in most of those worlds.</p>
+      <p><strong>What it simplifies.</strong> Taxes are flat rates you can see and change under Assumptions, not a bracket-by-bracket calculation. Social Security is whatever you entered; the built-in estimator runs high. Healthcare has no separate line, so put it in your spending. Your portfolio is a fixed stock/bond mix rebalanced yearly, less the fee you set. History is one sample: overlapping U.S. periods since 1926, and the future does not have to look like any of them. The model knows nothing that is not a number.</p>
+      <p><strong>How to read the range.</strong> The shaded band is the spread of outcomes and the line is the median. If most of the band stays above zero, the plan held up in most of the worlds tested. That is a good sign, not a guarantee. If the bottom edge hits zero, some worlds ran out, which is a reason to adjust a lever and look again, not a prediction. “Failing” here usually means running low in the final years of a plan that runs to age ${state.targetAge}. A plan that survives every period, including 1929, is probably more cautious than you need.</p>
+      <p>Before you act on any of this, take the scenario to a qualified financial planner or tax professional.</p>
+    </div></details>`;
+}
+
+// ===== ASSUMPTIONS =====
+function asmInput(key, val, opts) {
+  return `<input type="number" class="asm-input" min="${opts.min}" max="${opts.max}" step="${opts.step}" value="${val}" onchange="update('${key}', +this.value/100)" aria-label="${opts.label}"/>%`;
+}
+function asmRow(label, html) { return `<div class="asm-row"><div class="asm-label">${label}</div><div class="asm-text">${html}</div></div>`; }
+function renderAssumptions(result) {
+  const mix = state.stockPct, h = historicalStats(mix);
+  const isHist = result.mode === 'historical', isMC = result.mode === 'montecarlo';
+  const w = result.windows;
+  const retRate = retirementTaxRate(state);
+  const mixWords = Math.round(mix * 100) + '% stocks / ' + Math.round((1 - mix) * 100) + '% bonds';
+  const rows = [];
+  rows.push(asmRow('Returns', isHist
+    ? `Every rolling ${w.years}-year window of real U.S. returns for a ${mixWords} portfolio, 1926–${HISTORICAL_END_YEAR}: <strong>${w.count} windows</strong> starting ${w.firstStart} through ${w.lastStart}.${w.paddedYears ? ' Your horizon is longer than the data, so each window is padded with the mix’s long-run compound return (' + pct(h.geo) + ') for up to ' + w.paddedYears + ' years.' : ''} Windows overlap heavily, so they are not ${w.count} independent trials.`
+    : isMC
+    ? `<strong>${result.mcSims}</strong> randomized futures. Each year’s return is drawn from a bell curve with average <strong>${pct(result.mcMean)}</strong> and volatility <strong>${pct(result.mcSd)}</strong>${mcParams(state).fromHistory ? ', the 1926–' + HISTORICAL_END_YEAR + ' average and volatility of your ' + mixWords + ' mix' : ' (you set these; history for this mix is ' + pct(h.mean) + ' and ' + pct(h.sd) + ')'}. Real markets have fatter tails and streaks than a bell curve.`
+    : `One path at a steady <strong>${pct(state.returnRate)}</strong> real return every year, so no good or bad years and no sequence-of-returns risk. For comparison, the ${mixWords} mix compounded at ${pct(h.geo)} a year over 1926–${HISTORICAL_END_YEAR}.`));
+  rows.push(asmRow('Asset mix', `<strong>${mixWords}</strong>, rebalanced yearly. Stocks are the S&amp;P composite with dividends reinvested; bonds are 10-year U.S. Treasuries. History for this mix, 1926–${HISTORICAL_END_YEAR}: average ${pct(h.mean)}, volatility ${pct(h.sd)}, compound ${pct(h.geo)}, worst year ${pct(h.min)}, best ${pct(h.max)}.
+    <input type="range" class="asm-range" min="0" max="100" step="5" value="${Math.round(mix * 100)}" onchange="update('stockPct', +this.value/100)" aria-label="Percent in stocks"/>`));
+  rows.push(asmRow('Fees', `<strong>${pct(state.feeRate || 0, 2)}</strong> a year is subtracted from every year’s return, for fund expense ratios plus any advisor fee. ${asmInput('feeRate', ((state.feeRate || 0) * 100).toFixed(2), { min: 0, max: 3, step: 0.05, label: 'Annual fee percent' })} Index funds run about 0.03 to 0.2%; add an advisor and it is often near 1%.`));
+  rows.push(asmRow('Inflation', `Everything is in today’s dollars. Spending, Social Security, and housing are held constant in real terms, and the return data is already inflation-adjusted. Wages grow <strong>${pct(state.yourIncomeGrowth)}</strong> a year above inflation${isPaid() ? ' (change it under More options)' : ''}. A fixed mortgage payment is treated as if it rose with inflation, which slightly overstates housing cost in later years.`));
+  const gr = state.guardrailsEnabled;
+  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending)}</strong> a year until age ${state.slowDownAge}, then <strong>${fmtMoney(state.lateSpending)}</strong>${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails <strong>${gr ? 'on' : 'off'}</strong> <label class="asm-toggle"><input type="checkbox" ${gr ? 'checked' : ''} onchange="update('guardrailsEnabled', this.checked)"/> flex spending with the market</label>. ${gr
+    ? `Starting from the withdrawal rate in your first retired year, spending is cut <strong>${pct(state.guardrailCutPct, 0)}</strong> in any year the rate runs more than ${pct(state.guardrailBandPct, 0)} above it, and boosted <strong>${pct(state.guardrailBoostPct, 0)}</strong> when more than ${pct(state.guardrailBandPct, 0)} below. Cuts do not compound. The median path shown cut spending in <strong>${result.medianRunFlexCuts || 0}</strong> year${(result.medianRunFlexCuts || 0) === 1 ? '' : 's'}.${isPaid() ? ' Cut and boost sizes are under Spending flexibility below.' : ''}`
+    : 'The same amount is withdrawn every year no matter what markets do.'}`));
+  rows.push(asmRow('Taxes', `Wages are taxed at <strong>${pct(state.taxRate, 0)}</strong> ${asmInput('taxRate', Math.round(state.taxRate * 100), { min: 0, max: 60, step: 1, label: 'Wage tax rate percent' })}, estimated from your income, filing status, and state, including payroll tax. In retirement, traditional-IRA withdrawals and half of Social Security are taxed at <strong>${pct(retRate, 0)}</strong> ${asmInput('retirementTaxRate', Math.round(retRate * 100), { min: 0, max: 60, step: 1, label: 'Retirement tax rate percent' })}. ${state.accountsEnabled
+    ? 'Account types are on: Roth withdrawals are tax-free, taxable-account withdrawals assume half is gain taxed at <strong>' + pct(state.capGainsTax, 0) + '</strong> ' + asmInput('capGainsTax', Math.round(state.capGainsTax * 100), { min: 0, max: 50, step: 1, label: 'Capital gains rate percent' }) + ', and anything drawn before 59½ pays a 10% penalty.'
+    : 'Every portfolio withdrawal is grossed up by <strong>' + pct(state.capGainsTax, 0) + '</strong> ' + asmInput('capGainsTax', Math.round(state.capGainsTax * 100), { min: 0, max: 50, step: 1, label: 'Withdrawal tax rate percent' }) + ' for tax. Set it to 0 if your savings are mostly Roth' + (isPaid() ? ', or turn on account types under More options for per-account treatment.' : '.')} Brackets, RMDs, and Medicare surcharges are not modelled.`));
+  rows.push(asmRow('Horizon', `The plan runs from age ${state.age} through age <strong>${state.targetAge}</strong> (${state.targetAge - state.age + 1} years)${isPaid() ? ', set under More options' : ''}. A period counts as failed if the balance hits $0 before age ${state.targetAge}. There is no partial credit and no recovery after that.`));
+  if (state.yourSSAmount > 0 || state.partnerSSAmount > 0) rows.push(asmRow('Social Security', `Starts at age <strong>${state.ssStartAge}</strong> at ${fmtMoney(state.yourSSAmount)}${state.hasPartner && state.partnerSSAmount ? ' for you and ' + fmtMoney(state.partnerSSAmount) + ' for your partner' : ''} a year in today’s dollars, from your inputs. Claiming at 62 pays 70% of the full-age amount and at 70 pays 124%. Survivor and spousal benefits are not worked out for you.`));
+  if (isMC) rows.push(asmRow('Randomness', `Seed <strong>${state.mcSeed}</strong>, so these ${result.mcSims} futures repeat exactly until you <button class="link-btn" onclick="rerollSeed()">re-roll</button>. Average ${asmInput('mcMean', (result.mcMean * 100).toFixed(1), { min: -5, max: 15, step: 0.1, label: 'Simulated average real return percent' })} &middot; volatility ${asmInput('mcSd', (result.mcSd * 100).toFixed(1), { min: 1, max: 40, step: 0.5, label: 'Simulated volatility percent' })}${mcParams(state).fromHistory ? '' : ' &middot; <button class="link-btn" onclick="resetMcToHistory()">match history for this mix</button>'} &middot; futures <input type="number" class="asm-input" min="100" max="5000" step="100" value="${result.mcSims}" onchange="update('mcSims', Math.max(100, Math.min(5000, +this.value)))" aria-label="Number of simulated futures"/>`));
+  return `<details class="assumptions" ${assumptionsOpen ? 'open' : ''} ontoggle="assumptionsOpen=this.open">
+    <summary>Assumptions behind this result <span class="asm-hint">every default, and where to change it</span></summary>
+    <div class="asm-body">${rows.join('')}
+      <div class="asm-sources">Sources: <a href="${DATA_SOURCE.url}" target="_blank" rel="noopener">Robert Shiller’s U.S. stock market dataset</a> (Yale) for S&amp;P composite prices, dividends, CPI, and 10-year Treasury yields, 1926–${HISTORICAL_END_YEAR}, rebuilt by a script in the code (${HISTORICAL_END_YEAR} is a partial year); 2026 IRS brackets and standard deduction; 2026 SSA bend points and wage base; state rates from the Tax Foundation. This is not the Ibbotson data the original 4% rule studies used.</div>
+    </div></details>`;
+}
+
+// ===== SIDE BY SIDE =====
+function renderCompareSummary(a, b) {
+  const last = r => r.percentiles[r.percentiles.length - 1];
+  const range = r => r.mode === 'fixed' ? fmtMoneyShort(last(r).p50) + ' (steady return)' : (last(r).p10 <= 0 ? 'ran out' : fmtMoneyShort(last(r).p10)) + ' to ' + fmtMoneyShort(last(r).p90);
+  const im = computeImpact();
+  const diffs = im ? im.changes.map(c => c.label + ' ' + c.from + ' → ' + c.to).join('; ') : 'no inputs differ yet';
+  return `<div class="section-heading">Side by side</div>
+    <div class="section-sub"><strong>${baselineName}</strong> versus your current settings, both run in ${modeName(b.mode)} mode. What differs: ${diffs}. <button class="link-btn" onclick="toggleCompare()">Stop comparing</button></div>
+    <table class="data-table compare-table"><thead><tr><th></th><th>${baselineName}</th><th>Current</th></tr></thead><tbody>
+      <tr><td>Lasted to age ${state.targetAge}</td><td>${periodsLabel(a)}</td><td style="font-weight:600;color:var(--ink)">${periodsLabel(b)}</td></tr>
+      <tr><td>Ending balance, worst 10% to best 10%</td><td>${range(a)}</td><td>${range(b)}</td></tr>
+      <tr><td>Median ending balance</td><td>${fmtMoneyShort(a.medianFinal)}</td><td>${fmtMoneyShort(b.medianFinal)}</td></tr>
+      <tr><td>Annual spending</td><td>${fmtMoney(baselineState.spending)}</td><td>${fmtMoney(state.spending)}</td></tr>
+      <tr><td>Portfolio today</td><td>${fmtMoneyShort(baselineState.portfolio)}</td><td>${fmtMoneyShort(state.portfolio)}</td></tr>
+    </tbody></table>`;
 }
 
 // ===== CONFIDENCE BANDS =====
@@ -1346,11 +1457,16 @@ function renderBands(result) {
   if (result.mode === 'fixed') {
     return `<div class="bands"><div class="band neutral" style="grid-column:1/-1"><div class="band-label">Projected ending balance</div><div class="band-sub">At a steady ${(state.returnRate*100).toFixed(1)}% real return</div><div class="band-value">${last.p50 <= 0 ? 'Depleted at age '+result.medianRunOutAge : fmtMoneyShort(last.p50)}</div></div></div>`;
   }
-  const consTxt = last.p10 <= 0 ? 'Ran out by ' + (result.failures[0] ? 'age '+result.failures[0].ranOutAge : 'age '+state.targetAge) : fmtMoneyShort(last.p10);
-  return `<div class="bands">
-    <div class="band warn"><div class="band-label">Conservative</div><div class="band-sub">Worst 10%</div><div class="band-value">${consTxt}</div></div>
-    <div class="band ok"><div class="band-label">Likely outcome</div><div class="band-sub">Middle 50%</div><div class="band-value">${fmtMoneyShort(last.p25)}\u2013${fmtMoneyShort(last.p75)}</div></div>
-    <div class="band neutral"><div class="band-label">Optimistic</div><div class="band-sub">Best 10%</div><div class="band-value">${fmtMoneyShort(last.p90)}</div></div>
+  const unit = result.mode === 'historical' ? 'periods' : 'futures';
+  // p10 <= 0 means at least 10% of runs were depleted by the end; say that, not a single age.
+  const consTxt = last.p10 <= 0 ? 'Ran out' : fmtMoneyShort(last.p10);
+  const consSub = last.p10 <= 0 ? `${result.failureCount} of ${result.totalPeriods} ${unit} ran out; among those, half by age ${result.medianRunOutAge}` : `10% of ${unit} ended below this`;
+  return `<div class="section-heading">Ending balance at age ${state.targetAge}</div>
+  <div class="section-sub">Where the ${result.totalPeriods} ${unit} finished. Every figure is in today's dollars.</div>
+  <div class="bands">
+    <div class="band warn"><div class="band-label">Worst 10%</div><div class="band-sub">${consSub}</div><div class="band-value">${consTxt}</div></div>
+    <div class="band ok"><div class="band-label">Middle 50%</div><div class="band-sub">Half of ${unit} ended in this range</div><div class="band-value">${fmtMoneyShort(last.p25)}\u2013${fmtMoneyShort(last.p75)}</div></div>
+    <div class="band neutral"><div class="band-label">Best 10%</div><div class="band-sub">10% of ${unit} ended above this</div><div class="band-value">${fmtMoneyShort(last.p90)}</div></div>
   </div>`;
 }
 
@@ -1362,7 +1478,6 @@ function renderEventTimeline() {
   if (state.housing > 0 && state.mortgagePayoffAge > state.age) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr housing cost drops' });
   if (state.ssStartAge > state.age && (state.yourSSAmount > 0 || state.partnerSSAmount > 0)) events.push({ age: state.ssStartAge, label: 'Social Security begins', detail: fmtMoneyShort(state.yourSSAmount + state.partnerSSAmount) + '/yr starts' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending changes', detail: fmtMoneyShort(state.spending) + ' \u2192 ' + fmtMoneyShort(state.lateSpending) + '/yr' });
-  if (state.homeSaleAge) events.push({ age: state.homeSaleAge, label: 'Home sale', detail: fmtMoneyShort(state.homeSaleProceeds) + ' added to portfolio' });
   if (state.oneTimeEvents) state.oneTimeEvents.forEach(ev => events.push({ age: ev.age, label: ev.label, detail: fmtMoneyShort(ev.amount) }));
   events.sort((a, b) => a.age - b.age);
   if (!events.length) return '';
@@ -1390,7 +1505,7 @@ function computeSpendingLevels() {
 function renderSpendingExplorer() {
   const rows = computeSpendingLevels();
   const isHist = state.simMode === 'historical';
-  return `<table class="data-table"><thead><tr><th>Annual spending</th><th>${isHist?'Historical success':'Success'}</th><th>Median ending</th><th>Worst case</th></tr></thead><tbody>
+  return `<table class="data-table"><thead><tr><th>Annual spending</th><th>${isHist?'Historical success':'Success'}</th><th>Median ending</th><th>Worst 10%</th></tr></thead><tbody>
     ${rows.map(r => `<tr class="${r.isCurrent?'current-row':''} clickable" onclick="applySpending(${r.spending})" title="Click to set spending to ${fmtMoney(r.spending)}/yr"><td>${fmtMoney(r.spending)}/yr ${r.isCurrent?'<span class="tag-current">current</span>':''}</td><td>${isHist ? r.successCount+' of '+r.totalPeriods : Math.round(r.successRate*100)+'%'}</td><td>${fmtMoneyShort(r.medianFinal)}</td><td>${r.p10<=0?'<span class="fail">Ran out</span>':fmtMoneyShort(r.p10)}</td></tr>`).join('')}
   </tbody></table>`;
 }
@@ -1452,7 +1567,8 @@ function renderStressTests() {
   }).join('');
   return `<div class="section-heading">Historical stress tests</div>
     <div class="section-sub">How this scenario would have played out starting in specific market environments.</div>
-    <div class="scenario-cards">${cards}</div>`;
+    <div class="scenario-cards">${cards}</div>
+    ${HISTORICAL_SCENARIOS.some(s => runNamedScenario(state, s).padded) ? '<div class="section-sub" style="margin-top:-8px">* Your horizon runs past the end of the data; padded years use the mix’s long-run compound return.</div>' : ''}`;
 }
 
 // ===== SS COMPARISON =====
@@ -1525,9 +1641,9 @@ function renderResources() {
     <details class="faq-item">
       <summary>Where does the data come from?</summary>
       <div class="faq-body">
-        <p>Every data source is verified and cited in the code:</p>
+        <p>Every data source is cited in the code, and the return series can be rebuilt from the raw file with a script that ships with the app:</p>
         <ul>
-          <li><strong>Market returns:</strong> S&amp;P 500 real (inflation-adjusted) total returns, 1926-2025, from the Shiller CAPE dataset and us500.com. These are the same figures used in the original 4% rule research.</li>
+          <li><strong>Market returns:</strong> two annual series of real (inflation-adjusted) total returns, 1926–${HISTORICAL_END_YEAR}, both built from <a href="${DATA_SOURCE.url}" target="_blank" rel="noopener">Robert Shiller’s U.S. stock market dataset</a> (Yale). Stocks are the S&amp;P composite with dividends reinvested. Bonds are 10-year U.S. Treasuries bought at January’s yield, held a year, and repriced at the next January’s yield (a standard constant-maturity approximation with no default risk). Both are deflated by CPI and measured January to January; ${HISTORICAL_END_YEAR} runs January to December. Your asset mix blends the two, rebalanced yearly. These are not the Ibbotson series used in the original 4% rule research, which used intermediate-term government or long-term corporate bonds, so expect this tool to land within a few periods of those studies rather than match them exactly.</li>
           <li><strong>Federal tax brackets and standard deduction:</strong> 2026 figures from IRS Rev. Proc. 2025-32.</li>
           <li><strong>Social Security bend points and wage base:</strong> 2026 SSA figures ($1,286 / $7,749 bend points, $184,500 wage base).</li>
           <li><strong>State tax:</strong> California uses full 2025 CA FTB brackets (<a href="https://www.ftb.ca.gov/forms/2025/2025-540-booklet.html" target="_blank">CA FTB</a>). Nine states have no income tax (Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, Wyoming). All other states use a flat approximation based on their statutory or typical effective rate, sourced from the <a href="https://taxfoundation.org/data/all/state/state-income-tax-rates/" target="_blank">Tax Foundation</a> and each state's revenue department. Set your state in More options.</li>
@@ -1539,7 +1655,7 @@ function renderResources() {
     <details class="faq-item">
       <summary>How does the historical simulation work?</summary>
       <div class="faq-body">
-        <p>In Historical mode, the tool tests your plan against every rolling period of real U.S. market returns since 1926. If your retirement horizon is 30 years, it runs your numbers starting in 1926, then 1927, then 1928, and so on through every period in the dataset, each using the actual sequence of market returns from that era.</p>
+        <p>In Historical mode, the tool tests your plan against every rolling period of real U.S. market returns since 1926 for the stock/bond mix you chose. If your horizon is 30 years, it runs your numbers starting in 1926, then 1927, then 1928, and so on through every period in the dataset (71 of them for 30 years), each using the actual sequence of returns from that era. The periods overlap, so they are not independent trials, and the Assumptions panel shows exactly how many were run and where they start.</p>
         <p>This matters because of sequence of returns risk. A market crash in year two of retirement is far more damaging than the same crash in year twenty, even if the long-run average return is identical. In year two you are forced to sell at the bottom to cover expenses, and those sold shares never recover. Historical mode shows how many real sequences your plan survives, including the ones that started right before 1929, 1966, 2000, and 2008.</p>
         <p>Fixed and Simulated modes use steady or randomized return rates. They are faster to grasp, but they smooth over the timing risk that makes real retirement outcomes so variable.</p>
       </div>
@@ -1548,7 +1664,7 @@ function renderResources() {
     <details class="faq-item">
       <summary>How do I read the success rate?</summary>
       <div class="faq-body">
-        <p>The success rate tells you how often your plan lasted to your target age. In Historical mode it is a count ("survived 82 of 95 periods"). In Simulated mode it is a percentage across 500 randomized runs.</p>
+        <p>The success rate tells you how often your plan lasted to your target age. In Historical mode it is a count ("lasted in 66 of 71 periods"). In Simulated mode it is a percentage across ${state.mcSims} randomized futures.</p>
         <ul>
           <li><strong>100% is not the goal.</strong> A plan that survives every historical period including the Great Depression is almost certainly too conservative. You are leaving real years of good spending on the table.</li>
           <li><strong>85-90% is a reasonable target.</strong> Your plan holds up across most real market environments, including some very bad ones, without being so cautious that you are chronically underusing what you have.</li>
@@ -1585,7 +1701,7 @@ function renderResources() {
     <details class="faq-item">
       <summary>What is the 4% rule, and does this tool use it?</summary>
       <div class="faq-body">
-        <p>The 4% rule comes from William Bengen's 1994 research, later expanded by the Trinity Study. The finding: a retiree withdrawing 4% of their portfolio in year one, then adjusting for inflation each year, had never run out of money over a 30-year retirement in actual historical S&amp;P 500 data.</p>
+        <p>The 4% rule comes from William Bengen's 1994 research, later expanded by the Trinity Study. The finding: a retiree withdrawing 4% of a portfolio that was 50 to 75% stocks and the rest intermediate-term government bonds in year one, then adjusting for inflation each year, had not run out of money over any 30-year period in the data those studies used. ${(() => { const t = runForState({ ...DEFAULT_STATE, age: 65, targetAge: 94, hasPartner: false, partnerAge: 0, portfolio: 1000000, spending: 40000, lateSpending: 40000, slowDownAge: 200, yourIncome: 0, yourStopWorkAge: 65, yourSSAmount: 0, housing: 0, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false, simMode: 'historical', stockPct: state.stockPct }); return 'On this tool’s own data, with your current ' + mixLabel() + ' mix, no fees and no taxes, 4% for 30 years lasted in ' + t.successCount + ' of ' + t.totalPeriods + ' periods.'; })()}</p>
         <p>It became the dominant rule of thumb in financial planning, and it is not wrong for what it was designed to do. But it has real limits:</p>
         <ul>
           <li>It assumes a fixed withdrawal regardless of what the market does, with no adjustments in bad years.</li>
@@ -1601,13 +1717,13 @@ function renderResources() {
       <summary>How does the flexible spending (guardrails) system work?</summary>
       <div class="faq-body">
         <p>The idea comes from financial planner Jonathan Guyton: rather than withdrawing a fixed amount every year regardless of conditions, you set a target and let it flex within a band based on how hard your portfolio is actually working.</p>
-        <p>In the first year you draw from the portfolio, the tool records your withdrawal rate as the baseline. Each year after that:</p>
+        <p>In the first year you draw from the portfolio with no wages coming in, the tool records your withdrawal rate as the baseline. Each year after that:</p>
         <ul>
-          <li>If your withdrawal rate climbs more than 20% above that baseline, your portfolio is under stress and spending is cut by 25%.</li>
-          <li>If it falls more than 20% below, your portfolio is running ahead and spending is boosted by 20%.</li>
+          <li>If your withdrawal rate climbs more than ${pct(state.guardrailBandPct, 0)} above that baseline, your portfolio is under stress and that year's spending is cut by ${pct(state.guardrailCutPct, 0)}.</li>
+          <li>If it falls more than ${pct(state.guardrailBandPct, 0)} below, your portfolio is running ahead and that year's spending is boosted by ${pct(state.guardrailBoostPct, 0)}.</li>
         </ul>
-        <p>A plan with guardrails on will tighten in bad market stretches and loosen in good ones. In practice this substantially improves survival rates versus rigid fixed spending, while keeping the variability realistic enough to plan around.</p>
-        <p>Toggle guardrails on or off and adjust the cut and boost percentages in More options.</p>
+        <p>Cuts apply to one year at a time and do not compound. A plan with guardrails on will tighten in bad market stretches and loosen in good ones, which raises the survival count versus rigid spending. The trade-off is real: the verdict tells you how many years the median path cut spending, so you can judge whether you would actually live that way. One known quirk: if Social Security starts years after you retire, the baseline is set in a "bridge" year with a high withdrawal rate, which makes boosts more likely once benefits begin.</p>
+        <p>Toggle guardrails on or off under Assumptions. The cut and boost percentages are in the Spending flexibility section (Pro).</p>
       </div>
     </details>
 
@@ -1632,14 +1748,18 @@ function renderResources() {
     <details class="faq-item">
       <summary>What are the model's limitations?</summary>
       <div class="faq-body">
-        <p>A few things the model does not capture:</p>
+        <p>A few things the model does not capture or simplifies:</p>
         <ul>
+          <li><strong>Asset classes.</strong> The portfolio is U.S. large-cap stocks and 10-year Treasuries only. No international stocks, cash, TIPS, or real estate, and the bond series is a constant-maturity approximation rather than a fund's actual record.</li>
+          <li><strong>History is one sample.</strong> Overlapping U.S. periods since 1926 share most of their years, and the best-performing major market of the century is not a neutral sample. Simulated mode is a bell curve, which underweights extreme years and streaks.</li>
+          <li><strong>Fees default to zero.</strong> Set your own under Assumptions; the difference over 30 years is not small.</li>
           <li><strong>Healthcare costs</strong> are not broken out separately. Include them in your annual spending, or add pre-Medicare premiums as a life event if they will differ significantly from your regular retirement spending.</li>
           <li><strong>Required Minimum Distributions</strong> (RMDs) starting at age 73 are not modeled. For most people the impact is limited, but a large traditional IRA can push forced withdrawals into a higher tax bracket.</li>
           <li><strong>Medicare premium surcharges</strong> (IRMAA) for higher-income retirees are not included.</li>
           <li><strong>Roth conversions and tax-loss harvesting</strong> are not modeled. A good accountant can meaningfully improve your tax picture beyond what any simple model captures.</li>
           <li><strong>Spousal and survivor Social Security benefits</strong> are entered manually but not calculated automatically from each other's records.</li>
-          <li><strong>State income tax</strong> is approximated for most states. Set your state in More options for a closer number.</li>
+          <li><strong>State income tax</strong> is approximated for most states. Set your state in More options for a closer number, or edit the rates directly under Assumptions.</li>
+          <li><strong>A fixed mortgage payment</strong> is treated as if it rose with inflation. In reality it shrinks in today's dollars each year, so late-year housing cost is slightly overstated.</li>
         </ul>
         <p>Use this tool to understand the range of possibilities and the levers available to you, then take the numbers to a professional before making major decisions.</p>
       </div>
@@ -1661,7 +1781,7 @@ window.toggleFaq = function() { faqOpen = !faqOpen; render(); };
 // ============================================================================
 // CHARTS
 // ============================================================================
-function drawMainChart(result) {
+function drawMainChart(result, compare) {
   const ctx = document.getElementById('mainChart'); if (!ctx) return;
   if (chart) chart.destroy();
   const p = result.percentiles;
@@ -1675,13 +1795,21 @@ function drawMainChart(result) {
     datasets.push({ label: 'p25', data: p.map(x => x.p25), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, tension: 0.1 });
   }
   datasets.push(Object.assign(fill(p.map(x => x.p50), '#a04a28', 'transparent'), { label: 'Median', borderWidth: 2 }));
+  // Side-by-side: the baseline's range as a faint rust band and its median as a dashed line.
+  if (compare && compare.percentiles && compare.percentiles.length === p.length) {
+    const cp = compare.percentiles;
+    if (compare.mode !== 'fixed') {
+      datasets.push({ label: 'Baseline p90', data: cp.map(x => x.p90), borderColor: 'transparent', backgroundColor: 'rgba(160,74,40,0.09)', pointRadius: 0, fill: '+1', tension: 0.1 });
+      datasets.push({ label: 'Baseline p10', data: cp.map(x => x.p10), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, tension: 0.1 });
+    }
+    datasets.push({ label: 'Baseline median', data: cp.map(x => x.p50), borderColor: '#6b6356', borderDash: [5, 4], borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.1 });
+  }
 
   // Key event ages for annotations
   const events = [];
   if (state.yourStopWorkAge > state.age && state.yourStopWorkAge < state.targetAge) events.push({ age: state.yourStopWorkAge, label: 'Retire' });
   if (state.ssStartAge > state.age) events.push({ age: state.ssStartAge, label: 'SS starts' });
   if (state.mortgagePayoffAge > state.age && state.housing > 0) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
-  if (state.homeSaleAge) events.push({ age: state.homeSaleAge, label: 'Home sale' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: state.lateSpending < state.spending ? 'Spending drops' : 'Spending rises' });
 
   // Chart.js plugin for vertical annotation lines
@@ -1761,8 +1889,9 @@ function drawMainChart(result) {
         callbacks: {
           title: (t) => 'Age ' + t[0].label,
           label: (c) => {
-            if (!['Median','p10','p90'].includes(c.dataset.label)) return null;
-            const lines = [c.dataset.label + ': ' + fmtMoneyShort(c.parsed.y)];
+            if (!['Median','p10','p90','Baseline median'].includes(c.dataset.label)) return null;
+            const nice = { Median: 'Median', p10: 'Worst 10% edge', p90: 'Best 10% edge', 'Baseline median': baselineName + ' median' };
+            const lines = [nice[c.dataset.label] + ': ' + fmtMoneyShort(c.parsed.y)];
             if (c.dataset.label === 'Median' && medianRun && medianRun[c.dataIndex]) {
               const yr = medianRun[c.dataIndex];
               if (yr.yourIncome > 0) lines.push('Income: ' + fmtMoneyShort(yr.yourIncome + yr.partnerIncome));
@@ -1779,7 +1908,7 @@ function drawMainChart(result) {
             return ev ? ['\u2192 ' + ev.label] : [];
           }
         },
-        filter: (t) => ['Median','p10','p90'].includes(t.dataset.label)
+        filter: (t) => ['Median','p10','p90','Baseline median'].includes(t.dataset.label)
       } },
       scales: {
         x: { title: { display: true, text: 'Age', color: '#6b6356', font: { size: 11 } }, ticks: { color: '#75695a', maxTicksLimit: 10 }, grid: { color: 'rgba(212,202,184,0.4)' } },
@@ -1922,19 +2051,36 @@ window.removeEvent = function(i) {
   state.oneTimeEvents.splice(i, 1);
   invalidateCaches(); render();
 };
+// Estimate both tax rates from household wages: the wage rate includes FICA, the
+// retirement rate is federal + state only (no payroll tax on IRA withdrawals or SS).
+function applyEstimatedTaxRates() {
+  const gross = state.yourIncome + state.partnerIncome;
+  if (gross <= 0) return;
+  const r = estimateNetIncome({ gross, filingStatus: state.filingStatus, stateCode: state.stateCode });
+  state.taxRate = Math.round(r.effectiveRate * 100) / 100;
+  state.retirementTaxRate = Math.round(r.incomeTaxRate * 100) / 100;
+}
 window.updateTax = function(key, val) {
   state[key] = val;
-  // Recompute effective tax rate from income and tax settings
-  const gross = state.yourIncome + state.partnerIncome;
-  if (gross > 0) {
-    const r = estimateNetIncome({ gross, filingStatus: state.filingStatus, stateCode: state.stateCode });
-    state.taxRate = Math.round(r.effectiveRate * 100) / 100;
-  }
+  applyEstimatedTaxRates();
   invalidateCaches(); render();
 };
 window.setMode = function(m) {
-  if ((m === 'historical' || m === 'montecarlo') && !isPaid()) { showUnlockModal(); return; }
+  if (m === 'montecarlo' && !isPaid()) { showUnlockModal(); return; }
   state.simMode = m; invalidateCaches(); render();
+};
+window.rerollSeed = function() { state.mcSeed = Math.floor(Math.random() * 1e9); invalidateCaches(); render(); };
+window.resetMcToHistory = function() { state.mcMean = null; state.mcSd = null; invalidateCaches(); render(); };
+window.toggleCompare = function() {
+  if (!isPaid()) { showUnlockModal(); return; }
+  compareOn = !compareOn; render();
+};
+window.compareWith = function(i) {
+  if (!isPaid()) { showUnlockModal(); return; }
+  if (!savedScenarios[i]) return;
+  baselineState = JSON.parse(JSON.stringify(savedScenarios[i].state));
+  baselineName = savedScenarios[i].name;
+  compareOn = true; render();
 };
 window.setCashflowMode = function(m) {
   cashflowMode = m;
@@ -1963,12 +2109,12 @@ window.setCashflowMode = function(m) {
 window.toggleMore = function() { showMoreOptions = !showMoreOptions; render(); };
 
 // Live updates: immediate label + debounced chart, full render on release
-let liveTimer = null;
 let liveChartTimer = null;
+function liveCompare() { return (compareOn && isPaid() && baselineResult) ? baselineResult : null; }
 
 function fmtSliderVal(key, val) {
-  if (['guardrailCutPct','guardrailBoostPct'].includes(key)) return Math.round(val * 100) + '%';
-  if (['returnRate','returnStdDev','yourIncomeGrowth','partnerIncomeGrowth'].includes(key)) return (val * 100).toFixed(1) + '%';
+  if (['guardrailCutPct','guardrailBoostPct','stockPct'].includes(key)) return Math.round(val * 100) + '%';
+  if (['returnRate','returnStdDev','yourIncomeGrowth','partnerIncomeGrowth','feeRate'].includes(key)) return (val * 100).toFixed(1) + '%';
   if (['slowDownAge','yourStopWorkAge','partnerStopWorkAge','ssStartAge','mortgagePayoffAge','targetAge'].includes(key)) return String(Math.round(val));
   return fmtMoney(val);
 }
@@ -1990,7 +2136,7 @@ window.slideLive = function(el, key, rawVal) {
   liveChartTimer = setTimeout(() => {
     invalidateCaches();
     const result = runForState(state); lastSimResult = result;
-    drawMainChart(result); drawCashflowChart(result);
+    drawMainChart(result, liveCompare()); if (isPaid()) drawCashflowChart(result);
   }, 150);
 };
 
@@ -2025,10 +2171,10 @@ window.updateLive2 = function(el, k1, k2, rawVal) {
   const row = el.parentElement.querySelector('.control-value');
   if (row) row.textContent = fmtSliderVal(k1, val);
   clearTimeout(liveChartTimer);
-  liveChartTimer = setTimeout(() => { invalidateCaches(); const r = runForState(state); lastSimResult = r; drawMainChart(r); drawCashflowChart(r); }, 150);
+  liveChartTimer = setTimeout(() => { invalidateCaches(); const r = runForState(state); lastSimResult = r; drawMainChart(r, liveCompare()); if (isPaid()) drawCashflowChart(r); }, 150);
 };
 
-window.resetBaseline = function() { baselineState = JSON.parse(JSON.stringify(state)); baselineResult = lastSimResult; render(); };
+window.resetBaseline = function() { baselineState = JSON.parse(JSON.stringify(state)); baselineResult = lastSimResult; baselineName = 'Baseline'; render(); };
 window.revertChange = function(key) { if (!baselineState) return; state[key] = baselineState[key]; invalidateCaches(); render(); };
 
 window.applySSAge = function(age) {
@@ -2060,10 +2206,14 @@ window.applyPreset = function(id) {
     case 'partnerStarts': state.partnerIncome = 50000; state.partnerStopWorkAge = Math.max(state.partnerAge + 5, 62); break;
     case 'partnerRetires': state.partnerStopWorkAge = state.partnerAge; break;
     case 'partnerReturns': state.partnerIncome = state.partnerIncome > 0 ? state.partnerIncome : 60000; state.partnerStopWorkAge = Math.max(state.partnerAge + 5, 60); break;
-    case 'maxSpend': { state.simMode = 'fixed'; const ms = findMaxSpend(state); const ratio = state.spending > 0 ? state.lateSpending/state.spending : 0.85; state.spending = Math.round(ms.spend/1000)*1000; state.lateSpending = Math.round(state.spending*ratio); maxSpendView = true; break; }
+    case 'maxSpend': {
+      // In Fixed mode: the steady-return ceiling. Otherwise: the most that survived >= 85% of history.
+      const ratio = state.spending > 0 ? state.lateSpending / state.spending : 0.85;
+      const ms = state.simMode === 'fixed' ? findMaxSpend(state) : findMaxSpendAtSuccess({ ...state, spending: 100000, lateSpending: 100000 * ratio });
+      state.spending = Math.round(ms.spend / 1000) * 1000; state.lateSpending = Math.round(state.spending * ratio); maxSpendView = true; break;
+    }
     case 'delaySS': { const f = 1.24; state.ssStartAge = 70; state.yourSSAmount = Math.round(state.yourSSAmount * f); state.partnerSSAmount = Math.round(state.partnerSSAmount * f); break; }
     case 'earlySS': { const ssFactors = { 62: 0.70, 67: 1.00, 70: 1.24 }; const base = ssFactors[state.ssStartAge] || 1; state.ssStartAge = 62; state.yourSSAmount = Math.round(state.yourSSAmount / base * 0.70); state.partnerSSAmount = Math.round(state.partnerSSAmount / base * 0.70); break; }
-    case 'payoffFast': state.mortgagePayoffAge = state.age + 5; break;
     case 'sellHome': if (!state.oneTimeEvents) state.oneTimeEvents = []; state.oneTimeEvents.push({ label: 'Home sale', age: 70, amount: 400000 }); break;
     case 'ltc': if (!state.oneTimeEvents) state.oneTimeEvents = []; for (let a = 85; a < 90; a++) state.oneTimeEvents.push({ label: 'Long-term care', age: a, amount: -90000 }); break;
   }
@@ -2091,35 +2241,14 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && mod
 
 window.showFullDisclaimer = function() {
   openModal(`<h2>Important disclaimer</h2>
-    <p>This tool is provided for educational purposes only and does not constitute financial, investment, tax, or legal advice.</p>
-    <p>The results shown are hypothetical projections based on your inputs and historical data. They are not predictions of future performance and should not be the sole basis for any financial decision.</p>
-    <p>Your actual results will depend on factors this tool cannot model, including actual market performance, tax law changes, inflation, health, and life events.</p>
-    <p>Before making major decisions, consult a qualified financial advisor, tax professional, or estate-planning attorney. This tool creates no advisory or fiduciary relationship.</p>`);
-};
-
-window.showComparison = function() {
-  if (savedScenarios.length < 2) return;
-  const rows = savedScenarios.map(sc => {
-    const r = runForState(sc.state);
-    const isHist = sc.state.simMode === 'historical';
-    return {
-      name: sc.name,
-      spending: sc.state.spending,
-      portfolio: sc.state.portfolio,
-      retireAge: sc.state.yourStopWorkAge,
-      mode: sc.state.simMode === 'montecarlo' ? 'Simulated' : sc.state.simMode === 'historical' ? 'Historical' : 'Fixed',
-      success: isHist ? r.successCount + '/' + r.totalPeriods : sc.state.simMode === 'montecarlo' ? Math.round(r.successRate * 100) + '%' : (r.successRate >= 1 ? 'Lasts' : 'Runs out'),
-      medianFinal: r.medianFinal,
-      tier: r.successRate >= 0.9 ? 'good' : r.successRate >= 0.7 ? 'mid' : 'bad',
-    };
-  });
-  const table = `<table class="data-table"><thead><tr><th>Scenario</th><th>Spending</th><th>Portfolio</th><th>Retire at</th><th>Mode</th><th>Outcome</th><th>Median ending</th></tr></thead><tbody>
-    ${rows.map(r => `<tr><td style="font-weight:600">${r.name}</td><td>${fmtMoney(r.spending)}/yr</td><td>${fmtMoneyShort(r.portfolio)}</td><td>${r.retireAge}</td><td>${r.mode}</td><td style="color:var(--${r.tier==='good'?'moss':r.tier==='mid'?'gold':'danger'});font-weight:600">${r.success}</td><td>${fmtMoneyShort(r.medianFinal)}</td></tr>`).join('')}
-  </tbody></table>`;
-  openModal(`<h2>Compare scenarios</h2>
-    <p style="margin-bottom:16px">Side-by-side comparison of your saved scenarios.</p>
-    ${table}
-    <p style="font-size:14px;color:var(--ink-faint);margin-top:12px">Each scenario is run with its own mode and settings. Click "load" in the sidebar to explore any scenario in detail.</p>`);
+    <p><strong>Educational purpose only.</strong> Spend Enough is an educational modelling tool. It is provided to help you explore how different decisions might affect your finances over time. It is not financial, investment, tax, retirement, estate, insurance, or legal advice, and nothing in the tool or on this site should be read as a recommendation to buy, sell, hold, or do anything with any asset or account.</p>
+    <p><strong>No knowledge of your situation.</strong> The tool works only from the numbers you enter and a set of stated assumptions. It does not know your health, your family, your employer benefits, your debts, your full tax picture, your risk tolerance, or anything else it was not told. Two people with identical inputs can have very different real-world outcomes.</p>
+    <p><strong>Ranges, not predictions.</strong> Results are shown as ranges (success counts, percentiles, and shaded bands) generated by running your inputs against historical market sequences and randomized simulations. They describe what happened under a set of assumptions, not what will happen. Past performance does not predict future results. Markets, tax law, inflation, interest rates, and your own life can all behave differently than any model assumes.</p>
+    <p><strong>Simplifications.</strong> The model simplifies many things, including taxes, Social Security benefits, healthcare costs, asset allocation, investment fees, and required minimum distributions. The "Read this first" note, the Assumptions panel, and the FAQ describe the main simplifications. The list is not exhaustive.</p>
+    <p><strong>No professional relationship.</strong> Using the tool does not create an advisory, fiduciary, client, or professional relationship between you and the maker of Spend Enough, who is not a registered investment adviser, broker-dealer, tax preparer, or law firm.</p>
+    <p><strong>Consult a professional.</strong> Before making any decision that depends on these results, including leaving a job, retiring, changing contributions, paying off debt, claiming benefits, or changing investments, consult a qualified financial planner, tax professional, or attorney who can review your specific circumstances.</p>
+    <p><strong>Your responsibility.</strong> You are solely responsible for any decision you make and for verifying any figure the tool produces before relying on it.</p>
+    <p style="font-size:13px;color:var(--ink-faint)">See also the <a href="privacy.html" style="color:var(--rust)">privacy policy</a> and <a href="terms.html" style="color:var(--rust)">terms of service</a>.</p>`);
 };
 
 window.showAbout = function() {
@@ -2153,27 +2282,11 @@ window.showScenarioDetail = function(id) {
   openModal(`<h2>${s.name} \u00b7 ${s.startYear}\u2013${s.startYear + (state.targetAge - state.age)}${run.padded?'*':''}</h2>
     <div class="detail-narrative">${narrative}</div>
     ${table}
-    ${run.padded ? '<p style="font-size:14px;color:var(--ink-faint)">*This horizon extends beyond available history; later years use the long-run average return.</p>' : ''}
+    ${run.padded ? '<p style="font-size:14px;color:var(--ink-faint)">*This horizon extends beyond available history; the last ' + run.paddedYears + ' year' + (run.paddedYears === 1 ? '' : 's') + ' use the mix’s long-run compound return (' + pct(historicalStats(state.stockPct).geo) + ').</p>' : ''}
     <p style="font-size:14px;color:var(--ink-faint)">Past performance does not predict future results.</p>`);
 };
 
-// ===== TAX / SS HELPERS (onboarding) =====
-window.openTaxHelper = function() {
-  openModal(`<h2>Estimate take-home income</h2>
-    <p>Enter gross household income to see a rough net (after federal, state, and FICA).</p>
-    <div class="field"><label>Gross annual income</label><input type="number" id="th_gross" placeholder="e.g. 150000"/></div>
-    <div class="field" style="margin-top:10px"><label>Filing status</label><select id="th_filing"><option value="mfj">Married filing jointly</option><option value="single">Single</option></select></div>
-    <div class="field" style="margin-top:10px"><label>State</label><select id="th_state">${Object.keys(STATE_CONFIG).map(k => `<option value="${k}">${STATE_CONFIG[k].name}</option>`).join('')}</select></div>
-    <div style="margin-top:14px"><button class="btn-primary" onclick="runTaxHelper()">Estimate</button></div>
-    <div id="th_result" style="margin-top:14px;font-size:14px;color:var(--ink-soft)"></div>`);
-};
-window.runTaxHelper = function() {
-  const gross = parseFloat(document.getElementById('th_gross').value) || 0;
-  const filing = document.getElementById('th_filing').value;
-  const st = document.getElementById('th_state').value;
-  const r = estimateNetIncome({ gross, filingStatus: filing, stateCode: st });
-  document.getElementById('th_result').innerHTML = `Estimated net: <strong>${fmtMoney(r.net)}</strong> (federal ${fmtMoney(r.federal)}, state ${fmtMoney(r.state)}, FICA ${fmtMoney(r.fica)}). Effective rate ${(r.effectiveRate*100).toFixed(1)}%. <br/><span style="font-size:14px;color:var(--ink-faint)">A rough estimate, not tax advice.</span>`;
-};
+// ===== SS HELPER (onboarding) =====
 window.openSSHelper = function() {
   openModal(`<h2>Estimate Social Security</h2>
     <p>A rough estimate from your typical career income. Your ssa.gov statement is the official figure.</p>
