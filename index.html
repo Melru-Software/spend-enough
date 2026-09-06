@@ -36,7 +36,7 @@
     font-family: 'Inter Tight', system-ui, sans-serif;
     background: var(--bone);
     color: var(--ink);
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
@@ -99,114 +99,117 @@
     margin-right: 2px;
     transform: translateY(-2px);
   }
-  .tagline { color: var(--ink-mute); font-size: 13px; font-style: italic; font-family: 'Fraunces', serif; }
+  .tagline { color: var(--ink-mute); font-size: 14px; font-style: italic; font-family: 'Fraunces', serif; }
   .scenarios-bar { display: flex; gap: 8px; align-items: center; }
   .scenario-pill {
     padding: 6px 14px; border: 1px solid var(--line); background: var(--paper);
-    color: var(--ink-soft); font-size: 12px; border-radius: 100px; cursor: pointer;
+    color: var(--ink-soft); font-size: 14px; border-radius: 100px; cursor: pointer;
     transition: all 0.15s ease; font-weight: 500; font-family: inherit;
   }
   .scenario-pill:hover { border-color: var(--ink); background: var(--bone-2); }
 
   /* ========== ONBOARDING ========== */
-  .onboarding { max-width: 720px; margin: 0 auto; padding: 64px 40px; }
+  .onboarding { max-width: 960px; margin: 0 auto; padding: 64px 40px; }
   .onboard-hero { margin-bottom: 48px; text-align: center; }
-  .onboard-eyebrow { text-transform: uppercase; letter-spacing: 0.18em; font-size: 11px; color: var(--rust); font-weight: 600; margin-bottom: 18px; }
-  .onboard-title { font-family: 'Fraunces', serif; font-size: clamp(38px, 6vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 22px; }
+  .onboard-eyebrow { text-transform: uppercase; letter-spacing: 0.18em; font-size: 14px; color: var(--rust); font-weight: 600; margin-bottom: 18px; }
+  .onboard-title { font-family: 'Fraunces', serif; font-size: clamp(38px, 6vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 22px; white-space: nowrap; }
   .onboard-title em { font-style: italic; color: var(--rust); font-weight: 500; }
   .onboard-sub { font-size: 17px; color: var(--ink-mute); max-width: 520px; margin: 0 auto; line-height: 1.6; }
-  .onboard-fine { font-size: 12px; color: var(--ink-faint); margin-top: 18px; }
+  .onboard-fine { font-size: 14px; color: var(--ink-faint); margin-top: 18px; }
   .onboard-fine a { color: var(--rust); }
-  .onboard-step { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 32px; margin-bottom: 14px; box-shadow: var(--shadow-sm); }
-  .step-number { font-family: 'Fraunces', serif; font-size: 13px; color: var(--rust); font-style: italic; margin-bottom: 8px; }
+  .onboard-step { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 32px; margin-bottom: 14px; box-shadow: var(--shadow-sm); max-width: 680px; margin-left: auto; margin-right: auto; }
+  .step-number { font-family: 'Fraunces', serif; font-size: 14px; color: var(--rust); font-style: italic; margin-bottom: 8px; }
   .step-title { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.01em; }
   .step-hint { color: var(--ink-mute); font-size: 14px; margin-bottom: 22px; }
   .field-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
   .field-grid.cols-1 { grid-template-columns: 1fr; }
   .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute); font-weight: 600; }
+  .field label { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute); font-weight: 600; }
   .field input, .field select { background: var(--bone); border: 1px solid var(--line); padding: 11px 14px; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--ink); border-radius: 2px; transition: border-color 0.15s ease; }
   .field input:focus, .field select:focus { outline: none; border-color: var(--ink); }
-  .field-hint { font-size: 11px; color: var(--ink-faint); }
-  .field-hint .helper-trigger { background: none; border: none; color: var(--rust); cursor: pointer; font-size: 11px; text-decoration: underline; padding: 0; font-family: inherit; }
+  .field-hint { font-size: 14px; color: var(--ink-faint); }
+  .field-hint .helper-trigger { background: none; border: none; color: var(--rust); cursor: pointer; font-size: 14px; text-decoration: underline; padding: 0; font-family: inherit; }
   .step-actions { display: flex; justify-content: center; gap: 12px; margin-top: 28px; }
   .btn-primary { background: var(--ink); color: var(--paper); border: none; padding: 14px 28px; font-size: 15px; font-weight: 600; border-radius: 3px; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s ease; }
   .btn-primary:hover { background: var(--rust); }
   .btn-secondary { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); padding: 14px 22px; font-size: 14px; border-radius: 3px; cursor: pointer; font-family: inherit; }
   .btn-secondary:hover { border-color: var(--ink); }
-  .validation-msg { color: var(--danger); font-size: 13px; text-align: center; margin-top: 14px; min-height: 18px; }
+  .validation-msg { color: var(--danger); font-size: 14px; text-align: center; margin-top: 14px; min-height: 18px; }
 </style>
 </head>
 <style>
   /* ========== DASHBOARD LAYOUT ========== */
-  .dashboard { display: grid; grid-template-columns: 320px 1fr; grid-template-areas: "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
+  .dashboard { display: grid; grid-template-columns: 360px 1fr; grid-template-areas: "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
   .resources-row { grid-area: resources; border-top: 1px solid var(--line); padding: 22px 32px 30px; text-align: center; }
   .sidebar { grid-area: sidebar; background: var(--paper); border-right: 1px solid var(--line); padding: 22px 20px; overflow-y: auto; }
   .sidebar-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
   .sidebar-section:last-child { border-bottom: none; }
   
-  .sidebar-heading { text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
-  .sidebar-sub { font-size: 11px; color: var(--ink-mute); margin-bottom: 12px; }
-  .preset-btn { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--bone); padding: 9px 11px; font-size: 12px; color: var(--ink-soft); margin-bottom: 5px; border-radius: 3px; font-family: inherit; cursor: pointer; transition: border-color 0.15s ease; }
+  .sidebar-heading { text-transform: uppercase; letter-spacing: 0.12em; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .sidebar-sub { font-size: 14px; color: var(--ink-mute); margin-bottom: 12px; }
+  .preset-btn { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--bone); padding: 9px 11px; font-size: 14px; color: var(--ink-soft); margin-bottom: 5px; border-radius: 3px; font-family: inherit; cursor: pointer; transition: border-color 0.15s ease; }
   .preset-btn:hover { border-color: var(--rust); color: var(--ink); }
   .preset-icon { color: var(--rust); font-style: italic; font-family: 'Fraunces', serif; margin-right: 5px; }
   .toggle-group { display: flex; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
-  .toggle-btn { flex: 1; padding: 7px 4px; font-size: 11px; text-align: center; border: none; cursor: pointer; font-family: inherit; background: var(--bone); color: var(--ink-mute); transition: all 0.12s ease; }
+  .toggle-btn { flex: 1; padding: 7px 4px; font-size: 14px; text-align: center; border: none; cursor: pointer; font-family: inherit; background: var(--bone); color: var(--ink-mute); transition: all 0.12s ease; }
   .toggle-btn:hover { background: var(--bone-2); }
   .toggle-btn.active { background: var(--ink); color: var(--paper); }
   .control { margin-bottom: 14px; }
   .control-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
   .control-label { color: var(--ink-soft); flex: 1; font-size: inherit; }
-  .control-value { font-size: 12px; font-weight: 500; color: var(--ink); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+  .control-value { font-size: 14px; font-weight: 500; color: var(--ink); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
   .control input[type=range] { width: 100%; height: 4px; -webkit-appearance: none; appearance: none; background: var(--line); border-radius: 2px; outline: none; }
   .control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; transition: background 0.12s; }
   .control input[type=range]::-webkit-slider-thumb:hover { background: var(--rust); }
   .control input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; border: none; }
-  .control input[type=number] { width: 100%; background: var(--bone); border: 1px solid var(--line); padding: 7px 9px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink); border-radius: 2px; }
+  .control input[type=number] { width: 100%; background: var(--bone); border: 1px solid var(--line); padding: 7px 9px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--ink); border-radius: 2px; }
   .control input[type=number]:focus { outline: none; border-color: var(--ink); }
-  .help-mark { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-mute); font-size: 9px; font-style: italic; margin-left: 4px; cursor: help; font-family: 'Fraunces', serif; }
-  .more-toggle { display: block; width: 100%; text-align: left; border: none; background: transparent; padding: 8px 0 0; font-size: 12px; color: var(--rust); font-family: inherit; cursor: pointer; }
-  .more-toggle:hover { text-decoration: underline; }
+  .help-mark { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; min-width: 15px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-mute); font-size: 10px; font-style: italic; margin-left: 4px; cursor: help; font-family: 'Fraunces', serif; vertical-align: middle; overflow: hidden; box-sizing: border-box; }
+  #tip-popup { position: fixed; z-index: 9999; background: var(--ink); color: var(--paper); font-size: 13px; padding: 6px 10px; border-radius: 4px; max-width: 260px; line-height: 1.4; pointer-events: none; display: none; font-family: inherit; }
+  .more-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 3px; background: var(--bone); padding: 7px 10px; font-size: 14px; color: var(--ink-soft); font-family: inherit; cursor: pointer; font-weight: 600; }
+  .more-toggle:hover { border-color: var(--ink-mute); color: var(--ink); }
+  .more-toggle-chevron { font-size: 14px; color: var(--ink-mute); transition: transform 0.15s; }
+  .more-hint { font-size: 14px; color: var(--ink-mute); margin-top: 5px; padding: 0 2px; letter-spacing: 0.01em; }
   .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .checkbox-row input { width: 14px; height: 14px; accent-color: var(--ink); }
-  .checkbox-row label { font-size: 12px; color: var(--ink-soft); cursor: pointer; }
+  .checkbox-row label { font-size: 14px; color: var(--ink-soft); cursor: pointer; }
   .acct-grid { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; }
-  .acct-grid label { font-size: 12px; color: var(--ink-soft); }
-  .acct-grid input { width: 110px; background: var(--bone); border: 1px solid var(--line); padding: 6px 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink); border-radius: 2px; text-align: right; }
+  .acct-grid label { font-size: 14px; color: var(--ink-soft); }
+  .acct-grid input { width: 110px; background: var(--bone); border: 1px solid var(--line); padding: 6px 8px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--ink); border-radius: 2px; text-align: right; }
 
   /* ========== MAIN ========== */
   .main { grid-area: main; padding: 24px 32px; overflow-y: auto; max-width: 1100px; }
-  .disclaimer-bar { background: var(--bone-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px 16px; font-size: 12px; line-height: 1.5; color: var(--ink-mute); margin-bottom: 18px; }
+  .disclaimer-bar { background: var(--bone-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px 16px; font-size: 14px; line-height: 1.5; color: var(--ink-mute); margin-bottom: 18px; }
   .disclaimer-bar strong { color: var(--ink-soft); font-weight: 600; }
   .disclaimer-bar a { color: var(--rust); cursor: pointer; }
-  .impact-banner { background: var(--bone-2); border-radius: 4px; padding: 11px 16px; font-size: 12px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 16px; }
+  .impact-banner { background: var(--bone-2); border-radius: 4px; padding: 11px 16px; font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 16px; }
   .impact-banner strong { color: var(--ink); }
-  .impact-banner button { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: 12px; text-decoration: underline; padding: 0; }
+  .impact-banner button { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: 14px; text-decoration: underline; padding: 0; }
 
   /* Verdict */
   .verdict { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 24px 28px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
-  .verdict-eye { text-transform: uppercase; letter-spacing: 0.15em; font-size: 10px; font-weight: 700; margin-bottom: 8px; }
+  .verdict-eye { text-transform: uppercase; letter-spacing: 0.15em; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
   .verdict-eye.good { color: var(--moss); }
   .verdict-eye.mid { color: var(--gold); }
   .verdict-eye.bad { color: var(--danger); }
   .verdict-head { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 400; color: var(--ink); line-height: 1.25; margin-bottom: 10px; letter-spacing: -0.01em; }
   .verdict-body { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
-  .verdict-caveat { font-size: 12px; color: var(--ink-faint); margin-top: 10px; font-style: italic; }
+  .verdict-caveat { font-size: 14px; color: var(--ink-faint); margin-top: 10px; font-style: italic; }
   .verdict-wedge { margin-top: 14px; padding: 12px 16px; background: rgba(184,92,56,0.06); border-left: 3px solid var(--rust); border-radius: 0 4px 4px 0; font-size: 15px; color: var(--ink); line-height: 1.5; }
   .verdict-wedge .wedge-amount { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--rust); font-size: 16px; }
-  .verdict-wedge .wedge-sub { font-size: 12px; color: var(--ink-mute); margin-top: 4px; }
+  .verdict-wedge .wedge-sub { font-size: 14px; color: var(--ink-mute); margin-top: 4px; }
 
   .toggle-btn.locked { opacity: 0.7; }
-  .toggle-btn.locked .lock-icon { font-size: 10px; margin-left: 3px; }
-  .unlock-prompt { margin-top: 8px; padding: 10px 14px; background: rgba(184,92,56,0.06); border-radius: 4px; font-size: 12px; color: var(--ink-soft); line-height: 1.6; }
+  .toggle-btn.locked .lock-icon { font-size: 14px; margin-left: 3px; }
+  .unlock-prompt { margin-top: 8px; padding: 10px 14px; background: rgba(184,92,56,0.06); border-radius: 4px; font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
   /* Free-tier preview of paid settings: visible but non-interactive */
-  .locked-note { margin: 8px 0; padding: 8px 10px; background: var(--bone-2); border-left: 2px solid var(--rust); border-radius: 3px; font-size: 11px; color: var(--ink-soft); line-height: 1.5; }
-  .link-btn { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: 11px; text-decoration: underline; padding: 0; }
+  .locked-note { margin: 8px 0; padding: 8px 10px; background: var(--bone-2); border-left: 2px solid var(--rust); border-radius: 3px; font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+  .link-btn { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: 14px; text-decoration: underline; padding: 0; }
   .locked-preview { border: none; padding: 0; margin: 0; min-width: 0; opacity: 0.5; pointer-events: none; }
   .unlock-prompt a { color: var(--rust); cursor: pointer; text-decoration: underline; }
   .unlock-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
-  .unlock-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--paper); }
-  .unlock-input-row button { padding: 10px 16px; background: var(--rust); color: var(--paper); border: none; border-radius: 3px; font-family: inherit; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .unlock-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 14px; background: var(--paper); }
+  .unlock-input-row button { padding: 10px 16px; background: var(--rust); color: var(--paper); border: none; border-radius: 3px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
   .unlock-input-row button:hover { background: var(--rust-deep); }
   /* Free vs Pro comparison (unlock modal) */
   .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
@@ -214,10 +217,10 @@
   .compare-col.pro { border-color: var(--rust); background: rgba(184,92,56,0.05); }
   .compare-head { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: var(--ink); }
   .compare-col.pro .compare-head { color: var(--rust-deep); }
-  .compare-sub { font-size: 10px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-  .compare-plus { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .compare-sub { font-size: 14px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .compare-plus { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
   .compare-list { list-style: none; margin: 0; padding: 0; }
-  .compare-list li { font-size: 12px; color: var(--ink-soft); line-height: 1.4; padding: 6px 0 6px 18px; position: relative; border-top: 1px solid var(--line-soft); }
+  .compare-list li { font-size: 14px; color: var(--ink-soft); line-height: 1.4; padding: 6px 0 6px 18px; position: relative; border-top: 1px solid var(--line-soft); }
   .compare-list li:first-child { border-top: none; }
   .compare-list li::before { content: '\2713'; position: absolute; left: 0; top: 6px; color: var(--moss); font-weight: 700; }
   .compare-col.pro .compare-list li::before { color: var(--rust); }
@@ -230,13 +233,13 @@
 
   /* Sections */
   .section-heading { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: var(--ink); margin: 26px 0 4px; }
-  .section-sub { font-size: 12px; color: var(--ink-mute); line-height: 1.5; margin-bottom: 14px; }
+  .section-sub { font-size: 14px; color: var(--ink-mute); line-height: 1.5; margin-bottom: 14px; }
 
   /* Confidence bands */
   .bands { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
   .band { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; }
-  .band-label { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
-  .band-sub { font-size: 11px; color: var(--ink-mute); margin-bottom: 8px; }
+  .band-label { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .band-sub { font-size: 14px; color: var(--ink-mute); margin-bottom: 8px; }
   .band-value { font-size: 17px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
   .band.warn .band-value { color: var(--danger); }
   .band.ok .band-value { color: var(--moss); }
@@ -248,11 +251,11 @@
   .chart-wrap.short { height: 200px; }
 
   /* Tables */
-  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 18px; }
-  .data-table th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); color: var(--ink-mute); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 18px; }
+  .data-table th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); color: var(--ink-mute); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; }
   .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); color: var(--ink-soft); }
   .data-table tr.current-row { background: var(--bone-2); }
-  .data-table .tag-current { display: inline-block; background: var(--rust); color: var(--paper); font-size: 9px; padding: 1px 6px; border-radius: 2px; margin-left: 6px; vertical-align: 1px; font-weight: 600; }
+  .data-table .tag-current { display: inline-block; background: var(--rust); color: var(--paper); font-size: 14px; padding: 1px 6px; border-radius: 2px; margin-left: 6px; vertical-align: 1px; font-weight: 600; }
   .data-table .fail { color: var(--danger); font-weight: 600; }
   .data-table .clickable { cursor: pointer; }
   .data-table .clickable:hover { background: var(--bone-2); }
@@ -263,20 +266,20 @@
   .scenario-card:hover { border-color: var(--rust); }
   .scenario-card.failed { border-left: 3px solid var(--danger-soft); }
   .scenario-card.survived { border-left: 3px solid var(--moss); }
-  .scenario-name { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
-  .scenario-years { font-size: 11px; color: var(--ink-mute); margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; }
-  .scenario-result { font-size: 13px; font-weight: 600; }
+  .scenario-name { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .scenario-years { font-size: 14px; color: var(--ink-mute); margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; }
+  .scenario-result { font-size: 14px; font-weight: 600; }
   .scenario-result.ok { color: var(--moss); }
   .scenario-result.fail { color: var(--danger); }
-  .scenario-desc { font-size: 11px; color: var(--ink-mute); margin-top: 5px; line-height: 1.4; }
-  .scenario-card.add { border-style: dashed; display: flex; align-items: center; justify-content: center; color: var(--ink-faint); font-size: 13px; }
+  .scenario-desc { font-size: 14px; color: var(--ink-mute); margin-top: 5px; line-height: 1.4; }
+  .scenario-card.add { border-style: dashed; display: flex; align-items: center; justify-content: center; color: var(--ink-faint); font-size: 14px; }
 
   /* Flexibility */
   .flex-box { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 16px 20px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; text-align: center; }
-  .flex-label { font-size: 11px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .flex-label { font-size: 14px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
   .flex-value { font-size: 18px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
   .flex-arrow { font-size: 20px; color: var(--rust); }
-  .flex-note { font-size: 12px; color: var(--ink-mute); line-height: 1.5; margin-bottom: 18px; }
+  .flex-note { font-size: 14px; color: var(--ink-mute); line-height: 1.5; margin-bottom: 18px; }
 
   /* SS comparison */
   .ss-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
@@ -284,40 +287,55 @@
   .ss-card:hover { border-color: var(--rust); }
   .ss-card.highlight { border: 2px solid var(--moss); }
   .ss-age { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 500; color: var(--ink); }
-  .ss-label { font-size: 10px; color: var(--ink-mute); margin: 2px 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
-  .ss-benefit { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
-  .ss-success { font-size: 13px; font-weight: 600; }
+  .ss-label { font-size: 14px; color: var(--ink-mute); margin: 2px 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .ss-benefit { font-size: 14px; color: var(--ink-soft); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+  .ss-success { font-size: 14px; font-weight: 600; }
 
   /* Assumptions + resources */
-  .assumptions-section { margin: 8px 0 18px; }
-  .assumptions-section summary { font-size: 13px; color: var(--rust); cursor: pointer; font-weight: 500; }
-  .assumptions-section .assumptions-body { font-size: 12px; color: var(--ink-mute); line-height: 1.7; margin-top: 10px; padding-left: 4px; }
-  .assumptions-section .assumptions-body strong { color: var(--ink-soft); }
-  .resources { max-width: 720px; margin: 0 auto; }
-  .resources a { color: var(--rust); font-size: 13px; text-decoration: none; margin-right: 16px; }
-  .resources a:hover { text-decoration: underline; }
-  .resources p { font-size: 12px; color: var(--ink-mute); line-height: 1.6; margin-top: 8px; }
+  .resources-row { padding: 0 !important; }
+  .faq-toggle { width: 100%; background: none; border: none; padding: 18px 32px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-family: inherit; }
+  .faq-toggle:hover .faq-toggle-label { color: var(--ink); }
+  .faq-toggle-label { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-mute); }
+  .faq-toggle-chevron { font-size: 14px; color: var(--ink-mute); }
+  .faq-inner { padding: 8px 32px 32px; }
+  .faq { max-width: 800px; margin: 0 auto; }
+  .faq-heading { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 18px; letter-spacing: -0.01em; }
+  .faq-item { border-top: 1px solid var(--line-soft); }
+  .faq-item:last-child { border-bottom: 1px solid var(--line-soft); }
+  .faq-item summary { font-size: 15px; font-weight: 600; color: var(--ink-soft); cursor: pointer; padding: 14px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after { content: '+'; font-size: 18px; color: var(--ink-mute); font-weight: 400; }
+  .faq-item[open] summary::after { content: '\2212'; }
+  .faq-item summary:hover { color: var(--ink); }
+  .faq-body { font-size: 14px; color: var(--ink-mute); line-height: 1.75; padding-bottom: 16px; text-align: left; }
+  .faq-body p { margin-bottom: 10px; }
+  .faq-body p:last-child { margin-bottom: 0; }
+  .faq-body strong { color: var(--ink-soft); }
+  .faq-body a { color: var(--rust); text-decoration: none; }
+  .faq-body a:hover { text-decoration: underline; }
+  .faq-body ul { padding-left: 18px; margin: 6px 0; }
+  .faq-body ul li { margin-bottom: 4px; }
 
   /* Stat cards */
   .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
   .stat-card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; }
-  .stat-label { font-size: 11px; color: var(--ink-mute); margin-bottom: 4px; }
+  .stat-label { font-size: 14px; color: var(--ink-mute); margin-bottom: 4px; }
   .stat-value { font-size: 20px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--ink); }
 
   /* Saved scenarios */
   .scenario-save-row { display: flex; gap: 8px; margin-bottom: 12px; }
-  .scenario-save-row input { flex: 1; background: var(--bone); border: 1px solid var(--line); padding: 8px 10px; font-size: 13px; border-radius: 2px; font-family: inherit; }
-  .saved-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line-soft); font-size: 12px; }
-  .saved-item button { background: none; border: none; color: var(--rust); cursor: pointer; font-size: 11px; font-family: inherit; }
+  .scenario-save-row input { flex: 1; background: var(--bone); border: 1px solid var(--line); padding: 8px 10px; font-size: 14px; border-radius: 2px; font-family: inherit; }
+  .saved-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line-soft); font-size: 14px; }
+  .saved-item button { background: none; border: none; color: var(--rust); cursor: pointer; font-size: 14px; font-family: inherit; }
 
   /* Modal */
   .modal-overlay { position: fixed; inset: 0; background: rgba(26,24,20,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
   .modal { background: var(--paper); border-radius: 6px; max-width: 600px; max-height: 80vh; overflow-y: auto; padding: 32px; box-shadow: var(--shadow-md); }
   .modal h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; margin-bottom: 16px; }
-  .modal p { font-size: 13px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 12px; }
+  .modal p { font-size: 14px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 12px; }
   .modal .modal-close { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-mute); }
 
-  .detail-narrative { background: var(--bone-2); border-radius: 4px; padding: 14px 18px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
+  .detail-narrative { background: var(--bone-2); border-radius: 4px; padding: 14px 18px; font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
 
   @media (max-width: 860px) {
     .dashboard { grid-template-columns: 1fr; grid-template-areas: "main" "sidebar" "resources"; }
@@ -344,10 +362,10 @@
     .sidebar-section { margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line-soft); }
     .sidebar-section:last-child { border-bottom: none; }
 
-    .control-row { font-size: 13px; }
+    .control-row { font-size: 14px; }
     
     .toggle-group { gap: 4px; }
-    .toggle-btn { padding: 8px 12px; font-size: 12px; }
+    .toggle-btn { padding: 8px 12px; font-size: 14px; }
     
   }
 
@@ -412,47 +430,47 @@
       min-height: 40px; padding: 10px 12px; font-size: 14px;
     }
     
-    .preset-btn { padding: 10px 14px; font-size: 13px; margin-bottom: 6px; }
-    .more-toggle { padding: 10px 14px; font-size: 13px; }
-    .scenario-pill, .btn-primary { min-height: 40px; font-size: 13px; padding: 10px 14px; }
+    .preset-btn { padding: 10px 14px; font-size: 14px; margin-bottom: 6px; }
+    .more-toggle { padding: 10px 14px; font-size: 14px; }
+    .scenario-pill, .btn-primary { min-height: 40px; font-size: 14px; padding: 10px 14px; }
     
     .verdict { padding: 18px 16px; margin-bottom: 14px; }
     .verdict-head { font-size: 20px; }
-    .verdict-body { font-size: 13px; }
+    .verdict-body { font-size: 14px; }
     .verdict-wedge { padding: 10px 12px; margin-top: 12px; }
     .verdict-wedge .wedge-amount { font-size: 14px; }
     
     .section-heading { font-size: 16px; margin: 20px 0 4px; }
-    .section-sub { font-size: 11px; margin-bottom: 12px; }
+    .section-sub { font-size: 14px; margin-bottom: 12px; }
     
     .chart-card { margin-bottom: 16px; }
     .chart-wrap { min-height: 200px; }
     .chart-wrap.short { min-height: 120px; }
     
     .band { padding: 12px 14px; }
-    .band-label { font-size: 12px; }
+    .band-label { font-size: 14px; }
     .band-value { font-size: 14px; }
     
     .stat-card { padding: 12px 14px; }
-    .stat-label { font-size: 11px; }
-    .stat-value { font-size: 13px; }
+    .stat-label { font-size: 14px; }
+    .stat-value { font-size: 14px; }
     
-    .data-table { font-size: 12px; }
+    .data-table { font-size: 14px; }
     .data-table th, .data-table td { padding: 8px 6px; }
     
     .ss-card, .scenario-card { padding: 14px; margin: 6px 0; }
     
     .modal { max-width: 90vw; padding: 20px; }
     .modal h2 { font-size: 18px; }
-    .modal p { font-size: 13px; }
+    .modal p { font-size: 14px; }
     
     .unlock-input-row { flex-direction: column; }
     .unlock-input-row input, .unlock-input-row button { width: 100%; min-height: 44px; }
     
     .field { margin-bottom: 12px; }
-    .field label { font-size: 13px; }
+    .field label { font-size: 14px; }
     .field input, .field select { min-height: 40px; font-size: 14px; }
-    .field-hint { font-size: 11px; }
+    .field-hint { font-size: 14px; }
   }
 
   /* Mobile (480px and below) */
@@ -462,31 +480,31 @@
     
     header { padding: 12px 16px; }
     .logo { font-size: 18px; }
-    .tagline { font-size: 11px; }
+    .tagline { font-size: 14px; }
     
     .onboarding { padding: 32px 20px; max-width: 100%; }
     .onboard-hero { margin-bottom: 28px; }
-    .onboard-title { font-size: 28px; line-height: 1.2; }
+    .onboard-title { font-size: 28px; line-height: 1.2; white-space: normal; }
     .onboard-sub { font-size: 14px; }
     
     .onboard-step { margin-bottom: 24px; padding: 16px 0; }
-    .step-number { font-size: 11px; }
+    .step-number { font-size: 14px; }
     .step-title { font-size: 16px; }
-    .step-hint { font-size: 12px; }
+    .step-hint { font-size: 14px; }
     
     .field-grid { grid-template-columns: 1fr; gap: 12px; }
     .field { margin-bottom: 0; }
     
     .scenarios-bar { gap: 4px; }
-    .scenario-pill { padding: 8px 12px; font-size: 12px; }
+    .scenario-pill { padding: 8px 12px; font-size: 14px; }
     
-    .toggle-btn { padding: 7px 10px; font-size: 11px; }
-    .sidebar-heading { font-size: 13px; }
-    .sidebar-sub { font-size: 11px; }
+    .toggle-btn { padding: 7px 10px; font-size: 14px; }
+    .sidebar-heading { font-size: 14px; }
+    .sidebar-sub { font-size: 14px; }
     
     .verdict { padding: 14px 12px; }
     .verdict-head { font-size: 18px; line-height: 1.3; }
-    .verdict-body { font-size: 12px; }
+    .verdict-body { font-size: 14px; }
     
     .chart-wrap { min-height: 160px; }
     .chart-wrap.short { min-height: 100px; }
@@ -496,36 +514,37 @@
     
     .modal { padding: 16px; border-radius: 4px; }
     .modal h2 { font-size: 16px; margin-bottom: 12px; }
-    .modal p { font-size: 12px; line-height: 1.5; }
+    .modal p { font-size: 14px; line-height: 1.5; }
     .modal-close { font-size: 18px; top: 10px; right: 10px; }
     
-    .data-table { font-size: 11px; }
+    .data-table { font-size: 14px; }
     .data-table th, .data-table td { padding: 6px 4px; }
     
     
     .scenario-card, .ss-card { padding: 10px 12px; }
-    .scenario-card p { font-size: 11px; }
+    .scenario-card p { font-size: 14px; }
     
-    .preset-btn { padding: 8px 12px; font-size: 12px; margin-bottom: 6px; width: 100%; }
-    .more-toggle { padding: 8px 12px; font-size: 12px; width: 100%; }
+    .preset-btn { padding: 8px 12px; font-size: 14px; margin-bottom: 6px; width: 100%; }
+    .more-toggle { padding: 8px 12px; font-size: 14px; width: 100%; }
   }
 
   /* Very Small Screens (320px) */
   @media (max-width: 360px) {
     .onboarding { padding: 24px 16px; }
     .onboard-title { font-size: 24px; }
-    .onboard-sub { font-size: 13px; }
+    .onboard-sub { font-size: 14px; }
     
     .verdict-head { font-size: 16px; }
     .section-heading { font-size: 14px; }
     
-    .toggle-btn { padding: 6px 8px; font-size: 10px; }
-    input[type="number"], input[type="text"], select { padding: 8px 10px; font-size: 13px; }
+    .toggle-btn { padding: 6px 8px; font-size: 14px; }
+    input[type="number"], input[type="text"], select { padding: 8px 10px; font-size: 14px; }
   }
 </style>
 <body>
 <div id="app"></div>
 <div id="modal-root"></div>
+<div id="tip-popup"></div>
 <script src="engine.js"></script>
 <script>
 "use strict";
@@ -582,12 +601,12 @@ window.showUnlockModal = function() {
         </ul>
       </div>
     </div>
-    <p style="font-size:13px;color:var(--ink-mute);margin:16px 0 14px">One-time payment. No subscription. No account. Your numbers stay on your device.</p>
+    <p style="font-size:14px;color:var(--ink-mute);margin:16px 0 14px">One-time payment. No subscription. No account. Your numbers stay on your device.</p>
     <div class="unlock-input-row">
       <input type="text" id="unlockKeyInput" placeholder="Paste your license key" />
       <button onclick="submitUnlockKey()" style="background:var(--rust);color:var(--paper);border:none;padding:10px 16px;border-radius:3px;font-weight:600;cursor:pointer;font-size:14px">Unlock</button>
     </div>
-    <p style="margin-top:14px;font-size:12px;text-align:center"><a href="#" onclick="closeModal();return false" style="color:var(--rust);text-decoration:none;cursor:pointer">Continue with the free version</a></p>`);
+    <p style="margin-top:14px;font-size:14px;text-align:center"><a href="#" onclick="closeModal();return false" style="color:var(--rust);text-decoration:none;cursor:pointer">Continue with the free version</a></p>`);
 };
 
 window.submitUnlockKey = function() {
@@ -604,18 +623,141 @@ window.submitUnlockKey = function() {
 };
 
 // ============================================================================
+// ACCELERATED MORTGAGE PAYOFF
+// ============================================================================
+function calcAnnualMortgagePayment(balance, annualRate, years) {
+  const r = annualRate / 12;
+  const n = years * 12;
+  if (r === 0) return balance / years;
+  return balance * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1) * 12;
+}
+
+window.showPayoffModal = function() {
+  if (!isPaid()) { showUnlockModal(); return; }
+  const currentYearsLeft = Math.max(1, state.mortgagePayoffAge - state.age);
+  openModal(`
+    <div style="max-width:380px">
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px;font-family:'Fraunces',serif">Accelerated mortgage payoff</div>
+      <p style="font-size:14px;color:var(--ink-mute);margin-bottom:16px">We'll calculate your new required payment and update your housing costs accordingly. After payoff, housing costs drop to zero in the model.</p>
+      <div style="display:grid;gap:10px">
+        <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Remaining mortgage balance
+          <input type="number" id="po_balance" placeholder="e.g. 280000" step="10000" min="0"
+            style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'JetBrains Mono',monospace;background:var(--bone)"/>
+        </label>
+        <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Interest rate (%)
+          <input type="number" id="po_rate" placeholder="e.g. 6.5" step="0.1" min="0" max="20" value="6.5"
+            style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'JetBrains Mono',monospace;background:var(--bone)"/>
+        </label>
+        <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Pay off in how many years?
+          <input type="number" id="po_years" placeholder="e.g. 5" step="1" min="1" max="${currentYearsLeft - 1}" value="5"
+            style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'JetBrains Mono',monospace;background:var(--bone)"/>
+        </label>
+      </div>
+      <div id="po_preview" style="margin-top:12px;font-size:14px;color:var(--ink-mute);min-height:18px"></div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button onclick="applyPayoffModal()" style="flex:1;padding:10px;background:var(--rust);color:var(--paper);border:none;border-radius:3px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit">Apply to plan</button>
+        <button onclick="closeModal()" style="padding:10px 16px;background:none;border:1px solid var(--line);border-radius:3px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink-soft)">Cancel</button>
+      </div>
+    </div>
+  `);
+  // Live preview as user types
+  ['po_balance','po_rate','po_years'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updatePayoffPreview);
+  });
+  updatePayoffPreview();
+};
+
+function updatePayoffPreview() {
+  const balance = parseFloat(document.getElementById('po_balance').value) || 0;
+  const rate = (parseFloat(document.getElementById('po_rate').value) || 6.5) / 100;
+  const years = parseInt(document.getElementById('po_years').value) || 5;
+  const el = document.getElementById('po_preview');
+  if (!el) return;
+  if (balance <= 0) { el.textContent = ''; return; }
+  const annual = calcAnnualMortgagePayment(balance, rate, years);
+  const diff = annual - state.housing;
+  el.innerHTML = `New annual payment: <strong style="font-family:'JetBrains Mono',monospace">${fmtMoney(Math.round(annual/100)*100)}</strong>`
+    + (diff > 0 ? ` <span style="color:var(--danger)">(+${fmtMoney(Math.round(diff/100)*100)}/yr for ${years} yrs)</span>` : '');
+}
+
+window.applyPayoffModal = function() {
+  const balance = parseFloat(document.getElementById('po_balance').value) || 0;
+  const rate = (parseFloat(document.getElementById('po_rate').value) || 6.5) / 100;
+  const years = parseInt(document.getElementById('po_years').value) || 5;
+  if (balance <= 0) {
+    document.getElementById('po_balance').style.outline = '2px solid var(--danger)';
+    return;
+  }
+  const annual = calcAnnualMortgagePayment(balance, rate, years);
+  state.housing = Math.round(annual / 100) * 100;
+  state.mortgagePayoffAge = state.age + years;
+  state.mortgageBalance = balance;
+  state.mortgageRate = rate;
+  closeModal();
+  invalidateCaches();
+  render();
+};
+
+// ============================================================================
 // DYNAMIC PRESETS
 // ============================================================================
 function generatePresets(s) {
   const presets = [];
-  if (s.age < 60 && s.yourStopWorkAge > s.age) presets.push({ id: 'stopNow', label: 'I stop working now' });
-  if (s.age < 58 && s.yourStopWorkAge > s.age + 5) presets.push({ id: 'retire5early', label: 'Retire 5 years early' });
+  const yearsToRetire = s.yourStopWorkAge - s.age;
+
+  // ---- User's own work situation ----
+  if (s.yourIncome > 0 && s.age < 60 && yearsToRetire > 0) {
+    presets.push({ id: 'stopNow', label: 'I stop working now' });
+  }
+  // "Retire early" only makes sense with enough runway; close to retirement, "work longer" is the useful contrast
+  if (s.yourIncome > 0 && s.age < 58 && yearsToRetire > 5) {
+    presets.push({ id: 'retire5early', label: 'Retire 5 years early' });
+  }
+  if (s.yourIncome > 0 && yearsToRetire > 2) {
+    presets.push({ id: 'partTime', label: 'Go part-time first' });
+  }
+  if (s.yourIncome > 0 && yearsToRetire <= 5 && s.yourStopWorkAge < 70) {
+    presets.push({ id: 'work2more', label: 'Work 2 more years' });
+  }
+
+  // ---- Partner work situation ----
+  // Both working — offer retiring together
+  if (s.yourIncome > 0 && s.hasPartner && s.partnerIncome > 0) {
+    presets.push({ id: 'bothRetire', label: 'We both retire now' });
+  }
+  // Partner is working-age but never had income or SS — could start
+  if (s.hasPartner && s.partnerIncome === 0 && s.partnerSSAmount === 0 && s.partnerAge < 58) {
+    presets.push({ id: 'partnerStarts', label: 'Partner starts working' });
+  }
+  // Partner is currently working — offer retiring them
+  if (s.hasPartner && s.partnerIncome > 0 && s.partnerStopWorkAge > s.partnerAge) {
+    presets.push({ id: 'partnerRetires', label: 'Partner retires now' });
+  }
+  // Partner had a career and has since retired — offer returning
+  if (s.hasPartner && s.partnerIncome === 0 && s.partnerSSAmount > 0 && s.partnerStopWorkAge <= s.partnerAge) {
+    presets.push({ id: 'partnerReturns', label: 'Partner returns to work' });
+  }
+
+  // ---- Always ----
   presets.push({ id: 'maxSpend', label: 'What can I spend?' });
-  if (s.hasPartner && s.partnerIncome === 0 && s.partnerAge < s.partnerStopWorkAge) presets.push({ id: 'partnerReturns', label: 'Partner returns to work' });
-  if (s.ssStartAge !== 70 && s.yourSSAmount > 0) presets.push({ id: 'delaySS', label: 'Delay Social Security to 70' });
-  if (s.housing > 0 && s.mortgagePayoffAge > s.age + 5) presets.push({ id: 'payoffFast', label: 'Pay off the house in 5 years' });
-  if (!s.homeSaleAge && s.age < 72) presets.push({ id: 'sellHome', label: 'Sell the home at 70' });
+
+  // ---- Social Security ----
+  if (s.ssStartAge !== 70 && (s.yourSSAmount > 0 || s.partnerSSAmount > 0)) {
+    presets.push({ id: 'delaySS', label: 'Delay Social Security to 70' });
+  }
+  if (s.ssStartAge > 62 && s.age >= 55 && (s.yourSSAmount > 0 || s.partnerSSAmount > 0)) {
+    presets.push({ id: 'earlySS', label: 'Claim Social Security at 62' });
+  }
+
+  // ---- Housing ----
+  // payoffFast removed from free presets — requires balance/rate inputs to model correctly
+  if (s.housing > 0 && !s.homeSaleAge && s.age < 72) {
+    presets.push({ id: 'sellHome', label: 'Sell the home at 70' });
+  }
+
+  // ---- Long-term care ----
   if (s.age > 45) presets.push({ id: 'ltc', label: 'Add long-term care at 85' });
+
   return presets.slice(0, 6);
 }
 
@@ -643,7 +785,28 @@ function periodsLabel(result) {
 const app = document.getElementById('app');
 const modalRoot = document.getElementById('modal-root');
 
-function render() { if (activeView === 'onboarding') renderOnboarding(); else renderDashboard(); }
+function render() { if (activeView === 'onboarding') renderOnboarding(); else renderDashboard(); wireTooltips(); }
+
+const tipEl = document.getElementById('tip-popup');
+function wireTooltips() {
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      tipEl.textContent = el.dataset.tip;
+      tipEl.style.display = 'block';
+      positionTip(e);
+    });
+    el.addEventListener('mousemove', positionTip);
+    el.addEventListener('mouseleave', () => { tipEl.style.display = 'none'; });
+  });
+}
+function positionTip(e) {
+  const pad = 12, tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+  let x = e.clientX + pad, y = e.clientY - th - pad;
+  if (x + tw > window.innerWidth - pad) x = e.clientX - tw - pad;
+  if (y < pad) y = e.clientY + pad;
+  tipEl.style.left = x + 'px';
+  tipEl.style.top = y + 'px';
+}
 
 // ============================================================================
 // ONBOARDING
@@ -657,10 +820,10 @@ function renderOnboarding() {
     <div class="onboarding">
       <div class="onboard-hero">
         <div class="onboard-eyebrow">Answer the hard question first</div>
-        <h1 class="onboard-title">How much is<br/>enough?</h1>
+        <h1 class="onboard-title">How much is enough?</h1>
         <p class="onboard-sub">Most tools help you hoard. We help you spend wisely. Enter your numbers and see: can you actually afford the life you want, or are you leaving a fortune unspent?</p>
         <p style="margin-top:16px"><a onclick="showAbout()" style="color:var(--rust);cursor:pointer;font-size:14px;font-family:'Fraunces',serif;font-style:italic">Why this matters \u2192</a></p>
-        <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a> \u00b7 <a onclick="loadSample()">See a sample</a></p>
+        <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a></p>
       </div>
 
       <div class="onboard-step">
@@ -707,6 +870,7 @@ function renderOnboarding() {
 
       <div class="step-actions">
         <button class="btn-primary" onclick="finishOnboarding()">See the picture <span>\u2192</span></button>
+        <p style="margin-top:12px;font-size:14px;text-align:center"><a onclick="loadSample()" style="color:var(--rust);cursor:pointer;font-family:'Fraunces',serif;font-style:italic">or see a sample \u2192</a></p>
       </div>
       <div class="validation-msg" id="ob_validation"></div>
     </div>
@@ -803,13 +967,13 @@ function renderDashboard() {
           <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
           <button class="toggle-btn ${state.simMode==='historical'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('historical')">Historical${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
         </div>
-        <div style="font-size:10px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Tests your plan against every rolling period of real market returns since 1926.':state.simMode==='montecarlo'?'Runs 500 randomized simulations to show the range of possible outcomes.':'Projects a single path using a steady assumed return.'}</div>
+        <div style="font-size:14px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Tests your plan against every rolling period of real market returns since 1926.':state.simMode==='montecarlo'?'Runs 500 randomized simulations to show the range of possible outcomes.':'Projects a single path using a steady assumed return.'}</div>
       </div>
 
       <div class="sidebar-section">
         <div class="sidebar-heading">Your plan</div>
         ${state.simMode==='fixed' ? `<div class="control">
-          <div class="control-row"><span class="control-label">Real return<span class="help-mark" title="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
+          <div class="control-row"><span class="control-label">Real return<span class="help-mark" data-tip="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
           <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
           <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" placeholder="%" class="mobile-input"/>
         </div>` : ''}
@@ -833,11 +997,16 @@ function renderDashboard() {
           <input type="range" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)" class="slider-input"/>
           <input type="number" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)" placeholder="Annual income" class="mobile-input"/>
         </div>` : ''}
-        <div class="control">
+        ${state.yourIncome > 0 ? `<div class="control">
           <div class="control-row"><span class="control-label">Your retirement age</span><span class="control-value">${state.yourStopWorkAge}</span></div>
           <input type="range" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)" class="slider-input"/>
           <input type="number" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
-        </div>
+        </div>` : ''}
+        ${(state.hasPartner && state.partnerIncome > 0) ? `<div class="control">
+          <div class="control-row"><span class="control-label">Partner's retirement age</span><span class="control-value">${state.partnerStopWorkAge}</span></div>
+          <input type="range" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" class="slider-input"/>
+          <input type="number" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
+        </div>` : ''}
       </div>
 
       <div class="sidebar-section">
@@ -846,7 +1015,11 @@ function renderDashboard() {
       </div>
 
       <div class="sidebar-section">
-        <button class="more-toggle" onclick="toggleMore()">${showMoreOptions?'\u2212 Fewer options':'+ More options'}${!isPaid()?' <span class="lock-icon">&#x1f512;</span>':''}</button>
+        <button class="more-toggle" onclick="toggleMore()">
+          <span>${showMoreOptions ? 'Fewer options' : 'More options'}${!isPaid()?' <span class="lock-icon">&#x1f512;</span>':''}</span>
+          <span class="more-toggle-chevron">${showMoreOptions ? '▾' : '▸'}</span>
+        </button>
+        ${!showMoreOptions ? `<div class="more-hint">${state.taxRate ? Math.round(state.taxRate*100) : 18}% tax &middot; ${(state.returnRate*100).toFixed(1)}% return &middot; plan to age ${state.targetAge}</div>` : ''}
         ${showMoreOptions ? (isPaid()
           ? moreOptionsHTML()
           : `<div class="locked-note">These settings are part of the paid plan. <button class="link-btn" onclick="showUnlockModal()">Unlock to adjust \u2192</button></div>
@@ -859,7 +1032,7 @@ function renderDashboard() {
         <div class="sidebar-heading">Saved scenarios</div>
         ${isPaid()
           ? `<div class="scenario-save-row"><input type="text" id="scenarioName" placeholder="Name this scenario"/><button class="scenario-pill" onclick="saveScenario()">Save</button></div>
-        ${savedScenarios.map((sc, i) => `<div class="saved-item"><span>${sc.name}</span><span><button onclick="loadScenario(${i})">load</button> \u00b7 <button onclick="deleteScenario(${i})">\u00d7</button></span></div>`).join('') || '<div style="font-size:11px;color:var(--ink-faint)">None yet</div>'}
+        ${savedScenarios.map((sc, i) => `<div class="saved-item"><span>${sc.name}</span><span><button onclick="loadScenario(${i})">load</button> \u00b7 <button onclick="deleteScenario(${i})">\u00d7</button></span></div>`).join('') || ''}
         ${savedScenarios.length >= 2 ? `<button class="more-toggle" style="margin-top:6px" onclick="showComparison()">Compare scenarios</button>` : ''}`
           : `<button class="more-toggle locked-row" onclick="showUnlockModal()">Save &amp; compare scenarios <span class="lock-icon">&#x1f512;</span></button>`}
       </div>
@@ -888,8 +1061,8 @@ function renderDashboard() {
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:26px">
         <div class="section-heading" style="margin:0">Cashflow</div>
         <div class="toggle-group" style="width:auto">
-          <button class="toggle-btn cf-toggle ${cashflowMode==='net'?'active':''}" data-mode="net" onclick="setCashflowMode('net')" style="padding:5px 12px;font-size:11px">Net flow</button>
-          <button class="toggle-btn cf-toggle ${cashflowMode==='breakdown'?'active':''}" data-mode="breakdown" onclick="setCashflowMode('breakdown')" style="padding:5px 12px;font-size:11px">Breakdown</button>
+          <button class="toggle-btn cf-toggle ${cashflowMode==='net'?'active':''}" data-mode="net" onclick="setCashflowMode('net')" style="padding:5px 12px;font-size:14px">Net flow</button>
+          <button class="toggle-btn cf-toggle ${cashflowMode==='breakdown'?'active':''}" data-mode="breakdown" onclick="setCashflowMode('breakdown')" style="padding:5px 12px;font-size:14px">Breakdown</button>
         </div>
       </div>
       <div class="section-sub" id="cf-desc">${cashflowMode==='net' ? 'Green bars mean you\'re adding to the portfolio. Red means you\'re drawing from it.' : 'Income sources stacked against spending. The gap is what comes from or goes to the portfolio.'}</div>
@@ -905,13 +1078,12 @@ function renderDashboard() {
 
       ${(state.simMode==='historical' || state.simMode==='montecarlo') && state.accountsEnabled ? renderTaxComparison() : ''}
 
-      ${renderAssumptions(result)}
-      <div style="text-align:center;padding:12px 0 4px;font-size:11px;color:var(--ink-faint)">Educational tool, not financial advice. <a onclick="showFullDisclaimer()" style="color:var(--rust);cursor:pointer">Disclaimer</a></div>
+      <div style="text-align:center;padding:12px 0 4px;font-size:14px;color:var(--ink-faint)">Educational tool, not financial advice. <a onclick="showFullDisclaimer()" style="color:var(--rust);cursor:pointer">Disclaimer</a></div>
     </div>`;
 
   app.innerHTML = `
     <header role="banner">
-      <a href="#main-content" style="position:absolute;left:-9999px;top:auto;padding:8px 16px;background:var(--ink);color:var(--paper);z-index:200;font-size:13px" onfocus="this.style.left='0';this.style.top='0'" onblur="this.style.left='-9999px'">Skip to content</a>
+      <a href="#main-content" style="position:absolute;left:-9999px;top:auto;padding:8px 16px;background:var(--ink);color:var(--paper);z-index:200;font-size:14px" onfocus="this.style.left='0';this.style.top='0'" onblur="this.style.left='-9999px'">Skip to content</a>
       <div class="logo"><span class="logo-dot"></span>Spend Enough</div>
       <div class="scenarios-bar">
         <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
@@ -976,34 +1148,12 @@ function moreOptionsHTML() {
         <input type="range" min="55" max="95" step="1" value="${state.slowDownAge}" oninput="slideLive(this,'slowDownAge',this.value)" onchange="sliderCommit('slowDownAge',this.value)"/>
       </div>
 
-      ${state.hasPartner ? `<div class="sidebar-heading" style="margin-top:14px">Partner</div>
-      <div class="control">
-        <div class="control-row"><span class="control-label">Partner's retirement age</span><span class="control-value">${state.partnerStopWorkAge}</span></div>
-        <input type="range" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)"/>
-      </div>` : ''}
 
       <div class="sidebar-heading" style="margin-top:14px">Income growth</div>
       <div class="control">
         <div class="control-row"><span class="control-label">Real income growth</span><span class="control-value">${(state.yourIncomeGrowth*100).toFixed(1)}%</span></div>
         <input type="range" min="0" max="5" step="0.25" value="${state.yourIncomeGrowth*100}" oninput="updateLive2(this,'yourIncomeGrowth','partnerIncomeGrowth',this.value/100)" onchange="state.partnerIncomeGrowth=this.value/100;sliderCommit('yourIncomeGrowth',this.value/100)"/>
       </div>
-
-      <div class="sidebar-heading" style="margin-top:14px">Taxes</div>
-      <div style="font-size:10px;color:var(--ink-faint);margin-bottom:8px">Used to estimate take-home pay and withdrawal taxes.</div>
-      <div class="control">
-        <div class="control-row"><span class="control-label">Filing status</span></div>
-        <select onchange="updateTax('filingStatus',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:12px;font-family:inherit;border-radius:2px;color:var(--ink)">
-          <option value="mfj" ${state.filingStatus==='mfj'?'selected':''}>Married filing jointly</option>
-          <option value="single" ${state.filingStatus==='single'?'selected':''}>Single</option>
-        </select>
-      </div>
-      <div class="control" style="margin-top:8px">
-        <div class="control-row"><span class="control-label">State</span></div>
-        <select onchange="updateTax('stateCode',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:12px;font-family:inherit;border-radius:2px;color:var(--ink)">
-          ${Object.keys(STATE_CONFIG).map(k => `<option value="${k}" ${state.stateCode===k?'selected':''}>${STATE_CONFIG[k].name}</option>`).join('')}
-        </select>
-      </div>
-      <div style="font-size:11px;color:var(--ink-mute);margin-top:8px">Estimated effective rate: <strong style="font-family:'JetBrains Mono',monospace">${effRate}%</strong></div>
 
       <div class="sidebar-heading" style="margin-top:14px">Housing</div>
       <div class="control">
@@ -1014,26 +1164,44 @@ function moreOptionsHTML() {
         <div class="control-row"><span class="control-label">Mortgage paid off at age</span><span class="control-value">${state.mortgagePayoffAge}</span></div>
         <input type="range" min="${state.age}" max="90" step="1" value="${state.mortgagePayoffAge}" oninput="slideLive(this,'mortgagePayoffAge',this.value)" onchange="sliderCommit('mortgagePayoffAge',this.value)"/>
       </div>
+      ${state.housing > 0 && state.mortgagePayoffAge > state.age + 2 ? `<button onclick="showPayoffModal()" style="margin-top:6px;font-size:14px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">+ Model accelerated payoff \u2192</button>` : ''}
 
-      <div class="sidebar-heading" style="margin-top:14px">Investment assumptions</div>
-      <div class="control">
-        <div class="control-row"><span class="control-label">Real return<span class="help-mark" title="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
-        <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
-        <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" placeholder="%" class="mobile-input"/>
-      </div>
-      ${state.simMode==='montecarlo' ? `<div class="control">
+      ${state.simMode==='montecarlo' ? `<div class="sidebar-heading" style="margin-top:14px">Investment assumptions</div><div class="control">
         <div class="control-row"><span class="control-label">Volatility</span><span class="control-value">${(state.returnStdDev*100).toFixed(0)}%</span></div>
         <input type="range" min="5" max="25" step="1" value="${state.returnStdDev*100}" oninput="slideLive(this,'returnStdDev',this.value/100)" onchange="sliderCommit('returnStdDev',this.value/100)" class="slider-input"/>
         <input type="number" min="5" max="25" step="1" value="${(state.returnStdDev*100).toFixed(0)}" oninput="slideLive(this,'returnStdDev',this.value/100)" onchange="sliderCommit('returnStdDev',this.value/100)" placeholder="%" class="mobile-input"/>
       </div>` : ''}
 
+      <div class="sidebar-heading" style="margin-top:14px">Taxes</div>
+      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">Used to estimate take-home pay and withdrawal taxes.</div>
+      <div class="control">
+        <div class="control-row"><span class="control-label">Filing status</span></div>
+        <select onchange="updateTax('filingStatus',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:14px;font-family:inherit;border-radius:2px;color:var(--ink)">
+          <option value="mfj" ${state.filingStatus==='mfj'?'selected':''}>Married filing jointly</option>
+          <option value="single" ${state.filingStatus==='single'?'selected':''}>Single</option>
+        </select>
+      </div>
+      <div class="control" style="margin-top:8px">
+        <div class="control-row"><span class="control-label">State</span></div>
+        <select onchange="updateTax('stateCode',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:14px;font-family:inherit;border-radius:2px;color:var(--ink)">
+          ${Object.keys(STATE_CONFIG).map(k => `<option value="${k}" ${state.stateCode===k?'selected':''}>${STATE_CONFIG[k].name}</option>`).join('')}
+        </select>
+      </div>
+      <div style="font-size:14px;color:var(--ink-mute);margin-top:8px">Estimated effective rate: <strong style="font-family:'JetBrains Mono',monospace">${effRate}%</strong></div>
+
       <div class="sidebar-heading" style="margin-top:14px">Account types</div>
-      <div class="checkbox-row"><input type="checkbox" id="cb_accts" ${state.accountsEnabled?'checked':''} onchange="update('accountsEnabled', this.checked)"/><label for="cb_accts">Separate account types</label></div>
-      ${state.accountsEnabled ? `
-        <div class="acct-grid" style="margin-bottom:10px">
+      <div class="checkbox-row"><input type="checkbox" id="cb_accts" ${state.accountsEnabled?'checked':''} onchange="toggleAccounts(this.checked)"/><label for="cb_accts">Separate account types</label></div>
+      ${state.accountsEnabled ? (() => {
+        const acctTotal = state.accounts.traditional + state.accounts.roth + state.accounts.taxable;
+        const mismatch = Math.abs(acctTotal - state.portfolio) > 100;
+        return `
+        <div class="acct-grid" style="margin-bottom:6px">
           <label>Traditional</label><input type="number" value="${state.accounts.traditional}" min="0" onchange="updateAccount('traditional', +this.value)"/>
           <label>Roth</label><input type="number" value="${state.accounts.roth}" onchange="updateAccount('roth', +this.value)"/>
           <label>Taxable</label><input type="number" value="${state.accounts.taxable}" onchange="updateAccount('taxable', +this.value)"/>
+        </div>
+        <div style="font-size:13px;margin-bottom:10px;${mismatch?'color:var(--danger)':'color:var(--ink-mute)'}">
+          Total: ${fmtMoneyShort(acctTotal)}${mismatch?' (portfolio updated to match)':''}
         </div>
         <div class="control">
           <div class="control-row"><span class="control-label">Withdrawal order</span></div>
@@ -1041,21 +1209,22 @@ function moreOptionsHTML() {
             <button class="toggle-btn ${state.withdrawalStrategy==='proportional'?'active':''}" onclick="update('withdrawalStrategy','proportional')">Proportional</button>
             <button class="toggle-btn ${state.withdrawalStrategy==='taxSmart'?'active':''}" onclick="update('withdrawalStrategy','taxSmart')">Tax-aware</button>
           </div>
-        </div>` : ''}
+        </div>`;
+      })() : ''}
 
       <div class="sidebar-heading" style="margin-top:14px">Life events</div>
-      <div style="font-size:10px;color:var(--ink-faint);margin-bottom:8px">One-time income or expenses at a specific age. Use negative for costs.</div>
-      ${(state.oneTimeEvents || []).map((ev, i) => `<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;font-size:11px">
+      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">One-time income or expenses at a specific age. Use negative for costs.</div>
+      ${(state.oneTimeEvents || []).map((ev, i) => `<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;font-size:14px">
         <span style="color:var(--ink-soft);flex:1">${ev.label || 'Event'} at ${ev.age}</span>
         <span style="font-family:'JetBrains Mono',monospace;color:${ev.amount>=0?'var(--moss)':'var(--danger)'}">${fmtMoneyShort(ev.amount)}</span>
         <button onclick="removeEvent(${i})" style="background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:0 2px">\u00d7</button>
       </div>`).join('')}
       <div style="display:grid;grid-template-columns:1fr 52px 96px;gap:4px;margin-top:6px">
-        <input type="text" id="ev_label" placeholder="e.g. Sell home" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:11px;padding:5px 6px;background:var(--bone);border:1px solid var(--line);border-radius:2px;font-family:inherit"/>
-        <input type="number" id="ev_age" placeholder="Age" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:11px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:center;font-family:'JetBrains Mono',monospace"/>
-        <input type="number" id="ev_amount" placeholder="$" step="10000" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:11px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:right;font-family:'JetBrains Mono',monospace"/>
+        <input type="text" id="ev_label" placeholder="e.g. Sell home" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 6px;background:var(--bone);border:1px solid var(--line);border-radius:2px;font-family:inherit"/>
+        <input type="number" id="ev_age" placeholder="Age" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:center;font-family:'JetBrains Mono',monospace"/>
+        <input type="number" id="ev_amount" placeholder="$" step="10000" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:right;font-family:'JetBrains Mono',monospace"/>
       </div>
-      <button onclick="addEvent()" style="font-size:11px;color:var(--rust);background:none;border:none;cursor:pointer;padding:4px 0;font-family:inherit;margin-top:4px">+ Add event</button>
+      <button onclick="addEvent()" style="font-size:14px;color:var(--rust);background:none;border:none;cursor:pointer;padding:4px 0;font-family:inherit;margin-top:4px">+ Add event</button>
     </div>`;
 }
 
@@ -1125,14 +1294,15 @@ function getVerdict(result) {
 // ===== IMPACT BANNER =====
 function computeImpact() {
   if (!baselineState || !baselineResult) return null;
-  const fields = { spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: 'Your retirement age', partnerStopWorkAge: "Partner's retirement age", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', homeSaleAge: 'Home sale age', returnRate: 'Return' };
+  const fields = { spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', homeSaleAge: 'Home sale age', returnRate: 'Return' };
   const changes = [];
   for (const k in fields) {
+    if (!fields[k]) continue;
     if (JSON.stringify(baselineState[k]) !== JSON.stringify(state[k])) {
       let from = baselineState[k], to = state[k];
       if (k === 'spending' || k === 'lateSpending' || k === 'portfolio') { from = fmtMoneyShort(from); to = fmtMoneyShort(to); }
       else if (k === 'returnRate') { from = (from*100).toFixed(1)+'%'; to = (to*100).toFixed(1)+'%'; }
-      changes.push(fields[k] + ' ' + (from===null?'\u2014':from) + ' \u2192 ' + (to===null?'\u2014':to));
+      changes.push({ key: k, label: fields[k], from, to });
     }
   }
   if (!changes.length) return null;
@@ -1145,10 +1315,16 @@ function renderSidebarImpact() {
   const im = computeImpact();
   if (!im) return '';
   const fdTxt = (im.finalDelta >= 0 ? '+' : '') + fmtMoneyShort(im.finalDelta);
-  return `<div class="sidebar-section" style="background:var(--bone-2);margin:-4px -20px 14px;padding:12px 20px;border-bottom:1px solid var(--line-soft)">
-    <div style="font-size:11px;color:var(--ink-soft);line-height:1.5"><strong style="color:var(--ink)">Changed:</strong> ${im.changes.slice(0,3).join(', ')}${im.changes.length>3?' + '+(im.changes.length-3)+' more':''}</div>
-    <div style="font-size:11px;color:var(--ink-mute);margin-top:3px">${fdTxt} median ending balance</div>
-    <button style="font-size:10px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit" onclick="resetBaseline()">Set current as new baseline</button>
+  const changeRows = im.changes.map(c =>
+    `<div style="display:flex;align-items:baseline;gap:6px;line-height:1;margin-bottom:3px">
+      <span style="flex:1;min-width:0;font-size:13px;color:var(--ink-soft)"><strong style="color:var(--ink)">${c.label}:</strong> ${c.from} \u2192 ${c.to}</span>
+      <button onclick="revertChange('${c.key}')" title="Undo this change" style="flex-shrink:0;background:none;border:none;cursor:pointer;font-size:11px;color:var(--ink-mute);padding:0;font-family:inherit;text-decoration:underline;text-decoration-style:dotted">undo</button>
+    </div>`
+  ).join('');
+  return `<div style="background:var(--bone-2);margin:-4px -20px 10px;padding:8px 20px;border-bottom:1px solid var(--line-soft)">
+    ${changeRows}
+    <div style="font-size:13px;color:var(--ink-mute);margin-top:6px;padding-top:6px;border-top:1px solid var(--line-soft)">${fdTxt} median ending balance</div>
+    <button style="font-size:13px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;margin-top:2px" onclick="resetBaseline()">Set current as new baseline</button>
   </div>`;
 }
 
@@ -1157,10 +1333,10 @@ function renderStatCards(result) {
   const ms = maxSpendCache ? maxSpendCache.spend : null;
   const peak = Math.max(...result.percentiles.map(p => p.p50));
   return `<div class="stat-row">
-    <div class="stat-card" title="The middle outcome across all ${result.mode==='historical'?'historical periods':'simulations'}. Half did better, half did worse."><div class="stat-label">Median ending balance<span class="help-mark">i</span></div><div class="stat-value">${fmtMoneyShort(result.medianFinal)}</div></div>
-    <div class="stat-card" title="The highest portfolio value reached in the median path. Shows when you have the most financial flexibility."><div class="stat-label">Peak balance<span class="help-mark">i</span></div><div class="stat-value">${fmtMoneyShort(peak)}</div></div>
-    <div class="stat-card" title="The highest annual spending where the portfolio still lasts to age ${state.targetAge} at a steady return. A starting point, not a recommendation."><div class="stat-label">Most you could spend<span class="help-mark">i</span></div><div class="stat-value">${ms ? fmtMoneyShort(ms) : '\u2014'}</div></div>
-    <div class="stat-card" title="The age at which the portfolio hits zero in the median outcome. If blank, you don't run out before age ${state.targetAge}."><div class="stat-label">Runs out<span class="help-mark">i</span></div><div class="stat-value">${result.medianRunOutAge ? 'age '+result.medianRunOutAge : 'never'}</div></div>
+    <div class="stat-card"><div class="stat-label">Median ending balance<span class="help-mark" data-tip="The middle outcome across all ${result.mode==='historical'?'historical periods':'simulations'}. Half did better, half did worse.">i</span></div><div class="stat-value">${fmtMoneyShort(result.medianFinal)}</div></div>
+    <div class="stat-card"><div class="stat-label">Peak balance<span class="help-mark" data-tip="The highest portfolio value reached in the median path. Shows when you have the most financial flexibility.">i</span></div><div class="stat-value">${fmtMoneyShort(peak)}</div></div>
+    <div class="stat-card"><div class="stat-label">Most you could spend<span class="help-mark" data-tip="The highest annual spending where the portfolio lasts to age ${state.targetAge} at a steady ${(state.returnRate*100).toFixed(1)}% return — the same number the 'What can I spend?' preset uses. Real markets are bumpier, so historical mode may show a lower safe level.">i</span></div><div class="stat-value">${ms ? fmtMoneyShort(ms) : '\u2014'}</div></div>
+    <div class="stat-card"><div class="stat-label">Runs out<span class="help-mark" data-tip="The age at which the portfolio hits zero in the median outcome. If blank, you don't run out before age ${state.targetAge}.">i</span></div><div class="stat-value">${result.medianRunOutAge ? 'age '+result.medianRunOutAge : 'never'}</div></div>
   </div>`;
 }
 
@@ -1191,7 +1367,7 @@ function renderEventTimeline() {
   events.sort((a, b) => a.age - b.age);
   if (!events.length) return '';
   return `<div style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:18px;padding:0 4px">${events.map(ev =>
-    `<div style="font-size:11px;color:var(--ink-mute);background:var(--paper);border:1px solid var(--line-soft);border-radius:3px;padding:4px 8px" title="${ev.detail}"><span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink-soft);margin-right:4px">${ev.age}</span>${ev.label}</div>`
+    `<div style="font-size:14px;color:var(--ink-mute);background:var(--paper);border:1px solid var(--line-soft);border-radius:3px;padding:4px 8px" title="${ev.detail}"><span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink-soft);margin-right:4px">${ev.age}</span>${ev.label}</div>`
   ).join('')}</div>`;
 }
 
@@ -1233,25 +1409,25 @@ function renderFlexibilityImpact() {
     <div class="section-sub">What happens if you adjust spending when your portfolio is under pressure?</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
       <div onclick="update('guardrailsEnabled',false)" style="background:var(--paper);border:${activeLeft?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeLeft?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:${activeLeft?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeLeft?'700':'500'}">Fixed spending</div>
+        <div style="font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:${activeLeft?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeLeft?'700':'500'}">Fixed spending</div>
         <div style="font-size:28px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--ink)">${fmtShort(withoutFlex)}</div>
-        <div style="font-size:10px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
+        <div style="font-size:14px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
       </div>
       <div onclick="update('guardrailsEnabled',true)" style="background:var(--paper);border:${activeRight?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeRight?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:${activeRight?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeRight?'700':'500'}">With flexibility</div>
+        <div style="font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:${activeRight?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeRight?'700':'500'}">With flexibility</div>
         <div style="font-size:28px;font-weight:600;font-family:'JetBrains Mono',monospace;color:${improved?'var(--moss)':'var(--ink)'}">${fmtShort(withFlex)}</div>
-        <div style="font-size:10px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
+        <div style="font-size:14px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
         <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)">
           <div>
-            <div style="font-size:10px;color:var(--ink-mute);margin-bottom:3px">Cut</div>
+            <div style="font-size:14px;color:var(--ink-mute);margin-bottom:3px">Cut</div>
             <div style="display:inline-flex;align-items:baseline;gap:1px">
-              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailCutPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailCutPct',+this.value/100)" style="width:42px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:12px;color:var(--ink-mute)">%</span>
+              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailCutPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailCutPct',+this.value/100)" style="width:42px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
             </div>
           </div>
           <div>
-            <div style="font-size:10px;color:var(--ink-mute);margin-bottom:3px">Boost</div>
+            <div style="font-size:14px;color:var(--ink-mute);margin-bottom:3px">Boost</div>
             <div style="display:inline-flex;align-items:baseline;gap:1px">
-              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailBoostPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailBoostPct',+this.value/100)" style="width:42px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:12px;color:var(--ink-mute)">%</span>
+              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailBoostPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailBoostPct',+this.value/100)" style="width:42px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
             </div>
           </div>
         </div>
@@ -1327,20 +1503,160 @@ function renderTaxComparison() {
 }
 
 // ===== ASSUMPTIONS + RESOURCES =====
-function renderAssumptions(result) {
-  return `<details class="assumptions-section"><summary>Assumptions used in this projection</summary><div class="assumptions-body">
-    Returns: ${state.simMode==='historical' ? 'actual S&P 500 real returns, 1926\u20132025' : state.simMode==='montecarlo' ? (state.returnRate*100).toFixed(1)+'% real average, '+(state.returnStdDev*100).toFixed(0)+'% volatility' : 'steady '+(state.returnRate*100).toFixed(1)+'% real'} \u00b7
-    All amounts in today's dollars \u00b7
-    Income tax ${(state.taxRate*100).toFixed(0)}% effective, capital gains ${(state.capGainsTax*100).toFixed(0)}% \u00b7
-    Spending ${fmtMoney(state.spending)}/yr${state.lateSpending!==state.spending?', '+fmtMoney(state.lateSpending)+' after age '+state.slowDownAge:''}${state.guardrailsEnabled?' \u00b7 flexible \u00b1'+Math.round(state.guardrailCutPct*100)+'%':''}.
-    <br/><br/><strong>Not modeled:</strong> healthcare costs before Medicare (65), Required Minimum Distributions at 73, Medicare premium surcharges, Roth conversions, or life events not entered. Actual results will differ.
-  </div></details>`;
-}
+let faqOpen = false;
 function renderResources() {
-  return `<div class="resources"><div class="section-heading" style="margin-top:0">Working with a professional</div>
-    <div style="margin-top:6px"><a href="https://www.napfa.org/find-an-advisor" target="_blank">Fee-only advisors (NAPFA)</a><a href="https://www.letsmakeaplan.org/" target="_blank">Certified planners (CFP)</a><a href="https://www.aicpa.org" target="_blank">Tax professionals</a></div>
-    <p>This tool is a starting point. A qualified professional can assess your full picture and account for factors not modeled here.</p></div>`;
+  return `
+    <button class="faq-toggle" onclick="toggleFaq()">
+      <span class="faq-toggle-label">About this tool</span>
+      <span class="faq-toggle-chevron">${faqOpen ? '&#9662;' : '&#9658;'}</span>
+    </button>
+    ${faqOpen ? `<div class="faq-inner"><div class="faq">
+
+    <details class="faq-item">
+      <summary>Why we made this tool</summary>
+      <div class="faq-body">
+        <p>Most retirement planning tools are built around one fear: running out of money. Save more, spend less, build a cushion so large you will never risk zero. That is not bad advice, but it has a cost nobody talks about.</p>
+        <p>If you are 55 with a million dollars saved and a calculator tells you to spend like you have half that, you lose something money cannot buy back: time. The trips you skip. The moments you defer. The years you could have lived well.</p>
+        <p>Bill Perkins made this case in <em>Die With Zero</em>. Spending your life savings while you can enjoy them is not failure. It is the point.</p>
+        <p>Knowing you should spend more and knowing how much you can safely spend are two different problems. This tool tries to answer the second one. Enter your numbers, and we test your plan against every real U.S. market period since 1926 so you can see where it holds up and where it does not.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Where does the data come from?</summary>
+      <div class="faq-body">
+        <p>Every data source is verified and cited in the code:</p>
+        <ul>
+          <li><strong>Market returns:</strong> S&amp;P 500 real (inflation-adjusted) total returns, 1926-2025, from the Shiller CAPE dataset and us500.com. These are the same figures used in the original 4% rule research.</li>
+          <li><strong>Federal tax brackets and standard deduction:</strong> 2026 figures from IRS Rev. Proc. 2025-32.</li>
+          <li><strong>Social Security bend points and wage base:</strong> 2026 SSA figures ($1,286 / $7,749 bend points, $184,500 wage base).</li>
+          <li><strong>State tax:</strong> California uses full 2025 CA FTB brackets (<a href="https://www.ftb.ca.gov/forms/2025/2025-540-booklet.html" target="_blank">CA FTB</a>). Nine states have no income tax (Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, Wyoming). All other states use a flat approximation based on their statutory or typical effective rate, sourced from the <a href="https://taxfoundation.org/data/all/state/state-income-tax-rates/" target="_blank">Tax Foundation</a> and each state's revenue department. Set your state in More options.</li>
+        </ul>
+        <p>All projections use real (inflation-adjusted) dollars, so the spending amounts shown are in today's purchasing power.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How does the historical simulation work?</summary>
+      <div class="faq-body">
+        <p>In Historical mode, the tool tests your plan against every rolling period of real U.S. market returns since 1926. If your retirement horizon is 30 years, it runs your numbers starting in 1926, then 1927, then 1928, and so on through every period in the dataset, each using the actual sequence of market returns from that era.</p>
+        <p>This matters because of sequence of returns risk. A market crash in year two of retirement is far more damaging than the same crash in year twenty, even if the long-run average return is identical. In year two you are forced to sell at the bottom to cover expenses, and those sold shares never recover. Historical mode shows how many real sequences your plan survives, including the ones that started right before 1929, 1966, 2000, and 2008.</p>
+        <p>Fixed and Simulated modes use steady or randomized return rates. They are faster to grasp, but they smooth over the timing risk that makes real retirement outcomes so variable.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How do I read the success rate?</summary>
+      <div class="faq-body">
+        <p>The success rate tells you how often your plan lasted to your target age. In Historical mode it is a count ("survived 82 of 95 periods"). In Simulated mode it is a percentage across 500 randomized runs.</p>
+        <ul>
+          <li><strong>100% is not the goal.</strong> A plan that survives every historical period including the Great Depression is almost certainly too conservative. You are leaving real years of good spending on the table.</li>
+          <li><strong>85-90% is a reasonable target.</strong> Your plan holds up across most real market environments, including some very bad ones, without being so cautious that you are chronically underusing what you have.</li>
+          <li><strong>Failures are not cliff edges.</strong> When a plan "fails," it usually means the portfolio ran low in the final years, not that you would be broke at 70. Social Security and adjusted late-life spending can absorb a lot of what looks alarming in the model.</li>
+        </ul>
+        <p>Think of the success rate as a dial. The spending explorer below the chart shows exactly how it shifts as you adjust spending up or down.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Why do small changes make such a big difference?</summary>
+      <div class="faq-body">
+        <p>Retirement portfolios are sensitive to small changes because the effects compound over decades and the math is nonlinear. A few forces drive this:</p>
+        <ul>
+          <li><strong>Compounding cuts both ways.</strong> An extra $5,000 per year in spending does not just cost $5,000 — it also costs the growth that money would have generated over the next 20 or 30 years. At 5% real returns, $5,000 today becomes roughly $13,000 in 20 years. Every dollar you spend early is a dollar that stops compounding.</li>
+          <li><strong>The withdrawal rate cliff.</strong> Portfolios under stress behave differently at different withdrawal rates. Going from 3.5% to 4% might drop your success rate a little. Going from 4% to 4.5% might drop it a lot, because you start hitting the same bad market sequences that caused most historical failures. The relationship is not linear.</li>
+          <li><strong>Early retirement is especially sensitive.</strong> A 10-year difference in retirement age does not just add 10 more years of withdrawals — it also removes 10 years of contributions and growth while adding 10 years of portfolio depletion risk. The two effects stack.</li>
+          <li><strong>Sequence risk magnifies everything.</strong> In a bad market sequence, a slightly higher withdrawal rate means selling more shares at the bottom, leaving fewer shares to recover when the market rebounds. Small differences in withdrawal rate become large differences in survival.</li>
+        </ul>
+        <p>This is why the tool uses historical sequences rather than averages — averages smooth over the exact dynamics that make small differences matter.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>What is sequence of returns risk?</summary>
+      <div class="faq-body">
+        <p>Two retirees can experience the exact same average market return over 30 years and end up in completely different places, depending on whether the good years came first or the bad years did.</p>
+        <p>If your portfolio drops 40% in year two of retirement, you have to sell investments at the bottom just to cover expenses. Those shares cannot recover because they are gone. A crash in year twenty, when your portfolio is smaller and your drawing period is shorter, does far less damage.</p>
+        <p>This is why plugging in an average return and projecting forward is misleading for retirement planning. A steady 6% real return assumption says nothing about what happens if a 2008-style crash hits in your first year, even if 6% turns out to be the actual long-run average.</p>
+        <p>Historical mode addresses this by running your plan through every real sequence since 1926, not a smoothed average of them.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>What is the 4% rule, and does this tool use it?</summary>
+      <div class="faq-body">
+        <p>The 4% rule comes from William Bengen's 1994 research, later expanded by the Trinity Study. The finding: a retiree withdrawing 4% of their portfolio in year one, then adjusting for inflation each year, had never run out of money over a 30-year retirement in actual historical S&amp;P 500 data.</p>
+        <p>It became the dominant rule of thumb in financial planning, and it is not wrong for what it was designed to do. But it has real limits:</p>
+        <ul>
+          <li>It assumes a fixed withdrawal regardless of what the market does, with no adjustments in bad years.</li>
+          <li>It was calibrated for a 30-year horizon. Retire at 55 planning to 95 and you need something more conservative.</li>
+          <li>It ignores income. Social Security alone can dramatically change how hard your portfolio has to work.</li>
+          <li>It does not account for spending that changes in late life — healthcare costs may rise even as travel and discretionary spending fall.</li>
+        </ul>
+        <p>This tool does not apply the 4% rule. It runs your actual numbers through historical and simulated market sequences, accounting for your income, Social Security, housing costs, and spending trajectory.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>How does the flexible spending (guardrails) system work?</summary>
+      <div class="faq-body">
+        <p>The idea comes from financial planner Jonathan Guyton: rather than withdrawing a fixed amount every year regardless of conditions, you set a target and let it flex within a band based on how hard your portfolio is actually working.</p>
+        <p>In the first year you draw from the portfolio, the tool records your withdrawal rate as the baseline. Each year after that:</p>
+        <ul>
+          <li>If your withdrawal rate climbs more than 20% above that baseline, your portfolio is under stress and spending is cut by 25%.</li>
+          <li>If it falls more than 20% below, your portfolio is running ahead and spending is boosted by 20%.</li>
+        </ul>
+        <p>A plan with guardrails on will tighten in bad market stretches and loosen in good ones. In practice this substantially improves survival rates versus rigid fixed spending, while keeping the variability realistic enough to plan around.</p>
+        <p>Toggle guardrails on or off and adjust the cut and boost percentages in More options.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>What are account types and which withdrawal strategy should I use?</summary>
+      <div class="faq-body">
+        <p>Most people have savings spread across different kinds of accounts, and they are not all taxed the same way. The account types feature lets you model this.</p>
+        <ul>
+          <li><strong>Traditional (IRA, 401k).</strong> Contributions went in pre-tax, so withdrawals are taxed as ordinary income. The model gross-ups each withdrawal to cover the tax owed, meaning you need to pull out more than you actually spend.</li>
+          <li><strong>Roth (IRA, 401k).</strong> Contributions went in after-tax, so qualified withdrawals are tax-free. This makes Roth dollars worth more than traditional dollars of the same nominal amount.</li>
+          <li><strong>Taxable brokerage.</strong> No special tax treatment going in or out, but gains are taxed at the lower capital gains rate rather than ordinary income rates. The model approximates this by assuming about half of each withdrawal is gain.</li>
+        </ul>
+        <p>The withdrawal strategy controls the order you draw from these accounts:</p>
+        <ul>
+          <li><strong>Proportional</strong> draws from all three in proportion to their current balances. Simple and predictable.</li>
+          <li><strong>Tax-aware</strong> draws from taxable first, then traditional, then Roth last. Because Roth grows tax-free, leaving it untouched as long as possible lets it compound without tax drag. This typically leaves more usable after-tax wealth at the end, though it may show higher nominal taxes in the early years. The withdrawal strategy comparison table (visible in Historical and Simulated modes) shows the estimated difference for your specific numbers.</li>
+        </ul>
+        <p>The right answer depends on your tax bracket now versus in retirement, and on whether RMDs will force traditional withdrawals anyway after age 73. A tax professional can model your specific situation.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>What are the model's limitations?</summary>
+      <div class="faq-body">
+        <p>A few things the model does not capture:</p>
+        <ul>
+          <li><strong>Healthcare costs</strong> are not broken out separately. Include them in your annual spending, or add pre-Medicare premiums as a life event if they will differ significantly from your regular retirement spending.</li>
+          <li><strong>Required Minimum Distributions</strong> (RMDs) starting at age 73 are not modeled. For most people the impact is limited, but a large traditional IRA can push forced withdrawals into a higher tax bracket.</li>
+          <li><strong>Medicare premium surcharges</strong> (IRMAA) for higher-income retirees are not included.</li>
+          <li><strong>Roth conversions and tax-loss harvesting</strong> are not modeled. A good accountant can meaningfully improve your tax picture beyond what any simple model captures.</li>
+          <li><strong>Spousal and survivor Social Security benefits</strong> are entered manually but not calculated automatically from each other's records.</li>
+          <li><strong>State income tax</strong> is approximated for most states. Set your state in More options for a closer number.</li>
+        </ul>
+        <p>Use this tool to understand the range of possibilities and the levers available to you, then take the numbers to a professional before making major decisions.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Should I talk to a financial advisor?</summary>
+      <div class="faq-body">
+        <p>This tool is a starting point, not a substitute for professional advice. A good advisor can account for your full picture: estate planning, insurance, tax optimization, account structure, and the things a model cannot capture about your situation.</p>
+        <p>Find one: <a href="https://www.napfa.org/find-an-advisor" target="_blank">fee-only advisors (NAPFA)</a> &middot; <a href="https://www.letsmakeaplan.org/" target="_blank">certified planners (CFP Board)</a> &middot; <a href="https://www.aicpa.org" target="_blank">tax professionals (AICPA)</a></p>
+      </div>
+    </details>
+
+  </div></div>` : ''}
+  `;
 }
+window.toggleFaq = function() { faqOpen = !faqOpen; render(); };
 
 // ============================================================================
 // CHARTS
@@ -1366,7 +1682,7 @@ function drawMainChart(result) {
   if (state.ssStartAge > state.age) events.push({ age: state.ssStartAge, label: 'SS starts' });
   if (state.mortgagePayoffAge > state.age && state.housing > 0) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
   if (state.homeSaleAge) events.push({ age: state.homeSaleAge, label: 'Home sale' });
-  if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending drops' });
+  if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: state.lateSpending < state.spending ? 'Spending drops' : 'Spending rises' });
 
   // Chart.js plugin for vertical annotation lines
   const annotationPlugin = {
@@ -1573,6 +1889,19 @@ function drawCashflowChart(result) {
 function invalidateCaches() { maxSpendStale = true; spendingLevelsStale = true; }
 window.update = function(key, val) { state[key] = val; maxSpendView = false; invalidateCaches(); render(); };
 window.updateAccount = function(key, val) { state.accounts[key] = val; state.portfolio = state.accounts.traditional + state.accounts.roth + state.accounts.taxable; invalidateCaches(); render(); };
+window.toggleAccounts = function(enabled) {
+  state.accountsEnabled = enabled;
+  if (enabled) {
+    const total = state.accounts.traditional + state.accounts.roth + state.accounts.taxable;
+    if (total === 0 && state.portfolio > 0) {
+      // Default: put everything in traditional (most conservative, most common)
+      state.accounts.traditional = state.portfolio;
+      state.accounts.roth = 0;
+      state.accounts.taxable = 0;
+    }
+  }
+  maxSpendView = false; invalidateCaches(); render();
+};
 
 window.addEvent = function() {
   const ageEl = document.getElementById('ev_age');
@@ -1640,7 +1969,7 @@ let liveChartTimer = null;
 function fmtSliderVal(key, val) {
   if (['guardrailCutPct','guardrailBoostPct'].includes(key)) return Math.round(val * 100) + '%';
   if (['returnRate','returnStdDev','yourIncomeGrowth','partnerIncomeGrowth'].includes(key)) return (val * 100).toFixed(1) + '%';
-  if (['slowDownAge','yourStopWorkAge','partnerStopWorkAge','ssStartAge','mortgagePayoffAge'].includes(key)) return String(Math.round(val));
+  if (['slowDownAge','yourStopWorkAge','partnerStopWorkAge','ssStartAge','mortgagePayoffAge','targetAge'].includes(key)) return String(Math.round(val));
   return fmtMoney(val);
 }
 
@@ -1648,6 +1977,11 @@ function fmtSliderVal(key, val) {
 window.slideLive = function(el, key, rawVal) {
   const val = +rawVal;
   state[key] = val;
+  // Recalculate mortgage payment when payoff age changes
+  if (key === 'mortgagePayoffAge' && state.mortgageBalance > 0 && state.mortgageRate > 0) {
+    const years = Math.max(1, val - state.age);
+    state.housing = Math.round(calcAnnualMortgagePayment(state.mortgageBalance, state.mortgageRate, years) / 100) * 100;
+  }
   // Immediate label update
   const row = el.parentElement.querySelector('.control-value');
   if (row) row.textContent = fmtSliderVal(key, val);
@@ -1664,6 +1998,11 @@ window.slideLive = function(el, key, rawVal) {
 window.sliderCommit = function(key, rawVal) {
   state[key] = +rawVal;
   maxSpendView = false;
+  // Recalculate mortgage payment when payoff age changes (if balance/rate are known)
+  if (key === 'mortgagePayoffAge' && state.mortgageBalance > 0 && state.mortgageRate > 0) {
+    const years = Math.max(1, state.mortgagePayoffAge - state.age);
+    state.housing = Math.round(calcAnnualMortgagePayment(state.mortgageBalance, state.mortgageRate, years) / 100) * 100;
+  }
   // Sync accounts proportionally when portfolio changes
   if (key === 'portfolio' && state.accountsEnabled) {
     const total = state.accounts.traditional + state.accounts.roth + state.accounts.taxable;
@@ -1690,6 +2029,7 @@ window.updateLive2 = function(el, k1, k2, rawVal) {
 };
 
 window.resetBaseline = function() { baselineState = JSON.parse(JSON.stringify(state)); baselineResult = lastSimResult; render(); };
+window.revertChange = function(key) { if (!baselineState) return; state[key] = baselineState[key]; invalidateCaches(); render(); };
 
 window.applySSAge = function(age) {
   const factors = { 62: 0.70, 67: 1.00, 70: 1.24 };
@@ -1712,11 +2052,17 @@ window.applySpending = function(spend) {
 // ===== PRESETS =====
 window.applyPreset = function(id) {
   switch (id) {
-    case 'stopNow': state.yourStopWorkAge = state.age; if (state.hasPartner) state.partnerStopWorkAge = state.partnerAge; break;
+    case 'stopNow': state.yourStopWorkAge = state.age; break;
     case 'retire5early': state.yourStopWorkAge = Math.max(state.age, state.yourStopWorkAge - 5); break;
-    case 'maxSpend': { state.simMode = 'fixed'; const ms = findMaxSpend(state); const ratio = state.spending > 0 ? state.lateSpending/state.spending : 0.85; state.spending = Math.round(ms.spend/1000)*1000; state.lateSpending = Math.round(state.spending*ratio); maxSpendView = true; break; }
+    case 'partTime': state.yourIncome = Math.round(state.yourIncome * 0.5 / 5000) * 5000; state.yourStopWorkAge = Math.min(state.yourStopWorkAge + 3, 70); break;
+    case 'work2more': state.yourStopWorkAge = state.yourStopWorkAge + 2; if (state.hasPartner && state.partnerIncome > 0) state.partnerStopWorkAge = state.partnerStopWorkAge + 2; break;
+    case 'bothRetire': state.yourStopWorkAge = state.age; state.partnerStopWorkAge = state.partnerAge; break;
+    case 'partnerStarts': state.partnerIncome = 50000; state.partnerStopWorkAge = Math.max(state.partnerAge + 5, 62); break;
+    case 'partnerRetires': state.partnerStopWorkAge = state.partnerAge; break;
     case 'partnerReturns': state.partnerIncome = state.partnerIncome > 0 ? state.partnerIncome : 60000; state.partnerStopWorkAge = Math.max(state.partnerAge + 5, 60); break;
-    case 'delaySS': state.ssStartAge = 70; { const f = 1.24; state.yourSSAmount = Math.round(state.yourSSAmount * f); state.partnerSSAmount = Math.round(state.partnerSSAmount * f); } break;
+    case 'maxSpend': { state.simMode = 'fixed'; const ms = findMaxSpend(state); const ratio = state.spending > 0 ? state.lateSpending/state.spending : 0.85; state.spending = Math.round(ms.spend/1000)*1000; state.lateSpending = Math.round(state.spending*ratio); maxSpendView = true; break; }
+    case 'delaySS': { const f = 1.24; state.ssStartAge = 70; state.yourSSAmount = Math.round(state.yourSSAmount * f); state.partnerSSAmount = Math.round(state.partnerSSAmount * f); break; }
+    case 'earlySS': { const ssFactors = { 62: 0.70, 67: 1.00, 70: 1.24 }; const base = ssFactors[state.ssStartAge] || 1; state.ssStartAge = 62; state.yourSSAmount = Math.round(state.yourSSAmount / base * 0.70); state.partnerSSAmount = Math.round(state.partnerSSAmount / base * 0.70); break; }
     case 'payoffFast': state.mortgagePayoffAge = state.age + 5; break;
     case 'sellHome': if (!state.oneTimeEvents) state.oneTimeEvents = []; state.oneTimeEvents.push({ label: 'Home sale', age: 70, amount: 400000 }); break;
     case 'ltc': if (!state.oneTimeEvents) state.oneTimeEvents = []; for (let a = 85; a < 90; a++) state.oneTimeEvents.push({ label: 'Long-term care', age: a, amount: -90000 }); break;
@@ -1773,7 +2119,7 @@ window.showComparison = function() {
   openModal(`<h2>Compare scenarios</h2>
     <p style="margin-bottom:16px">Side-by-side comparison of your saved scenarios.</p>
     ${table}
-    <p style="font-size:11px;color:var(--ink-faint);margin-top:12px">Each scenario is run with its own mode and settings. Click "load" in the sidebar to explore any scenario in detail.</p>`);
+    <p style="font-size:14px;color:var(--ink-faint);margin-top:12px">Each scenario is run with its own mode and settings. Click "load" in the sidebar to explore any scenario in detail.</p>`);
 };
 
 window.showAbout = function() {
@@ -1807,8 +2153,8 @@ window.showScenarioDetail = function(id) {
   openModal(`<h2>${s.name} \u00b7 ${s.startYear}\u2013${s.startYear + (state.targetAge - state.age)}${run.padded?'*':''}</h2>
     <div class="detail-narrative">${narrative}</div>
     ${table}
-    ${run.padded ? '<p style="font-size:11px;color:var(--ink-faint)">*This horizon extends beyond available history; later years use the long-run average return.</p>' : ''}
-    <p style="font-size:11px;color:var(--ink-faint)">Past performance does not predict future results.</p>`);
+    ${run.padded ? '<p style="font-size:14px;color:var(--ink-faint)">*This horizon extends beyond available history; later years use the long-run average return.</p>' : ''}
+    <p style="font-size:14px;color:var(--ink-faint)">Past performance does not predict future results.</p>`);
 };
 
 // ===== TAX / SS HELPERS (onboarding) =====
@@ -1819,26 +2165,26 @@ window.openTaxHelper = function() {
     <div class="field" style="margin-top:10px"><label>Filing status</label><select id="th_filing"><option value="mfj">Married filing jointly</option><option value="single">Single</option></select></div>
     <div class="field" style="margin-top:10px"><label>State</label><select id="th_state">${Object.keys(STATE_CONFIG).map(k => `<option value="${k}">${STATE_CONFIG[k].name}</option>`).join('')}</select></div>
     <div style="margin-top:14px"><button class="btn-primary" onclick="runTaxHelper()">Estimate</button></div>
-    <div id="th_result" style="margin-top:14px;font-size:13px;color:var(--ink-soft)"></div>`);
+    <div id="th_result" style="margin-top:14px;font-size:14px;color:var(--ink-soft)"></div>`);
 };
 window.runTaxHelper = function() {
   const gross = parseFloat(document.getElementById('th_gross').value) || 0;
   const filing = document.getElementById('th_filing').value;
   const st = document.getElementById('th_state').value;
   const r = estimateNetIncome({ gross, filingStatus: filing, stateCode: st });
-  document.getElementById('th_result').innerHTML = `Estimated net: <strong>${fmtMoney(r.net)}</strong> (federal ${fmtMoney(r.federal)}, state ${fmtMoney(r.state)}, FICA ${fmtMoney(r.fica)}). Effective rate ${(r.effectiveRate*100).toFixed(1)}%. <br/><span style="font-size:11px;color:var(--ink-faint)">A rough estimate, not tax advice.</span>`;
+  document.getElementById('th_result').innerHTML = `Estimated net: <strong>${fmtMoney(r.net)}</strong> (federal ${fmtMoney(r.federal)}, state ${fmtMoney(r.state)}, FICA ${fmtMoney(r.fica)}). Effective rate ${(r.effectiveRate*100).toFixed(1)}%. <br/><span style="font-size:14px;color:var(--ink-faint)">A rough estimate, not tax advice.</span>`;
 };
 window.openSSHelper = function() {
   openModal(`<h2>Estimate Social Security</h2>
     <p>A rough estimate from your typical career income. Your ssa.gov statement is the official figure.</p>
     <div class="field"><label>Typical annual income (today's $)</label><input type="number" id="ss_gross" placeholder="e.g. 90000"/></div>
     <div style="margin-top:14px"><button class="btn-primary" onclick="runSSHelper()">Estimate</button></div>
-    <div id="ss_result" style="margin-top:14px;font-size:13px;color:var(--ink-soft)"></div>`);
+    <div id="ss_result" style="margin-top:14px;font-size:14px;color:var(--ink-soft)"></div>`);
 };
 window.runSSHelper = function() {
   const g = parseFloat(document.getElementById('ss_gross').value) || 0;
   const b = estimateSSBenefit(g);
-  document.getElementById('ss_result').innerHTML = `Estimated benefit at full retirement age: <strong>${fmtMoney(b)}/yr</strong> (${fmtMoney(Math.round(b/12))}/mo).<br/><span style="font-size:11px;color:var(--ink-faint)">Approximate \u2014 your ssa.gov statement is authoritative.</span>`;
+  document.getElementById('ss_result').innerHTML = `Estimated benefit at full retirement age: <strong>${fmtMoney(b)}/yr</strong> (${fmtMoney(Math.round(b/12))}/mo).<br/><span style="font-size:14px;color:var(--ink-faint)">Approximate \u2014 your ssa.gov statement is authoritative.</span>`;
 };
 
 // ============================================================================

@@ -376,7 +376,7 @@ function findMaxSpend(state) {
   for (let i = 0; i < 18; i++) {
     const mid = (low + high) / 2;
     const ratio = state.spending > 0 ? (state.lateSpending / state.spending) : 1;
-    const r = runFixed({ ...state, spending: mid, lateSpending: mid * ratio });
+    const r = runFixed({ ...state, spending: mid, lateSpending: mid * ratio, guardrailsEnabled: false });
     if (r.medianRunOutAge === null && r.medianFinal >= buffer) { best = mid; bestFinal = r.medianFinal; low = mid; }
     else high = mid;
   }
@@ -399,14 +399,65 @@ const CA_STANDARD_DEDUCTION_2025 = { single: 5706, mfj: 11412 };
 const CA_MENTAL_HEALTH_THRESHOLD = 1000000;
 const SS_WAGE_BASE_2026 = 184500, MEDICARE_RATE = 0.0145, SS_RATE = 0.062, ADD_MEDICARE_RATE = 0.009;
 const ADD_MEDICARE_THRESHOLD = { single: 200000, mfj: 250000 };
+// State tax rates: CA full brackets from CA FTB 2025 (ftb.ca.gov). No-tax states from SSA/IRS records.
+// Flat/graduated approximations sourced from Tax Foundation state income tax rates (taxfoundation.org/data/all/state/state-income-tax-rates/)
+// and individual state revenue departments. Rates reflect 2025 statutory or typical effective rates.
 const STATE_CONFIG = {
+  // Full brackets
   CA: { name: 'California', brackets: CA_BRACKETS_2025, standardDeduction: CA_STANDARD_DEDUCTION_2025, mentalHealthSurcharge: true },
-  NY: { name: 'New York', flatApprox: 0.065 },
-  TX: { name: 'Texas (no state tax)', flatApprox: 0 },
-  FL: { name: 'Florida (no state tax)', flatApprox: 0 },
-  WA: { name: 'Washington (no state tax)', flatApprox: 0 },
-  NV: { name: 'Nevada (no state tax)', flatApprox: 0 },
-  OTHER: { name: 'Other / approximate', flatApprox: 0.05 },
+  // No state income tax
+  AK: { name: 'Alaska', flatApprox: 0 },
+  FL: { name: 'Florida', flatApprox: 0 },
+  NV: { name: 'Nevada', flatApprox: 0 },
+  NH: { name: 'New Hampshire', flatApprox: 0 },
+  SD: { name: 'South Dakota', flatApprox: 0 },
+  TN: { name: 'Tennessee', flatApprox: 0 },
+  TX: { name: 'Texas', flatApprox: 0 },
+  WA: { name: 'Washington', flatApprox: 0 },
+  WY: { name: 'Wyoming', flatApprox: 0 },
+  // Flat-rate states (statutory rate)
+  AZ: { name: 'Arizona', flatApprox: 0.025 },
+  CO: { name: 'Colorado', flatApprox: 0.044 },
+  GA: { name: 'Georgia', flatApprox: 0.054 },
+  ID: { name: 'Idaho', flatApprox: 0.058 },
+  IL: { name: 'Illinois', flatApprox: 0.0495 },
+  IN: { name: 'Indiana', flatApprox: 0.04 },    // state 3.05% + avg county ~1%
+  IA: { name: 'Iowa', flatApprox: 0.038 },
+  KY: { name: 'Kentucky', flatApprox: 0.04 },
+  LA: { name: 'Louisiana', flatApprox: 0.03 },  // 3% flat as of 2025
+  MA: { name: 'Massachusetts', flatApprox: 0.05 },
+  MI: { name: 'Michigan', flatApprox: 0.0425 }, // state 4.05% + avg local ~0.2%
+  MS: { name: 'Mississippi', flatApprox: 0.047 },
+  NC: { name: 'North Carolina', flatApprox: 0.045 },
+  PA: { name: 'Pennsylvania', flatApprox: 0.0307 },
+  UT: { name: 'Utah', flatApprox: 0.0455 },
+  // Graduated states (flat approximation of typical effective rate)
+  AL: { name: 'Alabama', flatApprox: 0.04 },
+  AR: { name: 'Arkansas', flatApprox: 0.04 },
+  CT: { name: 'Connecticut', flatApprox: 0.055 },
+  DC: { name: 'District of Columbia', flatApprox: 0.07 },
+  DE: { name: 'Delaware', flatApprox: 0.05 },
+  HI: { name: 'Hawaii', flatApprox: 0.07 },
+  KS: { name: 'Kansas', flatApprox: 0.045 },
+  ME: { name: 'Maine', flatApprox: 0.055 },
+  MD: { name: 'Maryland', flatApprox: 0.065 }, // state ~5.75% + avg county ~3%
+  MN: { name: 'Minnesota', flatApprox: 0.065 },
+  MO: { name: 'Missouri', flatApprox: 0.04 },
+  MT: { name: 'Montana', flatApprox: 0.059 },
+  NE: { name: 'Nebraska', flatApprox: 0.045 },
+  NJ: { name: 'New Jersey', flatApprox: 0.06 },
+  NM: { name: 'New Mexico', flatApprox: 0.045 },
+  NY: { name: 'New York', flatApprox: 0.065 },  // state ~6.85% + NYC ~3.9% for city residents; ~6.5% outside NYC
+  ND: { name: 'North Dakota', flatApprox: 0.02 },
+  OH: { name: 'Ohio', flatApprox: 0.035 },      // state up to 3.99% + avg local ~1.5%
+  OK: { name: 'Oklahoma', flatApprox: 0.04 },
+  OR: { name: 'Oregon', flatApprox: 0.07 },
+  RI: { name: 'Rhode Island', flatApprox: 0.05 },
+  SC: { name: 'South Carolina', flatApprox: 0.05 },
+  VT: { name: 'Vermont', flatApprox: 0.06 },
+  VA: { name: 'Virginia', flatApprox: 0.05 },
+  WV: { name: 'West Virginia', flatApprox: 0.04 },
+  WI: { name: 'Wisconsin', flatApprox: 0.055 },
 };
 function taxFromBrackets(taxable, brackets) {
   if (taxable <= 0) return 0;
@@ -422,7 +473,7 @@ function estimateNetIncome({ gross, filingStatus = 'mfj', stateCode = 'CA', pret
   if (gross <= 0) return { net: 0, federal: 0, state: 0, fica: 0, totalTax: 0, effectiveRate: 0 };
   const w = Math.max(0, gross - pretax);
   const federal = taxFromBrackets(Math.max(0, w - FED_STANDARD_DEDUCTION_2026[filingStatus]), FED_BRACKETS_2026[filingStatus]);
-  const sc = STATE_CONFIG[stateCode] || STATE_CONFIG.OTHER;
+  const sc = STATE_CONFIG[stateCode] || { flatApprox: 0.05 };
   let stateTax = 0;
   if (sc.brackets) {
     const st = Math.max(0, w - sc.standardDeduction[filingStatus]);
@@ -460,7 +511,7 @@ const DEFAULT_STATE = {
   age: 0, partnerAge: 0, hasPartner: false,
   portfolio: 0,
   spending: 0, lateSpending: 0, slowDownAge: 75,
-  housing: 0, mortgagePayoffAge: 60,
+  housing: 0, mortgagePayoffAge: 60, mortgageBalance: 0, mortgageRate: 0,
   yourIncome: 0, yourStopWorkAge: 65, yourIncomeGrowth: 0.01,
   partnerIncome: 0, partnerStopWorkAge: 65, partnerIncomeGrowth: 0.01,
   yourPartTimeAmount: 0, yourPartTimeStart: 65, yourPartTimeEnd: 70,
@@ -469,7 +520,7 @@ const DEFAULT_STATE = {
   oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0,
   returnRate: 0.05, returnStdDev: 0.15,
   taxRate: 0.18, capGainsTax: 0.15,
-  filingStatus: 'mfj', stateCode: 'OTHER',
+  filingStatus: 'mfj', stateCode: 'CA',
   simMode: 'fixed',
   targetAge: 100,
   successThreshold: 0.85, endGoalBuffer: 0,

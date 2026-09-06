@@ -85,14 +85,16 @@ test('findMaxSpend lands near the buffer and within sane bounds', () => {
   const { spend, medianFinal } = E.findMaxSpend(s);
   assert.ok(spend > 0 && spend < 600001, `spend ${spend} should be within [5k,600k] bounds, never millions`);
   assert.ok(spend < 1000000, 'spend is not in the millions');
-  // Running AT that spend should last (no run-out) and end at/above the buffer...
-  const at = runAtMaxSpend(s, spend);
+  // findMaxSpend runs with guardrailsEnabled:false internally, so verify AT the max
+  // and one notch higher using the same guardrails-off setting for a fair comparison.
+  const sNoGuardrails = Object.assign({}, s, { guardrailsEnabled: false });
+  const at = runAtMaxSpend(sNoGuardrails, spend);
   assert.strictEqual(at.medianRunOutAge, null, 'max spend should not run out');
   assert.ok(at.medianFinal >= (s.endGoalBuffer || 0), 'ends at/above the buffer');
   // ...but ends well below the starting portfolio (it actually uses the money up).
   assert.ok(medianFinal < s.portfolio, 'ending balance is near the buffer, not a giant surplus');
   // One notch higher should fail to clear the buffer (confirms we're AT the max, not under it).
-  const higher = runAtMaxSpend(s, spend + 5000);
+  const higher = runAtMaxSpend(sNoGuardrails, spend + 5000);
   assert.ok(higher.medianRunOutAge !== null || higher.medianFinal < at.medianFinal,
     'spending more than the max erodes the ending balance or runs out');
 });
