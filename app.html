@@ -582,7 +582,7 @@ let isFirstDashboard = true;
 let maxSpendView = false;
 let cashflowMode = 'net';
 let assumptionsOpen = false;
-let readFirstOpen = true;
+let readFirstOpen = false;
 
 // Deployment config (config.js, public values only) and feature flags.
 const CONFIG = Object.assign({ checkoutUrl: '', price: '$39', emailEndpoint: '' }, window.SPENDENOUGH_CONFIG || {});
@@ -1103,12 +1103,12 @@ function renderDashboard() {
         ${verdict.wedge ? `<div class="verdict-wedge">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
       </div>
 
-      ${renderReadFirst()}
-
       <div class="section-heading">Portfolio projection</div>
       <div class="section-sub">${state.simMode==='historical' ? 'The shaded area is the range across all '+result.totalPeriods+' historical periods: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : state.simMode==='montecarlo' ? 'The shaded area is the range across '+result.mcSims+' simulated futures: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : 'One steady-return path, so there is no range. Switch to Historical mode to see one.'}${canCompare ? ' The dashed line and faint band are the baseline.' : ''}</div>
       <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
       ${renderEventTimeline()}
+
+      ${renderReadFirst(result)}
 
       ${renderAssumptions(result)}
 
@@ -1383,16 +1383,21 @@ function renderSidebarImpact() {
   </div>`;
 }
 
-// ===== READ THIS FIRST =====
-function renderReadFirst() {
+// ===== HOW TO READ THIS =====
+function renderReadFirst(result) {
+  const n = result.totalPeriods;
+  const unit = result.mode === 'historical' ? 'periods' : result.mode === 'montecarlo' ? 'simulated futures' : 'path';
+  const yrs = state.targetAge - state.age + 1;
+  const bandLine = result.mode === 'fixed'
+    ? `Everything here is in today’s dollars. Fixed mode draws one line at a steady ${pct(state.returnRate)} return, so there is no band. Historical mode shows the spread.`
+    : `Everything here is in today’s dollars. The shaded band shows where the portfolio ended up across all ${n} ${unit}, and the line is the middle one. If the band mostly stays above zero, the plan lasted in most of them. If the bottom edge touches zero, it ran out in at least some, and the spending explorer below shows how much less you would need to spend to change that.`;
   return `<details class="read-first" ${readFirstOpen ? 'open' : ''} ontoggle="readFirstOpen=this.open">
-    <summary>Read this first: what these numbers are, and what they are not</summary>
+    <summary>How to read this, and what the model leaves out</summary>
     <div class="read-first-body">
-      <p>These numbers are a model built from your inputs. They are not a forecast of your life. Everything is in today’s dollars, so inflation is already accounted for.</p>
-      <p>The model takes what you have, what comes in and goes out, and the ages you set, and runs that plan through real market history and through randomized futures. It shows which decisions move the outcome a lot and which barely register, what a bad stretch of markets at the wrong time would have done, and how much you could spend and still make it in most of those worlds.</p>
-      <p>It simplifies a lot. Taxes are flat rates you can see and change under Assumptions, and the tool does not work through brackets. Social Security is whatever you entered, and the built-in estimator runs high. Healthcare has no separate line, so put it in your spending. Your portfolio is a fixed stock/bond mix rebalanced yearly, less the fee you set. History is one sample: overlapping U.S. periods since 1926, and the future does not have to look like any of them. The model knows nothing that is not a number.</p>
-      <p>The shaded band is the spread of outcomes and the line is the median. If most of the band stays above zero, the plan held up in most of the worlds tested. That is a good sign. It is not a guarantee. If the bottom edge hits zero, some worlds ran out. That is a reason to adjust a lever and look again, and it is not a prediction that you will run out. “Failing” here usually means running low in the final years of a plan that runs to age ${state.targetAge}. A plan that survives every period, including 1929, is probably more cautious than you need.</p>
-      <p>Before you act on any of this, take the scenario to a qualified financial planner or tax professional.</p>
+      <p>${bandLine}</p>
+      <p>Running out here means the balance hits zero before age ${state.targetAge} in that ${result.mode === 'historical' ? 'period' : 'run'}. It usually happens in the last few years, after decades of the plan working. Most people would notice a bad run and adjust long before then. The guardrails setting under Assumptions is a rough version of that adjustment.</p>
+      <p>The model works from the numbers you typed and nothing else. Taxes are one flat rate on wages and one on withdrawals, both of which you can change under Assumptions. Social Security is the figure you entered. Healthcare is not broken out, so it needs to be in your spending number. The portfolio is your stock/bond mix rebalanced once a year, minus the fee you set. The market history is U.S. returns since 1926, and ${yrs}-year periods overlap, so ${result.mode === 'historical' ? n + ' periods are not ' + n + ' separate tests' : 'the historical count is not a count of separate tests'}.</p>
+      <p>If you are about to make a decision based on this, take the scenario to a planner or tax professional first.</p>
     </div></details>`;
 }
 
