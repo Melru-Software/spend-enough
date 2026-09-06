@@ -324,9 +324,13 @@
   .asm-label { font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; padding-top: 3px; }
   .asm-text strong { color: var(--ink); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
   .asm-input { width: 64px; text-align: right; font-family: 'JetBrains Mono', monospace; background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 2px 4px; color: var(--ink); min-height: 0; margin: 0 2px; }
-  .asm-range { width: 100%; max-width: 320px; display: block; margin-top: 8px; height: 4px; -webkit-appearance: none; appearance: none; background: var(--line); border-radius: 2px; }
-  .asm-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; }
-  .asm-range::-moz-range-thumb { width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; border: none; }
+  .asm-slider { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: center; margin-top: 10px; max-width: 440px; font-size: 12px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.06em; }
+  .asm-slider output { grid-column: 1 / -1; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink); text-transform: none; letter-spacing: 0; }
+  input[type="range"].asm-range { width: 100%; height: 6px; margin: 0; background: var(--line); border-radius: 3px; -webkit-appearance: none; appearance: none; }
+  input[type="range"].asm-range::-webkit-slider-runnable-track { height: 6px; background: var(--line); border-radius: 3px; }
+  input[type="range"].asm-range::-moz-range-track { height: 6px; background: var(--line); border-radius: 3px; }
+  input[type="range"].asm-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; background: var(--ink); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--line); border-radius: 50%; cursor: pointer; }
+  input[type="range"].asm-range::-moz-range-thumb { width: 18px; height: 18px; background: var(--ink); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--line); border-radius: 50%; cursor: pointer; }
   .asm-toggle { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; cursor: pointer; color: var(--ink-soft); }
   .asm-toggle input { accent-color: var(--ink); }
   .asm-sources { font-size: 13px; color: var(--ink-faint); margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); line-height: 1.5; }
@@ -1325,12 +1329,12 @@ function getVerdict(result) {
       v.headline = lasts ? 'At a steady ' + r + ' return, the portfolio lasts past age ' + state.targetAge : 'At a steady ' + r + ' return, the portfolio runs out around age ' + result.medianRunOutAge;
       v.body = (lasts ? 'Ending balance at age ' + state.targetAge + ' would be about ' + fmtMoneyShort(result.medianFinal) + '. ' : '') + 'This assumes the same return every year, so it hides sequence-of-returns risk. Historical mode runs the same plan through every real market stretch since 1926.' + flexNote;
     }
-    v.caveat = 'A steady-return projection has no range in it. Treat it as a sanity check.';
+    v.caveat = 'A steady return hides the good and bad years. Historical mode shows them.';
   }
   // "Money left on the table" wedge: the median outcome's ending balance.
   if (!maxSpendView && result.medianFinal > 10000) {
     v.wedge = fmtMoneyShort(result.medianFinal);
-    if (result.mode === 'historical') v.wedgeSub = 'Half of the ' + result.totalPeriods + ' historical periods ended with more than this at age ' + state.targetAge + ', half with less. That is money you could be using.';
+    if (result.mode === 'historical') v.wedgeSub = 'Half of the ' + result.totalPeriods + ' historical periods ended with more than this at age ' + state.targetAge + ', half with less. The spending explorer below shows what happens to the count if you spend some of it now.';
     else if (result.mode === 'montecarlo') v.wedgeSub = 'Half of the simulated futures ended with more than this at age ' + state.targetAge + ', half with less.';
     else v.wedgeSub = 'At a steady ' + pct(state.returnRate, 1) + ' return, this is what you would have left at age ' + state.targetAge + '.';
   }
@@ -1392,11 +1396,11 @@ function renderReadFirst(result) {
     ? `Everything here is in today’s dollars. Fixed mode draws one line at a steady ${pct(state.returnRate)} return, so there is no band. Historical mode shows the spread.`
     : `Everything here is in today’s dollars. The shaded band shows where the portfolio ended up across all ${n} ${unit}, and the line is the middle one. If the band mostly stays above zero, the plan lasted in most of them. If the bottom edge touches zero, it ran out in at least some, and the spending explorer below shows how much less you would need to spend to change that.`;
   return `<details class="read-first" ${readFirstOpen ? 'open' : ''} ontoggle="readFirstOpen=this.open">
-    <summary>How to read this, and what the model leaves out</summary>
+    <summary>How to read this, and what the model covers</summary>
     <div class="read-first-body">
       <p>${bandLine}</p>
-      <p>Running out here means the balance hits zero before age ${state.targetAge} in that ${result.mode === 'historical' ? 'period' : 'run'}. It usually happens in the last few years, after decades of the plan working. Most people would notice a bad run and adjust long before then. The guardrails setting under Assumptions is a rough version of that adjustment.</p>
-      <p>The model works from the numbers you typed and nothing else. Taxes are one flat rate on wages and one on withdrawals, both of which you can change under Assumptions. Social Security is the figure you entered. Healthcare is not broken out, so it needs to be in your spending number. The portfolio is your stock/bond mix rebalanced once a year, minus the fee you set. The market history is U.S. returns since 1926, and ${yrs}-year periods overlap, so ${result.mode === 'historical' ? n + ' periods are not ' + n + ' separate tests' : 'the historical count is not a count of separate tests'}.</p>
+      <p>Running out here means the balance hits zero before age ${state.targetAge} in that ${result.mode === 'historical' ? 'period' : 'run'}. It usually happens in the last few years, after decades of the plan working. We’re assuming most people would notice a bad run and adjust long before then. The guardrails setting under Assumptions is a rough version of that adjustment.</p>
+      <p>The model covers your portfolio, wages until the age you stop, Social Security from the age you set, housing until the payoff age, one-time events you add, and taxes as one flat rate on wages and one on withdrawals, both of which you can change under Assumptions. Healthcare is not a separate line, so it belongs in your spending number. It does not model tax brackets, required minimum distributions, or Medicare surcharges. The portfolio is your stock/bond mix rebalanced once a year, minus the fee you set. The market history is U.S. returns since 1926, and ${yrs}-year periods overlap, so ${result.mode === 'historical' ? n + ' periods are not ' + n + ' separate tests' : 'the historical count is not a count of separate tests'}.</p>
       <p>If you are about to make a decision based on this, take the scenario to a planner or tax professional first.</p>
     </div></details>`;
 }
@@ -1419,7 +1423,7 @@ function renderAssumptions(result) {
     ? `<strong>${result.mcSims}</strong> randomized futures. Each year’s return is drawn from a bell curve with average <strong>${pct(result.mcMean)}</strong> and volatility <strong>${pct(result.mcSd)}</strong>${mcParams(state).fromHistory ? ', the 1926–' + HISTORICAL_END_YEAR + ' average and volatility of your ' + mixWords + ' mix' : ' (you set these; history for this mix is ' + pct(h.mean) + ' and ' + pct(h.sd) + ')'}. Real markets have fatter tails and streaks than a bell curve.`
     : `One path at a steady <strong>${pct(state.returnRate)}</strong> real return every year, so no good or bad years and no sequence-of-returns risk. For comparison, the ${mixWords} mix compounded at ${pct(h.geo)} a year over 1926–${HISTORICAL_END_YEAR}.`));
   rows.push(asmRow('Asset mix', `<strong>${mixWords}</strong>, rebalanced yearly. Stocks are the S&amp;P composite with dividends reinvested; bonds are 10-year U.S. Treasuries. History for this mix, 1926–${HISTORICAL_END_YEAR}: average ${pct(h.mean)}, volatility ${pct(h.sd)}, compound ${pct(h.geo)}, worst year ${pct(h.min)}, best ${pct(h.max)}.
-    <input type="range" class="asm-range" min="0" max="100" step="5" value="${Math.round(mix * 100)}" onchange="update('stockPct', +this.value/100)" aria-label="Percent in stocks"/>`));
+    <div class="asm-slider"><span>All bonds</span><input type="range" class="asm-range" min="0" max="100" step="5" value="${Math.round(mix * 100)}" oninput="this.parentElement.querySelector('output').textContent=this.value+'% stocks / '+(100-this.value)+'% bonds'" onchange="update('stockPct', +this.value/100)" aria-label="Percent in stocks"/><span>All stocks</span><output>${Math.round(mix * 100)}% stocks / ${Math.round((1 - mix) * 100)}% bonds</output></div>`));
   rows.push(asmRow('Fees', `<strong>${pct(state.feeRate || 0, 2)}</strong> a year is subtracted from every year’s return, for fund expense ratios plus any advisor fee. ${asmInput('feeRate', ((state.feeRate || 0) * 100).toFixed(2), { min: 0, max: 3, step: 0.05, label: 'Annual fee percent' })} Index funds run about 0.03 to 0.2%; add an advisor and it is often near 1%.`));
   rows.push(asmRow('Inflation', `Everything is in today’s dollars. Spending, Social Security, and housing are held constant in real terms, and the return data is already inflation-adjusted. Wages grow <strong>${pct(state.yourIncomeGrowth)}</strong> a year above inflation${isPaid() ? ' (change it under More options)' : ''}. A fixed mortgage payment is treated as if it rose with inflation, which slightly overstates housing cost in later years.`));
   const gr = state.guardrailsEnabled;
@@ -1429,7 +1433,7 @@ function renderAssumptions(result) {
   rows.push(asmRow('Taxes', `Wages are taxed at <strong>${pct(state.taxRate, 0)}</strong> ${asmInput('taxRate', Math.round(state.taxRate * 100), { min: 0, max: 60, step: 1, label: 'Wage tax rate percent' })}, estimated from your income, filing status, and state, including payroll tax. In retirement, traditional-IRA withdrawals and half of Social Security are taxed at <strong>${pct(retRate, 0)}</strong> ${asmInput('retirementTaxRate', Math.round(retRate * 100), { min: 0, max: 60, step: 1, label: 'Retirement tax rate percent' })}. ${state.accountsEnabled
     ? 'Account types are on: Roth withdrawals are tax-free, taxable-account withdrawals assume half is gain taxed at <strong>' + pct(state.capGainsTax, 0) + '</strong> ' + asmInput('capGainsTax', Math.round(state.capGainsTax * 100), { min: 0, max: 50, step: 1, label: 'Capital gains rate percent' }) + ', and anything drawn before 59½ pays a 10% penalty.'
     : 'Every portfolio withdrawal is grossed up by <strong>' + pct(state.capGainsTax, 0) + '</strong> ' + asmInput('capGainsTax', Math.round(state.capGainsTax * 100), { min: 0, max: 50, step: 1, label: 'Withdrawal tax rate percent' }) + ' for tax. Set it to 0 if your savings are mostly Roth' + (isPaid() ? ', or turn on account types under More options for per-account treatment.' : '.')} Brackets, RMDs, and Medicare surcharges are not modelled.`));
-  rows.push(asmRow('Horizon', `The plan runs from age ${state.age} through age <strong>${state.targetAge}</strong> (${state.targetAge - state.age + 1} years)${isPaid() ? ', set under More options' : ''}. A period counts as failed if the balance hits $0 before age ${state.targetAge}. There is no partial credit and no recovery after that.`));
+  rows.push(asmRow('Horizon', `The plan runs from age ${state.age} through age <strong>${state.targetAge}</strong> (${state.targetAge - state.age + 1} years)${isPaid() ? ', set under More options' : ''}. A period counts as failed if the balance hits $0 before age ${state.targetAge}, even if that happens in the last year, and a period that ends with $1 still counts as a success. Once the balance is gone, the model does not let it come back.`));
   if (state.yourSSAmount > 0 || state.partnerSSAmount > 0) rows.push(asmRow('Social Security', `Starts at age <strong>${state.ssStartAge}</strong> at ${fmtMoney(state.yourSSAmount)}${state.hasPartner && state.partnerSSAmount ? ' for you and ' + fmtMoney(state.partnerSSAmount) + ' for your partner' : ''} a year in today’s dollars, from your inputs. Claiming at 62 pays 70% of the full-age amount and at 70 pays 124%. Survivor and spousal benefits are not worked out for you.`));
   if (isMC) rows.push(asmRow('Randomness', `Seed <strong>${state.mcSeed}</strong>, so these ${result.mcSims} futures repeat exactly until you <button class="link-btn" onclick="rerollSeed()">re-roll</button>. Average ${asmInput('mcMean', (result.mcMean * 100).toFixed(1), { min: -5, max: 15, step: 0.1, label: 'Simulated average real return percent' })} &middot; volatility ${asmInput('mcSd', (result.mcSd * 100).toFixed(1), { min: 1, max: 40, step: 0.5, label: 'Simulated volatility percent' })}${mcParams(state).fromHistory ? '' : ' &middot; <button class="link-btn" onclick="resetMcToHistory()">match history for this mix</button>'} &middot; futures <input type="number" class="asm-input" min="100" max="5000" step="100" value="${result.mcSims}" onchange="update('mcSims', Math.max(100, Math.min(5000, +this.value)))" aria-label="Number of simulated futures"/>`));
   return `<details class="assumptions" ${assumptionsOpen ? 'open' : ''} ontoggle="assumptionsOpen=this.open">
@@ -1636,7 +1640,7 @@ function renderResources() {
     <details class="faq-item">
       <summary>Why we made this tool</summary>
       <div class="faq-body">
-        <p>Most retirement tools are built to keep you from running out of money. Save more, spend less, keep a big cushion. That advice has a cost. If you are 55 with a million dollars saved and a calculator tells you to spend like you have half that, you give up trips, time off, and years you could have lived on money you already have.</p>
+        <p>Most retirement tools are built to keep you from running out of money. Save more and spend less. That advice has a cost. If you are 55 with a million dollars saved and a calculator tells you to spend like you have half that, you give up trips and time off you could have paid for with money you already have.</p>
         <p>Bill Perkins makes this case in <em>Die With Zero</em>. Knowing you should spend more and knowing how much you can safely spend are different problems, and this tool works on the second one. Enter your numbers and it runs your plan through every real U.S. market period since 1926, so you can see where the plan holds up and where it breaks.</p>
       </div>
     </details>
@@ -1660,7 +1664,7 @@ function renderResources() {
       <div class="faq-body">
         <p>In Historical mode, the tool tests your plan against every rolling period of real U.S. market returns since 1926 for the stock/bond mix you chose. If your horizon is 30 years, it runs your numbers starting in 1926, then 1927, then 1928, and so on through every period in the dataset (71 of them for 30 years), each using the actual sequence of returns from that era. The periods overlap, so they are not independent trials, and the Assumptions panel shows exactly how many were run and where they start.</p>
         <p>This matters because of sequence of returns risk. A market crash in year two of retirement is far more damaging than the same crash in year twenty, even if the long-run average return is identical. In year two you are forced to sell at the bottom to cover expenses, and those sold shares never recover. Historical mode shows how many real sequences your plan survives, including the ones that started right before 1929, 1966, 2000, and 2008.</p>
-        <p>Fixed and Simulated modes use steady or randomized return rates. They are faster to grasp, but they smooth over the timing risk that makes real retirement outcomes so variable.</p>
+        <p>Fixed mode uses one steady return and Simulated mode draws random ones, so neither carries the timing of a real crash.</p>
       </div>
     </details>
 
@@ -1669,11 +1673,11 @@ function renderResources() {
       <div class="faq-body">
         <p>The success rate tells you how often your plan lasted to your target age. In Historical mode it is a count ("lasted in 66 of 71 periods"). In Simulated mode it is a percentage across ${state.mcSims} randomized futures.</p>
         <ul>
-          <li><strong>100% is not the goal.</strong> A plan that survives every historical period including the Great Depression is almost certainly too conservative. You are leaving real years of good spending on the table.</li>
+          <li><strong>100% is not the goal.</strong> A plan that survives every historical period, including one that starts in 1929, could have spent more in the other 70.</li>
           <li><strong>85-90% is a reasonable target.</strong> Your plan holds up across most real market environments, including some very bad ones, without being so cautious that you are chronically underusing what you have.</li>
           <li><strong>Failures are not cliff edges.</strong> When a plan "fails," it usually means the portfolio ran low in the final years, not that you would be broke at 70. Social Security and adjusted late-life spending can absorb a lot of what looks alarming in the model.</li>
         </ul>
-        <p>Think of the success rate as a dial. The spending explorer below the chart shows exactly how it shifts as you adjust spending up or down.</p>
+        <p>The spending explorer below the chart shows how the count moves as you set spending higher or lower.</p>
       </div>
     </details>
 
@@ -1682,10 +1686,10 @@ function renderResources() {
       <div class="faq-body">
         <p>Retirement portfolios are sensitive to small changes because the effects compound over decades and the math is nonlinear. A few forces drive this:</p>
         <ul>
-          <li><strong>Compounding cuts both ways.</strong> An extra $5,000 a year in spending costs $5,000 plus the growth that money would have earned over the next 20 or 30 years. At 5% real returns, $5,000 today becomes roughly $13,000 in 20 years. Every dollar you spend early is a dollar that stops compounding.</li>
+          <li><strong>Compounding cuts both ways.</strong> An extra $5,000 a year in spending costs $5,000 plus the growth that money would have earned over the next 20 or 30 years. At 5% real returns, $5,000 today becomes roughly $13,000 in 20 years.</li>
           <li><strong>The withdrawal rate cliff.</strong> Portfolios under stress behave differently at different withdrawal rates. Going from 3.5% to 4% might drop your success rate a little. Going from 4% to 4.5% might drop it a lot, because you start hitting the same bad market sequences that caused most historical failures. The relationship is not linear.</li>
           <li><strong>Early retirement is especially sensitive.</strong> Retiring 10 years earlier adds 10 years of withdrawals and removes 10 years of contributions and growth. The two effects stack.</li>
-          <li><strong>Sequence risk magnifies everything.</strong> In a bad market sequence, a slightly higher withdrawal rate means selling more shares at the bottom, leaving fewer shares to recover when the market rebounds. Small differences in withdrawal rate become large differences in survival.</li>
+          <li><strong>Sequence risk.</strong> In a bad market sequence, a slightly higher withdrawal rate means selling more shares at the bottom, leaving fewer shares to recover when the market rebounds. Small differences in withdrawal rate become large differences in survival.</li>
         </ul>
         <p>This is why the tool uses historical sequences rather than averages. Averages smooth over the exact dynamics that make small differences matter.</p>
       </div>
@@ -1755,7 +1759,7 @@ function renderResources() {
         <ul>
           <li><strong>Asset classes.</strong> The portfolio is U.S. large-cap stocks and 10-year Treasuries only. No international stocks, cash, TIPS, or real estate, and the bond series is a constant-maturity approximation rather than a fund's actual record.</li>
           <li><strong>History is one sample.</strong> Overlapping U.S. periods since 1926 share most of their years, and the best-performing major market of the century is not a neutral sample. Simulated mode is a bell curve, which underweights extreme years and streaks.</li>
-          <li><strong>Fees default to zero.</strong> Set your own under Assumptions; the difference over 30 years is not small.</li>
+          <li><strong>Fees default to zero.</strong> Set your own under Assumptions. On a $1M portfolio spending $40,000 a year at 60/40, a 0.5% fee turns 66 of 71 surviving periods into 63.</li>
           <li><strong>Healthcare costs</strong> are not broken out separately. Include them in your annual spending, or add pre-Medicare premiums as a life event if they will differ significantly from your regular retirement spending.</li>
           <li><strong>Required Minimum Distributions</strong> (RMDs) starting at age 73 are not modeled. For most people the impact is limited, but a large traditional IRA can push forced withdrawals into a higher tax bracket.</li>
           <li><strong>Medicare premium surcharges</strong> (IRMAA) for higher-income retirees are not included.</li>
@@ -2256,7 +2260,7 @@ window.showFullDisclaimer = function() {
 
 window.showAbout = function() {
   openModal(`<h2>Why Spend Enough exists</h2>
-    <p>Most retirement tools are built to keep you from running out of money. Save more, spend less, keep a big cushion. That advice has a cost. If you are 55 with a million dollars saved and a calculator tells you to spend like you have half that, you give up trips, time off, and years you could have lived on money you already have.</p>
+    <p>Most retirement tools are built to keep you from running out of money. Save more and spend less. That advice has a cost. If you are 55 with a million dollars saved and a calculator tells you to spend like you have half that, you give up trips and time off you could have paid for with money you already have.</p>
     <p>Bill Perkins makes this case in <em>Die With Zero</em>. Knowing you should spend more and knowing how much you can safely spend are different problems, and Spend Enough works on the second one.</p>
     <p>You enter your numbers. The tool runs your plan through every real U.S. market period since 1926 and shows you the range of what would have happened, where the plan holds up, where it breaks, and how much room you have. It does not tell you what to do. It shows you the trade-offs so you can decide.</p>
     <p>This is an educational planning tool and it is not financial advice. Talk to a qualified advisor before making major decisions.</p>`);
