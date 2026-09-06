@@ -1121,6 +1121,16 @@ function renderDashboard() {
       </div>
 
       <div class="sidebar-section">
+        <div class="sidebar-heading">Test against</div>
+        <div class="toggle-group">
+          <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
+          <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
+          <button class="toggle-btn ${state.simMode==='fixed'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('fixed')">Fixed${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
+        </div>
+        <div style="font-size:14px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Every rolling period of real U.S. market returns since 1926, for your '+mixLabel()+' stock/bond mix.':state.simMode==='montecarlo'?state.mcSims+' randomized futures drawn from a bell curve matched to your mix’s history. Change it under Assumptions.':'One steady real return every year. No range.'}</div>
+      </div>
+
+      <div class="sidebar-section">
         <button class="more-toggle" onclick="toggleMore()">
           <span>${showMoreOptions ? 'Fewer options' : 'More options'}${!isPaid()?' <span class="lock-icon">&#x1f512;</span>':''}</span>
           <span class="more-toggle-chevron">${showMoreOptions ? '▾' : '▸'}</span>
@@ -1242,14 +1252,7 @@ function moreOptionsHTML() {
   const effRate = state.taxRate ? (state.taxRate * 100).toFixed(0) : '18';
   return `
     <div style="margin-top:12px">
-      <div class="sidebar-heading" style="margin-top:0">Test against</div>
-        <div class="toggle-group">
-          <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
-          <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
-          <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''}" onclick="setMode('montecarlo')">Simulated</button>
-        </div>
-        <div style="font-size:14px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Runs your plan through every rolling period of real U.S. market returns since 1926 for your '+mixLabel()+' stock/bond mix.':state.simMode==='montecarlo'?'Runs '+state.mcSims+' randomized futures drawn from a bell curve matched to your mix’s history (change it under Assumptions).':'Projects a single path at one steady real return. No range.'}
-      <div class="sidebar-heading" style="margin-top:14px">Plan to age</div>
+      <div class="sidebar-heading" style="margin-top:0">Plan to age</div>
       <div class="control">
         <div class="control-row"><span class="control-label">Target age</span><span class="control-value">${state.targetAge}</span></div>
         <input type="range" min="70" max="110" step="1" value="${state.targetAge}" oninput="slideLive(this,'targetAge',this.value)" onchange="sliderCommit('targetAge',this.value)"/>
