@@ -786,9 +786,7 @@ function generatePresets(s) {
   if (s.hasPartner && s.partnerIncome > 0 && s.partnerStopWorkAge - s.partnerAge > 2) {
     presets.push({ id: 'partnerBreak', label: s.partnerBreakStart !== null ? 'Change my partner’s time off' : 'Partner takes time off' });
   }
-  if (s.yourIncome > 0 && yearsToRetire > 3) {
-    presets.push({ id: 'pauseContrib', label: s.contribPauseStart !== null ? 'Change the investing pause' : 'Stop investing for a while' });
-  }
+  presets.push({ id: 'spendMore', label: s.extraSpendStart !== null ? 'Change the extra spending' : 'Spend more for a while' });
   if (s.housing > 0 && s.mortgagePayoffAge > s.age + 2 && !(s.mortgageBalance > 0)) {
     presets.push({ id: 'payoffHouse', label: 'Pay off the house early' });
   }
@@ -803,7 +801,7 @@ function generatePresets(s) {
     presets.push({ id: 'retire5early', label: 'Retire 5 years early' });
   }
   if (s.yourIncome > 0 && (yearsToRetire > 2 || s.yourPartTimeAmount > 0)) {
-    presets.push({ id: 'partTime', label: s.yourPartTimeAmount > 0 ? 'Change part-time' : 'Go part-time first' });
+    presets.push({ id: 'partTime', label: s.yourPartTimeAmount > 0 ? 'Change part-time' : 'Go part-time for a while' });
   }
   if (s.yourIncome > 0 && yearsToRetire <= 5 && s.yourStopWorkAge < 70) {
     presets.push({ id: 'work2more', label: 'Work 2 more years' });
@@ -1100,7 +1098,7 @@ function renderDashboard() {
           <input type="number" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)" placeholder="Annual income" class="mobile-input"/>
         </div>` : ''}
         ${state.yourIncome > 0 ? `<div class="control">
-          <div class="control-row"><span class="control-label">${state.yourPartTimeAmount > 0 ? 'Full-time ends at' : 'Your retirement age'}</span><span class="control-value">${state.yourStopWorkAge}</span></div>
+          <div class="control-row"><span class="control-label">${state.yourPartTimeAmount > 0 && state.yourStopWorkAge === state.yourPartTimeStart ? 'Full-time ends at' : 'Your retirement age'}</span><span class="control-value">${state.yourStopWorkAge}</span></div>
           <input type="range" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)" class="slider-input"/>
           <input type="number" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
         </div>` : ''}
@@ -1108,11 +1106,6 @@ function renderDashboard() {
           <div class="control-row"><span class="control-label">Partner's retirement age</span><span class="control-value">${state.partnerStopWorkAge}</span></div>
           <input type="range" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" class="slider-input"/>
           <input type="number" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
-        </div>` : ''}
-        ${state.contributions > 0 ? `<div class="control">
-          <div class="control-row"><span class="control-label">Invested each year<span class="help-mark" data-tip="401k, IRA, brokerage. Exactly this much goes into the portfolio while you work, and the rest of your take-home counts as spent. Set it to 0 to invest everything you don’t spend.">i</span></span><span class="control-value">${fmtMoney(state.contributions)}</span></div>
-          <input type="range" min="0" max="80000" step="1000" value="${state.contributions}" oninput="slideLive(this,'contributions',this.value)" onchange="sliderCommit('contributions',this.value)" class="slider-input"/>
-          <input type="number" min="0" max="80000" step="1000" value="${state.contributions}" oninput="slideLive(this,'contributions',this.value)" onchange="sliderCommit('contributions',this.value)" placeholder="Per year" class="mobile-input"/>
         </div>` : ''}
       </div>
 
@@ -1397,11 +1390,11 @@ function getVerdict(result) {
   return v;
 }
 
-const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', contributions: 'Invested each year', contribPauseStart: 'Investing paused from', contribPauseEnd: 'Investing resumes', shockEra: 'Bad decade', shockAge: 'Bad decade starts', yourPartTimeAmount: 'Part-time income', yourPartTimeStart: 'Part-time from', yourPartTimeEnd: 'Stop working at' });
+const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', extraSpend: 'Extra spending', extraSpendStart: 'Extra spending from', extraSpendEnd: 'Extra spending until', shockEra: 'Bad decade', shockAge: 'Bad decade starts', yourPartTimeAmount: 'Part-time income', yourPartTimeStart: 'Part-time from', yourPartTimeEnd: 'Part-time until' });
 function fmtField(k, v) {
   if (v === null || v === undefined) return 'none';
   if (k === 'shockEra') return shockLabel(v);
-  if (['spending','lateSpending','portfolio','yourIncome','partnerIncome','housing','contributions','yourPartTimeAmount'].includes(k)) return v > 0 ? fmtMoneyShort(v) : 'none';
+  if (['spending','lateSpending','portfolio','yourIncome','partnerIncome','housing','extraSpend','yourPartTimeAmount'].includes(k)) return v > 0 ? fmtMoneyShort(v) : 'none';
   if (['returnRate','stockPct'].includes(k)) return pct(v, k === 'stockPct' ? 0 : 1);
   if (k === 'feeRate') return pct(v, 2);
   if (['taxRate','capGainsTax'].includes(k)) return pct(v, 0);
@@ -1484,24 +1477,14 @@ function renderAssumptions(result) {
   rows.push(asmRow('Fees', `${asmInput('feeRate', ((state.feeRate || 0) * 100).toFixed(2), { min: 0, max: 3, step: 0.05, label: 'Annual fee percent' })} a year is subtracted from every year’s return. That covers fund expense ratios and any advisor fee. The default, 0.10%, is a typical low-cost index fund. Index funds run about 0.03 to 0.2%, and with an advisor the total is often near 1%.`));
   rows.push(asmRow('Inflation', `Everything is in today’s dollars. Spending, Social Security, and housing are held constant in real terms, and the return data is already inflation-adjusted. Wages grow <strong>${pct(state.yourIncomeGrowth)}</strong> a year above inflation${isPaid() ? ' (change it under More options)' : ''}. A fixed mortgage payment is treated as if it rose with inflation, which slightly overstates housing cost in later years.`));
   const gr = state.guardrailsEnabled;
-  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending)}</strong> a year until age ${state.slowDownAge}, then <strong>${fmtMoney(state.lateSpending)}</strong>${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails <strong>${gr ? 'on' : 'off'}</strong> <label class="asm-toggle"><input type="checkbox" ${gr ? 'checked' : ''} onchange="update('guardrailsEnabled', this.checked)"/> flex spending with the market</label>. ${gr
+  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending)}</strong> a year until age ${state.slowDownAge}, then <strong>${fmtMoney(state.lateSpending)}</strong>${state.extraSpend > 0 && state.extraSpendStart !== null ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails <strong>${gr ? 'on' : 'off'}</strong> <label class="asm-toggle"><input type="checkbox" ${gr ? 'checked' : ''} onchange="update('guardrailsEnabled', this.checked)"/> flex spending with the market</label>. ${gr
     ? `Starting from the withdrawal rate in your first retired year, spending is cut <strong>${pct(state.guardrailCutPct, 0)}</strong> in any year the rate runs more than ${pct(state.guardrailBandPct, 0)} above it, and boosted <strong>${pct(state.guardrailBoostPct, 0)}</strong> when more than ${pct(state.guardrailBandPct, 0)} below. Cuts do not compound. The median path shown cut spending in <strong>${result.medianRunFlexCuts || 0}</strong> year${(result.medianRunFlexCuts || 0) === 1 ? '' : 's'}.${isPaid() ? ' Cut and boost sizes are under Spending flexibility below.' : ''}`
     : 'The same amount is withdrawn every year no matter what markets do.'}`));
-  if (state.yourIncome > 0 || (state.hasPartner && state.partnerIncome > 0) || state.contributions > 0) {
+  if (state.yourIncome > 0 || (state.hasPartner && state.partnerIncome > 0)) {
     const bits = [];
-    if (state.yourIncome > 0) bits.push('You earn <strong>' + fmtMoney(state.yourIncome) + '</strong> a year until age ' + state.yourStopWorkAge + (state.yourPartTimeAmount > 0 ? ', then ' + fmtMoney(state.yourPartTimeAmount) + ' part-time until ' + state.yourPartTimeEnd : '') + (state.yourBreakStart !== null ? ', with no wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd : '') + '.');
+    if (state.yourIncome > 0) bits.push('You earn <strong>' + fmtMoney(state.yourIncome) + '</strong> a year until age ' + state.yourStopWorkAge + (state.yourPartTimeAmount > 0 ? ', with ' + fmtMoney(state.yourPartTimeAmount) + ' part-time from ' + state.yourPartTimeStart + ' to ' + state.yourPartTimeEnd + (state.yourPartTimeEnd < state.yourStopWorkAge ? ' and full-time wages after' : '') : '') + (state.yourBreakStart !== null ? ', with no wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd : '') + '.');
     if (state.hasPartner && state.partnerIncome > 0) bits.push('Your partner earns ' + fmtMoney(state.partnerIncome) + ' until ' + state.partnerStopWorkAge + (state.partnerBreakStart !== null ? ', off from ' + state.partnerBreakStart + ' to ' + state.partnerBreakEnd : '') + '.');
-    const yr0 = (result.medianRun || []).find(y => y.yourIncome + y.partnerIncome > 0);
-    if (state.contributions > 0 && yr0) {
-      const takeHome = yr0.yourIncome + yr0.partnerIncome - (yr0.yourIncome + yr0.partnerIncome) * state.taxRate;
-      const surplus = takeHome - state.spending - (yr0.housing || 0);
-      if (surplus > state.contributions) bits.push('Your take-home is about ' + fmtMoneyShort(takeHome) + ' a year. You spend ' + fmtMoneyShort(state.spending + (yr0.housing || 0)) + ' and invest <strong>' + fmtMoney(state.contributions) + '</strong>, so the model treats the other ' + fmtMoneyShort(surplus - state.contributions) + ' as spent too.');
-      else if (surplus > 0) bits.push('Your take-home is about ' + fmtMoneyShort(takeHome) + ' a year, which leaves ' + fmtMoneyShort(surplus) + ' after spending and housing. That is less than the <strong>' + fmtMoney(state.contributions) + '</strong> you said you invest, so ' + fmtMoneyShort(surplus) + ' is what goes in.');
-      else bits.push('Your spending and housing use up your take-home, so nothing is invested while you work and the portfolio covers the gap.');
-      if (state.contribPauseStart !== null) bits.push('From ' + state.contribPauseStart + ' to ' + state.contribPauseEnd + ' nothing is invested and that money is spent.');
-    } else {
-      bits.push('Whatever is left after tax, spending, and housing goes into the portfolio each year.');
-    }
+    bits.push('Whatever is left after tax, spending, and housing goes into the portfolio each year.');
     rows.push(asmRow('Work', bits.join(' ')));
   }
   rows.push(asmRow('Taxes', `Wages are taxed at ${asmInput('taxRate', Math.round(state.taxRate * 100), { min: 0, max: 60, step: 1, label: 'Wage tax rate percent' })}, estimated from your income, filing status, and state, including payroll tax. In retirement, traditional-IRA withdrawals and half of Social Security are taxed at ${asmInput('retirementTaxRate', Math.round(retRate * 100), { min: 0, max: 60, step: 1, label: 'Retirement tax rate percent' })}. ${state.accountsEnabled
@@ -1556,14 +1539,19 @@ function renderBands(result) {
 // ===== EVENT TIMELINE =====
 function renderEventTimeline() {
   const events = [];
-  if (state.yourPartTimeAmount > 0) { events.push({ age: state.yourPartTimeStart, label: 'Part-time', detail: 'Income drops from ' + fmtMoneyShort(state.yourIncome) + ' to ' + fmtMoneyShort(state.yourPartTimeAmount) }); events.push({ age: state.yourPartTimeEnd, label: 'You stop working', detail: 'Part-time income ends' }); }
+  if (state.yourPartTimeAmount > 0) {
+    const glide = state.yourPartTimeEnd >= state.yourStopWorkAge;
+    events.push({ age: state.yourPartTimeStart, label: 'Part-time', detail: 'Income drops from ' + fmtMoneyShort(state.yourIncome) + ' to ' + fmtMoneyShort(state.yourPartTimeAmount) });
+    events.push({ age: state.yourPartTimeEnd, label: glide ? 'You stop working' : 'Back to full time', detail: glide ? 'Part-time income ends' : 'Income returns to ' + fmtMoneyShort(state.yourIncome) });
+    if (!glide && state.yourStopWorkAge > state.yourPartTimeEnd) events.push({ age: state.yourStopWorkAge, label: 'You retire', detail: 'Income drops to $0' });
+  }
   else if (state.yourStopWorkAge > state.age && state.yourIncome > 0) events.push({ age: state.yourStopWorkAge, label: 'You retire', detail: 'Income drops from ' + fmtMoneyShort(state.yourIncome) + ' to $0' });
   if (state.hasPartner && state.partnerStopWorkAge > state.partnerAge && state.partnerIncome > 0) events.push({ age: state.partnerStopWorkAge, label: 'Partner retires', detail: 'Partner income drops to $0' });
   if (state.housing > 0 && state.mortgagePayoffAge > state.age) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr housing cost drops' });
   if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Career break', detail: 'No wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd }); events.push({ age: state.yourBreakEnd, label: 'Back to work', detail: 'Wages resume' }); }
   if (state.hasPartner && state.partnerBreakStart !== null) { events.push({ age: state.age + (state.partnerBreakStart - state.partnerAge), label: 'Partner’s break', detail: 'Partner has no wages for ' + (state.partnerBreakEnd - state.partnerBreakStart) + ' years' }); }
   if (state.shockEra && state.shockAge !== null) events.push({ age: state.shockAge, label: 'Bad decade starts', detail: shockLabel(state.shockEra) + ' returns for ten years' });
-  if (state.contributions > 0 && state.contribPauseStart !== null) { events.push({ age: state.contribPauseStart, label: 'Investing paused', detail: 'Nothing invested until ' + state.contribPauseEnd }); events.push({ age: state.contribPauseEnd, label: 'Investing resumes', detail: fmtMoneyShort(state.contributions) + '/yr' }); }
+  if (state.extraSpend > 0 && state.extraSpendStart !== null) { events.push({ age: state.extraSpendStart, label: 'Extra spending', detail: '+' + fmtMoneyShort(state.extraSpend) + '/yr until ' + state.extraSpendEnd }); events.push({ age: state.extraSpendEnd, label: 'Extra spending ends', detail: '' }); }
   if (state.ssStartAge > state.age && (state.yourSSAmount > 0 || state.partnerSSAmount > 0)) events.push({ age: state.ssStartAge, label: 'Social Security begins', detail: fmtMoneyShort(state.yourSSAmount + state.partnerSSAmount) + '/yr starts' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending changes', detail: fmtMoneyShort(state.spending) + ' \u2192 ' + fmtMoneyShort(state.lateSpending) + '/yr' });
   if (state.oneTimeEvents) state.oneTimeEvents.forEach(ev => events.push({ age: ev.age, label: ev.label, detail: fmtMoneyShort(ev.amount) }));
@@ -1893,12 +1881,12 @@ function drawMainChart(result, compare) {
 
   // Key event ages for annotations
   const events = [];
-  if (state.yourPartTimeAmount > 0) { events.push({ age: state.yourPartTimeStart, label: 'Part-time' }); events.push({ age: state.yourPartTimeEnd, label: 'Stop working' }); }
+  if (state.yourPartTimeAmount > 0) { const glide = state.yourPartTimeEnd >= state.yourStopWorkAge; events.push({ age: state.yourPartTimeStart, label: 'Part-time' }); events.push({ age: state.yourPartTimeEnd, label: glide ? 'Stop working' : 'Full time' }); if (!glide && state.yourStopWorkAge < state.targetAge) events.push({ age: state.yourStopWorkAge, label: 'Retire' }); }
   else if (state.yourStopWorkAge > state.age && state.yourStopWorkAge < state.targetAge) events.push({ age: state.yourStopWorkAge, label: 'Retire' });
   if (state.ssStartAge > state.age) events.push({ age: state.ssStartAge, label: 'SS starts' });
   if (state.mortgagePayoffAge > state.age && state.housing > 0) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
   if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Break' }); events.push({ age: state.yourBreakEnd, label: 'Back to work' }); }
-  if (state.contributions > 0 && state.contribPauseStart !== null) events.push({ age: state.contribPauseStart, label: 'Investing paused' });
+  if (state.extraSpend > 0 && state.extraSpendStart !== null) events.push({ age: state.extraSpendStart, label: 'Extra spending' });
   if (state.shockEra && state.shockAge !== null) events.push({ age: state.shockAge, label: 'Bad decade' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: state.lateSpending < state.spending ? 'Spending drops' : 'Spending rises' });
 
@@ -2206,7 +2194,6 @@ function fmtSliderVal(key, val) {
   if (['guardrailCutPct','guardrailBoostPct','stockPct'].includes(key)) return Math.round(val * 100) + '%';
   if (['returnRate','returnStdDev','yourIncomeGrowth','partnerIncomeGrowth','feeRate'].includes(key)) return (val * 100).toFixed(1) + '%';
   if (['slowDownAge','yourStopWorkAge','partnerStopWorkAge','ssStartAge','mortgagePayoffAge','targetAge'].includes(key)) return String(Math.round(val));
-  if (key === 'contributions') return fmtMoney(val);
   return fmtMoney(val);
 }
 
@@ -2298,12 +2285,12 @@ function startComparison(label) {
 // Scenario dialogs: the button opens a small form with the two or three numbers the
 // scenario needs, prefilled with what is already set. "Run it" captures the pre-change
 // state as "Before" and applies. "Remove" clears it. Cancel leaves everything alone.
-const SCENARIO_TITLES = { careerBreak: 'Take time off, then go back', partnerBreak: 'Partner takes time off', pauseContrib: 'Stop investing for a while', shockAtRetirement: 'A bad decade', partTime: 'Go part-time first' };
+const SCENARIO_TITLES = { careerBreak: 'Take time off, then go back', partnerBreak: 'Partner takes time off', spendMore: 'Spend more for a while', shockAtRetirement: 'A bad decade', partTime: 'Go part-time for a while' };
 function dlgField(label, id, val, attrs, hint) {
   return `<div class="field" style="margin-top:10px"><label>${label}</label><input type="number" id="${id}" value="${val === null || val === undefined ? '' : val}" ${attrs}/>${hint ? `<span class="field-hint">${hint}</span>` : ''}</div>`;
 }
 window.showScenarioModal = function(id) {
-  const isSet = { careerBreak: state.yourBreakStart !== null, partnerBreak: state.partnerBreakStart !== null, pauseContrib: state.contribPauseStart !== null, shockAtRetirement: !!state.shockEra, partTime: state.yourPartTimeAmount > 0 }[id];
+  const isSet = { careerBreak: state.yourBreakStart !== null, partnerBreak: state.partnerBreakStart !== null, spendMore: state.extraSpendStart !== null, shockAtRetirement: !!state.shockEra, partTime: state.yourPartTimeAmount > 0 }[id];
   let body = '', intro = '';
   if (id === 'careerBreak') {
     intro = 'No wages between these ages, and no raises while you are off. Everything else stays the same.';
@@ -2311,13 +2298,16 @@ window.showScenarioModal = function(id) {
   } else if (id === 'partnerBreak') {
     intro = 'Your partner has no wages between these ages, and no raises while off.';
     body = dlgField('Off from age', 'sc_a', state.partnerBreakStart !== null ? state.partnerBreakStart : state.partnerAge, `min="${state.partnerAge}" max="${state.partnerStopWorkAge - 1}" step="1"`) + dlgField('Back to work at age', 'sc_b', state.partnerBreakEnd !== null ? state.partnerBreakEnd : Math.min(state.partnerAge + 2, state.partnerStopWorkAge), `min="${state.partnerAge + 1}" max="${state.partnerStopWorkAge}" step="1"`);
-  } else if (id === 'pauseContrib') {
-    intro = 'Tell it how much you invest each year (401k, IRA, brokerage, in today’s dollars). While the pause is on, none of it goes into the portfolio and that money is spent instead.';
-    body = dlgField('You invest each year', 'sc_c', state.contributions || '', 'min="0" step="1000" placeholder="e.g. 15000"', 'Exactly this much goes in while you work; the rest of your take-home counts as spent.') + dlgField('Pause from age', 'sc_a', state.contribPauseStart !== null ? state.contribPauseStart : state.age, `min="${state.age}" max="${state.yourStopWorkAge - 1}" step="1"`) + dlgField('Start investing again at age', 'sc_b', state.contribPauseEnd !== null ? state.contribPauseEnd : Math.min(state.age + 3, state.yourStopWorkAge), `min="${state.age + 1}" max="${state.yourStopWorkAge}" step="1"`);
+  } else if (id === 'spendMore') {
+    const on = state.extraSpendStart !== null;
+    intro = 'Extra spending on top of your usual amount for these years. College, childcare, a parent’s care, a year of travel, or money you would otherwise have invested. It is treated as committed, so the guardrails do not cut it.';
+    body = dlgField('Extra spending per year', 'sc_c', on ? state.extraSpend : '', 'min="0" step="1000" placeholder="e.g. 25000"', 'In today’s dollars, before any tax.') + dlgField('From age', 'sc_a', on ? state.extraSpendStart : state.age, `min="${state.age}" max="${state.targetAge - 1}" step="1"`) + dlgField('Until age', 'sc_b', on ? state.extraSpendEnd : state.age + 4, `min="${state.age + 1}" max="${state.targetAge}" step="1"`);
   } else if (id === 'partTime') {
     const pt = state.yourPartTimeAmount > 0;
-    intro = 'Full-time wages stop at the first age, part-time income runs until the second, and then you stop working. Wage growth applies to the part-time income too.';
-    body = dlgField('Part-time income per year', 'sc_c', pt ? state.yourPartTimeAmount : Math.round(state.yourIncome / 2 / 1000) * 1000, 'min="0" step="1000"', 'Before tax, in today’s dollars. Prefilled with half your current income; change it.') + dlgField('Part-time from age', 'sc_a', pt ? state.yourPartTimeStart : state.age, `min="${state.age}" max="${state.targetAge - 1}" step="1"`) + dlgField('Stop working at age', 'sc_b', pt ? state.yourPartTimeEnd : state.yourStopWorkAge, `min="${state.age + 1}" max="${state.targetAge}" step="1"`);
+    const glide = pt && state.yourStopWorkAge === state.yourPartTimeStart;
+    intro = 'Part-time income replaces your full-time wages between these ages. Then either your full-time wages come back, or you stop working for good.';
+    body = dlgField('Part-time income per year', 'sc_c', pt ? state.yourPartTimeAmount : Math.round(state.yourIncome / 2 / 1000) * 1000, 'min="0" step="1000"', 'Before tax, in today’s dollars. Prefilled with half your current income; change it.') + dlgField('Part-time from age', 'sc_a', pt ? state.yourPartTimeStart : state.age, `min="${state.age}" max="${state.targetAge - 1}" step="1"`) + dlgField('Until age', 'sc_b', pt ? state.yourPartTimeEnd : Math.min(state.age + 3, state.yourStopWorkAge), `min="${state.age + 1}" max="${state.targetAge}" step="1"`)
+      + `<div class="field" style="margin-top:12px"><label>Then</label><div class="toggle-group"><button type="button" class="toggle-btn ${glide ? '' : 'active'}" data-then="resume" onclick="pickThen(this)">Back to full time</button><button type="button" class="toggle-btn ${glide ? 'active' : ''}" data-then="stop" onclick="pickThen(this)">Stop working</button></div><span class="field-hint" id="sc_then_hint">${glide ? 'Wages end for good at the second age.' : 'Full-time wages come back until your retirement age of ' + state.yourStopWorkAge + '.'}</span></div>`;
   } else if (id === 'shockAtRetirement') {
     intro = 'From the age you pick, the market does what it did in that decade. Every period in the history test gets the same ten bad years there, so the count answers what happens if it hits right then.';
     const defAge = state.shockAge !== null ? state.shockAge : ((state.yourIncome > 0 && state.yourStopWorkAge > state.age) ? state.yourStopWorkAge : state.age);
@@ -2327,29 +2317,38 @@ window.showScenarioModal = function(id) {
     <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn-primary" onclick="applyScenarioModal('${id}')">Run it</button>${isSet ? `<button class="btn-secondary" onclick="removeScenario('${id}')">Remove</button>` : ''}<button class="btn-secondary" onclick="closeModal()">Cancel</button></div>`);
   const first = document.getElementById('sc_c') || document.getElementById('sc_a'); if (first) first.focus();
 };
+window.pickThen = function(btn) {
+  document.querySelectorAll('.modal .toggle-btn[data-then]').forEach(b => b.classList.toggle('active', b === btn));
+  const hint = document.getElementById('sc_then_hint');
+  if (hint) hint.textContent = btn.dataset.then === 'stop' ? 'Wages end for good at the second age.' : 'Full-time wages come back until your retirement age of ' + state.yourStopWorkAge + '.';
+};
 function dlgNum(id) { const el = document.getElementById(id); const v = el ? parseFloat(el.value) : NaN; return isNaN(v) ? null : Math.round(v); }
 window.applyScenarioModal = function(id) {
   const a = dlgNum('sc_a'), b = dlgNum('sc_b');
   const bad = (el) => { if (el) el.style.borderColor = 'var(--danger)'; };
-  if (id === 'careerBreak' || id === 'partnerBreak' || id === 'pauseContrib' || id === 'partTime') {
+  if (id === 'careerBreak' || id === 'partnerBreak' || id === 'spendMore' || id === 'partTime') {
     if (a === null || b === null || b <= a) { bad(document.getElementById('sc_b')); return; }
   }
-  if (id === 'pauseContrib') { const c = dlgNum('sc_c'); if (!(c > 0)) { bad(document.getElementById('sc_c')); return; } }
+  if (id === 'spendMore') { const c = dlgNum('sc_c'); if (!(c > 0)) { bad(document.getElementById('sc_c')); return; } }
   if (id === 'partTime') { const c = dlgNum('sc_c'); if (c === null || c < 0) { bad(document.getElementById('sc_c')); return; } }
   startComparison(presetLabel(id));
   if (id === 'careerBreak') { state.yourBreakStart = a; state.yourBreakEnd = b; }
   else if (id === 'partnerBreak') { state.partnerBreakStart = a; state.partnerBreakEnd = b; }
-  else if (id === 'pauseContrib') { state.contributions = dlgNum('sc_c'); state.contribPauseStart = a; state.contribPauseEnd = b; }
+  else if (id === 'spendMore') { state.extraSpend = dlgNum('sc_c'); state.extraSpendStart = a; state.extraSpendEnd = b; }
   else if (id === 'shockAtRetirement') { state.shockEra = document.getElementById('sc_era').value; state.shockAge = a; }
-  else if (id === 'partTime') { state.yourStopWorkAge = a; state.yourPartTimeAmount = dlgNum('sc_c'); state.yourPartTimeStart = a; state.yourPartTimeEnd = b; }
+  else if (id === 'partTime') {
+    const stopAfter = !!document.querySelector('.modal .toggle-btn[data-then="stop"].active');
+    state.yourPartTimeAmount = dlgNum('sc_c'); state.yourPartTimeStart = a; state.yourPartTimeEnd = b;
+    if (stopAfter) state.yourStopWorkAge = a; else if (state.yourStopWorkAge < b) state.yourStopWorkAge = b;
+  }
   closeModal(); invalidateCaches(); render();
 };
 window.removeScenario = function(id) {
   if (id === 'careerBreak') state.yourBreakStart = state.yourBreakEnd = null;
   else if (id === 'partnerBreak') state.partnerBreakStart = state.partnerBreakEnd = null;
-  else if (id === 'pauseContrib') state.contribPauseStart = state.contribPauseEnd = null;
+  else if (id === 'spendMore') { state.extraSpend = 0; state.extraSpendStart = state.extraSpendEnd = null; }
   else if (id === 'shockAtRetirement') { state.shockEra = null; state.shockAge = null; }
-  else if (id === 'partTime') { state.yourStopWorkAge = state.yourPartTimeEnd; state.yourPartTimeAmount = 0; }
+  else if (id === 'partTime') { if (state.yourStopWorkAge === state.yourPartTimeStart) state.yourStopWorkAge = state.yourPartTimeEnd; state.yourPartTimeAmount = 0; }
   closeModal(); maxSpendView = false; invalidateCaches(); render();
 };
 window.applyPreset = function(id) {

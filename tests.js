@@ -421,6 +421,26 @@ test('part-time years count as working for the guardrail reference', () => {
   assert.strictEqual(y(63).yourIncome, 0, 'wages stop at the part-time end');
   assert.ok(!years.filter(r => r.age < 63).some(r => r.flexed), 'no flexing while part-time wages are coming in');
 });
+test('part-time for a while, then back to full time', () => {
+  const s = mk({ age: 35, targetAge: 70, portfolio: 300000, spending: 60000, lateSpending: 60000, slowDownAge: 200,
+                 yourIncome: 100000, yourStopWorkAge: 65, yourPartTimeAmount: 45000, yourPartTimeStart: 37, yourPartTimeEnd: 40,
+                 yourIncomeGrowth: 0, taxRate: 0.2, capGainsTax: 0, hasPartner: false, guardrailsEnabled: false });
+  const years = E.simulateOnce(s, new Array(36).fill(0.05));
+  const y = (a) => years.find(r => r.age === a);
+  assert.strictEqual(y(36).yourIncome, 100000); assert.strictEqual(y(37).yourIncome, 45000); assert.strictEqual(y(39).yourIncome, 45000);
+  assert.strictEqual(y(40).yourIncome, 100000, 'full-time wages resume'); assert.strictEqual(y(65).yourIncome, 0);
+});
+
+test('extra spending applies for its window only and lowers the ending balance', () => {
+  const s = mk({ age: 45, targetAge: 90, portfolio: 2500000, spending: 60000, lateSpending: 60000, slowDownAge: 200,
+                 yourIncome: 0, hasPartner: false, taxRate: 0, capGainsTax: 0, guardrailsEnabled: false,
+                 extraSpend: 25000, extraSpendStart: 50, extraSpendEnd: 54 });
+  const years = E.simulateOnce(s, new Array(46).fill(0.03));
+  const y = (a) => years.find(r => r.age === a);
+  assert.strictEqual(y(49).spending, 60000); assert.strictEqual(y(50).spending, 85000); assert.strictEqual(y(53).spending, 85000); assert.strictEqual(y(54).spending, 60000);
+  const base = E.runForState(Object.assign({}, s, { extraSpend: 0, simMode: 'historical' })), more = E.runForState(Object.assign({}, s, { simMode: 'historical' }));
+  assert.ok(more.medianFinal < base.medianFinal && more.successRate <= base.successRate);
+});
 
 // ---- 14. Market shock ------------------------------------------------------------
 test('a market shock splices the era sequence in at the shock age and lowers success', () => {

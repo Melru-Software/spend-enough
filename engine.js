@@ -240,11 +240,13 @@ function simulateOnce(state, returnSeries) {
     // Career breaks: no wages between the break start age and the back-to-work age.
     const yourBreak = inWindow(age, state.yourBreakStart, state.yourBreakEnd);
     const partnerBreak = inWindow(partnerAge, state.partnerBreakStart, state.partnerBreakEnd);
-    let yourIncomeThisYear = (age >= state.yourStopWorkAge || yourBreak) ? 0 : yourSalary;
-    let partnerIncomeThisYear = (!state.hasPartner || partnerAge >= state.partnerStopWorkAge || partnerBreak) ? 0 : partnerSalary;
-
-    if (state.yourPartTimeAmount > 0 && age >= state.yourPartTimeStart && age < state.yourPartTimeEnd) yourIncomeThisYear += state.yourPartTimeAmount;
-    if (state.partnerPartTimeAmount > 0 && partnerAge >= state.partnerPartTimeStart && partnerAge < state.partnerPartTimeEnd) partnerIncomeThisYear += state.partnerPartTimeAmount;
+    // Part-time windows replace full-time wages for those years (before or after the
+    // stop-work age), so they serve both "part-time for a while, then back to full time"
+    // and "part-time as a glide path into retirement".
+    const yourPT = state.yourPartTimeAmount > 0 && inWindow(age, state.yourPartTimeStart, state.yourPartTimeEnd);
+    const partnerPT = state.partnerPartTimeAmount > 0 && inWindow(partnerAge, state.partnerPartTimeStart, state.partnerPartTimeEnd);
+    let yourIncomeThisYear = yourBreak ? 0 : yourPT ? state.yourPartTimeAmount : (age >= state.yourStopWorkAge ? 0 : yourSalary);
+    let partnerIncomeThisYear = (!state.hasPartner || partnerBreak) ? 0 : partnerPT ? state.partnerPartTimeAmount : (partnerAge >= state.partnerStopWorkAge ? 0 : partnerSalary);
 
     let ssIncome = 0;
     if (age >= state.ssStartAge) ssIncome += state.yourSSAmount;
@@ -313,7 +315,10 @@ function simulateOnce(state, returnSeries) {
       }
     }
 
-    const totalSpend = spend + housing;
+    // Extra spending for a window (college, childcare, a year of travel). Committed money,
+    // so it is added after the guardrails rather than flexed with the rest.
+    const extra = state.extraSpend > 0 && inWindow(age, state.extraSpendStart, state.extraSpendEnd) ? state.extraSpend : 0;
+    const totalSpend = spend + housing + extra;
     let netNeed = totalSpend - netIncome - eventAdj;
 
     let withdrawal = 0;
@@ -355,7 +360,7 @@ function simulateOnce(state, returnSeries) {
     let ranOutThisYear = false;
     if (portfolio <= 0) { portfolio = 0; ranOutThisYear = true; broken = true; if (useAccts) { accts.traditional = accts.roth = accts.taxable = 0; } }
 
-    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, onBreak: yourBreak || partnerBreak, contribPaused, unallocated, ranOut: ranOutThisYear || broken });
+    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, onBreak: yourBreak || partnerBreak, contribPaused, unallocated, extraSpend: extra, ranOut: ranOutThisYear || broken });
 
     // Real wage growth applies only in years actually worked (no raises during a break).
     if (!yourBreak) yourSalary *= (1 + (state.yourIncomeGrowth || 0));
@@ -697,6 +702,8 @@ const DEFAULT_STATE = {
   // Market shock: id from HISTORICAL_SCENARIOS whose first ten years replace the returns
   // from shockAge onward (null = none).
   shockEra: null, shockAge: null,
+  // Extra spending per year for a window (null ages = none).
+  extraSpend: 0, extraSpendStart: null, extraSpendEnd: null,
   ssStartAge: 67, yourSSAmount: 0, partnerSSAmount: 0,
   oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0,
   // Portfolio: share in stocks (rest in 10-year Treasuries), annual fee drag
