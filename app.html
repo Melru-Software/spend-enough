@@ -346,13 +346,6 @@
   .deep[open] summary::after { content: '\2212'; }
   .deep-body { padding: 0 18px 18px; }
   .deep-body .section-heading:first-child { margin-top: 8px; }
-  .event-card { background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 8px 10px; margin-bottom: 6px; font-size: 14px; color: var(--ink-soft); line-height: 1.9; }
-  .ec-title { display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--ink); font-size: 13px; line-height: 1.4; margin-bottom: 2px; }
-  .ec-x { background: none; border: none; color: var(--ink-faint); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 2px; min-height: 0; }
-  .ec-x:hover { color: var(--danger); }
-  .ec-add { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; }
-  .ec-add .link-btn { text-decoration: none; font-weight: 500; }
-  .ec-add .link-btn:hover { text-decoration: underline; }
   .asm-input.wide { width: 92px; }
   .asm-select { font-size: 14px; background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 3px 4px; font-family: inherit; color: var(--ink); min-height: 0; }
   .more-toggle .asm-hint { font-weight: 400; margin-left: 6px; }
@@ -787,21 +780,19 @@ function generatePresets(s) {
   const yearsToRetire = s.yourStopWorkAge - s.age;
 
   // ---- Time off and saving (the decisions this tool was built for) ----
-  if (s.yourIncome > 0 && yearsToRetire > 2 && s.yourBreakStart === null) {
-    presets.push({ id: 'careerBreak', label: 'Take 2 years off, then go back' });
+  if (s.yourIncome > 0 && yearsToRetire > 2) {
+    presets.push({ id: 'careerBreak', label: s.yourBreakStart !== null ? 'Change my time off' : 'Take time off, then go back' });
   }
-  if (s.hasPartner && s.partnerIncome > 0 && s.partnerStopWorkAge - s.partnerAge > 2 && s.partnerBreakStart === null) {
-    presets.push({ id: 'partnerBreak', label: 'Partner takes 2 years off' });
+  if (s.hasPartner && s.partnerIncome > 0 && s.partnerStopWorkAge - s.partnerAge > 2) {
+    presets.push({ id: 'partnerBreak', label: s.partnerBreakStart !== null ? 'Change my partner’s time off' : 'Partner takes time off' });
   }
-  if (s.yourIncome > 0 && yearsToRetire > 3 && s.contribPauseStart === null) {
-    presets.push({ id: 'pauseContrib', label: 'Stop investing for 3 years' });
+  if (s.yourIncome > 0 && yearsToRetire > 3) {
+    presets.push({ id: 'pauseContrib', label: s.contribPauseStart !== null ? 'Change the investing pause' : 'Stop investing for a while' });
   }
   if (s.housing > 0 && s.mortgagePayoffAge > s.age + 2 && !(s.mortgageBalance > 0)) {
     presets.push({ id: 'payoffHouse', label: 'Pay off the house early' });
   }
-  if (!s.shockEra) {
-    presets.push({ id: 'shockAtRetirement', label: (s.yourIncome > 0 && s.yourStopWorkAge > s.age) ? 'A bad decade starts when I stop working' : 'A bad decade starts now' });
-  }
+  presets.push({ id: 'shockAtRetirement', label: s.shockEra ? 'Change the bad decade' : ((s.yourIncome > 0 && s.yourStopWorkAge > s.age) ? 'A bad decade starts when I stop working' : 'A bad decade starts now') });
 
   // ---- User's own work situation ----
   if (s.yourIncome > 0 && s.age < 60 && yearsToRetire > 0) {
@@ -1125,8 +1116,6 @@ function renderDashboard() {
         </div>` : ''}
       </div>
 
-      ${renderChanges()}
-
       <div class="sidebar-section">
         <button class="more-toggle" onclick="toggleMore()">
           <span>${showMoreOptions ? 'Fewer options' : 'More options'}${!isPaid()?' <span class="lock-icon">&#x1f512;</span>':''}</span>
@@ -1245,32 +1234,6 @@ function renderDashboard() {
     card.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } });
   });
 }
-
-function ageInput(val, min, max, handler, label) {
-  return `<input type="number" class="asm-input" value="${val === null || val === undefined ? '' : val}" placeholder="age" min="${min}" max="${max}" onchange="${handler}" aria-label="${label}"/>`;
-}
-function renderChanges() {
-  const cards = [], adds = [];
-  const working = state.yourIncome > 0 && state.yourStopWorkAge > state.age;
-  const pWorking = state.hasPartner && state.partnerIncome > 0 && state.partnerStopWorkAge > state.partnerAge;
-  const card = (title, body, remove) => `<div class="event-card"><div class="ec-title"><span>${title}</span><button class="ec-x" onclick="${remove}" aria-label="Remove ${title}">&times;</button></div>${body}</div>`;
-  if (state.yourBreakStart !== null) cards.push(card('Career break', `Off from age ${ageInput(state.yourBreakStart, state.age, state.yourStopWorkAge, "setBreak('your','start',this.value)", 'Break starts at age')} and back at ${ageInput(state.yourBreakEnd, state.age + 1, state.yourStopWorkAge, "setBreak('your','end',this.value)", 'Back to work at age')}`, "clearBreak('your')"));
-  else if (working) adds.push(`<button class="link-btn" onclick="addBreak('your')">+ Career break</button>`);
-  if (state.partnerBreakStart !== null) cards.push(card('Partner\u2019s career break', `Off from age ${ageInput(state.partnerBreakStart, state.partnerAge, state.partnerStopWorkAge, "setBreak('partner','start',this.value)", 'Partner break starts at age')} and back at ${ageInput(state.partnerBreakEnd, state.partnerAge + 1, state.partnerStopWorkAge, "setBreak('partner','end',this.value)", 'Partner back to work at age')}`, "clearBreak('partner')"));
-  else if (pWorking) adds.push(`<button class="link-btn" onclick="addBreak('partner')">+ Partner\u2019s break</button>`);
-  if (state.contribPauseStart !== null && state.contributions > 0) cards.push(card('Investing paused', `From age ${ageInput(state.contribPauseStart, state.age, state.yourStopWorkAge, "setPause('start',this.value)", 'Pause starts at age')} to ${ageInput(state.contribPauseEnd, state.age + 1, state.yourStopWorkAge, "setPause('end',this.value)", 'Pause ends at age')}, nothing goes into the portfolio and the ${fmtMoney(state.contributions)} a year is spent`, "clearPause()"));
-  else if (working) adds.push(`<button class="link-btn" onclick="addPause()">+ Pause investing</button>`);
-  if (state.shockEra) cards.push(card('Bad decade', `The market does what it did in <select class="asm-select" onchange="setShock(this.value)" aria-label="Which decade">${SHOCK_ERAS.map(([v, l]) => `<option value="${v}" ${state.shockEra === v ? 'selected' : ''}>${l}</option>`).join('')}</select>, starting at age ${ageInput(state.shockAge, state.age, state.targetAge, "setShockAge(this.value)", 'Shock starts at age')}`, "setShock('')"));
-  else adds.push(`<button class="link-btn" onclick="setShock('dotcom')">+ Bad decade</button>`);
-  if (!cards.length && !adds.length) return '';
-  return `<div class="sidebar-section">
-        <div class="sidebar-heading">Changes along the way</div>
-        ${cards.length ? '' : '<div class="sidebar-sub">Time off, a pause in investing, or a bad stretch of markets.</div>'}
-        ${cards.join('')}
-        ${adds.length ? `<div class="ec-add">${adds.join('')}</div>` : ''}
-      </div>`;
-}
-
 
 function moreOptionsHTML() {
   const effRate = state.taxRate ? (state.taxRate * 100).toFixed(0) : '18';
@@ -2194,52 +2157,6 @@ window.setMode = function(m) {
   if (m !== 'historical' && !isPaid()) { showUnlockModal(); return; }
   state.simMode = m; invalidateCaches(); render();
 };
-window.setBreak = function(who, which, raw) {
-  const ks = who === 'partner' ? ['partnerBreakStart', 'partnerBreakEnd'] : ['yourBreakStart', 'yourBreakEnd'];
-  const base = who === 'partner' ? state.partnerAge : state.age;
-  const v = raw === '' || raw === null ? null : Math.round(+raw);
-  state[which === 'start' ? ks[0] : ks[1]] = v;
-  const s = state[ks[0]], e = state[ks[1]];
-  if (s !== null && (e === null || e <= s)) state[ks[1]] = s + 2;
-  if (e !== null && s === null) state[ks[0]] = Math.max(base, e - 2);
-  maxSpendView = false; invalidateCaches(); render();
-};
-window.addBreak = function(who) {
-  const base = who === 'partner' ? state.partnerAge : state.age;
-  const stop = who === 'partner' ? state.partnerStopWorkAge : state.yourStopWorkAge;
-  const end = Math.min(base + 2, stop);
-  if (who === 'partner') { state.partnerBreakStart = base; state.partnerBreakEnd = end; } else { state.yourBreakStart = base; state.yourBreakEnd = end; }
-  maxSpendView = false; invalidateCaches(); render();
-};
-window.clearBreak = function(who) {
-  if (who === 'partner') { state.partnerBreakStart = state.partnerBreakEnd = null; } else { state.yourBreakStart = state.yourBreakEnd = null; }
-  maxSpendView = false; invalidateCaches(); render();
-};
-window.addPause = function() {
-  if (!(state.contributions > 0)) { askContributions('addPause'); return; }
-  state.contribPauseStart = state.age; state.contribPauseEnd = Math.min(state.age + 3, state.yourStopWorkAge);
-  maxSpendView = false; invalidateCaches(); render();
-};
-window.clearPause = function() { state.contribPauseStart = state.contribPauseEnd = null; maxSpendView = false; invalidateCaches(); render(); };
-window.setPause = function(which, raw) {
-  const v = raw === '' || raw === null ? null : Math.round(+raw);
-  state[which === 'start' ? 'contribPauseStart' : 'contribPauseEnd'] = v;
-  const s = state.contribPauseStart, e = state.contribPauseEnd;
-  if (s !== null && (e === null || e <= s)) state.contribPauseEnd = s + 3;
-  if (e !== null && s === null) state.contribPauseStart = Math.max(state.age, e - 3);
-  maxSpendView = false; invalidateCaches(); render();
-};
-window.setShock = function(v) {
-  state.shockEra = v || null;
-  if (!v) state.shockAge = null;
-  else if (state.shockAge === null || state.shockAge === undefined) state.shockAge = (state.yourIncome > 0 && state.yourStopWorkAge > state.age) ? state.yourStopWorkAge : state.age;
-  maxSpendView = false; invalidateCaches(); render();
-};
-window.setShockAge = function(raw) {
-  const v = raw === '' ? null : Math.round(+raw);
-  state.shockAge = v; if (v === null) state.shockEra = null;
-  maxSpendView = false; invalidateCaches(); render();
-};
 window.rerollSeed = function() { state.mcSeed = Math.floor(Math.random() * 1e9); invalidateCaches(); render(); };
 window.resetMcToHistory = function() { state.mcMean = null; state.mcSd = null; invalidateCaches(); render(); };
 window.toggleCompare = function() {
@@ -2376,32 +2293,61 @@ function startComparison(label) {
   compareOn = isPaid();
   maxSpendView = false;
 }
-window.askContributions = function(thenId) {
-  openModal(`<h2>How much do you invest each year?</h2>
-    <p>401k, IRA, brokerage, in today's dollars. From now on exactly this much goes into the portfolio while you work, and the rest of your take-home counts as spent. The scenario then pauses it for a few years.</p>
-    <div class="field"><label>Per year</label><input type="number" id="ask_contrib" min="0" step="1000" placeholder="e.g. 15000"/></div>
-    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn-primary" onclick="finishAskContributions('${thenId}')">Run it</button><button class="btn-secondary" onclick="cancelAsk()">Cancel</button></div>`);
-  const el = document.getElementById('ask_contrib'); if (el) el.focus();
+// Scenario dialogs: the button opens a small form with the two or three numbers the
+// scenario needs, prefilled with what is already set. "Run it" captures the pre-change
+// state as "Before" and applies. "Remove" clears it. Cancel leaves everything alone.
+const SCENARIO_TITLES = { careerBreak: 'Take time off, then go back', partnerBreak: 'Partner takes time off', pauseContrib: 'Stop investing for a while', shockAtRetirement: 'A bad decade' };
+function dlgField(label, id, val, attrs, hint) {
+  return `<div class="field" style="margin-top:10px"><label>${label}</label><input type="number" id="${id}" value="${val === null || val === undefined ? '' : val}" ${attrs}/>${hint ? `<span class="field-hint">${hint}</span>` : ''}</div>`;
+}
+window.showScenarioModal = function(id) {
+  const isSet = { careerBreak: state.yourBreakStart !== null, partnerBreak: state.partnerBreakStart !== null, pauseContrib: state.contribPauseStart !== null, shockAtRetirement: !!state.shockEra }[id];
+  let body = '', intro = '';
+  if (id === 'careerBreak') {
+    intro = 'No wages between these ages, and no raises while you are off. Everything else stays the same.';
+    body = dlgField('Off from age', 'sc_a', state.yourBreakStart !== null ? state.yourBreakStart : state.age, `min="${state.age}" max="${state.yourStopWorkAge - 1}" step="1"`) + dlgField('Back to work at age', 'sc_b', state.yourBreakEnd !== null ? state.yourBreakEnd : Math.min(state.age + 2, state.yourStopWorkAge), `min="${state.age + 1}" max="${state.yourStopWorkAge}" step="1"`);
+  } else if (id === 'partnerBreak') {
+    intro = 'Your partner has no wages between these ages, and no raises while off.';
+    body = dlgField('Off from age', 'sc_a', state.partnerBreakStart !== null ? state.partnerBreakStart : state.partnerAge, `min="${state.partnerAge}" max="${state.partnerStopWorkAge - 1}" step="1"`) + dlgField('Back to work at age', 'sc_b', state.partnerBreakEnd !== null ? state.partnerBreakEnd : Math.min(state.partnerAge + 2, state.partnerStopWorkAge), `min="${state.partnerAge + 1}" max="${state.partnerStopWorkAge}" step="1"`);
+  } else if (id === 'pauseContrib') {
+    intro = 'Tell it how much you invest each year (401k, IRA, brokerage, in today’s dollars). While the pause is on, none of it goes into the portfolio and that money is spent instead.';
+    body = dlgField('You invest each year', 'sc_c', state.contributions || '', 'min="0" step="1000" placeholder="e.g. 15000"', 'Exactly this much goes in while you work; the rest of your take-home counts as spent.') + dlgField('Pause from age', 'sc_a', state.contribPauseStart !== null ? state.contribPauseStart : state.age, `min="${state.age}" max="${state.yourStopWorkAge - 1}" step="1"`) + dlgField('Start investing again at age', 'sc_b', state.contribPauseEnd !== null ? state.contribPauseEnd : Math.min(state.age + 3, state.yourStopWorkAge), `min="${state.age + 1}" max="${state.yourStopWorkAge}" step="1"`);
+  } else if (id === 'shockAtRetirement') {
+    intro = 'From the age you pick, the market does what it did in that decade. Every period in the history test gets the same ten bad years there, so the count answers what happens if it hits right then.';
+    const defAge = state.shockAge !== null ? state.shockAge : ((state.yourIncome > 0 && state.yourStopWorkAge > state.age) ? state.yourStopWorkAge : state.age);
+    body = `<div class="field" style="margin-top:10px"><label>Which decade</label><select id="sc_era">${SHOCK_ERAS.map(([v, l]) => `<option value="${v}" ${(state.shockEra || 'dotcom') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>` + dlgField('Starting at age', 'sc_a', defAge, `min="${state.age}" max="${state.targetAge}" step="1"`);
+  }
+  openModal(`<h2>${SCENARIO_TITLES[id]}</h2><p>${intro}</p>${body}
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn-primary" onclick="applyScenarioModal('${id}')">Run it</button>${isSet ? `<button class="btn-secondary" onclick="removeScenario('${id}')">Remove</button>` : ''}<button class="btn-secondary" onclick="closeModal()">Cancel</button></div>`);
+  const first = document.getElementById('sc_c') || document.getElementById('sc_a'); if (first) first.focus();
 };
-window.finishAskContributions = function(thenId) {
-  const v = parseFloat((document.getElementById('ask_contrib') || {}).value) || 0;
-  if (v <= 0) { const el = document.getElementById('ask_contrib'); if (el) el.style.borderColor = 'var(--danger)'; return; }
-  state.contributions = v;
-  closeModal();
-  if (thenId === 'addPause') { addPause(); return; }
-  state.contribPauseStart = state.age; state.contribPauseEnd = Math.min(state.age + 3, state.yourStopWorkAge);
-  maxSpendView = false; invalidateCaches(); render();
+function dlgNum(id) { const el = document.getElementById(id); const v = el ? parseFloat(el.value) : NaN; return isNaN(v) ? null : Math.round(v); }
+window.applyScenarioModal = function(id) {
+  const a = dlgNum('sc_a'), b = dlgNum('sc_b');
+  const bad = (el) => { if (el) el.style.borderColor = 'var(--danger)'; };
+  if (id === 'careerBreak' || id === 'partnerBreak' || id === 'pauseContrib') {
+    if (a === null || b === null || b <= a) { bad(document.getElementById('sc_b')); return; }
+  }
+  if (id === 'pauseContrib') { const c = dlgNum('sc_c'); if (!(c > 0)) { bad(document.getElementById('sc_c')); return; } }
+  startComparison(presetLabel(id));
+  if (id === 'careerBreak') { state.yourBreakStart = a; state.yourBreakEnd = b; }
+  else if (id === 'partnerBreak') { state.partnerBreakStart = a; state.partnerBreakEnd = b; }
+  else if (id === 'pauseContrib') { state.contributions = dlgNum('sc_c'); state.contribPauseStart = a; state.contribPauseEnd = b; }
+  else if (id === 'shockAtRetirement') { state.shockEra = document.getElementById('sc_era').value; state.shockAge = a; }
+  closeModal(); invalidateCaches(); render();
 };
-window.cancelAsk = function() { closeModal(); if (compareOn && !computeImpact()) { compareOn = false; currentName = 'Current'; render(); } };
+window.removeScenario = function(id) {
+  if (id === 'careerBreak') state.yourBreakStart = state.yourBreakEnd = null;
+  else if (id === 'partnerBreak') state.partnerBreakStart = state.partnerBreakEnd = null;
+  else if (id === 'pauseContrib') state.contribPauseStart = state.contribPauseEnd = null;
+  else if (id === 'shockAtRetirement') { state.shockEra = null; state.shockAge = null; }
+  closeModal(); maxSpendView = false; invalidateCaches(); render();
+};
 window.applyPreset = function(id) {
-  if (id === 'pauseContrib' && !(state.contributions > 0)) { startComparison(presetLabel(id)); askContributions(id); return; }
+  if (SCENARIO_TITLES[id]) { showScenarioModal(id); return; }
   if (id === 'payoffHouse') { showPayoffModal(true); return; }
   startComparison(presetLabel(id));
   switch (id) {
-    case 'shockAtRetirement': state.shockEra = 'dotcom'; state.shockAge = (state.yourIncome > 0 && state.yourStopWorkAge > state.age) ? state.yourStopWorkAge : state.age; break;
-    case 'careerBreak': state.yourBreakStart = state.age; state.yourBreakEnd = state.age + 2; break;
-    case 'partnerBreak': state.partnerBreakStart = state.partnerAge; state.partnerBreakEnd = state.partnerAge + 2; break;
-    case 'pauseContrib': state.contribPauseStart = state.age; state.contribPauseEnd = state.age + 3; break;
     case 'stopNow': state.yourStopWorkAge = state.age; break;
     case 'retire5early': state.yourStopWorkAge = Math.max(state.age, state.yourStopWorkAge - 5); break;
     case 'partTime': state.yourIncome = Math.round(state.yourIncome * 0.5 / 5000) * 5000; state.yourStopWorkAge = Math.min(state.yourStopWorkAge + 3, 70); break;
