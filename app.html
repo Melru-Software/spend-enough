@@ -944,7 +944,7 @@ function renderOnboarding() {
         <p class="step-hint">How much you've saved, and what you spend each year.</p>
         <div class="field-grid">
           <div class="field"><label>Investment portfolio</label><input type="number" id="ob_portfolio" min="0" value="${state.portfolio || ''}" placeholder="e.g. 600000" step="10000"/><span class="field-hint">401k, IRA, brokerage, combined</span></div>
-          <div class="field"><label>Annual spending</label><input type="number" id="ob_spending" min="0" value="${state.spending || ''}" placeholder="e.g. 70000" step="5000"/><span class="field-hint">Leave blank to find your "enough" number</span></div>
+          <div class="field"><label>Annual spending, not counting housing</label><input type="number" id="ob_spending" min="0" value="${state.spending || ''}" placeholder="e.g. 70000" step="5000"/><span class="field-hint">Housing goes in the next step. Leave blank to find your "enough" number.</span></div>
         </div>
       </div>
 
@@ -955,7 +955,7 @@ function renderOnboarding() {
         <div class="field-grid">
           <div class="field"><label>Your gross income</label><input type="number" id="ob_yourIncome" min="0" value="${state.yourIncome || ''}" placeholder="e.g. 110000" step="5000"/><span class="field-hint">Before tax \u00b7 You can adjust tax settings later</span></div>
           <div class="field"><label>Partner's gross income</label><input type="number" id="ob_partnerIncome" min="0" value="${state.partnerIncome || ''}" placeholder="0 if none" step="5000"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
-          <div class="field"><label>Annual housing cost</label><input type="number" id="ob_housing" min="0" value="${state.housing || ''}" placeholder="e.g. 24000" step="1000"/><span class="field-hint">Mortgage + taxes + insurance</span></div>
+          <div class="field"><label>Annual housing cost</label><input type="number" id="ob_housing" min="0" value="${state.housing || ''}" placeholder="e.g. 24000" step="1000"/><span class="field-hint">Mortgage, taxes, and insurance. Kept separate from spending so it can stop when the mortgage does.</span></div>
           <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100"/><span class="field-hint">When housing cost drops</span></div>
         </div>
       </div>
@@ -1094,7 +1094,7 @@ function renderDashboard() {
           <input type="number" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)" placeholder="Amount" class="mobile-input"/>
         </div>
         <div class="control">
-          <div class="control-row"><span class="control-label">Annual spending</span><span class="control-value">${fmtMoney(state.spending)}</span></div>
+          <div class="control-row"><span class="control-label">Spending, not counting housing</span><span class="control-value">${fmtMoney(state.spending)}</span></div>
           <input type="range" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)" class="slider-input"/>
           <input type="number" min="10000" max="400000" step="1000" value="${state.spending}" oninput="slideLive(this,'spending',this.value)" onchange="sliderCommit('spending',this.value)" placeholder="Annual amount" class="mobile-input"/>
         </div>
@@ -1355,7 +1355,7 @@ function getVerdict(result) {
     const rate = successCount / totalPeriods;
     const tested = 'We ran your plan through every rolling ' + yc + '-year stretch of real U.S. market returns since 1926 for a ' + mixLabel() + ' stock/bond mix: ' + totalPeriods + ' periods, starting ' + windows.firstStart + ' through ' + windows.lastStart + '.' + shockSentence('period');
     if (maxSpendView) {
-      v.headline = 'You could spend about ' + fmtMoney(state.spending) + ' a year and still make it through ' + successCount + ' of ' + totalPeriods + ' historical periods';
+      v.headline = 'You could spend about ' + fmtMoney(state.spending) + ' a year on top of housing and still make it through ' + successCount + ' of ' + totalPeriods + ' historical periods';
       v.lead = 'This is the highest spending level that lasted to age ' + state.targetAge + ' in at least ' + threshold + '% of history, with steady spending and no cuts.';
       v.detail = tested + ' The spending explorer below shows how the count moves if you spend a little more or less.';
     } else if (successCount === totalPeriods) {
@@ -1384,7 +1384,7 @@ function getVerdict(result) {
     const lasts = result.successRate >= 1;
     const r = pct(state.returnRate, 1);
     if (maxSpendView) {
-      v.headline = 'At a steady ' + r + ' return, the most you could spend is about ' + fmtMoney(state.spending) + ' a year';
+      v.headline = 'At a steady ' + r + ' return, the most you could spend is about ' + fmtMoney(state.spending) + ' a year on top of housing';
       v.lead = lasts ? 'This is the highest annual spending that keeps the portfolio going to age ' + state.targetAge + ' if returns were the same every year.' : 'At a steady ' + r + ' return the portfolio would run out around age ' + result.medianRunOutAge + '.';
       v.detail = 'Real markets are not steady, and bad years early on can sink a plan whose average is fine. Switch to Historical mode to see how this level held up in real sequences.';
     } else {
@@ -1490,7 +1490,7 @@ function renderAssumptions(result) {
   rows.push(asmRow('Fees', `${asmInput('feeRate', ((state.feeRate || 0) * 100).toFixed(2), { min: 0, max: 3, step: 0.05, label: 'Annual fee percent' })} a year is subtracted from every year’s return. That covers fund expense ratios and any advisor fee. The default, 0.10%, is a typical low-cost index fund. Index funds run about 0.03 to 0.2%, and with an advisor the total is often near 1%.`));
   rows.push(asmRow('Inflation', `Everything is in today’s dollars. Spending, Social Security, and housing are held constant in real terms, and the return data is already inflation-adjusted. Wages grow <strong>${pct(state.yourIncomeGrowth)}</strong> a year above inflation${isPaid() ? ' (change it under More options)' : ''}. A fixed mortgage payment is treated as if it rose with inflation, which slightly overstates housing cost in later years.`));
   const gr = state.guardrailsEnabled;
-  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending)}</strong> a year until age ${state.slowDownAge}, then <strong>${fmtMoney(state.lateSpending)}</strong>${state.extraSpend > 0 && has(state.extraSpendStart) ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails <strong>${gr ? 'on' : 'off'}</strong> <label class="asm-toggle"><input type="checkbox" ${gr ? 'checked' : ''} onchange="update('guardrailsEnabled', this.checked)"/> flex spending with the market</label>. ${gr
+  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending)}</strong> a year, not counting housing, until age ${state.slowDownAge}, then <strong>${fmtMoney(state.lateSpending)}</strong>${state.extraSpend > 0 && has(state.extraSpendStart) ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails <strong>${gr ? 'on' : 'off'}</strong> <label class="asm-toggle"><input type="checkbox" ${gr ? 'checked' : ''} onchange="update('guardrailsEnabled', this.checked)"/> flex spending with the market</label>. ${gr
     ? `Starting from the withdrawal rate in your first retired year, spending is cut <strong>${pct(state.guardrailCutPct, 0)}</strong> in any year the rate runs more than ${pct(state.guardrailBandPct, 0)} above it, and boosted <strong>${pct(state.guardrailBoostPct, 0)}</strong> when more than ${pct(state.guardrailBandPct, 0)} below. Cuts do not compound. The median path shown cut spending in <strong>${result.medianRunFlexCuts || 0}</strong> year${(result.medianRunFlexCuts || 0) === 1 ? '' : 's'}.${isPaid() ? ' Cut and boost sizes are under Spending flexibility below.' : ''}`
     : 'The same amount is withdrawn every year no matter what markets do.'}`));
   if (state.housing > 0 || has(state.homeSaleAge)) {
@@ -1532,7 +1532,7 @@ function renderCompareSummary(a, b) {
       <tr><td>Lasted to age ${state.targetAge}</td><td>${periodsLabel(a)}</td><td style="font-weight:600;color:var(--ink)">${periodsLabel(b)}</td></tr>
       <tr><td>Ending balance, worst 10% to best 10%</td><td>${range(a)}</td><td>${range(b)}</td></tr>
       <tr><td>Median ending balance</td><td>${fmtMoneyShort(a.medianFinal)}</td><td>${fmtMoneyShort(b.medianFinal)}</td></tr>
-      <tr><td>Annual spending</td><td>${fmtMoney(baselineState.spending)}</td><td>${fmtMoney(state.spending)}</td></tr>
+      <tr><td>Spending, not counting housing</td><td>${fmtMoney(baselineState.spending)}</td><td>${fmtMoney(state.spending)}</td></tr>
       <tr><td>Portfolio today</td><td>${fmtMoneyShort(baselineState.portfolio)}</td><td>${fmtMoneyShort(state.portfolio)}</td></tr>
     </tbody></table>`;
 }
@@ -1602,7 +1602,7 @@ function computeSpendingLevels() {
 function renderSpendingExplorer() {
   const rows = computeSpendingLevels();
   const isHist = state.simMode === 'historical';
-  return `<table class="data-table"><thead><tr><th>Annual spending</th><th>${isHist?'Historical success':'Success'}</th><th>Median ending</th><th>Worst 10%</th></tr></thead><tbody>
+  return `<table class="data-table"><thead><tr><th>Spending (besides housing)</th><th>${isHist?'Historical success':'Success'}</th><th>Median ending</th><th>Worst 10%</th></tr></thead><tbody>
     ${rows.map(r => `<tr class="${r.isCurrent?'current-row':''} clickable" onclick="applySpending(${r.spending})" title="Click to set spending to ${fmtMoney(r.spending)}/yr"><td>${fmtMoney(r.spending)}/yr ${r.isCurrent?'<span class="tag-current">current</span>':''}</td><td>${isHist ? r.successCount+' of '+r.totalPeriods : Math.round(r.successRate*100)+'%'}</td><td>${fmtMoneyShort(r.medianFinal)}</td><td>${r.p10<=0?'<span class="fail">Ran out</span>':fmtMoneyShort(r.p10)}</td></tr>`).join('')}
   </tbody></table>`;
 }
