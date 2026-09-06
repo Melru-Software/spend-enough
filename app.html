@@ -326,7 +326,14 @@
   .asm-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line-soft); font-size: 14px; line-height: 1.6; color: var(--ink-soft); }
   .asm-label { font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; padding-top: 3px; }
   .asm-text strong { color: var(--ink); font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; }
-  .asm-input { width: 64px; text-align: right; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 2px 4px; color: var(--ink); min-height: 0; margin: 0 2px; }
+  /* Editable numbers inside sentences: look like the other numbers, with a dashed underline. */
+  input.asm-input[type="number"], select.asm-select { font: inherit; font-size: 14px !important; font-weight: 600; color: var(--ink); background: transparent; border: none; border-bottom: 1px dashed var(--rust); border-radius: 0; padding: 0 1px; margin: 0; height: auto; min-height: 0; line-height: inherit; font-variant-numeric: tabular-nums; -moz-appearance: textfield; appearance: none; -webkit-appearance: none; }
+  input.asm-input[type="number"] { width: 4.5ch; text-align: left; }
+  input.asm-input[type="number"].wide { width: 7.5ch; }
+  input.asm-input::-webkit-outer-spin-button, input.asm-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input.asm-input[type="number"]:hover, input.asm-input[type="number"]:focus, select.asm-select:hover, select.asm-select:focus { background: var(--bone); outline: none; border-bottom-color: var(--ink); }
+  select.asm-select { cursor: pointer; padding-right: 0; }
+  @media (max-width: 768px) { input.asm-input[type="number"], select.asm-select { font-size: 16px !important; } }
   .asm-slider { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: center; margin-top: 10px; max-width: 440px; font-size: 12px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.06em; }
   .asm-slider output { grid-column: 1 / -1; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-size: 13px; color: var(--ink); text-transform: none; letter-spacing: 0; }
   input[type="range"].asm-range { width: 100%; height: 6px; margin: 0; background: var(--line); border-radius: 3px; -webkit-appearance: none; appearance: none; }
@@ -334,8 +341,6 @@
   input[type="range"].asm-range::-moz-range-track { height: 6px; background: var(--line); border-radius: 3px; }
   input[type="range"].asm-range::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; background: var(--ink); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--line); border-radius: 50%; cursor: pointer; }
   input[type="range"].asm-range::-moz-range-thumb { width: 18px; height: 18px; background: var(--ink); border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--line); border-radius: 50%; cursor: pointer; }
-  .asm-toggle { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; cursor: pointer; color: var(--ink-soft); }
-  .asm-toggle input { accent-color: var(--ink); }
   .asm-sources { font-size: 13px; color: var(--ink-faint); margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); line-height: 1.5; }
   .asm-sources a { color: var(--rust); }
   .teaser-row { margin: 4px 0 18px; }
@@ -346,8 +351,6 @@
   .deep[open] summary::after { content: '\2212'; }
   .deep-body { padding: 0 18px 18px; }
   .deep-body .section-heading:first-child { margin-top: 8px; }
-  .asm-input.wide { width: 92px; }
-  .asm-select { font-size: 14px; background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 3px 4px; font-family: inherit; color: var(--ink); min-height: 0; }
   .more-toggle .asm-hint { font-weight: 400; margin-left: 6px; }
   .field-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
   .compare-table td:first-child { color: var(--ink-mute); }
@@ -1471,7 +1474,8 @@ function renderReadFirst(result) {
 
 // ===== ASSUMPTIONS =====
 function asmInput(key, val, opts) {
-  return `<input type="number" class="asm-input" min="${opts.min}" max="${opts.max}" step="${opts.step}" value="${val}" onchange="update('${key}', +this.value/100)" aria-label="${opts.label}"/>%`;
+  const w = (String(val).length + 0.6) + 'ch';
+  return `<input type="number" class="asm-input" style="width:${w}" min="${opts.min}" max="${opts.max}" step="${opts.step}" value="${val}" onchange="update('${key}', +this.value/100)" oninput="this.style.width=(this.value.length+0.6)+'ch'" aria-label="${opts.label}"/>%`;
 }
 function asmRow(label, html) { return `<div class="asm-row"><div class="asm-label">${label}</div><div class="asm-text">${html}</div></div>`; }
 function renderAssumptions(result) {
@@ -1491,7 +1495,7 @@ function renderAssumptions(result) {
   rows.push(asmRow('Fees', `${asmInput('feeRate', ((state.feeRate || 0) * 100).toFixed(2), { min: 0, max: 3, step: 0.05, label: 'Annual fee percent' })} a year is subtracted from every year’s return. That covers fund expense ratios and any advisor fee. The default, 0.10%, is a typical low-cost index fund. Index funds run about 0.03 to 0.2%, and with an advisor the total is often near 1%.`));
   rows.push(asmRow('Inflation', `Everything is in today’s dollars. Spending, Social Security, and housing are held constant in real terms, and the return data is already inflation-adjusted. Wages grow <strong>${pct(state.yourIncomeGrowth)}</strong> a year above inflation${isPaid() ? ' (change it under More options)' : ''}. A fixed mortgage payment is treated as if it rose with inflation, which slightly overstates housing cost in later years.`));
   const gr = state.guardrailsEnabled;
-  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending + state.housing)}</strong> a year${state.housing > 0 ? ', of which ' + fmtMoney(state.housing) + ' is the mortgage payment until it ends at ' + state.mortgagePayoffAge : ''}. From age ${state.slowDownAge}, <strong>${fmtMoney(state.lateSpending)}</strong> a year besides any housing${state.extraSpend > 0 && has(state.extraSpendStart) ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails <strong>${gr ? 'on' : 'off'}</strong> <label class="asm-toggle"><input type="checkbox" ${gr ? 'checked' : ''} onchange="update('guardrailsEnabled', this.checked)"/> flex spending with the market</label>. ${gr
+  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending + state.housing)}</strong> a year${state.housing > 0 ? ', of which ' + fmtMoney(state.housing) + ' is the mortgage payment until it ends at ' + state.mortgagePayoffAge : ''}. From age ${state.slowDownAge}, <strong>${fmtMoney(state.lateSpending)}</strong> a year besides any housing${state.extraSpend > 0 && has(state.extraSpendStart) ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails are <select class="asm-select" onchange="update('guardrailsEnabled', this.value === 'on')" aria-label="Guardrails on or off"><option value="on" ${gr ? 'selected' : ''}>on</option><option value="off" ${gr ? '' : 'selected'}>off</option></select>. ${gr
     ? `Starting from the withdrawal rate in your first retired year, spending is cut <strong>${pct(state.guardrailCutPct, 0)}</strong> in any year the rate runs more than ${pct(state.guardrailBandPct, 0)} above it, and boosted <strong>${pct(state.guardrailBoostPct, 0)}</strong> when more than ${pct(state.guardrailBandPct, 0)} below. Cuts do not compound. The median path shown cut spending in <strong>${result.medianRunFlexCuts || 0}</strong> year${(result.medianRunFlexCuts || 0) === 1 ? '' : 's'}.${isPaid() ? ' Cut and boost sizes are under Spending flexibility below.' : ''}`
     : 'The same amount is withdrawn every year no matter what markets do.'}`));
   if (state.housing > 0 || has(state.homeSaleAge)) {
@@ -1513,7 +1517,7 @@ function renderAssumptions(result) {
     : 'Every portfolio withdrawal is grossed up by ' + asmInput('capGainsTax', Math.round(state.capGainsTax * 100), { min: 0, max: 50, step: 1, label: 'Withdrawal tax rate percent' }) + ' for tax. Set it to 0 if your savings are mostly Roth' + (isPaid() ? ', or turn on account types under More options for per-account treatment.' : '.')} Brackets, RMDs, and Medicare surcharges are not modelled.`));
   rows.push(asmRow('Horizon', `The plan runs from age ${state.age} through age <strong>${state.targetAge}</strong> (${state.targetAge - state.age + 1} years)${isPaid() ? ', set under More options' : ''}. A period counts as failed if the balance hits $0 before age ${state.targetAge}, even if that happens in the last year, and a period that ends with $1 still counts as a success. Once the balance is gone, the model does not let it come back.`));
   if (state.yourSSAmount > 0 || state.partnerSSAmount > 0) rows.push(asmRow('Social Security', `Starts at age <strong>${state.ssStartAge}</strong> at ${fmtMoney(state.yourSSAmount)}${state.hasPartner && state.partnerSSAmount ? ' for you and ' + fmtMoney(state.partnerSSAmount) + ' for your partner' : ''} a year in today’s dollars, from your inputs. Claiming at 62 pays 70% of the full-age amount and at 70 pays 124%. Survivor and spousal benefits are not worked out for you.`));
-  if (isMC) rows.push(asmRow('Randomness', `The ${result.mcSims} random futures are the same set every time you look, so the result does not jump around as you change things. <button class="link-btn" onclick="rerollSeed()">Try a different random set</button>. If the count barely moves, ${result.mcSims} futures is plenty; if it jumps a few points, that is how much luck is in the number. Average ${asmInput('mcMean', (result.mcMean * 100).toFixed(1), { min: -5, max: 15, step: 0.1, label: 'Simulated average real return percent' })} &middot; volatility ${asmInput('mcSd', (result.mcSd * 100).toFixed(1), { min: 1, max: 40, step: 0.5, label: 'Simulated volatility percent' })}${mcParams(state).fromHistory ? '' : ' &middot; <button class="link-btn" onclick="resetMcToHistory()">match history for this mix</button>'} &middot; futures <input type="number" class="asm-input" min="100" max="5000" step="100" value="${result.mcSims}" onchange="update('mcSims', Math.max(100, Math.min(5000, +this.value)))" aria-label="Number of simulated futures"/>`));
+  if (isMC) rows.push(asmRow('Randomness', `The ${result.mcSims} random futures are the same set every time you look, so the result does not jump around as you change things. <button class="link-btn" onclick="rerollSeed()">Try a different random set</button>. If the count barely moves, ${result.mcSims} futures is plenty; if it jumps a few points, that is how much luck is in the number. Average ${asmInput('mcMean', (result.mcMean * 100).toFixed(1), { min: -5, max: 15, step: 0.1, label: 'Simulated average real return percent' })} &middot; volatility ${asmInput('mcSd', (result.mcSd * 100).toFixed(1), { min: 1, max: 40, step: 0.5, label: 'Simulated volatility percent' })}${mcParams(state).fromHistory ? '' : ' &middot; <button class="link-btn" onclick="resetMcToHistory()">match history for this mix</button>'} &middot; futures <input type="number" class="asm-input" style="width:${String(result.mcSims).length + 0.6}ch" min="100" max="5000" step="100" value="${result.mcSims}" oninput="this.style.width=(this.value.length+0.6)+'ch'" onchange="update('mcSims', Math.max(100, Math.min(5000, +this.value)))" aria-label="Number of simulated futures"/>`));
   return `<details class="assumptions" ${assumptionsOpen ? 'open' : ''} ontoggle="assumptionsOpen=this.open">
     <summary>Assumptions behind this result <span class="asm-hint">every default, and where to change it</span></summary>
     <div class="asm-body">${rows.join('')}
