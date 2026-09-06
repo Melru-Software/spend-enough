@@ -344,6 +344,37 @@
   .asm-sources { font-size: 13px; color: var(--ink-faint); margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); line-height: 1.5; }
   .asm-sources a { color: var(--rust); }
   .teaser-row { margin: 4px 0 18px; }
+  .wwit { background: var(--paper); border: 1px solid var(--line); border-left: 3px solid var(--moss); border-radius: 4px; padding: 14px 18px; margin: 0 0 18px; font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+  .wwit .wwit-title { font-family: 'Source Serif 4', serif; font-size: 18px; color: var(--ink); margin-bottom: 4px; }
+  .wwit ul { margin: 6px 0 0 18px; }
+  .wwit li { margin-bottom: 3px; }
+  .wwit strong { color: var(--ink); font-weight: 600; }
+  .year-table-wrap { max-height: 360px; overflow: auto; border: 1px solid var(--line-soft); border-radius: 4px; margin-bottom: 8px; }
+  .year-table-wrap .data-table { margin: 0; }
+  .year-table-wrap th { position: sticky; top: 0; background: var(--paper); }
+  .year-table-wrap td, .year-table-wrap th { text-align: right; white-space: nowrap; }
+  .year-table-wrap td:first-child, .year-table-wrap th:first-child { text-align: left; }
+  .year-table-wrap tr.out td { color: var(--danger); }
+  .saved-note { font-size: 12px; color: var(--ink-faint); margin-top: -4px; margin-bottom: 6px; line-height: 1.4; }
+  .print-only { display: none; }
+  @media print {
+    .print-only { display: block; }
+    body { background: #fff; font-size: 12px; }
+    header, .sidebar, .resources-row, .teaser-row, .more-toggle, .link-btn, .modal-overlay, #tip-popup, .cf-toggle, .toggle-group, .year-actions { display: none !important; }
+    .dashboard { display: block; min-height: 0; }
+    .main { max-width: none; padding: 0; overflow: visible; }
+    .print-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 14px; font-size: 12px; color: var(--ink-mute); }
+    .print-head .logo { font-size: 18px; }
+    .chart-wrap { height: 280px; } .chart-wrap.short { height: 160px; }
+    .assumptions summary::after, .deep summary::after, .read-first summary::after { content: ''; }
+    details:not([open]) { display: none; }
+    .assumptions, .deep, .wwit, .verdict, .chart-card, .bands, .scenario-cards { break-inside: avoid; box-shadow: none; }
+    .section-heading { break-after: avoid; }
+    input.asm-input[type="number"], select.asm-select { border-bottom: none; }
+    .year-table-wrap { max-height: none; overflow: visible; border: none; }
+    .data-table { font-size: 11px; }
+    a { text-decoration: none; color: inherit; }
+  }
   .deep { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; margin: 4px 0 18px; box-shadow: var(--shadow-sm); }
   .deep summary { cursor: pointer; padding: 14px 18px; font-weight: 600; font-size: 15px; color: var(--ink-soft); list-style: none; display: flex; align-items: center; gap: 10px; }
   .deep summary::-webkit-details-marker { display: none; }
@@ -672,6 +703,9 @@ window.showUnlockModal = function() {
         <div class="compare-plus">Everything in Free, plus:</div>
         <ul class="compare-list">
           <li>Side-by-side scenario comparison, both futures on one chart</li>
+          <li>What would it take: the spending, retirement age, or savings that gets a plan over the line</li>
+          <li>A printable one-page report to take to a partner or a planner</li>
+          <li>Year-by-year table, downloadable as a spreadsheet</li>
           <li>Percentile bands and five named historical stress tests</li>
           <li>Spending-flexibility comparison</li>
           <li>Social Security claiming comparison</li>
@@ -679,7 +713,7 @@ window.showUnlockModal = function() {
           <li>Simulated (Monte Carlo) mode</li>
           <li>Planning options (plan-to age, late-life spending, housing payoff, income growth)</li>
           <li>Account types, withdrawal order, life events</li>
-          <li>Save up to 8 scenarios</li>
+          <li>Save up to 8 scenarios, with notes</li>
         </ul>
       </div>
     </div>
@@ -1156,7 +1190,8 @@ function renderDashboard() {
         <div class="sidebar-heading">Saved scenarios</div>
         ${isPaid()
           ? `<div class="scenario-save-row"><input type="text" id="scenarioName" placeholder="Name this scenario"/><button class="scenario-pill" onclick="saveScenario()">Save</button></div>
-        ${savedScenarios.map((sc, i) => `<div class="saved-item"><span>${sc.name}</span><span><button onclick="loadScenario(${i})">load</button> \u00b7 <button onclick="compareWith(${i})" title="Show this scenario next to your current settings">compare</button> \u00b7 <button onclick="deleteScenario(${i})" aria-label="Delete ${sc.name}">\u00d7</button></span></div>`).join('') || '<div style="font-size:13px;color:var(--ink-faint)">Save a scenario, then use \u201ccompare\u201d to put it next to your current settings.</div>'}`
+        <input type="text" id="scenarioNote" placeholder="A note to yourself (optional)" style="width:100%;margin:-6px 0 10px;background:var(--bone);border:1px solid var(--line);padding:6px 10px;font-size:13px;border-radius:2px;font-family:inherit"/>
+        ${savedScenarios.map((sc, i) => `<div class="saved-item"><span>${sc.name}</span><span><button onclick="loadScenario(${i})">load</button> \u00b7 <button onclick="compareWith(${i})" title="Show this scenario next to your current settings">compare</button> \u00b7 <button onclick="deleteScenario(${i})" aria-label="Delete ${sc.name}">\u00d7</button></span></div>${sc.note ? `<div class="saved-note">${sc.note}</div>` : ''}`).join('') || '<div style="font-size:13px;color:var(--ink-faint)">Save a scenario, then use \u201ccompare\u201d to put it next to your current settings.</div>'}`
           : `<button class="more-toggle locked-row" onclick="showUnlockModal()">Save &amp; compare scenarios <span class="lock-icon">&#x1f512;</span></button>`}
       </div>
     </aside>`;
@@ -1164,6 +1199,7 @@ function renderDashboard() {
   const notFixed = state.simMode !== 'fixed';
   const main = `
     <div class="main" id="main-content" role="main">
+      <div class="print-only print-head"><div class="logo"><span class="logo-dot"></span>Spend Enough</div><div>Scenario report &middot; ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}${currentName !== 'Current' ? ' &middot; ' + currentName + ' versus ' + baselineName : ''} &middot; ${modeName(state.simMode)} mode</div></div>
       <div class="verdict" aria-live="polite">
         <div class="verdict-head">${verdict.headline}</div>
         <div class="verdict-body">${verdict.lead}</div>
@@ -1178,6 +1214,8 @@ function renderDashboard() {
         <p>${verdict.detail}</p>
         ${verdict.caveat ? `<p class="verdict-caveat">${verdict.caveat}</p>` : ''}
       </div>
+
+      ${renderWhatItTakes(result)}
 
       ${canCompare ? renderCompareSummary(baselineResult, result) : (!isPaid() && computeImpact() ? `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">See “${baselineName}” and “${currentName}” on one chart, with the counts side by side <span class="lock-icon">&#x1f512;</span></button>` : '')}
 
@@ -1206,6 +1244,7 @@ function renderDashboard() {
           ${notFixed ? renderFlexibilityImpact() : ''}
           ${notFixed && state.yourSSAmount > 0 ? renderSSComparison() : ''}
           ${notFixed && state.accountsEnabled ? renderTaxComparison() : ''}
+          ${renderYearTable(result)}
         </div>
       </details>` : `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()"><span>More analysis <span class="asm-hint">best and worst outcomes, stress tests, cashflow, Social Security timing</span></span><span class="lock-icon">&#x1f512;</span></button>`}
 
@@ -1219,6 +1258,7 @@ function renderDashboard() {
       <div class="scenarios-bar">
         <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
+        <button class="scenario-pill" onclick="printReport()">Print report${!isPaid() ? ' <span class="lock-icon">&#x1f512;</span>' : ''}</button>
       </div>
     </header>
     <div class="dashboard">${main}${sidebar}<div class="resources-row">${renderResources()}</div></div>`;
@@ -1530,6 +1570,82 @@ function renderAssumptions(result) {
       <div class="asm-sources">Sources: <a href="${DATA_SOURCE.url}" target="_blank" rel="noopener">Robert Shiller’s U.S. stock market dataset</a> (Yale) for S&amp;P composite prices, dividends, CPI, and 10-year Treasury yields, 1926–${HISTORICAL_END_YEAR}, rebuilt by a script in the code (${HISTORICAL_END_YEAR} is a partial year); 2026 IRS brackets and standard deduction; 2026 SSA bend points and wage base; state rates from the Tax Foundation. This is not the Ibbotson data the original 4% rule studies used.</div>
     </div></details>`;
 }
+
+// ===== WHAT WOULD IT TAKE =====
+let wwitCache = null, wwitStale = true;
+function renderWhatItTakes(result) {
+  if (!isPaid() || result.mode !== 'historical') return '';
+  if (wwitStale || !wwitCache) {
+    const th = state.successThreshold || 0.85;
+    const need = Math.ceil(th * result.totalPeriods);
+    const c = { th, need, total: result.totalPeriods, clears: result.successRate >= th };
+    const ratio = state.spending > 0 ? state.lateSpending / state.spending : 0.85;
+    const ms = findMaxSpendAtSuccess({ ...state, spending: state.spending || 100000, lateSpending: (state.spending || 100000) * ratio }, th);
+    c.maxSpend = Math.round((ms.spend + state.housing) / 1000) * 1000;
+    if (!c.clears) {
+      c.age = findRetireAgeAtSuccess(state, th);
+      c.portfolio = findPortfolioAtSuccess(state, th);
+    }
+    wwitCache = c; wwitStale = false;
+  }
+  const c = wwitCache;
+  const pctTh = Math.round(c.th * 100);
+  const nowSpend = state.spending + state.housing;
+  if (c.clears) {
+    const room = c.maxSpend - nowSpend;
+    return `<div class="wwit"><div class="wwit-title">Room to spend</div>This plan lasts in at least ${c.need} of ${c.total} periods (${pctTh}% of history). ${room >= 1000 ? 'Spending could go up to <strong>' + fmtMoney(c.maxSpend) + '</strong> a year all in, ' + fmtMoneyShort(room) + ' more than now, and still clear that line.' : 'At ' + fmtMoney(nowSpend) + ' a year it is right at that line.'} That is with steady spending and no guardrail cuts.</div>`;
+  }
+  const items = [];
+  if (c.maxSpend < nowSpend) items.push('Spend <strong>' + fmtMoney(c.maxSpend) + '</strong> a year all in, ' + fmtMoneyShort(nowSpend - c.maxSpend) + ' less than now.');
+  if (c.age && c.age.age > state.yourStopWorkAge) items.push('Work until <strong>' + c.age.age + '</strong> instead of ' + state.yourStopWorkAge + ', ' + (c.age.age - state.yourStopWorkAge) + ' more year' + (c.age.age - state.yourStopWorkAge > 1 ? 's' : '') + '.');
+  if (c.portfolio && !c.portfolio.alreadyThere) items.push('Have <strong>' + fmtMoney(c.portfolio.portfolio) + '</strong> saved today, ' + fmtMoneyShort(c.portfolio.portfolio - state.portfolio) + ' more than now.');
+  if (!items.length) return '';
+  return `<div class="wwit"><div class="wwit-title">What would it take</div>To last in at least ${c.need} of ${c.total} periods (${pctTh}% of history), any one of these would do it on its own:<ul>${items.map(i => '<li>' + i + '</li>').join('')}</ul></div>`;
+}
+
+// ===== YEAR BY YEAR =====
+function yearRows(result) {
+  const run = result.medianRun || [];
+  return run.map((y, i) => {
+    const p = result.percentiles[i] || {};
+    return { age: y.age, year: y.year, wages: y.yourIncome + y.partnerIncome, ss: y.ssIncome, spending: y.spending, fromPortfolio: y.withdrawal > 0 ? y.withdrawal : 0, added: y.withdrawal < 0 ? -y.withdrawal : 0, tax: y.tax, ret: y.marketReturn, balance: y.portfolio, p10: p.p10, p90: p.p90, ranOut: y.ranOut };
+  });
+}
+function renderYearTable(result) {
+  const rows = yearRows(result);
+  const notFixed = result.mode !== 'fixed';
+  return `<div class="section-heading">Year by year</div>
+    <div class="section-sub">The median path, in today’s dollars.${notFixed ? ' The last two columns are where the worst 10% and best 10% of ' + (result.mode === 'historical' ? 'periods' : 'futures') + ' stood at each age.' : ''} <button class="link-btn year-actions" onclick="downloadCsv()">Download as a spreadsheet (CSV)</button></div>
+    <div class="year-table-wrap"><table class="data-table"><thead><tr><th>Age</th><th>Wages</th><th>Social Security</th><th>Spending</th><th>From portfolio</th><th>Added</th><th>Return</th><th>Balance</th>${notFixed ? '<th>Worst 10%</th><th>Best 10%</th>' : ''}</tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td>${r.age}</td><td>${r.wages > 0 ? fmtMoneyShort(r.wages) : ''}</td><td>${r.ss > 0 ? fmtMoneyShort(r.ss) : ''}</td><td>${fmtMoneyShort(r.spending)}</td><td>${r.fromPortfolio > 0 ? fmtMoneyShort(r.fromPortfolio) : ''}</td><td>${r.added > 0 ? fmtMoneyShort(r.added) : ''}</td><td>${(r.ret * 100).toFixed(1)}%</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td>${notFixed ? '<td>' + (r.p10 <= 0 ? 'ran out' : fmtMoneyShort(r.p10)) + '</td><td>' + fmtMoneyShort(r.p90) + '</td>' : ''}</tr>`).join('')}
+    </tbody></table></div>`;
+}
+window.downloadCsv = function() {
+  if (!isPaid()) { showUnlockModal(); return; }
+  const r = lastSimResult; if (!r) return;
+  const rows = yearRows(r);
+  const head = ['Age', 'Year', 'Wages', 'Social Security', 'Spending (all in)', 'From portfolio', 'Added to portfolio', 'Tax on withdrawals', 'Real return', 'Balance (median path)', 'Balance worst 10%', 'Balance best 10%', 'Ran out'];
+  const lines = [head.join(',')].concat(rows.map(x => [x.age, x.year, Math.round(x.wages), Math.round(x.ss), Math.round(x.spending), Math.round(x.fromPortfolio), Math.round(x.added), Math.round(x.tax), (x.ret * 100).toFixed(2) + '%', Math.round(x.balance), Math.round(x.p10 || 0), Math.round(x.p90 || 0), x.ranOut ? 'yes' : 'no'].join(',')));
+  lines.push('');
+  lines.push('"Spend Enough scenario export, ' + new Date().toISOString().slice(0, 10) + '. ' + modeName(r.mode) + ' mode, ' + mixLabel() + ' stocks/bonds, fees ' + pct(state.feeRate || 0, 2) + '. Today\'s dollars. Educational model, not advice."');
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'spend-enough-' + (currentName !== 'Current' ? currentName : 'scenario').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.csv';
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  track('downloaded_csv');
+};
+
+// ===== PRINT =====
+window.printReport = function() {
+  if (!isPaid()) { showUnlockModal(); return; }
+  const prevA = assumptionsOpen, prevD = deepOpen, prevR = readFirstOpen;
+  assumptionsOpen = true; deepOpen = true; readFirstOpen = false;
+  document.body.classList.add('printing');
+  render();
+  const done = () => { document.body.classList.remove('printing'); assumptionsOpen = prevA; deepOpen = prevD; readFirstOpen = prevR; window.removeEventListener('afterprint', done); render(); };
+  window.addEventListener('afterprint', done);
+  setTimeout(() => { if (lastSimResult) drawCashflowChart(lastSimResult); setTimeout(() => window.print(), 250); }, 200);
+  track('printed_report');
+};
 
 // ===== SIDE BY SIDE =====
 function renderCompareSummary(a, b) {
@@ -2126,7 +2242,7 @@ function drawCashflowChart(result) {
 // ============================================================================
 // UPDATES & HANDLERS
 // ============================================================================
-function invalidateCaches() { maxSpendStale = true; spendingLevelsStale = true; }
+function invalidateCaches() { maxSpendStale = true; spendingLevelsStale = true; wwitStale = true; }
 window.update = function(key, val) { state[key] = val; maxSpendView = false; invalidateCaches(); render(); };
 window.updateAccount = function(key, val) { state.accounts[key] = val; state.portfolio = state.accounts.traditional + state.accounts.roth + state.accounts.taxable; invalidateCaches(); render(); };
 window.toggleAccounts = function(enabled) {
@@ -2424,7 +2540,8 @@ window.saveScenario = function() {
   const el = document.getElementById('scenarioName'); const name = (el.value || '').trim();
   if (!name) { el.focus(); return; }
   if (savedScenarios.length >= 8) { alert('Max 8 saved scenarios. Delete one first.'); return; }
-  savedScenarios.push({ name, state: JSON.parse(JSON.stringify(state)) });
+  const noteEl = document.getElementById('scenarioNote'); const note = noteEl ? (noteEl.value || '').trim().slice(0, 200) : '';
+  savedScenarios.push({ name, note, state: JSON.parse(JSON.stringify(state)) });
   localStorage.setItem('zeroline_scenarios', JSON.stringify(savedScenarios));
   render();
 };

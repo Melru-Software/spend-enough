@@ -458,6 +458,31 @@ test('freed mortgage payment can be spent after payoff; a home sale adds proceed
   assert.ok(Math.abs((y(sale, 70).portfolio) - (y(sale, 70).portfolioStart - y(sale, 70).withdrawal) * 1.03) < 1, 'sale-year balance grows normally');
 });
 
+// ---- 15. What would it take ------------------------------------------------------
+test('findRetireAgeAtSuccess finds the first stop-work age that clears the threshold', () => {
+  const s = mk({ age: 45, targetAge: 90, portfolio: 400000, spending: 60000, lateSpending: 60000, slowDownAge: 200,
+                 yourIncome: 100000, yourStopWorkAge: 50, taxRate: 0.2, capGainsTax: 0, feeRate: 0, hasPartner: false,
+                 yourSSAmount: 20000, guardrailsEnabled: false, stockPct: 0.6 });
+  const now = E.runForState(Object.assign({}, s, { simMode: 'historical' }));
+  assert.ok(now.successRate < 0.85, 'test case should start below the threshold');
+  const r = E.findRetireAgeAtSuccess(s, 0.85);
+  assert.ok(r && r.age > 50 && r.age <= 80, `expected a later age, got ${JSON.stringify(r)}`);
+  assert.ok(r.successRate >= 0.85);
+  const before = E.runForState(Object.assign({}, s, { simMode: 'historical', yourStopWorkAge: r.age - 1 }));
+  assert.ok(before.successRate < 0.85, 'one year earlier should not clear it');
+  assert.strictEqual(E.findRetireAgeAtSuccess(Object.assign({}, s, { yourIncome: 0 }), 0.85), null, 'no wages, no answer');
+});
+test('findPortfolioAtSuccess finds the portfolio that clears the threshold, and reports when already there', () => {
+  const s = mk({ age: 65, targetAge: 94, portfolio: 600000, spending: 40000, lateSpending: 40000, slowDownAge: 200,
+                 yourIncome: 0, hasPartner: false, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false, stockPct: 0.6 });
+  const r = E.findPortfolioAtSuccess(s, 0.85);
+  assert.ok(r && !r.alreadyThere && r.portfolio > 600000 && r.portfolio < 1500000, JSON.stringify(r));
+  assert.ok(E.runForState(Object.assign({}, s, { simMode: 'historical', portfolio: r.portfolio })).successRate >= 0.85);
+  assert.ok(E.runForState(Object.assign({}, s, { simMode: 'historical', portfolio: r.portfolio - 20000 })).successRate < 0.85, 'not far above the line');
+  const rich = E.findPortfolioAtSuccess(Object.assign({}, s, { portfolio: 2000000 }), 0.85);
+  assert.ok(rich.alreadyThere && rich.portfolio === 2000000);
+});
+
 // ---- 14. Market shock ------------------------------------------------------------
 test('a market shock splices the era sequence in at the shock age and lowers success', () => {
   const s = pureWithdrawal(1000000, 40000, 30, { stockPct: 1.0 });

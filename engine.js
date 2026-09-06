@@ -561,6 +561,35 @@ function findMaxSpendAtSuccess(state, threshold) {
   return { spend: best, successRate: bestResult.successRate, successCount: bestResult.successCount, totalPeriods: bestResult.totalPeriods, threshold: th };
 }
 
+// "What would it take": the smallest change to one input that gets the plan to `threshold`
+// of historical periods, holding everything else as set. Each returns null when no value
+// in range gets there.
+function findRetireAgeAtSuccess(state, threshold) {
+  const th = threshold === undefined ? (state.successThreshold || 0.85) : threshold;
+  const base = Object.assign({}, DEFAULT_STATE, state, { simMode: 'historical' });
+  if (base.yourIncome <= 0) return null;
+  for (let age = Math.max(base.age, base.yourStopWorkAge); age <= Math.min(80, base.targetAge - 1); age++) {
+    const r = runHistorical(Object.assign({}, base, { yourStopWorkAge: age }));
+    if (r.successRate >= th) return { age, successRate: r.successRate, successCount: r.successCount, totalPeriods: r.totalPeriods, threshold: th };
+  }
+  return null;
+}
+function findPortfolioAtSuccess(state, threshold) {
+  const th = threshold === undefined ? (state.successThreshold || 0.85) : threshold;
+  const base = Object.assign({}, DEFAULT_STATE, state, { simMode: 'historical' });
+  const scaleAccts = (p) => base.accountsEnabled && base.portfolio > 0
+    ? { traditional: base.accounts.traditional * p / base.portfolio, roth: base.accounts.roth * p / base.portfolio, taxable: base.accounts.taxable * p / base.portfolio }
+    : base.accounts;
+  const ok = (p) => runHistorical(Object.assign({}, base, { portfolio: p, accounts: scaleAccts(p) })).successRate >= th;
+  if (ok(base.portfolio)) return { portfolio: base.portfolio, threshold: th, alreadyThere: true };
+  let low = base.portfolio, high = Math.max(base.portfolio * 2, 100000);
+  let guard = 0;
+  while (!ok(high) && guard++ < 12) { low = high; high *= 2; }
+  if (!ok(high)) return null;
+  for (let i = 0; i < 20; i++) { const mid = (low + high) / 2; if (ok(mid)) high = mid; else low = mid; }
+  return { portfolio: Math.ceil(high / 1000) * 1000, threshold: th, alreadyThere: false };
+}
+
 // ============================================================================
 // TAX & SOCIAL SECURITY ESTIMATORS (approximations; for the helper modals)
 // ============================================================================
@@ -747,5 +776,5 @@ const SAMPLE_STATE = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), {
   accountsEnabled: true, accounts: { traditional: 280000, roth: 150000, taxable: 270000 },
 });
 
-  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, SHOCK_YEARS, applyShock, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };
+  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, SHOCK_YEARS, applyShock, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, findRetireAgeAtSuccess, findPortfolioAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };
 });
