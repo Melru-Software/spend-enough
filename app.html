@@ -1674,7 +1674,7 @@ function renderResources() {
       <summary>How does the historical simulation work?</summary>
       <div class="faq-body">
         <p>In Historical mode, the tool tests your plan against every rolling period of real U.S. market returns since 1926 for the stock/bond mix you chose. If your horizon is 30 years, it runs your numbers starting in 1926, then 1927, then 1928, and so on through every period in the dataset (71 of them for 30 years), each using the actual sequence of returns from that era. The periods overlap, so they are not independent trials, and the Assumptions panel shows exactly how many were run and where they start.</p>
-        <p>This matters because of sequence of returns risk. A market crash in year two of retirement is far more damaging than the same crash in year twenty, even if the long-run average return is identical. In year two you are forced to sell at the bottom to cover expenses, and those sold shares never recover. Historical mode shows how many real sequences your plan survives, including the ones that started right before 1929, 1966, 2000, and 2008.</p>
+        <p>This matters because of sequence of returns risk. A market crash in year two of retirement is far more damaging than the same crash in year twenty, even if the long-run average return is identical. In year two you sell at the bottom to cover expenses, and the shares you sold are not there for the recovery. Historical mode shows how many real sequences your plan survives, including the ones that started right before 1929, 1966, 2000, and 2008.</p>
         <p>Fixed mode uses one steady return and Simulated mode draws random ones, so neither carries the timing of a real crash.</p>
       </div>
     </details>
@@ -1685,8 +1685,8 @@ function renderResources() {
         <p>The success rate tells you how often your plan lasted to your target age. In Historical mode it is a count ("lasted in 66 of 71 periods"). In Simulated mode it is a percentage across ${state.mcSims} randomized futures.</p>
         <ul>
           <li><strong>100% is not the goal.</strong> A plan that survives every historical period, including one that starts in 1929, could have spent more in the other 70.</li>
-          <li><strong>85-90% is a reasonable target.</strong> Your plan holds up across most real market environments, including some very bad ones, without being so cautious that you are chronically underusing what you have.</li>
-          <li><strong>Failures are not cliff edges.</strong> When a plan "fails," it usually means the portfolio ran low in the final years, not that you would be broke at 70. Social Security and adjusted late-life spending can absorb a lot of what looks alarming in the model.</li>
+          <li><strong>85 to 90% is a reasonable target.</strong> For a 30-year plan that is 60 to 64 of 71 periods. The ones it misses are the handful that started right before a long slump, such as 1966 through 1969.</li>
+          <li><strong>What a failure means.</strong> When a plan fails here, the portfolio usually runs low in the last few years of a plan that runs to age ${state.targetAge}. Social Security keeps paying through it, and late-life spending is usually lower, so the model's failure is milder than the word suggests.</li>
         </ul>
         <p>The spending explorer below the chart shows how the count moves as you set spending higher or lower.</p>
       </div>
@@ -1698,11 +1698,11 @@ function renderResources() {
         <p>Retirement portfolios are sensitive to small changes because the effects compound over decades and the math is nonlinear. A few forces drive this:</p>
         <ul>
           <li><strong>Compounding cuts both ways.</strong> An extra $5,000 a year in spending costs $5,000 plus the growth that money would have earned over the next 20 or 30 years. At 5% real returns, $5,000 today becomes roughly $13,000 in 20 years.</li>
-          <li><strong>The withdrawal rate cliff.</strong> Portfolios under stress behave differently at different withdrawal rates. Going from 3.5% to 4% might drop your success rate a little. Going from 4% to 4.5% might drop it a lot, because you start hitting the same bad market sequences that caused most historical failures. The relationship is not linear.</li>
+          <li><strong>Withdrawal rate.</strong> ${(() => { const c = (w) => runForState({ ...DEFAULT_STATE, age: 65, targetAge: 94, hasPartner: false, partnerAge: 0, portfolio: 1000000, spending: w, lateSpending: w, slowDownAge: 200, yourIncome: 0, yourStopWorkAge: 65, yourSSAmount: 0, housing: 0, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false, simMode: 'historical', stockPct: state.stockPct }); const a = c(35000), b = c(40000), d = c(45000), e = c(50000); return 'On $1 million over 30 years with your ' + mixLabel() + ' mix and no taxes or fees, spending $35,000 a year lasted in ' + a.successCount + ' of ' + a.totalPeriods + ' periods, $40,000 in ' + b.successCount + ', $45,000 in ' + d.successCount + ', and $50,000 in ' + e.successCount + '. Each extra $5,000 costs more periods than the last, because each step runs into more of the bad sequences.'; })()}</li>
           <li><strong>Early retirement is especially sensitive.</strong> Retiring 10 years earlier adds 10 years of withdrawals and removes 10 years of contributions and growth. The two effects stack.</li>
           <li><strong>Sequence risk.</strong> In a bad market sequence, a slightly higher withdrawal rate means selling more shares at the bottom, leaving fewer shares to recover when the market rebounds. Small differences in withdrawal rate become large differences in survival.</li>
         </ul>
-        <p>This is why the tool uses historical sequences rather than averages. Averages smooth over the exact dynamics that make small differences matter.</p>
+        <p>This is why the tool uses historical sequences rather than averages.</p>
       </div>
     </details>
 
@@ -1710,8 +1710,8 @@ function renderResources() {
       <summary>What is sequence of returns risk?</summary>
       <div class="faq-body">
         <p>Two retirees can experience the exact same average market return over 30 years and end up in completely different places, depending on whether the good years came first or the bad years did.</p>
-        <p>If your portfolio drops 40% in year two of retirement, you have to sell investments at the bottom just to cover expenses. Those shares cannot recover because they are gone. A crash in year twenty, when your portfolio is smaller and your drawing period is shorter, does far less damage.</p>
-        <p>This is why plugging in an average return and projecting forward is misleading for retirement planning. A steady 6% real return assumption says nothing about what happens if a 2008-style crash hits in your first year, even if 6% turns out to be the actual long-run average.</p>
+        <p>If your portfolio drops 40% in year two of retirement, you sell investments at the bottom to cover expenses, and the shares you sold are not there for the recovery. A crash in year twenty, with fewer years of withdrawals left, does far less damage.</p>
+        <p>A steady 6% assumption says nothing about a 2008-style crash in your first year, even if 6% turns out to be the long-run average.</p>
         <p>Historical mode runs your plan through every real sequence since 1926 rather than a smoothed average of them.</p>
       </div>
     </details>
@@ -1724,17 +1724,17 @@ function renderResources() {
         <ul>
           <li>It assumes a fixed withdrawal regardless of what the market does, with no adjustments in bad years.</li>
           <li>It was calibrated for a 30-year horizon. Retire at 55 planning to 95 and you need something more conservative.</li>
-          <li>It ignores income. Social Security alone can dramatically change how hard your portfolio has to work.</li>
+          <li>It ignores income. A household spending $80,000 with $30,000 of Social Security only needs the portfolio to cover $50,000.</li>
           <li>It does not account for spending that changes in late life. Healthcare costs may rise even as travel and discretionary spending fall.</li>
         </ul>
-        <p>This tool does not apply the 4% rule. It runs your actual numbers through historical and simulated market sequences, accounting for your income, Social Security, housing costs, and spending trajectory.</p>
+        <p>This tool does not apply the 4% rule. It runs your own numbers through historical and simulated market sequences, with your income, Social Security, housing costs, and the spending changes you set.</p>
       </div>
     </details>
 
     <details class="faq-item">
       <summary>How does the flexible spending (guardrails) system work?</summary>
       <div class="faq-body">
-        <p>The idea comes from financial planner Jonathan Guyton: rather than withdrawing a fixed amount every year regardless of conditions, you set a target and let it flex within a band based on how hard your portfolio is actually working.</p>
+        <p>The idea comes from financial planner Jonathan Guyton: rather than withdrawing a fixed amount every year, you set a target and let it flex based on how hard the portfolio is being drawn.</p>
         <p>In the first year you draw from the portfolio with no wages coming in, the tool records your withdrawal rate as the baseline. Each year after that:</p>
         <ul>
           <li>If your withdrawal rate climbs more than ${pct(state.guardrailBandPct, 0)} above that baseline, your portfolio is under stress and that year's spending is cut by ${pct(state.guardrailCutPct, 0)}.</li>
@@ -1757,7 +1757,7 @@ function renderResources() {
         <p>The withdrawal strategy controls the order you draw from these accounts:</p>
         <ul>
           <li><strong>Proportional</strong> draws from all three in proportion to their current balances. Simple and predictable.</li>
-          <li><strong>Tax-aware</strong> draws from taxable first, then traditional, then Roth last. Because Roth grows tax-free, leaving it untouched as long as possible lets it compound without tax drag. This typically leaves more usable after-tax wealth at the end, though it may show higher nominal taxes in the early years. The withdrawal strategy comparison table (visible in Historical and Simulated modes) shows the estimated difference for your specific numbers.</li>
+          <li><strong>Tax-aware</strong> draws from taxable first, then traditional, then Roth last. Because Roth grows tax-free, leaving it untouched longer lets it compound tax-free longer. This usually leaves more usable after-tax wealth at the end, though it may show higher taxes in the early years. The withdrawal strategy comparison table (visible in Historical and Simulated modes) shows the estimated difference for your specific numbers.</li>
         </ul>
         <p>The right answer depends on your tax bracket now versus in retirement, and on whether RMDs will force traditional withdrawals anyway after age 73. A tax professional can model your specific situation.</p>
       </div>
@@ -1774,12 +1774,12 @@ function renderResources() {
           <li><strong>Healthcare costs</strong> are not broken out separately. Include them in your annual spending, or add pre-Medicare premiums as a life event if they will differ significantly from your regular retirement spending.</li>
           <li><strong>Required Minimum Distributions</strong> (RMDs) starting at age 73 are not modeled. For most people the impact is limited, but a large traditional IRA can push forced withdrawals into a higher tax bracket.</li>
           <li><strong>Medicare premium surcharges</strong> (IRMAA) for higher-income retirees are not included.</li>
-          <li><strong>Roth conversions and tax-loss harvesting</strong> are not modeled. A good accountant can meaningfully improve your tax picture beyond what any simple model captures.</li>
+          <li><strong>Roth conversions and tax-loss harvesting</strong> are not modeled. An accountant may find savings here that no simple model will.</li>
           <li><strong>Spousal and survivor Social Security benefits</strong> are entered manually but not calculated automatically from each other's records.</li>
           <li><strong>State income tax</strong> is approximated for most states. Set your state in More options for a closer number, or edit the rates directly under Assumptions.</li>
           <li><strong>A fixed mortgage payment</strong> is treated as if it rose with inflation. In reality it shrinks in today's dollars each year, so late-year housing cost is slightly overstated.</li>
         </ul>
-        <p>Use this tool to understand the range of possibilities and the levers available to you, then take the numbers to a professional before making major decisions.</p>
+        <p>Take the numbers to a professional before making a major decision.</p>
       </div>
     </details>
 
