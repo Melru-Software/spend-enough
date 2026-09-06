@@ -1107,12 +1107,12 @@ function renderDashboard() {
         ${verdict.wedge ? `<div class="verdict-wedge">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
       </div>
 
+      ${renderReadFirst(result)}
+
       <div class="section-heading">Portfolio projection</div>
       <div class="section-sub">${state.simMode==='historical' ? 'The shaded area is the range across all '+result.totalPeriods+' historical periods: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : state.simMode==='montecarlo' ? 'The shaded area is the range across '+result.mcSims+' simulated futures: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : 'One steady-return path, so there is no range. Switch to Historical mode to see one.'}${canCompare ? ' The dashed line and faint band are the baseline.' : ''}</div>
       <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
       ${renderEventTimeline()}
-
-      ${renderReadFirst(result)}
 
       ${renderAssumptions(result)}
 
