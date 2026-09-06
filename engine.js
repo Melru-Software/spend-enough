@@ -177,6 +177,22 @@ function withdrawWithTax(netNeed, accts, strategy, age, state) {
   return { gross, tax, drawn };
 }
 
+// Market shock: replace the returns from `shockAge` onward with the first ten years of a
+// named era (real returns for the user's mix), in every period, simulation, or fixed
+// path. Answers "what if that decade hits right when I stop working?".
+const SHOCK_YEARS = 10;
+function applyShock(seq, state) {
+  if (!state.shockEra || state.shockAge === null || state.shockAge === undefined) return seq;
+  const era = HISTORICAL_SCENARIOS.find(x => x.id === state.shockEra);
+  if (!era) return seq;
+  const idx = state.shockAge - state.age;
+  if (idx < 0 || idx >= seq.length) return seq;
+  const eraSeq = getHistoricalSequence(era.startYear, Math.min(SHOCK_YEARS, HISTORICAL_END_YEAR - era.startYear + 1), state.stockPct) || [];
+  const out = seq.slice();
+  for (let j = 0; j < eraSeq.length && idx + j < out.length; j++) out[idx + j] = eraSeq[j];
+  return out;
+}
+
 // True when `age` falls in [start, end). Null/undefined bounds mean "no window".
 function inWindow(age, start, end) {
   return start !== null && start !== undefined && end !== null && end !== undefined && age >= start && age < end;
@@ -423,7 +439,7 @@ function runMonteCarlo(state, numSims) {
   for (let s = 0; s < sims; s++) {
     const seq = [];
     for (let y = 0; y < yearCount; y++) seq.push(randNormal(mean, sd, rng));
-    allRuns.push(simulateOnce(state, seq));
+    allRuns.push(simulateOnce(state, applyShock(seq, state)));
   }
   return summarize(allRuns, yearCount, 'montecarlo', null, { mcMean: mean, mcSd: sd, mcSims: sims, mcSeed: state.mcSeed });
 }
@@ -438,7 +454,7 @@ function runHistorical(state) {
   for (let sy = HISTORICAL_START_YEAR; sy <= maxStart; sy++) {
     const seq = getHistoricalSequence(sy, yearCount, state.stockPct);
     if (!seq) continue;
-    allRuns.push(simulateOnce(state, seq));
+    allRuns.push(simulateOnce(state, applyShock(seq, state)));
     labels.push(sy + '–' + (sy + yearCount - 1));
   }
   // If the horizon is longer than the data, fall back to windows padded with the
@@ -448,7 +464,7 @@ function runHistorical(state) {
       const avail = getHistoricalSequence(sy, HISTORICAL_END_YEAR - sy + 1, state.stockPct);
       const seq = [...avail]; while (seq.length < yearCount) seq.push(geo);
       paddedYears = Math.max(paddedYears, yearCount - avail.length);
-      allRuns.push(simulateOnce(state, seq));
+      allRuns.push(simulateOnce(state, applyShock(seq, state)));
       labels.push(sy + '–' + (sy + yearCount - 1) + '*');
     }
   }
@@ -459,7 +475,7 @@ function runHistorical(state) {
 
 function runFixed(state) {
   const yearCount = horizonYears(state);
-  const seq = new Array(yearCount).fill(state.returnRate);
+  const seq = applyShock(new Array(yearCount).fill(state.returnRate), state);
   const run = simulateOnce(state, seq);
   const finalBal = run[run.length - 1].portfolio;
   const runOut = run.find(y => y.ranOut);
@@ -669,6 +685,9 @@ const DEFAULT_STATE = {
   // money is spent instead of invested.
   yourBreakStart: null, yourBreakEnd: null, partnerBreakStart: null, partnerBreakEnd: null,
   contributions: 0, contribPauseStart: null, contribPauseEnd: null,
+  // Market shock: id from HISTORICAL_SCENARIOS whose first ten years replace the returns
+  // from shockAge onward (null = none).
+  shockEra: null, shockAge: null,
   ssStartAge: 67, yourSSAmount: 0, partnerSSAmount: 0,
   oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0,
   // Portfolio: share in stocks (rest in 10-year Treasuries), annual fee drag
@@ -705,5 +724,5 @@ const SAMPLE_STATE = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), {
   accountsEnabled: true, accounts: { traditional: 280000, roth: 150000, taxable: 270000 },
 });
 
-  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };
+  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, SHOCK_YEARS, applyShock, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };
 });

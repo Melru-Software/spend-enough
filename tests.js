@@ -393,6 +393,23 @@ test('inWindow treats null bounds as no window and end as exclusive', () => {
   assert.strictEqual(E.inWindow(39, 40, 42), false);
 });
 
+// ---- 14. Market shock ------------------------------------------------------------
+test('a market shock splices the era sequence in at the shock age and lowers success', () => {
+  const s = pureWithdrawal(1000000, 40000, 30, { stockPct: 1.0 });
+  const shocked = Object.assign({}, s, { shockEra: 'dotcom', shockAge: 65 });
+  const seq = E.applyShock(new Array(30).fill(0.05), shocked);
+  const era = E.getHistoricalSequence(2000, 10, 1.0);
+  assert.deepStrictEqual(seq.slice(0, 10), era, 'first ten years are the 2000-2009 real returns');
+  assert.strictEqual(seq[10], 0.05, 'later years untouched');
+  const base = E.runForState(s), hit = E.runForState(shocked);
+  assert.ok(hit.successRate < base.successRate, 'a 2000-2009 start should lower the historical count');
+  assert.strictEqual(hit.totalPeriods, base.totalPeriods, 'still one run per period');
+  const later = E.runForState(Object.assign({}, s, { shockEra: 'dotcom', shockAge: 80 }));
+  assert.ok(later.successRate >= hit.successRate, 'the same decade fifteen years in hurts less');
+  assert.strictEqual(E.runForState(Object.assign({}, s, { shockEra: 'dotcom', shockAge: 200 })).successRate, base.successRate, 'a shock outside the horizon changes nothing');
+  assert.strictEqual(E.runForState(Object.assign({}, s, { shockEra: 'nope', shockAge: 65 })).successRate, base.successRate, 'unknown era is ignored');
+});
+
 // ---- summary ----------------------------------------------------------------
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed) { console.error(`\nFAILED: ${failures.length} test(s) above.`); process.exit(1); }

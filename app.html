@@ -349,6 +349,8 @@
   .work-row { font-size: 14px; color: var(--ink-soft); line-height: 2; margin-bottom: 4px; }
   .work-row > span { display: block; font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.4; margin-top: 6px; }
   .asm-input.wide { width: 92px; }
+  .asm-select { font-size: 14px; background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 3px 4px; font-family: inherit; color: var(--ink); min-height: 0; }
+  .more-toggle .asm-hint { font-weight: 400; margin-left: 6px; }
   .field-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
   .compare-table td:first-child { color: var(--ink-mute); }
   @media (max-width: 600px) { .asm-row { grid-template-columns: 1fr; gap: 4px; } }
@@ -704,13 +706,14 @@ function calcAnnualMortgagePayment(balance, annualRate, years) {
   return balance * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1) * 12;
 }
 
-window.showPayoffModal = function() {
-  if (!isPaid()) { showUnlockModal(); return; }
+let payoffFromPreset = false;
+window.showPayoffModal = function(fromPreset) {
+  payoffFromPreset = !!fromPreset;
   const currentYearsLeft = Math.max(1, state.mortgagePayoffAge - state.age);
   openModal(`
     <div style="max-width:380px">
       <div style="font-size:16px;font-weight:700;margin-bottom:4px;font-family:'Source Serif 4',serif">Accelerated mortgage payoff</div>
-      <p style="font-size:14px;color:var(--ink-mute);margin-bottom:16px">We'll calculate your new required payment and update your housing costs accordingly. After payoff, housing costs drop to zero in the model.</p>
+      <p style="font-size:14px;color:var(--ink-mute);margin-bottom:16px">Tell it what is left on the mortgage and how fast you want it gone. It works out the new yearly payment, raises your housing cost to match until the payoff year, then drops housing to zero.</p>
       <div style="display:grid;gap:10px">
         <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Remaining mortgage balance
           <input type="number" id="po_balance" placeholder="e.g. 280000" step="10000" min="0"
@@ -760,6 +763,7 @@ window.applyPayoffModal = function() {
     document.getElementById('po_balance').style.outline = '2px solid var(--danger)';
     return;
   }
+  if (payoffFromPreset) { startComparison('Pay off the house early'); payoffFromPreset = false; }
   const annual = calcAnnualMortgagePayment(balance, rate, years);
   state.housing = Math.round(annual / 100) * 100;
   state.mortgagePayoffAge = state.age + years;
@@ -786,6 +790,12 @@ function generatePresets(s) {
   }
   if (s.yourIncome > 0 && yearsToRetire > 3 && s.contribPauseStart === null) {
     presets.push({ id: 'pauseContrib', label: 'Stop contributing for 3 years' });
+  }
+  if (s.housing > 0 && s.mortgagePayoffAge > s.age + 2 && !(s.mortgageBalance > 0)) {
+    presets.push({ id: 'payoffHouse', label: 'Pay off the house early' });
+  }
+  if (!s.shockEra) {
+    presets.push({ id: 'shockAtRetirement', label: (s.yourIncome > 0 && s.yourStopWorkAge > s.age) ? 'A bad decade starts when I stop working' : 'A bad decade starts now' });
   }
 
   // ---- User's own work situation ----
@@ -867,6 +877,9 @@ function succLabel(r) {
   return r.mode === 'historical' ? r.successCount + '/' + r.totalPeriods : r.mode === 'montecarlo' ? Math.round(r.successRate * 100) + '%' : (r.successRate >= 1 ? 'lasts' : 'runs out');
 }
 function modeName(m) { return m === 'historical' ? 'Historical' : m === 'montecarlo' ? 'Simulated' : 'Fixed'; }
+const SHOCK_ERAS = [['dotcom', '2000 to 2009'], ['depression', '1929 to 1938'], ['stagflation', '1969 to 1978']];
+function shockLabel(id) { const e = SHOCK_ERAS.find(x => x[0] === id); return e ? e[1] : (id || 'none'); }
+function shockSentence(unit) { return state.shockEra && state.shockAge !== null ? ' From age ' + state.shockAge + ', every ' + unit + ' gets the real ' + shockLabel(state.shockEra) + ' returns for ten years, so the count answers what happens if that decade hits right then.' : ''; }
 function mixLabel() { return Math.round(state.stockPct * 100) + '/' + Math.round((1 - state.stockPct) * 100); }
 
 const app = document.getElementById('app');
@@ -1157,7 +1170,7 @@ function renderDashboard() {
       ${renderAssumptions(result)}
 
       ${isPaid() ? `<details class="deep" ${deepOpen ? 'open' : ''} ontoggle="deepOpen=this.open; if (this.open) setTimeout(() => drawCashflowChart(lastSimResult), 0)">
-        <summary>More analysis <span class="asm-hint">ending balances, stress tests, cashflow, flexibility, Social Security timing</span></summary>
+        <summary>More analysis <span class="asm-hint">best and worst outcomes, stress tests, cashflow, spending flexibility, Social Security timing</span></summary>
         <div class="deep-body">
           ${notFixed ? renderBands(result) : ''}
           ${state.simMode==='historical' ? renderStressTests() : ''}
@@ -1174,7 +1187,7 @@ function renderDashboard() {
           ${notFixed && state.yourSSAmount > 0 ? renderSSComparison() : ''}
           ${notFixed && state.accountsEnabled ? renderTaxComparison() : ''}
         </div>
-      </details>` : `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">Pro adds ending balances, stress tests, cashflow, flexibility and Social Security timing <span class="lock-icon">&#x1f512;</span></button>`}
+      </details>` : `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()"><span>More analysis <span class="asm-hint">best and worst outcomes, stress tests, cashflow, Social Security timing</span></span><span class="lock-icon">&#x1f512;</span></button>`}
 
       <div class="disclaimer-bar" style="margin-top:22px">These results are an educational model. They are not advice. The tool does not know your full situation, and it treats taxes, Social Security, and healthcare in simplified ways. What you see is a range of outcomes under the assumptions shown, built from past market returns and randomized simulations. Past performance does not predict future results. Before you make a decision based on these numbers, talk to a qualified financial, tax, or legal professional who can look at the whole picture. <a onclick="showFullDisclaimer()">Full disclaimer</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></div>
     </div>`;
@@ -1232,8 +1245,8 @@ function renderWorkControls() {
   if (state.yourIncome > 0 && state.yourStopWorkAge > state.age) rows.push(`<div class="work-row"><span>Your career break</span>off at ${ageInput(state.yourBreakStart, state.age, state.yourStopWorkAge, "setBreak('your','start',this.value)", 'Break starts at age')} back at ${ageInput(state.yourBreakEnd, state.age + 1, state.yourStopWorkAge, "setBreak('your','end',this.value)", 'Back to work at age')}</div>`);
   if (state.hasPartner && state.partnerIncome > 0 && state.partnerStopWorkAge > state.partnerAge) rows.push(`<div class="work-row"><span>Partner’s career break</span>off at ${ageInput(state.partnerBreakStart, state.partnerAge, state.partnerStopWorkAge, "setBreak('partner','start',this.value)", 'Partner break starts at age')} back at ${ageInput(state.partnerBreakEnd, state.partnerAge + 1, state.partnerStopWorkAge, "setBreak('partner','end',this.value)", 'Partner back to work at age')}</div>`);
   if (state.yourIncome > 0 || state.contributions > 0) rows.push(`<div class="work-row"><span>Retirement savings</span>$<input type="number" class="asm-input wide" value="${state.contributions || ''}" placeholder="0" min="0" step="1000" onchange="update('contributions', Math.max(0, +this.value || 0))" aria-label="Retirement contributions per year"/> a year${state.contributions > 0 ? `, paused from ${ageInput(state.contribPauseStart, state.age, state.yourStopWorkAge, "setPause('start',this.value)", 'Pause starts at age')} to ${ageInput(state.contribPauseEnd, state.age + 1, state.yourStopWorkAge, "setPause('end',this.value)", 'Pause ends at age')}` : ''}</div>`);
-  if (!rows.length) return '';
-  return `<div class="sidebar-heading" style="margin-top:14px">Time off and saving</div>${rows.join('')}<div class="more-hint">Blank means no break or pause. Paused savings are spent instead of invested for those years.</div>`;
+  rows.push(`<div class="work-row"><span>A bad decade</span><select class="asm-select" onchange="setShock(this.value)" aria-label="Market shock"><option value="" ${state.shockEra ? '' : 'selected'}>none</option>${SHOCK_ERAS.map(([v, l]) => `<option value="${v}" ${state.shockEra === v ? 'selected' : ''}>${l}</option>`).join('')}</select>${state.shockEra ? ` starting at age ${ageInput(state.shockAge, state.age, state.targetAge, "setShockAge(this.value)", 'Shock starts at age')}` : ''}</div>`);
+  return `<div class="sidebar-heading" style="margin-top:14px">Time off, saving, and shocks</div>${rows.join('')}<div class="more-hint">Blank means no break or pause. Paused savings are spent instead of invested. A bad decade replaces the returns from that age with what that decade did, in every period.</div>`;
 }
 
 function roman(n) { return ['i','ii','iii','iv','v','vi','vii','viii'][n-1] || String(n); }
@@ -1350,7 +1363,7 @@ function getVerdict(result) {
   if (result.mode === 'historical') {
     const { successCount, totalPeriods, failures, windows } = result;
     const rate = successCount / totalPeriods;
-    const tested = 'We ran your plan through every rolling ' + yc + '-year stretch of real U.S. market returns since 1926 for a ' + mixLabel() + ' stock/bond mix: ' + totalPeriods + ' periods, starting ' + windows.firstStart + ' through ' + windows.lastStart + '.';
+    const tested = 'We ran your plan through every rolling ' + yc + '-year stretch of real U.S. market returns since 1926 for a ' + mixLabel() + ' stock/bond mix: ' + totalPeriods + ' periods, starting ' + windows.firstStart + ' through ' + windows.lastStart + '.' + shockSentence('period');
     if (maxSpendView) {
       v.headline = 'You could spend about ' + fmtMoney(state.spending) + ' a year and still make it through ' + successCount + ' of ' + totalPeriods + ' historical periods';
       v.lead = 'This is the highest spending level that lasted to age ' + state.targetAge + ' in at least ' + threshold + '% of history, with steady spending and no cuts.';
@@ -1400,9 +1413,10 @@ function getVerdict(result) {
   return v;
 }
 
-const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', contributions: 'Retirement savings', contribPauseStart: 'Savings paused from', contribPauseEnd: 'Savings resume' });
+const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', contributions: 'Retirement savings', contribPauseStart: 'Savings paused from', contribPauseEnd: 'Savings resume', shockEra: 'Bad decade', shockAge: 'Bad decade starts' });
 function fmtField(k, v) {
   if (v === null || v === undefined) return 'none';
+  if (k === 'shockEra') return shockLabel(v);
   if (['spending','lateSpending','portfolio','yourIncome','partnerIncome','housing','contributions'].includes(k)) return fmtMoneyShort(v);
   if (['returnRate','stockPct'].includes(k)) return pct(v, k === 'stockPct' ? 0 : 1);
   if (k === 'feeRate') return pct(v, 2);
@@ -1477,9 +1491,9 @@ function renderAssumptions(result) {
   const mixWords = Math.round(mix * 100) + '% stocks / ' + Math.round((1 - mix) * 100) + '% bonds';
   const rows = [];
   rows.push(asmRow('Returns', isHist
-    ? `Every rolling ${w.years}-year window of real U.S. returns for a ${mixWords} portfolio, 1926–${HISTORICAL_END_YEAR}: <strong>${w.count} windows</strong> starting ${w.firstStart} through ${w.lastStart}.${w.paddedYears ? ' Your horizon is longer than the data, so each window is padded with the mix’s long-run compound return (' + pct(h.geo) + ') for up to ' + w.paddedYears + ' years.' : ''} Windows overlap heavily, so they are not ${w.count} independent trials.`
+    ? `Every rolling ${w.years}-year window of real U.S. returns for a ${mixWords} portfolio, 1926–${HISTORICAL_END_YEAR}: <strong>${w.count} windows</strong> starting ${w.firstStart} through ${w.lastStart}.${w.paddedYears ? ' Your horizon is longer than the data, so each window is padded with the mix’s long-run compound return (' + pct(h.geo) + ') for up to ' + w.paddedYears + ' years.' : ''} Windows overlap heavily, so they are not ${w.count} independent trials.${shockSentence('period')}`
     : isMC
-    ? `<strong>${result.mcSims}</strong> randomized futures. Each year’s return is drawn from a bell curve with average <strong>${pct(result.mcMean)}</strong> and volatility <strong>${pct(result.mcSd)}</strong>${mcParams(state).fromHistory ? ', the 1926–' + HISTORICAL_END_YEAR + ' average and volatility of your ' + mixWords + ' mix' : ' (you set these; history for this mix is ' + pct(h.mean) + ' and ' + pct(h.sd) + ')'}. Real markets have fatter tails and streaks than a bell curve.`
+    ? `<strong>${result.mcSims}</strong> randomized futures. Each year’s return is drawn from a bell curve with average <strong>${pct(result.mcMean)}</strong> and volatility <strong>${pct(result.mcSd)}</strong>${mcParams(state).fromHistory ? ', the 1926–' + HISTORICAL_END_YEAR + ' average and volatility of your ' + mixWords + ' mix' : ' (you set these; history for this mix is ' + pct(h.mean) + ' and ' + pct(h.sd) + ')'}. Real markets have fatter tails and streaks than a bell curve.${shockSentence('run')}`
     : `One path at a steady <strong>${pct(state.returnRate)}</strong> real return every year, so no good or bad years and no sequence-of-returns risk. For comparison, the ${mixWords} mix compounded at ${pct(h.geo)} a year over 1926–${HISTORICAL_END_YEAR}.`));
   rows.push(asmRow('Asset mix', `<strong>${mixWords}</strong>, rebalanced yearly. Stocks are the S&amp;P composite with dividends reinvested; bonds are 10-year U.S. Treasuries. History for this mix, 1926–${HISTORICAL_END_YEAR}: average ${pct(h.mean)}, volatility ${pct(h.sd)}, compound ${pct(h.geo)}, worst year ${pct(h.min)}, best ${pct(h.max)}.
     <div class="asm-slider"><span>All bonds</span><input type="range" class="asm-range" min="0" max="100" step="5" value="${Math.round(mix * 100)}" oninput="this.parentElement.querySelector('output').textContent=this.value+'% stocks / '+(100-this.value)+'% bonds'" onchange="update('stockPct', +this.value/100)" aria-label="Percent in stocks"/><span>All stocks</span><output>${Math.round(mix * 100)}% stocks / ${Math.round((1 - mix) * 100)}% bonds</output></div>`));
@@ -1554,6 +1568,7 @@ function renderEventTimeline() {
   if (state.housing > 0 && state.mortgagePayoffAge > state.age) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr housing cost drops' });
   if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Career break', detail: 'No wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd }); events.push({ age: state.yourBreakEnd, label: 'Back to work', detail: 'Wages resume' }); }
   if (state.hasPartner && state.partnerBreakStart !== null) { events.push({ age: state.age + (state.partnerBreakStart - state.partnerAge), label: 'Partner’s break', detail: 'Partner has no wages for ' + (state.partnerBreakEnd - state.partnerBreakStart) + ' years' }); }
+  if (state.shockEra && state.shockAge !== null) events.push({ age: state.shockAge, label: 'Bad decade starts', detail: shockLabel(state.shockEra) + ' returns for ten years' });
   if (state.contributions > 0 && state.contribPauseStart !== null) { events.push({ age: state.contribPauseStart, label: 'Savings paused', detail: fmtMoneyShort(state.contributions) + '/yr spent instead of invested until ' + state.contribPauseEnd }); events.push({ age: state.contribPauseEnd, label: 'Savings resume', detail: '' }); }
   if (state.ssStartAge > state.age && (state.yourSSAmount > 0 || state.partnerSSAmount > 0)) events.push({ age: state.ssStartAge, label: 'Social Security begins', detail: fmtMoneyShort(state.yourSSAmount + state.partnerSSAmount) + '/yr starts' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending changes', detail: fmtMoneyShort(state.spending) + ' \u2192 ' + fmtMoneyShort(state.lateSpending) + '/yr' });
@@ -1889,6 +1904,7 @@ function drawMainChart(result, compare) {
   if (state.mortgagePayoffAge > state.age && state.housing > 0) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
   if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Break' }); events.push({ age: state.yourBreakEnd, label: 'Back to work' }); }
   if (state.contributions > 0 && state.contribPauseStart !== null) events.push({ age: state.contribPauseStart, label: 'Savings paused' });
+  if (state.shockEra && state.shockAge !== null) events.push({ age: state.shockAge, label: 'Bad decade' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: state.lateSpending < state.spending ? 'Spending drops' : 'Spending rises' });
 
   // Chart.js plugin for vertical annotation lines
@@ -2166,6 +2182,17 @@ window.setPause = function(which, raw) {
   if (e !== null && s === null) state.contribPauseStart = Math.max(state.age, e - 3);
   maxSpendView = false; invalidateCaches(); render();
 };
+window.setShock = function(v) {
+  state.shockEra = v || null;
+  if (!v) state.shockAge = null;
+  else if (state.shockAge === null || state.shockAge === undefined) state.shockAge = (state.yourIncome > 0 && state.yourStopWorkAge > state.age) ? state.yourStopWorkAge : state.age;
+  maxSpendView = false; invalidateCaches(); render();
+};
+window.setShockAge = function(raw) {
+  const v = raw === '' ? null : Math.round(+raw);
+  state.shockAge = v; if (v === null) state.shockEra = null;
+  maxSpendView = false; invalidateCaches(); render();
+};
 window.rerollSeed = function() { state.mcSeed = Math.floor(Math.random() * 1e9); invalidateCaches(); render(); };
 window.resetMcToHistory = function() { state.mcMean = null; state.mcSd = null; invalidateCaches(); render(); };
 window.toggleCompare = function() {
@@ -2317,8 +2344,10 @@ window.finishAskContributions = function(thenId) {
 };
 window.applyPreset = function(id) {
   if (id === 'pauseContrib' && !(state.contributions > 0)) { askContributions(id); return; }
+  if (id === 'payoffHouse') { showPayoffModal(true); return; }
   startComparison(presetLabel(id));
   switch (id) {
+    case 'shockAtRetirement': state.shockEra = 'dotcom'; state.shockAge = (state.yourIncome > 0 && state.yourStopWorkAge > state.age) ? state.yourStopWorkAge : state.age; break;
     case 'careerBreak': state.yourBreakStart = state.age; state.yourBreakEnd = state.age + 2; break;
     case 'partnerBreak': state.partnerBreakStart = state.partnerAge; state.partnerBreakEnd = state.partnerAge + 2; break;
     case 'pauseContrib': state.contribPauseStart = state.age; state.contribPauseEnd = state.age + 3; break;
