@@ -111,7 +111,7 @@ const HISTORICAL_SCENARIOS = [
   { id: 'postwar', name: 'Post-war boom', startYear: 1950, description: 'Strong growth and rising wages through the 1950s and 60s.' },
   { id: 'stagflation', name: '1970s stagflation', startYear: 1969, description: 'High inflation and oil shocks; real returns were negative for a decade.' },
   { id: 'reagan', name: '1980s bull market', startYear: 1982, description: 'Falling interest rates fueled a long equity rally.' },
-  { id: 'dotcom', name: 'Dot-com to 2008', startYear: 2000, description: 'Two major crashes within a decade — a hard sequence for retirees.' },
+  { id: 'dotcom', name: 'Dot-com to 2008', startYear: 2000, description: 'Two major crashes within a decade, a hard sequence for retirees.' },
 ];
 
 // ============================================================================

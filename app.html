@@ -2292,7 +2292,7 @@ window.openSSHelper = function() {
 window.runSSHelper = function() {
   const g = parseFloat(document.getElementById('ss_gross').value) || 0;
   const b = estimateSSBenefit(g);
-  document.getElementById('ss_result').innerHTML = `Estimated benefit at full retirement age: <strong>${fmtMoney(b)}/yr</strong> (${fmtMoney(Math.round(b/12))}/mo).<br/><span style="font-size:14px;color:var(--ink-faint)">Approximate \u2014 your ssa.gov statement is authoritative.</span>`;
+  document.getElementById('ss_result').innerHTML = `Estimated benefit at full retirement age: <strong>${fmtMoney(b)}/yr</strong> (${fmtMoney(Math.round(b/12))}/mo).<br/><span style="font-size:14px;color:var(--ink-faint)">Approximate. Your ssa.gov statement is the official figure.</span>`;
 };
 
 // ============================================================================
