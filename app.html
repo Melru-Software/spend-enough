@@ -6,7 +6,7 @@
 <title>Spend Enough</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600;8..60,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600;8..60,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -125,7 +125,7 @@
   .field-grid.cols-1 { grid-template-columns: 1fr; }
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute); font-weight: 600; }
-  .field input, .field select { background: var(--bone); border: 1px solid var(--line); padding: 11px 14px; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--ink); border-radius: 2px; transition: border-color 0.15s ease; }
+  .field input, .field select { background: var(--bone); border: 1px solid var(--line); padding: 11px 14px; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-size: 15px; color: var(--ink); border-radius: 2px; transition: border-color 0.15s ease; }
   .field input:focus, .field select:focus { outline: none; border-color: var(--ink); }
   .field-hint { font-size: 14px; color: var(--ink-faint); }
   .field-hint .helper-trigger { background: none; border: none; color: var(--rust); cursor: pointer; font-size: 14px; text-decoration: underline; padding: 0; font-family: inherit; }
@@ -157,12 +157,12 @@
   .control { margin-bottom: 14px; }
   .control-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
   .control-label { color: var(--ink-soft); flex: 1; font-size: inherit; }
-  .control-value { font-size: 14px; font-weight: 500; color: var(--ink); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+  .control-value { font-size: 14px; font-weight: 500; color: var(--ink); font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .control input[type=range] { width: 100%; height: 4px; -webkit-appearance: none; appearance: none; background: var(--line); border-radius: 2px; outline: none; }
   .control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; transition: background 0.12s; }
   .control input[type=range]::-webkit-slider-thumb:hover { background: var(--rust); }
   .control input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; border: none; }
-  .control input[type=number] { width: 100%; background: var(--bone); border: 1px solid var(--line); padding: 7px 9px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--ink); border-radius: 2px; }
+  .control input[type=number] { width: 100%; background: var(--bone); border: 1px solid var(--line); padding: 7px 9px; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink); border-radius: 2px; }
   .control input[type=number]:focus { outline: none; border-color: var(--ink); }
   .help-mark { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; min-width: 15px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-mute); font-size: 10px; font-style: italic; margin-left: 4px; cursor: help; font-family: 'Source Serif 4', serif; vertical-align: middle; overflow: hidden; box-sizing: border-box; }
   #tip-popup { position: fixed; z-index: 9999; background: var(--ink); color: var(--paper); font-size: 13px; padding: 6px 10px; border-radius: 4px; max-width: 260px; line-height: 1.4; pointer-events: none; display: none; font-family: inherit; }
@@ -175,7 +175,7 @@
   .checkbox-row label { font-size: 14px; color: var(--ink-soft); cursor: pointer; }
   .acct-grid { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; }
   .acct-grid label { font-size: 14px; color: var(--ink-soft); }
-  .acct-grid input { width: 110px; background: var(--bone); border: 1px solid var(--line); padding: 6px 8px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--ink); border-radius: 2px; text-align: right; }
+  .acct-grid input { width: 110px; background: var(--bone); border: 1px solid var(--line); padding: 6px 8px; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink); border-radius: 2px; text-align: right; }
 
   /* ========== MAIN ========== */
   .main { grid-area: main; padding: 24px 32px; overflow-y: auto; max-width: 1100px; }
@@ -195,7 +195,7 @@
   .verdict-body { font-size: 15px; color: var(--ink-soft); line-height: 1.6; }
   .verdict-caveat { font-size: 14px; color: var(--ink-faint); margin-top: 10px; font-style: italic; }
   .verdict-wedge { margin-top: 10px; padding: 12px 16px; background: rgba(184,92,56,0.06); border-left: 3px solid var(--rust); border-radius: 0 4px 4px 0; font-size: 15px; color: var(--ink); line-height: 1.5; }
-  .verdict-wedge .wedge-amount { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--rust); font-size: 16px; }
+  .verdict-wedge .wedge-amount { font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; color: var(--rust); font-size: 16px; }
   .verdict-wedge .wedge-sub { font-size: 14px; color: var(--ink-mute); margin-top: 4px; }
 
   .toggle-btn.locked { opacity: 0.7; }
@@ -205,7 +205,7 @@
   .link-btn { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: 14px; text-decoration: underline; padding: 0; }
   .locked-preview { border: none; padding: 0; margin: 0; min-width: 0; opacity: 0.5; pointer-events: none; }
   .unlock-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
-  .unlock-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 14px; background: var(--paper); }
+  .unlock-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-size: 14px; background: var(--paper); }
   .unlock-input-row button { padding: 10px 16px; background: var(--rust); color: var(--paper); border: none; border-radius: 3px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
   .unlock-input-row button:hover { background: var(--rust-deep); }
   /* Free vs Pro comparison (unlock modal) */
@@ -237,7 +237,7 @@
   .band { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; }
   .band-label { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
   .band-sub { font-size: 14px; color: var(--ink-mute); margin-bottom: 8px; }
-  .band-value { font-size: 17px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .band-value { font-size: 17px; font-weight: 600; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
   .band.warn .band-value { color: var(--danger); }
   .band.ok .band-value { color: var(--moss); }
   .band.neutral .band-value { color: var(--ink-soft); }
@@ -264,7 +264,7 @@
   .scenario-card.failed { border-left: 3px solid var(--danger-soft); }
   .scenario-card.survived { border-left: 3px solid var(--moss); }
   .scenario-name { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
-  .scenario-years { font-size: 14px; color: var(--ink-mute); margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; }
+  .scenario-years { font-size: 14px; color: var(--ink-mute); margin-bottom: 5px; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
   .scenario-result { font-size: 14px; font-weight: 600; }
   .scenario-result.ok { color: var(--moss); }
   .scenario-result.fail { color: var(--danger); }
@@ -274,7 +274,7 @@
   /* Flexibility */
   .flex-box { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 16px 20px; margin-bottom: 10px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; text-align: center; }
   .flex-label { font-size: 14px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-  .flex-value { font-size: 18px; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+  .flex-value { font-size: 18px; font-weight: 600; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
   .flex-arrow { font-size: 20px; color: var(--rust); }
   .flex-note { font-size: 14px; color: var(--ink-mute); line-height: 1.5; margin-bottom: 18px; }
 
@@ -285,7 +285,7 @@
   .ss-card.highlight { border: 2px solid var(--moss); }
   .ss-age { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 500; color: var(--ink); }
   .ss-label { font-size: 14px; color: var(--ink-mute); margin: 2px 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
-  .ss-benefit { font-size: 14px; color: var(--ink-soft); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+  .ss-benefit { font-size: 14px; color: var(--ink-soft); margin-bottom: 4px; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
   .ss-success { font-size: 14px; font-weight: 600; }
 
   /* Assumptions + resources */
@@ -325,10 +325,10 @@
   .read-first-body p:last-child { margin-bottom: 0; }
   .asm-row { display: grid; grid-template-columns: 120px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line-soft); font-size: 14px; line-height: 1.6; color: var(--ink-soft); }
   .asm-label { font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; padding-top: 3px; }
-  .asm-text strong { color: var(--ink); font-family: 'JetBrains Mono', monospace; font-weight: 500; }
-  .asm-input { width: 64px; text-align: right; font-family: 'JetBrains Mono', monospace; background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 2px 4px; color: var(--ink); min-height: 0; margin: 0 2px; }
+  .asm-text strong { color: var(--ink); font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .asm-input { width: 64px; text-align: right; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 2px 4px; color: var(--ink); min-height: 0; margin: 0 2px; }
   .asm-slider { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: center; margin-top: 10px; max-width: 440px; font-size: 12px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.06em; }
-  .asm-slider output { grid-column: 1 / -1; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--ink); text-transform: none; letter-spacing: 0; }
+  .asm-slider output { grid-column: 1 / -1; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-size: 13px; color: var(--ink); text-transform: none; letter-spacing: 0; }
   input[type="range"].asm-range { width: 100%; height: 6px; margin: 0; background: var(--line); border-radius: 3px; -webkit-appearance: none; appearance: none; }
   input[type="range"].asm-range::-webkit-slider-runnable-track { height: 6px; background: var(--line); border-radius: 3px; }
   input[type="range"].asm-range::-moz-range-track { height: 6px; background: var(--line); border-radius: 3px; }
@@ -438,7 +438,7 @@
       border: 1px solid var(--line);
       border-radius: 3px;
       font-size: 14px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums;
       background: var(--paper);
       color: var(--ink);
       margin-top: 0;
@@ -718,15 +718,15 @@ window.showPayoffModal = function(fromPreset) {
       <div style="display:grid;gap:10px">
         <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Remaining mortgage balance
           <input type="number" id="po_balance" placeholder="e.g. 280000" step="10000" min="0"
-            style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'JetBrains Mono',monospace;background:var(--bone)"/>
+            style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:var(--bone)"/>
         </label>
         <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Interest rate (%)
           <input type="number" id="po_rate" placeholder="e.g. 6.5" step="0.1" min="0" max="20" value="6.5"
-            style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'JetBrains Mono',monospace;background:var(--bone)"/>
+            style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:var(--bone)"/>
         </label>
         <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Pay off in how many years?
           <input type="number" id="po_years" placeholder="e.g. 5" step="1" min="1" max="${currentYearsLeft - 1}" value="5"
-            style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'JetBrains Mono',monospace;background:var(--bone)"/>
+            style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:var(--bone)"/>
         </label>
       </div>
       <div id="po_preview" style="margin-top:12px;font-size:14px;color:var(--ink-mute);min-height:18px"></div>
@@ -753,7 +753,7 @@ function updatePayoffPreview() {
   if (balance <= 0) { el.textContent = ''; return; }
   const annual = calcAnnualMortgagePayment(balance, rate, years);
   const diff = annual - state.housing;
-  el.innerHTML = `New annual payment: <strong style="font-family:'JetBrains Mono',monospace">${fmtMoney(Math.round(annual/100)*100)}</strong>`
+  el.innerHTML = `New annual payment: <strong style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums">${fmtMoney(Math.round(annual/100)*100)}</strong>`
     + (diff > 0 ? ` <span style="color:var(--danger)">(+${fmtMoney(Math.round(diff/100)*100)}/yr for ${years} yrs)</span>` : '');
 }
 
@@ -1302,7 +1302,7 @@ function moreOptionsHTML() {
           ${Object.keys(STATE_CONFIG).map(k => `<option value="${k}" ${state.stateCode===k?'selected':''}>${STATE_CONFIG[k].name}</option>`).join('')}
         </select>
       </div>
-      <div style="font-size:14px;color:var(--ink-mute);margin-top:8px">Estimated rate on wages: <strong style="font-family:'JetBrains Mono',monospace">${effRate}%</strong> &middot; in retirement: <strong style="font-family:'JetBrains Mono',monospace">${Math.round(retirementTaxRate(state)*100)}%</strong></div>
+      <div style="font-size:14px;color:var(--ink-mute);margin-top:8px">Estimated rate on wages: <strong style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums">${effRate}%</strong> &middot; in retirement: <strong style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums">${Math.round(retirementTaxRate(state)*100)}%</strong></div>
 
       <div class="sidebar-heading" style="margin-top:14px">Account types</div>
       <div class="checkbox-row"><input type="checkbox" id="cb_accts" ${state.accountsEnabled?'checked':''} onchange="toggleAccounts(this.checked)"/><label for="cb_accts">Separate account types</label></div>
@@ -1331,13 +1331,13 @@ function moreOptionsHTML() {
       <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">One-time income or expenses at a specific age. Use negative for costs.</div>
       ${(state.oneTimeEvents || []).map((ev, i) => `<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;font-size:14px">
         <span style="color:var(--ink-soft);flex:1">${ev.label || 'Event'} at ${ev.age}</span>
-        <span style="font-family:'JetBrains Mono',monospace;color:${ev.amount>=0?'var(--moss)':'var(--danger)'}">${fmtMoneyShort(ev.amount)}</span>
+        <span style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:${ev.amount>=0?'var(--moss)':'var(--danger)'}">${fmtMoneyShort(ev.amount)}</span>
         <button onclick="removeEvent(${i})" style="background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:0 2px">\u00d7</button>
       </div>`).join('')}
       <div style="display:grid;grid-template-columns:1fr 52px 96px;gap:4px;margin-top:6px">
         <input type="text" id="ev_label" placeholder="e.g. Sell home" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 6px;background:var(--bone);border:1px solid var(--line);border-radius:2px;font-family:inherit"/>
-        <input type="number" id="ev_age" placeholder="Age" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:center;font-family:'JetBrains Mono',monospace"/>
-        <input type="number" id="ev_amount" placeholder="$" step="10000" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:right;font-family:'JetBrains Mono',monospace"/>
+        <input type="number" id="ev_age" placeholder="Age" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:center;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums"/>
+        <input type="number" id="ev_amount" placeholder="$" step="10000" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:right;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums"/>
       </div>
       <button onclick="addEvent()" style="font-size:14px;color:var(--rust);background:none;border:none;cursor:pointer;padding:4px 0;font-family:inherit;margin-top:4px">+ Add event</button>
     </div>`;
@@ -1580,7 +1580,7 @@ function renderEventTimeline() {
   events.sort((a, b) => a.age - b.age);
   if (!events.length) return '';
   return `<div style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:18px;padding:0 4px">${events.map(ev =>
-    `<div style="font-size:14px;color:var(--ink-mute);background:var(--paper);border:1px solid var(--line-soft);border-radius:3px;padding:4px 8px" title="${ev.detail}"><span style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--ink-soft);margin-right:4px">${ev.age}</span>${ev.label}</div>`
+    `<div style="font-size:14px;color:var(--ink-mute);background:var(--paper);border:1px solid var(--line-soft);border-radius:3px;padding:4px 8px" title="${ev.detail}"><span style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-soft);margin-right:4px">${ev.age}</span>${ev.label}</div>`
   ).join('')}</div>`;
 }
 
@@ -1623,24 +1623,24 @@ function renderFlexibilityImpact() {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
       <div onclick="update('guardrailsEnabled',false)" style="background:var(--paper);border:${activeLeft?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeLeft?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
         <div style="font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:${activeLeft?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeLeft?'700':'500'}">Fixed spending</div>
-        <div style="font-size:28px;font-weight:600;font-family:'JetBrains Mono',monospace;color:var(--ink)">${fmtShort(withoutFlex)}</div>
+        <div style="font-size:28px;font-weight:600;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--ink)">${fmtShort(withoutFlex)}</div>
         <div style="font-size:14px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
       </div>
       <div onclick="update('guardrailsEnabled',true)" style="background:var(--paper);border:${activeRight?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeRight?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
         <div style="font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:${activeRight?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeRight?'700':'500'}">With flexibility</div>
-        <div style="font-size:28px;font-weight:600;font-family:'JetBrains Mono',monospace;color:${improved?'var(--moss)':'var(--ink)'}">${fmtShort(withFlex)}</div>
+        <div style="font-size:28px;font-weight:600;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:${improved?'var(--moss)':'var(--ink)'}">${fmtShort(withFlex)}</div>
         <div style="font-size:14px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
         <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)">
           <div>
             <div style="font-size:14px;color:var(--ink-mute);margin-bottom:3px">Cut</div>
             <div style="display:inline-flex;align-items:baseline;gap:1px">
-              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailCutPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailCutPct',+this.value/100)" style="width:42px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
+              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailCutPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailCutPct',+this.value/100)" style="width:42px;text-align:center;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
             </div>
           </div>
           <div>
             <div style="font-size:14px;color:var(--ink-mute);margin-bottom:3px">Boost</div>
             <div style="display:inline-flex;align-items:baseline;gap:1px">
-              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailBoostPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailBoostPct',+this.value/100)" style="width:42px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
+              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailBoostPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailBoostPct',+this.value/100)" style="width:42px;text-align:center;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
             </div>
           </div>
         </div>
