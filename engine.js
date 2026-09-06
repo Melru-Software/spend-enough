@@ -1,15 +1,16 @@
 /* ============================================================================
-   FINANCIAL PLANNER — SIMULATION ENGINE  (engine.js)
+   SPEND ENOUGH — SIMULATION ENGINE  (engine.js)
    ----------------------------------------------------------------------------
-   Pure, DOM-free simulation + estimator code. Loaded by index.html via
+   Pure, DOM-free simulation + estimator code. Loaded by index/app.html via
    <script src="engine.js"> (attaches all symbols to window) and by tests.js
    via require() in Node. NO DOM, NO build step — plain ES2017.
 
    Contents:
-     1. CONSTANTS & HISTORICAL DATA ... HISTORICAL_RETURNS, HISTORICAL_SCENARIOS
+     1. CONSTANTS & HISTORICAL DATA ... STOCK_RETURNS, BOND_RETURNS, blends, stats
      2. SIMULATION ENGINE ............. withdrawWithTax, simulateOnce,
                                         runFixed/runHistorical/runMonteCarlo,
-                                        runForState, runNamedScenario, findMaxSpend
+                                        runForState, runNamedScenario,
+                                        findMaxSpend, findMaxSpendAtSuccess
      3. TAX & SOCIAL SECURITY ......... brackets, estimateNetIncome, estimateSSBenefit
      4. DEFAULT_STATE / SAMPLE_STATE
 
@@ -25,31 +26,84 @@
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-// S&P 500 annual REAL (inflation-adjusted) total returns, dividends reinvested.
-// Source: us500.com / Shiller CPI series, 1926-2025. Stored as decimals.
+// ============================================================================
+// HISTORICAL DATA
+// ----------------------------------------------------------------------------
+// Annual REAL (inflation-adjusted) total returns, 1926-2025, one value per year.
+// Both series are derived from Robert Shiller's U.S. stock market dataset (Yale;
+// monthly S&P composite price, dividends, CPI, and 10-year Treasury yield since
+// 1871) by data/build_returns.js, which documents the exact method. In short:
+//   STOCK_RETURNS  S&P composite, dividends reinvested, January to January, deflated by CPI.
+//   BOND_RETURNS   10-year U.S. Treasury held one year (constant-maturity approximation:
+//                  coupon at the January yield plus the price change from the yield move),
+//                  deflated by CPI. No credit risk, no fees.
+// The 2025 value in each series runs January to December (January 2026 was not yet
+// published), so it is a partial year.
+// Rebuild: node data/build_returns.js  (reads data/shiller_stock_market_data.csv).
+// These are NOT the Ibbotson SBBI series used by Bengen (1994) or the Trinity Study;
+// those included intermediate-term government / long corporate bonds and run to a
+// different end year. Expect agreement within a few periods, not identical counts.
 const HISTORICAL_START_YEAR = 1926;
-const HISTORICAL_RETURNS = [
-  0.1288,0.4067,0.453,-0.0895,-0.1976,-0.3752,0.0232,0.5283,-0.0292,0.4338,
-  0.3201,-0.3684,0.3487,-0.0041,-0.1042,-0.1958,0.1037,0.2228,0.1706,0.3344,
-  -0.2218,-0.0288,0.0244,0.213,0.2434,0.17,0.1749,-0.0173,0.5376,0.3108,
-  0.0347,-0.1329,0.4088,0.1006,-0.0088,0.2605,-0.0993,0.2082,0.1536,0.1033,
-  -0.1307,0.2032,0.0605,-0.1384,-0.0148,0.1069,0.1506,-0.215,-0.3455,0.283,
-  0.181,-0.1301,-0.0226,0.0455,0.1769,-0.127,0.1707,0.1808,0.0223,0.2691,
-  0.1738,0.0079,0.1167,0.2584,-0.0868,0.266,0.0459,0.0713,-0.0131,0.3417,
-  0.1901,0.3113,0.2654,0.1788,-0.1208,-0.1323,-0.2391,0.2631,0.0738,0.0144,
-  0.1292,0.0137,-0.3707,0.2311,0.1336,-0.0083,0.1402,0.3043,0.1283,0.0065,
-  0.0969,0.1931,-0.0617,0.2855,0.1681,0.2024,-0.2307,0.222,0.2151,0.148
+const STOCK_RETURNS = [
+  0.1354,0.3785,0.4815,-0.09,-0.1624,-0.3641,0.0283,0.5186,-0.1056,0.5124,
+  0.2926,-0.3179,0.183,0.0352,-0.1019,-0.177,0.1198,0.1983,0.1654,0.3544,
+  -0.2499,-0.067,0.0805,0.1898,0.2356,0.1627,0.1373,0.0156,0.4668,0.2801,
+  0.0387,-0.0887,0.3761,0.0647,0.0449,0.1816,-0.0408,0.1896,0.1469,0.0932,
+  -0.0956,0.1197,0.0589,-0.1364,0.0174,0.1026,0.1352,-0.2317,-0.2902,0.3001,
+  0.0569,-0.1455,0.0632,0.0272,0.1231,-0.1402,0.2427,0.1542,0.0392,0.2122,
+  0.2912,-0.0582,0.1247,0.1679,-0.0604,0.2829,0.0422,0.0884,-0.0164,0.314,
+  0.2333,0.2575,0.2914,0.1242,-0.0854,-0.1442,-0.2205,0.2585,0.0292,0.0582,
+  0.1092,-0.0536,-0.3521,0.2936,0.1429,0.0039,0.1422,0.2341,0.1343,-0.0465,
+  0.1798,0.222,-0.0615,0.248,0.1593,0.1366,-0.1728,0.1965,0.2203,0.1246
 ];
+const BOND_RETURNS = [
+  0.0872,0.0461,0.0247,0.0598,0.1067,0.1205,0.1808,0.024,0.0261,0.0239,
+  0.0023,0.029,0.0565,0.0432,0.0286,-0.121,-0.0489,-0.0055,0.0104,0.0154,
+  -0.139,-0.0862,0.0219,0.044,-0.0717,-0.0252,0.0112,0.0444,0.0221,-0.0003,
+  -0.0423,0.0261,-0.0515,-0.0203,0.0944,0.0138,0.0456,-0.0032,0.0302,-0.0076,
+  0.0132,-0.0546,-0.0223,-0.1052,0.1228,0.0479,-0.0106,-0.0584,-0.0721,-0.0069,
+  0.0565,-0.0404,-0.0744,-0.1255,-0.0917,-0.0517,0.3301,-0.0025,0.0939,0.1975,
+  0.2112,-0.0637,0.0143,0.0888,0.0313,0.1207,0.0641,0.0968,-0.0958,0.1924,
+  -0.0346,0.1204,0.0961,-0.1055,0.1303,0.0481,0.0954,0.0136,0.0065,-0.0118,
+  -0.001,0.0782,0.1342,-0.0898,0.0462,0.1173,0.0085,-0.07,0.11,-0.0118,
+  -0.0305,-0.0081,0,0.0787,0.0608,-0.1118,-0.1701,-0.0339,-0.0297,0.0653
+];
+const HISTORICAL_RETURNS = STOCK_RETURNS; // back-compat alias (100% stocks)
+const HISTORICAL_END_YEAR = HISTORICAL_START_YEAR + STOCK_RETURNS.length - 1;
+const HISTORICAL_PARTIAL_YEARS = [2025];
+const DATA_SOURCE = {
+  name: 'Robert Shiller, U.S. Stock Markets 1871-Present and CAPE Ratio (Yale)',
+  url: 'http://www.econ.yale.edu/~shiller/data.htm',
+  snapshot: 'data/shiller_stock_market_data.csv (rows through 2025-12)',
+  builder: 'data/build_returns.js',
+};
 
-const HISTORICAL_END_YEAR = HISTORICAL_START_YEAR + HISTORICAL_RETURNS.length - 1;
+// Portfolio blend: stockPct in stocks, the rest in 10-year Treasuries, rebalanced yearly.
+const _blendCache = {};
+function blendSeries(stockPct) {
+  const w = clamp01(stockPct === undefined || stockPct === null ? 1 : stockPct);
+  const key = w.toFixed(4);
+  if (!_blendCache[key]) _blendCache[key] = STOCK_RETURNS.map((s, i) => w * s + (1 - w) * BOND_RETURNS[i]);
+  return _blendCache[key];
+}
+function clamp01(x) { return Math.max(0, Math.min(1, +x || 0)); }
 
-function getHistoricalSequence(startYear, numYears) {
+function getHistoricalSequence(startYear, numYears, stockPct) {
+  const series = blendSeries(stockPct);
   const startIdx = startYear - HISTORICAL_START_YEAR;
-  if (startIdx < 0 || startIdx + numYears > HISTORICAL_RETURNS.length) return null;
-  return HISTORICAL_RETURNS.slice(startIdx, startIdx + numYears);
+  if (startIdx < 0 || startIdx + numYears > series.length) return null;
+  return series.slice(startIdx, startIdx + numYears);
 }
 
-const AVG_HISTORICAL_RETURN = HISTORICAL_RETURNS.reduce((a, b) => a + b, 0) / HISTORICAL_RETURNS.length;
+// Arithmetic mean, sample standard deviation, geometric (compound) mean of a return series.
+function seriesStats(arr) {
+  const n = arr.length;
+  const mean = arr.reduce((a, b) => a + b, 0) / n;
+  const sd = n > 1 ? Math.sqrt(arr.reduce((a, b) => a + (b - mean) * (b - mean), 0) / (n - 1)) : 0;
+  const geo = Math.exp(arr.reduce((a, b) => a + Math.log(1 + b), 0) / n) - 1;
+  return { n, mean, sd, geo, min: Math.min.apply(null, arr), max: Math.max.apply(null, arr) };
+}
+function historicalStats(stockPct) { return seriesStats(blendSeries(stockPct)); }
 
 // Named historical scenarios for stress tests
 const HISTORICAL_SCENARIOS = [
@@ -64,13 +118,19 @@ const HISTORICAL_SCENARIOS = [
 // SIMULATION ENGINE
 // ============================================================================
 
+// Tax rate applied to money coming OUT in retirement (traditional-IRA withdrawals and
+// half of Social Security). Falls back to the wage rate when not set separately.
+function retirementTaxRate(state) {
+  return (state.retirementTaxRate === null || state.retirementTaxRate === undefined) ? state.taxRate : state.retirementTaxRate;
+}
+
 function withdrawWithTax(netNeed, accts, strategy, age, state) {
   // Returns { gross, tax, drawn: {traditional, roth, taxable} }
   // netNeed is the after-tax cash required from the portfolio.
   // We gross up per account so that (gross - tax) covers netNeed.
   const penalty = age < 59.5 ? 0.10 : 0;
   const effRate = {
-    traditional: Math.min(0.95, state.taxRate + penalty),
+    traditional: Math.min(0.95, retirementTaxRate(state) + penalty),
     roth: penalty, // contributions assumed tax-free; only early penalty applies
     taxable: state.capGainsTax * 0.5, // ~half the withdrawal is gain, taxed at cap gains
   };
@@ -130,8 +190,11 @@ function simulateOnce(state, returnSeries) {
   let yourSalary = state.yourIncome;
   let partnerSalary = state.partnerIncome;
   const mortgagePayoffAge = state.mortgagePayoffAge;
+  const fee = state.feeRate || 0;
+  const band = (state.guardrailBandPct === undefined || state.guardrailBandPct === null) ? 0.20 : state.guardrailBandPct;
+  const retRate = retirementTaxRate(state);
   let broken = false;
-  let flexCutCount = 0;
+  let flexCutCount = 0, flexBoostCount = 0;
   let refWithdrawRate = null; // set on first withdrawal year; guardrails compare against this
 
   // Per-account tracking (only if enabled)
@@ -167,9 +230,11 @@ function simulateOnce(state, returnSeries) {
 
     let spend = age >= state.slowDownAge ? state.lateSpending : state.spending;
 
-    // Compute income first (independent of spend)
+    // Compute income first (independent of spend). Wages carry the wage rate (which
+    // includes payroll tax); Social Security is taxed at half the retirement rate as a
+    // stand-in for the 0/50/85% inclusion rules.
     const grossIncome = yourIncomeThisYear + partnerIncomeThisYear + ssIncome;
-    const taxedIncome = (yourIncomeThisYear + partnerIncomeThisYear) * state.taxRate + ssIncome * (state.taxRate * 0.5);
+    const taxedIncome = (yourIncomeThisYear + partnerIncomeThisYear) * state.taxRate + ssIncome * (retRate * 0.5);
     const netIncome = grossIncome - taxedIncome;
 
     // One-time events + home sale inflows/outflows
@@ -182,29 +247,28 @@ function simulateOnce(state, returnSeries) {
     // Provisional portfolio withdrawal need at base spend
     let provisionalNeed = (spend + housing) - netIncome - eventAdj;
 
-    // Withdrawal-rate guardrails: cut when drawing too hard, boost when genuinely flush.
-    // Reference rate is set in the first year of meaningful portfolio withdrawal.
-    // This ensures cuts fire in stressed sequences and boosts only when there's real surplus.
-    // KNOWN LIMITATION: the band is anchored to the FIRST withdrawal year's rate. If that
-    // year is unrepresentative (e.g. a "bridge" draw before Social Security starts, or a
-    // small transitional draw), the reference can be too high/low — biasing toward
-    // persistent boosts once SS begins, or persistent cuts. Fine for the common cases
-    // (already-retired, decades-away); revisit if anchoring proves misleading.
+    // Withdrawal-rate guardrails (Guyton-style): cut when drawing too hard, boost when
+    // genuinely flush. The reference rate is the withdrawal rate in the first year the
+    // household draws on the portfolio with NO wage income (i.e. the initial retirement
+    // withdrawal rate). Years with a small top-up draw while still working do not set
+    // the reference and are not flexed, otherwise a tiny pre-retirement draw would make
+    // every retired year look "stressed" and trigger permanent cuts.
+    // KNOWN LIMITATION: if Social Security starts later, the reference year is a "bridge"
+    // year with a higher rate, which biases toward boosts once SS begins.
+    // Cuts/boosts apply to this year's base spend only; they do not compound.
     let flexed = false;
-    if (state.guardrailsEnabled && provisionalNeed > 0 && portfolio > 0) {
+    const wagesThisYear = yourIncomeThisYear + partnerIncomeThisYear;
+    if (state.guardrailsEnabled && provisionalNeed > 0 && portfolio > 0 && wagesThisYear <= 0) {
       const rate = provisionalNeed / portfolio;
       if (refWithdrawRate === null) {
-        refWithdrawRate = rate; // first withdrawal year sets the reference
+        refWithdrawRate = rate; // first retired withdrawal year sets the reference
       } else {
-        const band = 0.20; // ±20% of reference rate as guardrail band
         if (rate > refWithdrawRate * (1 + band)) {
-          // Drawing too hard — cut spending
           spend = spend * (1 - state.guardrailCutPct);
           flexed = true; flexCutCount++;
         } else if (rate < refWithdrawRate * (1 - band)) {
-          // Genuinely flush — allow boost
           spend = spend * (1 + state.guardrailBoostPct);
-          flexed = true;
+          flexed = true; flexBoostCount++;
         }
       }
     }
@@ -224,6 +288,8 @@ function simulateOnce(state, returnSeries) {
         accts.roth = Math.max(0, accts.roth - res.drawn.roth);
         accts.taxable = Math.max(0, accts.taxable - res.drawn.taxable);
       } else {
+        // Single-pool portfolio: every withdrawal is grossed up by the withdrawal tax
+        // rate (capGainsTax). This is a visible, editable assumption in the UI.
         withdrawal = netNeed / (1 - state.capGainsTax);
         taxThisYear = withdrawal - netNeed;
       }
@@ -236,31 +302,48 @@ function simulateOnce(state, returnSeries) {
     const portfolioStart = portfolio;
     portfolio -= withdrawal;
 
-    const realReturn = returnSeries[i] !== undefined ? returnSeries[i] : state.returnRate;
-    portfolio = portfolio * (1 + realReturn);
+    // Withdraw at the start of the year, then earn the year's return net of fees.
+    const marketReturn = returnSeries[i] !== undefined ? returnSeries[i] : state.returnRate;
+    const growth = 1 + marketReturn - fee;
+    portfolio = portfolio * growth;
     if (useAccts) {
-      accts.traditional *= (1 + realReturn);
-      accts.roth *= (1 + realReturn);
-      accts.taxable *= (1 + realReturn);
+      accts.traditional *= growth;
+      accts.roth *= growth;
+      accts.taxable *= growth;
     }
 
     let ranOutThisYear = false;
     if (portfolio <= 0) { portfolio = 0; ranOutThisYear = true; broken = true; if (useAccts) { accts.traditional = accts.roth = accts.taxable = 0; } }
 
-    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn: realReturn, flexed, ranOut: ranOutThisYear || broken });
+    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, ranOut: ranOutThisYear || broken });
 
     yourSalary *= (1 + (state.yourIncomeGrowth || 0));
     partnerSalary *= (1 + (state.partnerIncomeGrowth || 0));
   }
   years.flexCutCount = flexCutCount;
+  years.flexBoostCount = flexBoostCount;
   years.finalAccounts = useAccts ? { traditional: accts.traditional, roth: accts.roth, taxable: accts.taxable } : null;
   return years;
 }
 
-function randNormal(mean, stdDev) {
+// Seeded PRNG (mulberry32): same seed => same simulated futures, so results do not
+// jitter between renders and tests are exact. Returns a function yielding [0,1).
+function makeRng(seed) {
+  let a = (seed >>> 0) || 1;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function randNormal(mean, stdDev, rng) {
+  const r = rng || Math.random;
   let u = 0, v = 0;
-  while (u === 0) u = Math.random();
-  while (v === 0) v = Math.random();
+  while (u === 0) u = r();
+  while (v === 0) v = r();
   const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
   return z * stdDev + mean;
 }
@@ -281,56 +364,81 @@ function buildPercentiles(allRuns, yearCount) {
   return percentiles;
 }
 
-function summarize(allRuns, yearCount, mode, labels) {
+function summarize(allRuns, yearCount, mode, labels, extra) {
   const percentiles = buildPercentiles(allRuns, yearCount);
+  const finalsWithIdx = allRuns.map((r, i) => ({ v: r[r.length - 1].portfolio, i })).sort((a, b) => a.v - b.v);
   const successCount = allRuns.filter(r => r[r.length - 1].portfolio > 0).length;
   const total = allRuns.length;
-  const finals = allRuns.map(r => r[r.length - 1].portfolio).sort((a, b) => a - b);
-  const medianFinal = finals[Math.floor(finals.length / 2)];
+  const medianFinal = finalsWithIdx[Math.floor(total / 2)].v;
+  // medianRunOutAge is the median depletion age AMONG THE RUNS THAT FAILED. It is not the
+  // median outcome; a 94%-success plan still has a value here. Callers must label it so.
   const runOutAges = allRuns.map(r => { const f = r.find(y => y.ranOut); return f ? f.age : null; }).filter(x => x !== null).sort((a, b) => a - b);
   const medianRunOutAge = runOutAges.length ? runOutAges[Math.floor(runOutAges.length / 2)] : null;
   const failures = [];
   allRuns.forEach((run, i) => { const f = run.find(y => y.ranOut); if (f) failures.push({ label: labels ? labels[i] : String(i), ranOutAge: f.age }); });
   failures.sort((a, b) => a.ranOutAge - b.ranOutAge);
-  // NOTE: medianRun is the middle run BY INDEX (middle start-year for historical, an
-  // arbitrary run for Monte Carlo) — NOT the median-outcome path. The chart's median
-  // line uses the p50 percentile series; the cashflow chart/tooltip use medianRun, so
-  // the two can differ slightly. Kept as-is (a true median path would need a per-year
-  // representative run); flagged so callers don't assume medianRun == p50.
-  return { percentiles, successRate: successCount / total, successCount, totalPeriods: total, medianFinal, medianRunOutAge, failures, medianRun: allRuns[Math.floor(allRuns.length / 2)], mode };
+  // medianRun = the run whose ending balance is the median (p50) ending balance, so the
+  // cashflow chart and tooltips describe a path that actually matches the headline.
+  const medianRun = allRuns[finalsWithIdx[Math.floor(total / 2)].i];
+  const flexCutYears = medianRun.flexCutCount || 0;
+  return Object.assign({
+    percentiles, successRate: successCount / total, successCount, totalPeriods: total,
+    failureCount: total - successCount, medianFinal, medianRunOutAge, failures, medianRun,
+    medianRunFlexCuts: flexCutYears, mode,
+  }, extra || {});
 }
 
-function runMonteCarlo(state, numSims = 500) {
+// Monte Carlo parameters: by default the average and volatility of the chosen historical
+// blend (arithmetic mean and sample sd of the annual real returns), so "Simulated" and
+// "Historical" describe the same portfolio. Either can be overridden in state.
+function mcParams(state) {
+  const h = historicalStats(state.stockPct);
+  const mean = (state.mcMean === null || state.mcMean === undefined) ? h.mean : state.mcMean;
+  const sd = (state.mcSd === null || state.mcSd === undefined) ? h.sd : state.mcSd;
+  return { mean, sd, fromHistory: (state.mcMean === null || state.mcMean === undefined) && (state.mcSd === null || state.mcSd === undefined) };
+}
+
+function runMonteCarlo(state, numSims) {
+  const sims = numSims || state.mcSims || 500;
   const yearCount = horizonYears(state);
+  const { mean, sd } = mcParams(state);
+  const rng = makeRng(state.mcSeed === undefined || state.mcSeed === null ? 12345 : state.mcSeed);
   const allRuns = [];
-  for (let s = 0; s < numSims; s++) {
+  for (let s = 0; s < sims; s++) {
     const seq = [];
-    for (let y = 0; y < yearCount; y++) seq.push(randNormal(state.returnRate, state.returnStdDev));
+    for (let y = 0; y < yearCount; y++) seq.push(randNormal(mean, sd, rng));
     allRuns.push(simulateOnce(state, seq));
   }
-  return summarize(allRuns, yearCount, 'montecarlo', null);
+  return summarize(allRuns, yearCount, 'montecarlo', null, { mcMean: mean, mcSd: sd, mcSims: sims, mcSeed: state.mcSeed });
 }
 
 function runHistorical(state) {
   const yearCount = horizonYears(state);
+  const series = blendSeries(state.stockPct);
+  const geo = seriesStats(series).geo;
   const maxStart = HISTORICAL_END_YEAR - yearCount + 1;
   const allRuns = []; const labels = [];
+  let paddedYears = 0;
   for (let sy = HISTORICAL_START_YEAR; sy <= maxStart; sy++) {
-    const seq = getHistoricalSequence(sy, yearCount);
+    const seq = getHistoricalSequence(sy, yearCount, state.stockPct);
     if (!seq) continue;
     allRuns.push(simulateOnce(state, seq));
-    labels.push(sy + '\u2013' + (sy + yearCount - 1));
+    labels.push(sy + '–' + (sy + yearCount - 1));
   }
-  // If horizon too long for any full window, fall back to padded windows
+  // If the horizon is longer than the data, fall back to windows padded with the
+  // blend's long-run compound (geometric) return. Labelled with * so the UI can say so.
   if (allRuns.length === 0) {
     for (let sy = HISTORICAL_START_YEAR; sy <= HISTORICAL_END_YEAR - 10; sy++) {
-      const avail = getHistoricalSequence(sy, HISTORICAL_END_YEAR - sy + 1);
-      const seq = [...avail]; while (seq.length < yearCount) seq.push(AVG_HISTORICAL_RETURN);
+      const avail = getHistoricalSequence(sy, HISTORICAL_END_YEAR - sy + 1, state.stockPct);
+      const seq = [...avail]; while (seq.length < yearCount) seq.push(geo);
+      paddedYears = Math.max(paddedYears, yearCount - avail.length);
       allRuns.push(simulateOnce(state, seq));
-      labels.push(sy + '\u2013' + (sy + yearCount - 1) + '*');
+      labels.push(sy + '–' + (sy + yearCount - 1) + '*');
     }
   }
-  return summarize(allRuns, yearCount, 'historical', labels);
+  const firstStart = HISTORICAL_START_YEAR;
+  const lastStart = paddedYears ? HISTORICAL_END_YEAR - 10 : maxStart;
+  return summarize(allRuns, yearCount, 'historical', labels, { windows: { count: allRuns.length, firstStart, lastStart, years: yearCount, paddedYears } });
 }
 
 function runFixed(state) {
@@ -341,9 +449,9 @@ function runFixed(state) {
   const runOut = run.find(y => y.ranOut);
   return {
     percentiles: run.map(y => ({ year: y.year, age: y.age, p10: y.portfolio, p25: y.portfolio, p50: y.portfolio, p75: y.portfolio, p90: y.portfolio, ranOutPct: y.ranOut ? 1 : 0 })),
-    successRate: finalBal > 0 ? 1 : 0, successCount: finalBal > 0 ? 1 : 0, totalPeriods: 1,
+    successRate: finalBal > 0 ? 1 : 0, successCount: finalBal > 0 ? 1 : 0, totalPeriods: 1, failureCount: finalBal > 0 ? 0 : 1,
     medianFinal: finalBal, medianRunOutAge: runOut ? runOut.age : null, failures: runOut ? [{ label: 'fixed', ranOutAge: runOut.age }] : [],
-    medianRun: run, mode: 'fixed',
+    medianRun: run, medianRunFlexCuts: run.flexCutCount || 0, mode: 'fixed',
   };
 }
 
@@ -355,21 +463,22 @@ function runForState(s) {
 
 function runNamedScenario(state, scenario) {
   const yearCount = horizonYears(state);
-  let seq = getHistoricalSequence(scenario.startYear, yearCount);
-  let padded = false;
+  let seq = getHistoricalSequence(scenario.startYear, yearCount, state.stockPct);
+  let padded = false, paddedYears = 0;
   if (!seq) {
-    const avail = getHistoricalSequence(scenario.startYear, HISTORICAL_END_YEAR - scenario.startYear + 1) || [];
-    seq = [...avail]; while (seq.length < yearCount) seq.push(AVG_HISTORICAL_RETURN);
-    padded = true;
+    const avail = getHistoricalSequence(scenario.startYear, HISTORICAL_END_YEAR - scenario.startYear + 1, state.stockPct) || [];
+    const geo = historicalStats(state.stockPct).geo;
+    seq = [...avail]; while (seq.length < yearCount) seq.push(geo);
+    padded = true; paddedYears = yearCount - avail.length;
   }
-  return { years: simulateOnce(state, seq), scenario, padded };
+  return { years: simulateOnce(state, seq), scenario, padded, paddedYears };
 }
 
-// Max sustainable spend (deterministic): highest spend landing at the end-goal buffer.
-// Binary-searches spending in [$5k, $600k]. NOTE the bounds are artifacts: if even $5k/yr
-// fails (tiny portfolio) it still returns $5k as "max" (a floor, not a sustainable figure),
-// and very large portfolios are capped at $600k. The cap is what keeps this from returning
-// implausible millions; widen both bounds if the input range ever needs it.
+// Max spend at a STEADY return (Fixed mode): highest spend landing at the end-goal
+// buffer. Binary-searches spending in [$5k, $600k]. NOTE the bounds are artifacts: if
+// even $5k/yr fails (tiny portfolio) it still returns $5k as "max" (a floor, not a
+// sustainable figure), and very large portfolios are capped at $600k. This figure has no
+// sequence-of-returns risk in it; see findMaxSpendAtSuccess for the historical version.
 function findMaxSpend(state) {
   const buffer = state.endGoalBuffer || 0;
   let low = 5000, high = 600000, best = low, bestFinal = null;
@@ -381,6 +490,24 @@ function findMaxSpend(state) {
     else high = mid;
   }
   return { spend: best, medianFinal: bestFinal };
+}
+
+// Max spend that survived at least `threshold` of historical periods (default: the
+// state's successThreshold, 85%), guardrails off so the figure is a true steady-spending
+// ceiling. Deterministic. Same [$5k, $600k] bounds and caveats as findMaxSpend.
+function findMaxSpendAtSuccess(state, threshold) {
+  const th = threshold === undefined ? (state.successThreshold || 0.85) : threshold;
+  const base = Object.assign({}, DEFAULT_STATE, state, { simMode: 'historical', guardrailsEnabled: false });
+  const ratio = base.spending > 0 ? (base.lateSpending / base.spending) : 1;
+  let low = 5000, high = 600000, best = low, bestResult = null;
+  for (let i = 0; i < 18; i++) {
+    const mid = (low + high) / 2;
+    const r = runHistorical({ ...base, spending: mid, lateSpending: mid * ratio });
+    if (r.successRate >= th) { best = mid; bestResult = r; low = mid; }
+    else high = mid;
+  }
+  if (!bestResult) bestResult = runHistorical({ ...base, spending: best, lateSpending: best * ratio });
+  return { spend: best, successRate: bestResult.successRate, successCount: bestResult.successCount, totalPeriods: bestResult.totalPeriods, threshold: th };
 }
 
 // ============================================================================
@@ -469,8 +596,11 @@ function taxFromBrackets(taxable, brackets) {
   }
   return tax;
 }
+// Returns federal, state, and FICA on gross wages. `incomeTaxRate` (federal + state only,
+// no payroll tax) is the right rate for retirement withdrawals; `effectiveRate` includes
+// FICA and is the right rate for wages.
 function estimateNetIncome({ gross, filingStatus = 'mfj', stateCode = 'CA', pretax = 0 }) {
-  if (gross <= 0) return { net: 0, federal: 0, state: 0, fica: 0, totalTax: 0, effectiveRate: 0 };
+  if (gross <= 0) return { net: 0, federal: 0, state: 0, fica: 0, totalTax: 0, effectiveRate: 0, incomeTaxRate: 0 };
   const w = Math.max(0, gross - pretax);
   const federal = taxFromBrackets(Math.max(0, w - FED_STANDARD_DEDUCTION_2026[filingStatus]), FED_BRACKETS_2026[filingStatus]);
   const sc = STATE_CONFIG[stateCode] || { flatApprox: 0.05 };
@@ -486,7 +616,7 @@ function estimateNetIncome({ gross, filingStatus = 'mfj', stateCode = 'CA', pret
   // pretax = 0); if pretax is ever wired up, base FICA on gross wages instead of w.
   const fica = Math.min(w, SS_WAGE_BASE_2026) * SS_RATE + w * MEDICARE_RATE + Math.max(0, w - ADD_MEDICARE_THRESHOLD[filingStatus]) * ADD_MEDICARE_RATE;
   const totalTax = federal + stateTax + fica;
-  return { net: gross - totalTax - pretax, federal: Math.round(federal), state: Math.round(stateTax), fica: Math.round(fica), totalTax: Math.round(totalTax), effectiveRate: totalTax / gross };
+  return { net: gross - totalTax - pretax, federal: Math.round(federal), state: Math.round(stateTax), fica: Math.round(fica), totalTax: Math.round(totalTax), effectiveRate: totalTax / gross, incomeTaxRate: (federal + stateTax) / gross };
 }
 function estimateSSBenefit(annualGross) {
   if (annualGross <= 0) return 0;
@@ -507,6 +637,8 @@ function estimateSSBenefit(annualGross) {
 // ============================================================================
 // STATE
 // ============================================================================
+// Every default here is shown to the user in the app's Assumptions panel. Fields marked
+// (null) mean "derive from the data/estimator" until the user overrides them.
 const DEFAULT_STATE = {
   age: 0, partnerAge: 0, hasPartner: false,
   portfolio: 0,
@@ -518,15 +650,22 @@ const DEFAULT_STATE = {
   partnerPartTimeAmount: 0, partnerPartTimeStart: 65, partnerPartTimeEnd: 70,
   ssStartAge: 67, yourSSAmount: 0, partnerSSAmount: 0,
   oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0,
+  // Portfolio: share in stocks (rest in 10-year Treasuries), annual fee drag.
+  stockPct: 0.6, feeRate: 0,
+  // Fixed mode: one steady real return. Monte Carlo: mean/sd default to the chosen
+  // blend's historical average and volatility (null = follow the data); seed fixed.
   returnRate: 0.05, returnStdDev: 0.15,
-  taxRate: 0.18, capGainsTax: 0.15,
+  mcMean: null, mcSd: null, mcSims: 500, mcSeed: 12345,
+  // taxRate = rate on wages (includes payroll tax); retirementTaxRate = rate on
+  // traditional-IRA withdrawals and half of Social Security (null = same as taxRate);
+  // capGainsTax = gross-up applied to every withdrawal when accounts are not tracked.
+  taxRate: 0.18, retirementTaxRate: null, capGainsTax: 0.15,
   filingStatus: 'mfj', stateCode: 'CA',
   simMode: 'fixed',
   targetAge: 100,
   successThreshold: 0.85, endGoalBuffer: 0,
-  // Spending flexibility (percentage-based guardrails). The band is hard-coded as ±20%
-  // of the reference rate in simulateOnce (see guardrail note there).
-  guardrailsEnabled: true, guardrailCutPct: 0.25, guardrailBoostPct: 0.20,
+  // Spending flexibility (percentage-based guardrails, Guyton-style).
+  guardrailsEnabled: true, guardrailCutPct: 0.25, guardrailBoostPct: 0.20, guardrailBandPct: 0.20,
   // Account types
   accountsEnabled: false,
   accounts: { traditional: 0, roth: 0, taxable: 0 },
@@ -540,8 +679,9 @@ const SAMPLE_STATE = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), {
   yourIncome: 120000, yourStopWorkAge: 62,
   partnerIncome: 0, partnerStopWorkAge: 60,
   ssStartAge: 67, yourSSAmount: 30000, partnerSSAmount: 18000,
+  simMode: 'historical',
   accountsEnabled: true, accounts: { traditional: 280000, roth: 150000, taxable: 270000 },
 });
 
-  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_RETURNS, HISTORICAL_END_YEAR, AVG_HISTORICAL_RETURN, HISTORICAL_SCENARIOS, getHistoricalSequence, withdrawWithTax, simulateOnce, randNormal, pctOf, buildPercentiles, summarize, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };
+  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };
 });
