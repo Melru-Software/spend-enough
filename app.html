@@ -1586,6 +1586,7 @@ function renderWhatItTakes(result) {
       c.age = findRetireAgeAtSuccess(state, th);
       c.portfolio = findPortfolioAtSuccess(state, th);
     }
+    if (state.guardrailsEnabled) c.noCuts = runForState({ ...state, guardrailsEnabled: false, simMode: 'historical' });
     wwitCache = c; wwitStale = false;
   }
   const c = wwitCache;
@@ -1593,7 +1594,8 @@ function renderWhatItTakes(result) {
   const nowSpend = state.spending + state.housing;
   if (c.clears) {
     const room = c.maxSpend - nowSpend;
-    return `<div class="wwit"><div class="wwit-title">Room to spend</div>This plan lasts in at least ${c.need} of ${c.total} periods (${pctTh}% of history). ${room >= 1000 ? 'Spending could go up to <strong>' + fmtMoney(c.maxSpend) + '</strong> a year all in, ' + fmtMoneyShort(room) + ' more than now, and still clear that line.' : 'At ' + fmtMoney(nowSpend) + ' a year it is right at that line.'} That is with steady spending and no guardrail cuts.</div>`;
+    if (c.noCuts && c.noCuts.successRate < c.th) return `<div class="wwit"><div class="wwit-title">Where the room comes from</div>This plan lasts in at least ${c.need} of ${c.total} periods (${pctTh}% of history) because the guardrails cut spending in bad stretches. With steady spending and no cuts it lasts in ${c.noCuts.successCount} of ${c.total}, and the line would be <strong>${fmtMoney(c.maxSpend)}</strong> a year all in, ${fmtMoneyShort(nowSpend - c.maxSpend)} less than now.</div>`;
+    return `<div class="wwit"><div class="wwit-title">Room to spend</div>This plan lasts in at least ${c.need} of ${c.total} periods (${pctTh}% of history) with steady spending and no guardrail cuts. ${room >= 1000 ? 'Spending could go up to <strong>' + fmtMoney(c.maxSpend) + '</strong> a year all in, ' + fmtMoneyShort(room) + ' more than now, and still clear that line.' : 'At ' + fmtMoney(nowSpend) + ' a year it is right at that line.'}</div>`;
   }
   const items = [];
   if (c.maxSpend < nowSpend) items.push('Spend <strong>' + fmtMoney(c.maxSpend) + '</strong> a year all in, ' + fmtMoneyShort(nowSpend - c.maxSpend) + ' less than now.');
