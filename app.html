@@ -431,8 +431,11 @@
       margin-bottom: 12px;
     }
     .control-row { margin-bottom: 0; min-width: 0; }
-    .control-row .control-value { display: none; }     /* value lives in the input now */
-    /* Any slider still shown (e.g. advanced controls without a number field) spans full width below the label */
+    .control:has(.mobile-input) .control-row .control-value { display: none; }     /* value lives in the input now */
+    /* Sliders without a number field keep their value and span full width below the label */
+    .control:not(:has(.mobile-input)) { display: block; }
+    .control:not(:has(.mobile-input)) .control-row { margin-bottom: 6px; }
+    .control:not(:has(.mobile-input)) input[type="range"] { display: block; margin: 6px 0 4px; }
     .control input[type="range"] { grid-column: 1 / -1; }
     .mobile-input {
       display: block;
@@ -1340,7 +1343,7 @@ function moreOptionsHTML() {
         <button onclick="removeEvent(${i})" style="background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:0 2px">\u00d7</button>
       </div>`).join('')}
       <div style="display:grid;grid-template-columns:1fr 52px 96px;gap:4px;margin-top:6px">
-        <input type="text" id="ev_label" placeholder="e.g. Sell home" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 6px;background:var(--bone);border:1px solid var(--line);border-radius:2px;font-family:inherit"/>
+        <input type="text" id="ev_label" placeholder="e.g. Inheritance" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 6px;background:var(--bone);border:1px solid var(--line);border-radius:2px;font-family:inherit"/>
         <input type="number" id="ev_age" placeholder="Age" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:center;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums"/>
         <input type="number" id="ev_amount" placeholder="$" step="10000" onkeydown="if(event.key==='Enter')addEvent()" style="min-width:0;font-size:14px;padding:5px 4px;background:var(--bone);border:1px solid var(--line);border-radius:2px;text-align:right;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums"/>
       </div>
