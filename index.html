@@ -208,6 +208,8 @@
     background: var(--paper); border: 1px solid var(--line); border-radius: 4px;
     padding: 18px 20px; box-shadow: var(--shadow-sm); border-left: 3px solid var(--rust);
   }
+  .tile a { display: block; color: inherit; text-decoration: none; }
+  .tile a:hover .q { color: var(--rust); }
   .tile .q { font-family: var(--serif); font-size: 20px; font-weight: 500; line-height: 1.3; letter-spacing: -0.01em; color: var(--ink); }
   .tile .maps { font-size: 14px; color: var(--ink-mute); margin-top: 6px; }
   .tile .maps code { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); background: var(--bone-2); padding: 1px 6px; border-radius: 2px; }
@@ -365,10 +367,10 @@
       <p class="eyebrow">Decisions, as you'd say them</p>
       <h2 id="whatif-h">Play out the what-ifs.</h2>
       <ul class="tiles">
-        <li class="tile"><p class="q">What if I don't go back to work for two years?</p></li>
-        <li class="tile"><p class="q">What if we pay off the house instead of investing the money?</p></li>
-        <li class="tile"><p class="q">What if the market has a bad run right when I stop working?</p></li>
-        <li class="tile"><p class="q">What if I retire at 55 instead of 62?</p></li>
+        <li class="tile"><a href="app.html?scenario=careerBreak"><p class="q">What if I don't go back to work for two years?</p></a></li>
+        <li class="tile"><a href="app.html"><p class="q">What if we pay off the house instead of investing the money?</p></a></li>
+        <li class="tile"><a href="app.html"><p class="q">What if the market has a bad run right when I stop working?</p></a></li>
+        <li class="tile"><a href="app.html?scenario=retire5early"><p class="q">What if I retire at 55 instead of 62?</p></a></li>
       </ul>
     </div>
   </section>

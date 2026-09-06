@@ -177,6 +177,11 @@ function withdrawWithTax(netNeed, accts, strategy, age, state) {
   return { gross, tax, drawn };
 }
 
+// True when `age` falls in [start, end). Null/undefined bounds mean "no window".
+function inWindow(age, start, end) {
+  return start !== null && start !== undefined && end !== null && end !== undefined && age >= start && age < end;
+}
+
 // Planning horizon in years (inclusive of the current age-year). Guarded to at
 // least 1: an inverted range (targetAge < age) is reachable from the UI when an
 // older user lowers "Plan to age" below their current age. Without the guard the
@@ -216,8 +221,11 @@ function simulateOnce(state, returnSeries) {
       continue;
     }
 
-    let yourIncomeThisYear = age >= state.yourStopWorkAge ? 0 : yourSalary;
-    let partnerIncomeThisYear = (state.hasPartner && partnerAge >= state.partnerStopWorkAge) ? 0 : (state.hasPartner ? partnerSalary : 0);
+    // Career breaks: no wages between the break start age and the back-to-work age.
+    const yourBreak = inWindow(age, state.yourBreakStart, state.yourBreakEnd);
+    const partnerBreak = inWindow(partnerAge, state.partnerBreakStart, state.partnerBreakEnd);
+    let yourIncomeThisYear = (age >= state.yourStopWorkAge || yourBreak) ? 0 : yourSalary;
+    let partnerIncomeThisYear = (!state.hasPartner || partnerAge >= state.partnerStopWorkAge || partnerBreak) ? 0 : partnerSalary;
 
     if (state.yourPartTimeAmount > 0 && age >= state.yourPartTimeStart && age < state.yourPartTimeEnd) yourIncomeThisYear += state.yourPartTimeAmount;
     if (state.partnerPartTimeAmount > 0 && partnerAge >= state.partnerPartTimeStart && partnerAge < state.partnerPartTimeEnd) partnerIncomeThisYear += state.partnerPartTimeAmount;
@@ -229,6 +237,10 @@ function simulateOnce(state, returnSeries) {
     const housing = age < mortgagePayoffAge ? state.housing : 0;
 
     let spend = age >= state.slowDownAge ? state.lateSpending : state.spending;
+    // Paused retirement contributions: the money that would have gone into the portfolio
+    // is spent (or sits in cash) for these years instead. Modelled as extra spending.
+    const contribPaused = state.contributions > 0 && inWindow(age, state.contribPauseStart, state.contribPauseEnd);
+    if (contribPaused) spend += state.contributions;
 
     // Compute income first (independent of spend). Wages carry the wage rate (which
     // includes payroll tax); Social Security is taxed at half the retirement rate as a
@@ -257,8 +269,11 @@ function simulateOnce(state, returnSeries) {
     // year with a higher rate, which biases toward boosts once SS begins.
     // Cuts/boosts apply to this year's base spend only; they do not compound.
     let flexed = false;
-    const wagesThisYear = yourIncomeThisYear + partnerIncomeThisYear;
-    if (state.guardrailsEnabled && provisionalNeed > 0 && portfolio > 0 && wagesThisYear <= 0) {
+    // "Retired" = no more wages expected: past your stop-work age (or no wage income at all),
+    // and the same for your partner. A career break before that is not retirement, so it
+    // neither sets the reference nor gets flexed.
+    const retired = (state.yourIncome <= 0 || age >= state.yourStopWorkAge) && (!state.hasPartner || state.partnerIncome <= 0 || partnerAge >= state.partnerStopWorkAge);
+    if (state.guardrailsEnabled && provisionalNeed > 0 && portfolio > 0 && retired) {
       const rate = provisionalNeed / portfolio;
       if (refWithdrawRate === null) {
         refWithdrawRate = rate; // first retired withdrawal year sets the reference
@@ -315,10 +330,11 @@ function simulateOnce(state, returnSeries) {
     let ranOutThisYear = false;
     if (portfolio <= 0) { portfolio = 0; ranOutThisYear = true; broken = true; if (useAccts) { accts.traditional = accts.roth = accts.taxable = 0; } }
 
-    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, ranOut: ranOutThisYear || broken });
+    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, onBreak: yourBreak || partnerBreak, contribPaused, ranOut: ranOutThisYear || broken });
 
-    yourSalary *= (1 + (state.yourIncomeGrowth || 0));
-    partnerSalary *= (1 + (state.partnerIncomeGrowth || 0));
+    // Real wage growth applies only in years actually worked (no raises during a break).
+    if (!yourBreak) yourSalary *= (1 + (state.yourIncomeGrowth || 0));
+    if (!partnerBreak) partnerSalary *= (1 + (state.partnerIncomeGrowth || 0));
   }
   years.flexCutCount = flexCutCount;
   years.flexBoostCount = flexBoostCount;
@@ -648,6 +664,11 @@ const DEFAULT_STATE = {
   partnerIncome: 0, partnerStopWorkAge: 65, partnerIncomeGrowth: 0.01,
   yourPartTimeAmount: 0, yourPartTimeStart: 65, yourPartTimeEnd: 70,
   partnerPartTimeAmount: 0, partnerPartTimeStart: 65, partnerPartTimeEnd: 70,
+  // Career breaks (no wages from start age until the back-to-work age; null = none) and
+  // retirement contributions per year, with an optional pause window during which that
+  // money is spent instead of invested.
+  yourBreakStart: null, yourBreakEnd: null, partnerBreakStart: null, partnerBreakEnd: null,
+  contributions: 0, contribPauseStart: null, contribPauseEnd: null,
   ssStartAge: 67, yourSSAmount: 0, partnerSSAmount: 0,
   oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0,
   // Portfolio: share in stocks (rest in 10-year Treasuries), annual fee drag
@@ -684,5 +705,5 @@ const SAMPLE_STATE = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), {
   accountsEnabled: true, accounts: { traditional: 280000, roth: 150000, taxable: 270000 },
 });
 
-  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };
+  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };
 });

@@ -339,6 +339,17 @@
   .asm-sources { font-size: 13px; color: var(--ink-faint); margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); line-height: 1.5; }
   .asm-sources a { color: var(--rust); }
   .teaser-row { margin: 4px 0 18px; }
+  .deep { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; margin: 4px 0 18px; box-shadow: var(--shadow-sm); }
+  .deep summary { cursor: pointer; padding: 14px 18px; font-weight: 600; font-size: 15px; color: var(--ink-soft); list-style: none; display: flex; align-items: center; gap: 10px; }
+  .deep summary::-webkit-details-marker { display: none; }
+  .deep summary::after { content: '+'; color: var(--ink-mute); font-size: 18px; margin-left: auto; }
+  .deep[open] summary::after { content: '\2212'; }
+  .deep-body { padding: 0 18px 18px; }
+  .deep-body .section-heading:first-child { margin-top: 8px; }
+  .work-row { font-size: 14px; color: var(--ink-soft); line-height: 2; margin-bottom: 4px; }
+  .work-row > span { display: block; font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.4; margin-top: 6px; }
+  .asm-input.wide { width: 92px; }
+  .field-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
   .compare-table td:first-child { color: var(--ink-mute); }
   @media (max-width: 600px) { .asm-row { grid-template-columns: 1fr; gap: 4px; } }
 
@@ -509,7 +520,7 @@
     .step-title { font-size: 16px; }
     .step-hint { font-size: 14px; }
     
-    .field-grid { grid-template-columns: 1fr; gap: 12px; }
+    .field-grid, .field-grid.cols-3 { grid-template-columns: 1fr; gap: 12px; }
     .field { margin-bottom: 0; }
     
     .scenarios-bar { gap: 4px; }
@@ -590,6 +601,9 @@ let maxSpendView = false;
 let cashflowMode = 'net';
 let assumptionsOpen = false;
 let readFirstOpen = false;
+let deepOpen = false;
+let currentName = 'Current';
+let pendingScenario = (() => { try { return new URLSearchParams(location.search).get('scenario'); } catch (e) { return null; } })();
 
 // Deployment config (config.js, public values only) and feature flags.
 const CONFIG = Object.assign({ checkoutUrl: '', price: '$39', emailEndpoint: '' }, window.SPENDENOUGH_CONFIG || {});
@@ -763,6 +777,17 @@ function generatePresets(s) {
   const presets = [];
   const yearsToRetire = s.yourStopWorkAge - s.age;
 
+  // ---- Time off and saving (the decisions this tool was built for) ----
+  if (s.yourIncome > 0 && yearsToRetire > 2 && s.yourBreakStart === null) {
+    presets.push({ id: 'careerBreak', label: 'Take 2 years off, then go back' });
+  }
+  if (s.hasPartner && s.partnerIncome > 0 && s.partnerStopWorkAge - s.partnerAge > 2 && s.partnerBreakStart === null) {
+    presets.push({ id: 'partnerBreak', label: 'Partner takes 2 years off' });
+  }
+  if (s.yourIncome > 0 && yearsToRetire > 3 && s.contribPauseStart === null) {
+    presets.push({ id: 'pauseContrib', label: 'Stop contributing for 3 years' });
+  }
+
   // ---- User's own work situation ----
   if (s.yourIncome > 0 && s.age < 60 && yearsToRetire > 0) {
     presets.push({ id: 'stopNow', label: 'I stop working now' });
@@ -813,8 +838,9 @@ function generatePresets(s) {
     if (s.age > 45) presets.push({ id: 'ltc', label: 'Add long-term care at 85' });
   }
 
-  return presets.slice(0, 6);
+  return presets.slice(0, 7);
 }
+function presetLabel(id) { const p = generatePresets(state).find(x => x.id === id); return p ? p.label : id; }
 
 // ============================================================================
 // FORMATTING
@@ -901,9 +927,10 @@ function renderOnboarding() {
         <div class="step-number">ii. What you have & spend</div>
         <h2 class="step-title">Your savings and spending</h2>
         <p class="step-hint">How much you've saved, and what you spend each year.</p>
-        <div class="field-grid">
+        <div class="field-grid cols-3">
           <div class="field"><label>Investment portfolio</label><input type="number" id="ob_portfolio" min="0" value="${state.portfolio || ''}" placeholder="e.g. 600000" step="10000"/><span class="field-hint">401k, IRA, brokerage, combined</span></div>
           <div class="field"><label>Annual spending</label><input type="number" id="ob_spending" min="0" value="${state.spending || ''}" placeholder="e.g. 70000" step="5000"/><span class="field-hint">Leave blank to find your "enough" number</span></div>
+          <div class="field"><label>Retirement savings per year</label><input type="number" id="ob_contrib" min="0" value="${state.contributions || ''}" placeholder="optional" step="1000"/><span class="field-hint">What you put into 401k, IRA and the like</span></div>
         </div>
       </div>
 
@@ -961,6 +988,9 @@ window.finishOnboarding = function() {
   state.mortgagePayoffAge = num('ob_mortgagePayoff') || 60;
   state.yourSSAmount = num('ob_yourSS');
   state.partnerSSAmount = num('ob_partnerSS');
+  state.contributions = num('ob_contrib');
+  state.yourBreakStart = state.yourBreakEnd = state.partnerBreakStart = state.partnerBreakEnd = null;
+  state.contribPauseStart = state.contribPauseEnd = null;
   // Reset any preset-derived state (home sale, life events) so nothing carries over
   state.homeSaleAge = null;
   state.homeSaleProceeds = 0;
@@ -986,9 +1016,10 @@ window.finishOnboarding = function() {
   activeView = 'dashboard';
   maxSpendStale = true; spendingLevelsStale = true;
   baselineState = JSON.parse(JSON.stringify(state));
-  baselineResult = null; baselineName = 'Starting point'; compareOn = false;
+  baselineResult = null; baselineName = 'Starting point'; currentName = 'Current'; compareOn = false;
   track('ran_model');
   render();
+  runPendingScenario();
 };
 
 window.loadSample = function() {
@@ -996,9 +1027,15 @@ window.loadSample = function() {
   activeView = 'dashboard';
   maxSpendStale = true; spendingLevelsStale = true;
   baselineState = JSON.parse(JSON.stringify(state));
-  baselineResult = null; baselineName = 'Starting point'; compareOn = false;
+  baselineResult = null; baselineName = 'Starting point'; currentName = 'Current'; compareOn = false;
   render();
+  runPendingScenario();
 };
+function runPendingScenario() {
+  if (!pendingScenario) return;
+  const id = pendingScenario; pendingScenario = null;
+  if (generatePresets(state).some(p => p.id === id)) applyPreset(id);
+}
 
 window.goToOnboarding = function() { activeView = 'onboarding'; render(); };
 window.resetToDefaults = function() {
@@ -1009,8 +1046,8 @@ window.resetToDefaults = function() {
 // DASHBOARD
 // ============================================================================
 function renderDashboard() {
-  // Simulated (Monte Carlo) mode is Pro; Fixed and Historical are free.
-  if (!isPaid() && state.simMode === 'montecarlo') { state.simMode = 'historical'; }
+  // Free users see Historical only; Fixed and Simulated live under More options (Pro).
+  if (!isPaid() && state.simMode !== 'historical') { state.simMode = 'historical'; }
   const result = runForState(state);
   lastSimResult = result;
   // The baseline is always re-run in the CURRENT mode so deltas and the side-by-side
@@ -1023,14 +1060,9 @@ function renderDashboard() {
   const sidebar = `
     <aside class="sidebar" role="complementary" aria-label="Planning controls">
       <div class="sidebar-section">
-        <div class="sidebar-heading">Mode</div>
-        <div class="sidebar-sub">How returns are modeled</div>
-        <div class="toggle-group">
-          <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
-          <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
-          <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
-        </div>
-        <div style="font-size:14px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Runs your plan through every rolling period of real U.S. market returns since 1926 for your '+mixLabel()+' stock/bond mix.':state.simMode==='montecarlo'?'Runs '+state.mcSims+' randomized futures drawn from a bell curve matched to your mix’s history (change it under Assumptions).':'Projects a single path at one steady real return. No range.'}</div>
+        <div class="sidebar-heading">Try a scenario</div>
+        <div class="sidebar-sub">Each one shows the result next to where you started.</div>
+        ${presets.map((p, i) => `<button class="preset-btn" onclick="applyPreset('${p.id}')"><span class="preset-icon">${roman(i+1)}.</span> ${p.label}</button>`).join('')}
       </div>
 
       <div class="sidebar-section">
@@ -1070,11 +1102,7 @@ function renderDashboard() {
           <input type="range" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" class="slider-input"/>
           <input type="number" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
         </div>` : ''}
-      </div>
-
-      <div class="sidebar-section">
-        <div class="sidebar-heading">Try a scenario</div>
-        ${presets.map((p, i) => `<button class="preset-btn" onclick="applyPreset('${p.id}')"><span class="preset-icon">${roman(i+1)}.</span> ${p.label}</button>`).join('')}
+        ${renderWorkControls()}
       </div>
 
       <div class="sidebar-section">
@@ -1110,7 +1138,7 @@ function renderDashboard() {
       </div>
 
       <div class="section-heading">Portfolio projection</div>
-      <div class="section-sub">${state.simMode==='historical' ? 'The shaded area is the range across all '+result.totalPeriods+' historical periods: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : state.simMode==='montecarlo' ? 'The shaded area is the range across '+result.mcSims+' simulated futures: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : 'One steady-return path, so there is no range. Switch to Historical mode to see one.'}${canCompare ? ' The dashed line and faint band are the baseline.' : ''}</div>
+      <div class="section-sub">${state.simMode==='historical' ? 'Shaded: where the portfolio stood across all '+result.totalPeriods+' periods, worst 10% to best 10%. Line: the median.' : state.simMode==='montecarlo' ? 'Shaded: the range across '+result.mcSims+' simulated futures, worst 10% to best 10%. Line: the median.' : 'One steady-return path, so no range.'}${canCompare ? ' Dashed line and faint band: ' + baselineName + '.' : ''}</div>
       <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
       ${renderEventTimeline()}
       <div class="verdict-notes">
@@ -1118,35 +1146,35 @@ function renderDashboard() {
         ${verdict.caveat ? `<p class="verdict-caveat">${verdict.caveat}</p>` : ''}
       </div>
 
-      ${renderReadFirst(result)}
-
-      ${renderAssumptions(result)}
-
-      ${canCompare ? renderCompareSummary(baselineResult, result) : ''}
-
-      ${isPaid() ? (notFixed ? renderBands(result) : '') : `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">Pro adds side-by-side comparison, percentile bands and stress tests <span class="lock-icon">&#x1f512;</span></button>`}
-
-      ${isPaid() && state.simMode==='historical' ? renderStressTests() : ''}
-
-      ${isPaid() ? `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:26px">
-        <div class="section-heading" style="margin:0">Cashflow</div>
-        <div class="toggle-group" style="width:auto">
-          <button class="toggle-btn cf-toggle ${cashflowMode==='net'?'active':''}" data-mode="net" onclick="setCashflowMode('net')" style="padding:5px 12px;font-size:14px">Net flow</button>
-          <button class="toggle-btn cf-toggle ${cashflowMode==='breakdown'?'active':''}" data-mode="breakdown" onclick="setCashflowMode('breakdown')" style="padding:5px 12px;font-size:14px">Breakdown</button>
-        </div>
-      </div>
-      <div class="section-sub" id="cf-desc">${cashflowMode==='net' ? 'Green bars mean you\'re adding to the portfolio. Red means you\'re drawing from it. Shown for the median path.' : 'Income sources stacked against spending, for the median path. The gap is what comes from or goes to the portfolio.'}</div>
-      <div class="chart-card"><div class="chart-wrap short"><canvas id="cashflowChart"></canvas></div></div>` : ''}
-
-      ${isPaid() && notFixed ? renderFlexibilityImpact() : ''}
+      ${canCompare ? renderCompareSummary(baselineResult, result) : (!isPaid() && computeImpact() ? `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">See “${baselineName}” and “${currentName}” on one chart, with the counts side by side <span class="lock-icon">&#x1f512;</span></button>` : '')}
 
       <div class="section-heading">Explore spending levels</div>
       <div class="section-sub">Click a row to apply that spending level and see how it changes the projection.</div>
       ${renderSpendingExplorer()}
 
-      ${isPaid() && notFixed && state.yourSSAmount > 0 ? renderSSComparison() : ''}
+      ${renderReadFirst(result)}
 
-      ${isPaid() && notFixed && state.accountsEnabled ? renderTaxComparison() : ''}
+      ${renderAssumptions(result)}
+
+      ${isPaid() ? `<details class="deep" ${deepOpen ? 'open' : ''} ontoggle="deepOpen=this.open; if (this.open) setTimeout(() => drawCashflowChart(lastSimResult), 0)">
+        <summary>More analysis <span class="asm-hint">ending balances, stress tests, cashflow, flexibility, Social Security timing</span></summary>
+        <div class="deep-body">
+          ${notFixed ? renderBands(result) : ''}
+          ${state.simMode==='historical' ? renderStressTests() : ''}
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:26px">
+            <div class="section-heading" style="margin:0">Cashflow</div>
+            <div class="toggle-group" style="width:auto">
+              <button class="toggle-btn cf-toggle ${cashflowMode==='net'?'active':''}" data-mode="net" onclick="setCashflowMode('net')" style="padding:5px 12px;font-size:14px">Net flow</button>
+              <button class="toggle-btn cf-toggle ${cashflowMode==='breakdown'?'active':''}" data-mode="breakdown" onclick="setCashflowMode('breakdown')" style="padding:5px 12px;font-size:14px">Breakdown</button>
+            </div>
+          </div>
+          <div class="section-sub" id="cf-desc">${cashflowMode==='net' ? 'Green bars mean you\'re adding to the portfolio. Red means you\'re drawing from it. Shown for the median path.' : 'Income sources stacked against spending, for the median path. The gap is what comes from or goes to the portfolio.'}</div>
+          <div class="chart-card"><div class="chart-wrap short"><canvas id="cashflowChart"></canvas></div></div>
+          ${notFixed ? renderFlexibilityImpact() : ''}
+          ${notFixed && state.yourSSAmount > 0 ? renderSSComparison() : ''}
+          ${notFixed && state.accountsEnabled ? renderTaxComparison() : ''}
+        </div>
+      </details>` : `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">Pro adds ending balances, stress tests, cashflow, flexibility and Social Security timing <span class="lock-icon">&#x1f512;</span></button>`}
 
       <div class="disclaimer-bar" style="margin-top:22px">These results are an educational model. They are not advice. The tool does not know your full situation, and it treats taxes, Social Security, and healthcare in simplified ways. What you see is a range of outcomes under the assumptions shown, built from past market returns and randomized simulations. Past performance does not predict future results. Before you make a decision based on these numbers, talk to a qualified financial, tax, or legal professional who can look at the whole picture. <a onclick="showFullDisclaimer()">Full disclaimer</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></div>
     </div>`;
@@ -1166,7 +1194,7 @@ function renderDashboard() {
   if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
 
   drawMainChart(result, canCompare ? baselineResult : null);
-  if (isPaid()) drawCashflowChart(result);
+  if (isPaid() && deepOpen) drawCashflowChart(result);
 
   // Accessibility: auto-label range inputs from nearby control-label
   document.querySelectorAll('.control').forEach(c => {
@@ -1196,13 +1224,32 @@ function renderDashboard() {
   });
 }
 
+function ageInput(val, min, max, handler, label) {
+  return `<input type="number" class="asm-input" value="${val === null || val === undefined ? '' : val}" placeholder="age" min="${min}" max="${max}" onchange="${handler}" aria-label="${label}"/>`;
+}
+function renderWorkControls() {
+  const rows = [];
+  if (state.yourIncome > 0 && state.yourStopWorkAge > state.age) rows.push(`<div class="work-row"><span>Your career break</span>off at ${ageInput(state.yourBreakStart, state.age, state.yourStopWorkAge, "setBreak('your','start',this.value)", 'Break starts at age')} back at ${ageInput(state.yourBreakEnd, state.age + 1, state.yourStopWorkAge, "setBreak('your','end',this.value)", 'Back to work at age')}</div>`);
+  if (state.hasPartner && state.partnerIncome > 0 && state.partnerStopWorkAge > state.partnerAge) rows.push(`<div class="work-row"><span>Partner’s career break</span>off at ${ageInput(state.partnerBreakStart, state.partnerAge, state.partnerStopWorkAge, "setBreak('partner','start',this.value)", 'Partner break starts at age')} back at ${ageInput(state.partnerBreakEnd, state.partnerAge + 1, state.partnerStopWorkAge, "setBreak('partner','end',this.value)", 'Partner back to work at age')}</div>`);
+  if (state.yourIncome > 0 || state.contributions > 0) rows.push(`<div class="work-row"><span>Retirement savings</span>$<input type="number" class="asm-input wide" value="${state.contributions || ''}" placeholder="0" min="0" step="1000" onchange="update('contributions', Math.max(0, +this.value || 0))" aria-label="Retirement contributions per year"/> a year${state.contributions > 0 ? `, paused from ${ageInput(state.contribPauseStart, state.age, state.yourStopWorkAge, "setPause('start',this.value)", 'Pause starts at age')} to ${ageInput(state.contribPauseEnd, state.age + 1, state.yourStopWorkAge, "setPause('end',this.value)", 'Pause ends at age')}` : ''}</div>`);
+  if (!rows.length) return '';
+  return `<div class="sidebar-heading" style="margin-top:14px">Time off and saving</div>${rows.join('')}<div class="more-hint">Blank means no break or pause. Paused savings are spent instead of invested for those years.</div>`;
+}
+
 function roman(n) { return ['i','ii','iii','iv','v','vi','vii','viii'][n-1] || String(n); }
 
 function moreOptionsHTML() {
   const effRate = state.taxRate ? (state.taxRate * 100).toFixed(0) : '18';
   return `
     <div style="margin-top:12px">
-      <div class="sidebar-heading" style="margin-top:0">Plan to age</div>
+      <div class="sidebar-heading" style="margin-top:0">Test against</div>
+        <div class="toggle-group">
+          <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
+          <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
+          <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''}" onclick="setMode('montecarlo')">Simulated</button>
+        </div>
+        <div style="font-size:14px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Runs your plan through every rolling period of real U.S. market returns since 1926 for your '+mixLabel()+' stock/bond mix.':state.simMode==='montecarlo'?'Runs '+state.mcSims+' randomized futures drawn from a bell curve matched to your mix’s history (change it under Assumptions).':'Projects a single path at one steady real return. No range.'}
+      <div class="sidebar-heading" style="margin-top:14px">Plan to age</div>
       <div class="control">
         <div class="control-row"><span class="control-label">Target age</span><span class="control-value">${state.targetAge}</span></div>
         <input type="range" min="70" max="110" step="1" value="${state.targetAge}" oninput="slideLive(this,'targetAge',this.value)" onchange="sliderCommit('targetAge',this.value)"/>
@@ -1353,9 +1400,10 @@ function getVerdict(result) {
   return v;
 }
 
-const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax' });
+const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', contributions: 'Retirement savings', contribPauseStart: 'Savings paused from', contribPauseEnd: 'Savings resume' });
 function fmtField(k, v) {
-  if (['spending','lateSpending','portfolio','yourIncome','partnerIncome','housing'].includes(k)) return fmtMoneyShort(v);
+  if (v === null || v === undefined) return 'none';
+  if (['spending','lateSpending','portfolio','yourIncome','partnerIncome','housing','contributions'].includes(k)) return fmtMoneyShort(v);
   if (['returnRate','stockPct'].includes(k)) return pct(v, k === 'stockPct' ? 0 : 1);
   if (k === 'feeRate') return pct(v, 2);
   if (['taxRate','capGainsTax'].includes(k)) return pct(v, 0);
@@ -1441,6 +1489,14 @@ function renderAssumptions(result) {
   rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending)}</strong> a year until age ${state.slowDownAge}, then <strong>${fmtMoney(state.lateSpending)}</strong>${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails <strong>${gr ? 'on' : 'off'}</strong> <label class="asm-toggle"><input type="checkbox" ${gr ? 'checked' : ''} onchange="update('guardrailsEnabled', this.checked)"/> flex spending with the market</label>. ${gr
     ? `Starting from the withdrawal rate in your first retired year, spending is cut <strong>${pct(state.guardrailCutPct, 0)}</strong> in any year the rate runs more than ${pct(state.guardrailBandPct, 0)} above it, and boosted <strong>${pct(state.guardrailBoostPct, 0)}</strong> when more than ${pct(state.guardrailBandPct, 0)} below. Cuts do not compound. The median path shown cut spending in <strong>${result.medianRunFlexCuts || 0}</strong> year${(result.medianRunFlexCuts || 0) === 1 ? '' : 's'}.${isPaid() ? ' Cut and boost sizes are under Spending flexibility below.' : ''}`
     : 'The same amount is withdrawn every year no matter what markets do.'}`));
+  if (state.yourIncome > 0 || (state.hasPartner && state.partnerIncome > 0) || state.contributions > 0) {
+    const bits = [];
+    if (state.yourIncome > 0) bits.push('You earn <strong>' + fmtMoney(state.yourIncome) + '</strong> a year until age ' + state.yourStopWorkAge + (state.yourBreakStart !== null ? ', with no wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd : '') + '.');
+    if (state.hasPartner && state.partnerIncome > 0) bits.push('Your partner earns ' + fmtMoney(state.partnerIncome) + ' until ' + state.partnerStopWorkAge + (state.partnerBreakStart !== null ? ', off from ' + state.partnerBreakStart + ' to ' + state.partnerBreakEnd : '') + '.');
+    bits.push('Whatever is left after tax, spending, and housing goes into the portfolio each year.');
+    if (state.contributions > 0) bits.push('You said <strong>' + fmtMoney(state.contributions) + '</strong> of that is retirement savings' + (state.contribPauseStart !== null ? ', and from ' + state.contribPauseStart + ' to ' + state.contribPauseEnd + ' that money is spent instead.' : '.'));
+    rows.push(asmRow('Work', bits.join(' ')));
+  }
   rows.push(asmRow('Taxes', `Wages are taxed at ${asmInput('taxRate', Math.round(state.taxRate * 100), { min: 0, max: 60, step: 1, label: 'Wage tax rate percent' })}, estimated from your income, filing status, and state, including payroll tax. In retirement, traditional-IRA withdrawals and half of Social Security are taxed at ${asmInput('retirementTaxRate', Math.round(retRate * 100), { min: 0, max: 60, step: 1, label: 'Retirement tax rate percent' })}. ${state.accountsEnabled
     ? 'Account types are on. Roth withdrawals are tax-free, taxable-account withdrawals assume half is gain taxed at ' + asmInput('capGainsTax', Math.round(state.capGainsTax * 100), { min: 0, max: 50, step: 1, label: 'Capital gains rate percent' }) + ', and anything drawn before 59½ pays a 10% penalty.'
     : 'Every portfolio withdrawal is grossed up by ' + asmInput('capGainsTax', Math.round(state.capGainsTax * 100), { min: 0, max: 50, step: 1, label: 'Withdrawal tax rate percent' }) + ' for tax. Set it to 0 if your savings are mostly Roth' + (isPaid() ? ', or turn on account types under More options for per-account treatment.' : '.')} Brackets, RMDs, and Medicare surcharges are not modelled.`));
@@ -1461,8 +1517,8 @@ function renderCompareSummary(a, b) {
   const im = computeImpact();
   const diffs = im ? im.changes.map(c => c.label + ' ' + c.from + ' → ' + c.to).join('; ') : 'no inputs differ yet';
   return `<div class="section-heading">Side by side</div>
-    <div class="section-sub">${baselineName} versus your current settings, both run in ${modeName(b.mode)} mode. What differs: ${diffs}. <button class="link-btn" onclick="toggleCompare()">Stop comparing</button></div>
-    <table class="data-table compare-table"><thead><tr><th></th><th>${baselineName}</th><th>Current</th></tr></thead><tbody>
+    <div class="section-sub">${baselineName} and ${currentName}, both run in ${modeName(b.mode)} mode. What differs: ${diffs}. <button class="link-btn" onclick="toggleCompare()">Stop comparing</button></div>
+    <table class="data-table compare-table"><thead><tr><th></th><th>${baselineName}</th><th>${currentName}</th></tr></thead><tbody>
       <tr><td>Lasted to age ${state.targetAge}</td><td>${periodsLabel(a)}</td><td style="font-weight:600;color:var(--ink)">${periodsLabel(b)}</td></tr>
       <tr><td>Ending balance, worst 10% to best 10%</td><td>${range(a)}</td><td>${range(b)}</td></tr>
       <tr><td>Median ending balance</td><td>${fmtMoneyShort(a.medianFinal)}</td><td>${fmtMoneyShort(b.medianFinal)}</td></tr>
@@ -1496,6 +1552,9 @@ function renderEventTimeline() {
   if (state.yourStopWorkAge > state.age && state.yourIncome > 0) events.push({ age: state.yourStopWorkAge, label: 'You retire', detail: 'Income drops from ' + fmtMoneyShort(state.yourIncome) + ' to $0' });
   if (state.hasPartner && state.partnerStopWorkAge > state.partnerAge && state.partnerIncome > 0) events.push({ age: state.partnerStopWorkAge, label: 'Partner retires', detail: 'Partner income drops to $0' });
   if (state.housing > 0 && state.mortgagePayoffAge > state.age) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr housing cost drops' });
+  if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Career break', detail: 'No wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd }); events.push({ age: state.yourBreakEnd, label: 'Back to work', detail: 'Wages resume' }); }
+  if (state.hasPartner && state.partnerBreakStart !== null) { events.push({ age: state.age + (state.partnerBreakStart - state.partnerAge), label: 'Partner’s break', detail: 'Partner has no wages for ' + (state.partnerBreakEnd - state.partnerBreakStart) + ' years' }); }
+  if (state.contributions > 0 && state.contribPauseStart !== null) { events.push({ age: state.contribPauseStart, label: 'Savings paused', detail: fmtMoneyShort(state.contributions) + '/yr spent instead of invested until ' + state.contribPauseEnd }); events.push({ age: state.contribPauseEnd, label: 'Savings resume', detail: '' }); }
   if (state.ssStartAge > state.age && (state.yourSSAmount > 0 || state.partnerSSAmount > 0)) events.push({ age: state.ssStartAge, label: 'Social Security begins', detail: fmtMoneyShort(state.yourSSAmount + state.partnerSSAmount) + '/yr starts' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending changes', detail: fmtMoneyShort(state.spending) + ' \u2192 ' + fmtMoneyShort(state.lateSpending) + '/yr' });
   if (state.oneTimeEvents) state.oneTimeEvents.forEach(ev => events.push({ age: ev.age, label: ev.label, detail: fmtMoneyShort(ev.amount) }));
@@ -1828,6 +1887,8 @@ function drawMainChart(result, compare) {
   if (state.yourStopWorkAge > state.age && state.yourStopWorkAge < state.targetAge) events.push({ age: state.yourStopWorkAge, label: 'Retire' });
   if (state.ssStartAge > state.age) events.push({ age: state.ssStartAge, label: 'SS starts' });
   if (state.mortgagePayoffAge > state.age && state.housing > 0) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
+  if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Break' }); events.push({ age: state.yourBreakEnd, label: 'Back to work' }); }
+  if (state.contributions > 0 && state.contribPauseStart !== null) events.push({ age: state.contribPauseStart, label: 'Savings paused' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: state.lateSpending < state.spending ? 'Spending drops' : 'Spending rises' });
 
   // Chart.js plugin for vertical annotation lines
@@ -2084,20 +2145,38 @@ window.updateTax = function(key, val) {
   invalidateCaches(); render();
 };
 window.setMode = function(m) {
-  if (m === 'montecarlo' && !isPaid()) { showUnlockModal(); return; }
+  if (m !== 'historical' && !isPaid()) { showUnlockModal(); return; }
   state.simMode = m; invalidateCaches(); render();
+};
+window.setBreak = function(who, which, raw) {
+  const ks = who === 'partner' ? ['partnerBreakStart', 'partnerBreakEnd'] : ['yourBreakStart', 'yourBreakEnd'];
+  const base = who === 'partner' ? state.partnerAge : state.age;
+  const v = raw === '' || raw === null ? null : Math.round(+raw);
+  state[which === 'start' ? ks[0] : ks[1]] = v;
+  const s = state[ks[0]], e = state[ks[1]];
+  if (s !== null && (e === null || e <= s)) state[ks[1]] = s + 2;
+  if (e !== null && s === null) state[ks[0]] = Math.max(base, e - 2);
+  maxSpendView = false; invalidateCaches(); render();
+};
+window.setPause = function(which, raw) {
+  const v = raw === '' || raw === null ? null : Math.round(+raw);
+  state[which === 'start' ? 'contribPauseStart' : 'contribPauseEnd'] = v;
+  const s = state.contribPauseStart, e = state.contribPauseEnd;
+  if (s !== null && (e === null || e <= s)) state.contribPauseEnd = s + 3;
+  if (e !== null && s === null) state.contribPauseStart = Math.max(state.age, e - 3);
+  maxSpendView = false; invalidateCaches(); render();
 };
 window.rerollSeed = function() { state.mcSeed = Math.floor(Math.random() * 1e9); invalidateCaches(); render(); };
 window.resetMcToHistory = function() { state.mcMean = null; state.mcSd = null; invalidateCaches(); render(); };
 window.toggleCompare = function() {
   if (!isPaid()) { showUnlockModal(); return; }
-  compareOn = !compareOn; render();
+  compareOn = !compareOn; if (!compareOn) currentName = 'Current'; render();
 };
 window.compareWith = function(i) {
   if (!isPaid()) { showUnlockModal(); return; }
   if (!savedScenarios[i]) return;
   baselineState = JSON.parse(JSON.stringify(savedScenarios[i].state));
-  baselineName = savedScenarios[i].name;
+  baselineName = savedScenarios[i].name; currentName = 'Current';
   compareOn = true; render();
 };
 window.setCashflowMode = function(m) {
@@ -2192,7 +2271,7 @@ window.updateLive2 = function(el, k1, k2, rawVal) {
   liveChartTimer = setTimeout(() => { invalidateCaches(); const r = runForState(state); lastSimResult = r; drawMainChart(r, liveCompare()); if (isPaid()) drawCashflowChart(r); }, 150);
 };
 
-window.resetBaseline = function() { baselineState = JSON.parse(JSON.stringify(state)); baselineResult = lastSimResult; baselineName = 'Baseline'; render(); };
+window.resetBaseline = function() { baselineState = JSON.parse(JSON.stringify(state)); baselineResult = lastSimResult; baselineName = 'Baseline'; currentName = 'Current'; render(); };
 window.revertChange = function(key) { if (!baselineState) return; state[key] = baselineState[key]; invalidateCaches(); render(); };
 
 window.applySSAge = function(age) {
@@ -2214,8 +2293,35 @@ window.applySpending = function(spend) {
 };
 
 // ===== PRESETS =====
+// Every scenario button shows its result next to where you were: the pre-click state
+// becomes the baseline ("Before"), the button label names the current side.
+function startComparison(label) {
+  if (!compareOn || !baselineState) { baselineState = JSON.parse(JSON.stringify(state)); baselineName = 'Before'; }
+  currentName = label;
+  compareOn = isPaid();
+  maxSpendView = false;
+}
+window.askContributions = function(thenId) {
+  openModal(`<h2>How much do you put into retirement each year?</h2>
+    <p>Your 401k, IRA, and anything else you save for later, in today's dollars. The scenario sends that money to spending instead for a few years.</p>
+    <div class="field"><label>Per year</label><input type="number" id="ask_contrib" min="0" step="1000" placeholder="e.g. 15000"/></div>
+    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn-primary" onclick="finishAskContributions('${thenId}')">Run it</button><button class="btn-secondary" onclick="closeModal()">Cancel</button></div>`);
+  const el = document.getElementById('ask_contrib'); if (el) el.focus();
+};
+window.finishAskContributions = function(thenId) {
+  const v = parseFloat((document.getElementById('ask_contrib') || {}).value) || 0;
+  if (v <= 0) { const el = document.getElementById('ask_contrib'); if (el) el.style.borderColor = 'var(--danger)'; return; }
+  state.contributions = v;
+  closeModal();
+  applyPreset(thenId);
+};
 window.applyPreset = function(id) {
+  if (id === 'pauseContrib' && !(state.contributions > 0)) { askContributions(id); return; }
+  startComparison(presetLabel(id));
   switch (id) {
+    case 'careerBreak': state.yourBreakStart = state.age; state.yourBreakEnd = state.age + 2; break;
+    case 'partnerBreak': state.partnerBreakStart = state.partnerAge; state.partnerBreakEnd = state.partnerAge + 2; break;
+    case 'pauseContrib': state.contribPauseStart = state.age; state.contribPauseEnd = state.age + 3; break;
     case 'stopNow': state.yourStopWorkAge = state.age; break;
     case 'retire5early': state.yourStopWorkAge = Math.max(state.age, state.yourStopWorkAge - 5); break;
     case 'partTime': state.yourIncome = Math.round(state.yourIncome * 0.5 / 5000) * 5000; state.yourStopWorkAge = Math.min(state.yourStopWorkAge + 3, 70); break;

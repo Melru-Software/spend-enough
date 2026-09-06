@@ -104,7 +104,7 @@ test('findMaxSpend respects a non-zero end-goal buffer', () => {
   const s = mk({ age: 52, portfolio: 700000, spending: 80000, lateSpending: 68000, yourIncome: 0,
                  yourSSAmount: 30000, simMode: 'fixed', endGoalBuffer: buffer });
   const { spend } = E.findMaxSpend(s);
-  const at = runAtMaxSpend(s, spend);
+  const at = runAtMaxSpend(Object.assign({}, s, { guardrailsEnabled: false }), spend); // findMaxSpend searches with guardrails off
   assert.strictEqual(at.medianRunOutAge, null, 'should not run out');
   assert.ok(at.medianFinal >= buffer * 0.9, `ending ${at.medianFinal} should respect buffer ${buffer}`);
 });
@@ -346,6 +346,51 @@ test('guardrails anchor to the first retired withdrawal year, not a pre-retireme
   const years = E.simulateOnce(s, seq);
   assert.ok(!years.slice(0, 10).some(y => y.flexed), 'no flexing while wages are still coming in');
   assert.ok(years.flexCutCount < 10, `steady 5% returns should not produce near-constant cuts (got ${years.flexCutCount})`);
+});
+
+// ---- 13. Career break and contributions pause ------------------------------------
+test('career break zeroes wages for the window and resumes after, with no raises during it', () => {
+  const s = mk({ age: 35, targetAge: 70, portfolio: 300000, spending: 60000, lateSpending: 60000, slowDownAge: 200,
+                 yourIncome: 100000, yourStopWorkAge: 65, yourIncomeGrowth: 0.02, taxRate: 0.2, capGainsTax: 0,
+                 yourBreakStart: 37, yourBreakEnd: 39, hasPartner: false, guardrailsEnabled: false });
+  const years = E.simulateOnce(s, new Array(36).fill(0.05));
+  const y = (a) => years.find(r => r.age === a);
+  assert.ok(y(36).yourIncome > 0 && y(37).yourIncome === 0 && y(38).yourIncome === 0 && y(39).yourIncome > 0, 'no wages at 37 and 38 only');
+  assert.ok(y(37).onBreak && y(38).onBreak && !y(39).onBreak);
+  // Salary at 39 equals salary at 36 grown one year (36 -> 37 raise applied, none during the break).
+  assert.ok(Math.abs(y(39).yourIncome - y(36).yourIncome * 1.02) < 1e-6, `expected ${y(36).yourIncome * 1.02}, got ${y(39).yourIncome}`);
+  const noBreak = E.runForState(Object.assign({}, s, { yourBreakStart: null, yourBreakEnd: null, simMode: 'historical' }));
+  const withBreak = E.runForState(Object.assign({}, s, { simMode: 'historical' }));
+  assert.ok(withBreak.medianFinal < noBreak.medianFinal, 'two years without wages must lower the median ending balance');
+  assert.ok(withBreak.successRate <= noBreak.successRate + 1e-9);
+});
+test('career break is not retirement for the guardrail reference', () => {
+  const s = mk({ age: 35, targetAge: 90, portfolio: 400000, spending: 70000, lateSpending: 70000, slowDownAge: 200,
+                 yourIncome: 90000, yourStopWorkAge: 60, taxRate: 0.2, capGainsTax: 0, yourBreakStart: 36, yourBreakEnd: 38,
+                 hasPartner: false, guardrailsEnabled: true });
+  const years = E.simulateOnce(s, new Array(56).fill(0.05));
+  assert.ok(!years.filter(y => y.age < 60).some(y => y.flexed), 'nothing flexes before the stop-work age, break included');
+});
+test('pausing contributions spends that money for the window only', () => {
+  const s = mk({ age: 40, targetAge: 80, portfolio: 200000, spending: 50000, lateSpending: 50000, slowDownAge: 200,
+                 yourIncome: 120000, yourStopWorkAge: 65, taxRate: 0.2, capGainsTax: 0, contributions: 15000,
+                 contribPauseStart: 41, contribPauseEnd: 44, hasPartner: false, guardrailsEnabled: false });
+  const years = E.simulateOnce(s, new Array(41).fill(0.05));
+  const y = (a) => years.find(r => r.age === a);
+  assert.strictEqual(y(40).spending, 50000); assert.strictEqual(y(41).spending, 65000); assert.strictEqual(y(43).spending, 65000); assert.strictEqual(y(44).spending, 50000);
+  assert.ok(y(41).contribPaused && !y(44).contribPaused);
+  const paused = E.runForState(Object.assign({}, s, { simMode: 'historical' }));
+  const not = E.runForState(Object.assign({}, s, { contribPauseStart: null, contribPauseEnd: null, simMode: 'historical' }));
+  assert.ok(paused.medianFinal < not.medianFinal);
+  // contributions with no pause window change nothing
+  const zero = E.runForState(Object.assign({}, s, { contributions: 0, contribPauseStart: null, contribPauseEnd: null, simMode: 'historical' }));
+  assert.strictEqual(not.medianFinal, zero.medianFinal);
+});
+test('inWindow treats null bounds as no window and end as exclusive', () => {
+  assert.strictEqual(E.inWindow(40, null, null), false);
+  assert.strictEqual(E.inWindow(40, 40, 42), true);
+  assert.strictEqual(E.inWindow(42, 40, 42), false);
+  assert.strictEqual(E.inWindow(39, 40, 42), false);
 });
 
 // ---- summary ----------------------------------------------------------------
