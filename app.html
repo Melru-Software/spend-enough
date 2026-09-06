@@ -1379,7 +1379,7 @@ function getVerdict(result) {
     v.headline = 'The portfolio lasted to age ' + state.targetAge + ' in ' + Math.round(rate * 100) + '% of ' + result.mcSims + ' simulated futures';
     v.lead = 'The median ending balance was ' + fmtMoneyShort(result.medianFinal) + '.';
     v.detail = (maxSpendView ? fmtMoney(state.spending) + ' a year is the most that made it through ' + threshold + '% of history. ' : '') + 'Each of the ' + result.mcSims + ' futures draws every year’s return from a bell curve with ' + pct(result.mcSd, 1) + ' volatility around a ' + pct(result.mcMean, 1) + ' average real return (' + src + ').' + flexNote;
-    v.caveat = 'Each year’s return is picked at random from a bell curve around the average. Bad years come in runs only as often as chance would put them there, and the worst years are milder than the worst real ones. If this and the historical count disagree, go with the historical count.';
+    v.caveat = 'Each year’s return is picked at random from a bell curve around the average. Bad years come in runs only as often as chance would put them there, and the worst years are milder than the worst real ones. If this and the historical count are far apart, the plan depends a lot on which view of the market turns out to be right.';
   } else {
     const lasts = result.successRate >= 1;
     const r = pct(state.returnRate, 1);
