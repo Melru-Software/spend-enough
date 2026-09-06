@@ -650,8 +650,9 @@ const DEFAULT_STATE = {
   partnerPartTimeAmount: 0, partnerPartTimeStart: 65, partnerPartTimeEnd: 70,
   ssStartAge: 67, yourSSAmount: 0, partnerSSAmount: 0,
   oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0,
-  // Portfolio: share in stocks (rest in 10-year Treasuries), annual fee drag.
-  stockPct: 0.6, feeRate: 0,
+  // Portfolio: share in stocks (rest in 10-year Treasuries), annual fee drag
+  // (0.10% = a typical low-cost index fund; owner-chosen default, editable in the app).
+  stockPct: 0.6, feeRate: 0.001,
   // Fixed mode: one steady real return. Monte Carlo: mean/sd default to the chosen
   // blend's historical average and volatility (null = follow the data); seed fixed.
   returnRate: 0.05, returnStdDev: 0.15,
