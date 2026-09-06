@@ -297,7 +297,7 @@ function simulateOnce(state, returnSeries) {
     // "Retired" = no more wages expected: past your stop-work age (or no wage income at all),
     // and the same for your partner. A career break before that is not retirement, so it
     // neither sets the reference nor gets flexed.
-    const retired = (state.yourIncome <= 0 || age >= state.yourStopWorkAge) && (!state.hasPartner || state.partnerIncome <= 0 || partnerAge >= state.partnerStopWorkAge);
+    const retired = wagesThisYear <= 0 && (state.yourIncome <= 0 || age >= state.yourStopWorkAge) && (!state.hasPartner || state.partnerIncome <= 0 || partnerAge >= state.partnerStopWorkAge);
     if (state.guardrailsEnabled && provisionalNeed > 0 && portfolio > 0 && retired) {
       const rate = provisionalNeed / portfolio;
       if (refWithdrawRate === null) {

@@ -411,6 +411,17 @@ test('inWindow treats null bounds as no window and end as exclusive', () => {
   assert.strictEqual(E.inWindow(39, 40, 42), false);
 });
 
+test('part-time years count as working for the guardrail reference', () => {
+  const s = mk({ age: 55, targetAge: 90, portfolio: 600000, spending: 60000, lateSpending: 60000, slowDownAge: 200,
+                 yourIncome: 100000, yourStopWorkAge: 58, yourPartTimeAmount: 40000, yourPartTimeStart: 58, yourPartTimeEnd: 63,
+                 taxRate: 0.2, capGainsTax: 0, hasPartner: false, guardrailsEnabled: true });
+  const years = E.simulateOnce(s, new Array(36).fill(0.05));
+  const y = (a) => years.find(r => r.age === a);
+  assert.strictEqual(Math.round(y(58).yourIncome), 40000, 'part-time wages replace full-time wages');
+  assert.strictEqual(y(63).yourIncome, 0, 'wages stop at the part-time end');
+  assert.ok(!years.filter(r => r.age < 63).some(r => r.flexed), 'no flexing while part-time wages are coming in');
+});
+
 // ---- 14. Market shock ------------------------------------------------------------
 test('a market shock splices the era sequence in at the shock age and lowers success', () => {
   const s = pureWithdrawal(1000000, 40000, 30, { stockPct: 1.0 });
