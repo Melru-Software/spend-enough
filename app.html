@@ -187,11 +187,14 @@
   .impact-banner button { background: none; border: none; color: var(--rust); cursor: pointer; font-family: inherit; font-size: 14px; text-decoration: underline; padding: 0; }
 
   /* Verdict */
-  .verdict { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 24px 28px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
+  .verdict { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 20px 24px; margin-bottom: 14px; box-shadow: var(--shadow-sm); }
+  .verdict-notes { margin: 0 4px 22px; font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+  .verdict-notes p { margin-bottom: 8px; }
+  .verdict-notes .verdict-caveat { margin-top: 0; }
   .verdict-head { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 400; color: var(--ink); line-height: 1.25; margin-bottom: 10px; letter-spacing: -0.01em; }
-  .verdict-body { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
+  .verdict-body { font-size: 15px; color: var(--ink-soft); line-height: 1.6; }
   .verdict-caveat { font-size: 14px; color: var(--ink-faint); margin-top: 10px; font-style: italic; }
-  .verdict-wedge { margin-top: 14px; padding: 12px 16px; background: rgba(184,92,56,0.06); border-left: 3px solid var(--rust); border-radius: 0 4px 4px 0; font-size: 15px; color: var(--ink); line-height: 1.5; }
+  .verdict-wedge { margin-top: 10px; padding: 12px 16px; background: rgba(184,92,56,0.06); border-left: 3px solid var(--rust); border-radius: 0 4px 4px 0; font-size: 15px; color: var(--ink); line-height: 1.5; }
   .verdict-wedge .wedge-amount { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--rust); font-size: 16px; }
   .verdict-wedge .wedge-sub { font-size: 14px; color: var(--ink-mute); margin-top: 4px; }
 
@@ -241,7 +244,7 @@
 
   /* Chart */
   .chart-card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 18px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
-  .chart-wrap { position: relative; height: 280px; }
+  .chart-wrap { position: relative; height: 360px; }
   .chart-wrap.short { height: 200px; }
 
   /* Tables */
@@ -1102,17 +1105,20 @@ function renderDashboard() {
     <div class="main" id="main-content" role="main">
       <div class="verdict" aria-live="polite">
         <div class="verdict-head">${verdict.headline}</div>
-        <div class="verdict-body">${verdict.body}</div>
-        ${verdict.caveat ? `<div class="verdict-caveat">${verdict.caveat}</div>` : ''}
-        ${verdict.wedge ? `<div class="verdict-wedge">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
+        <div class="verdict-body">${verdict.lead}</div>
       </div>
-
-      ${renderReadFirst(result)}
 
       <div class="section-heading">Portfolio projection</div>
       <div class="section-sub">${state.simMode==='historical' ? 'The shaded area is the range across all '+result.totalPeriods+' historical periods: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : state.simMode==='montecarlo' ? 'The shaded area is the range across '+result.mcSims+' simulated futures: lighter is the worst 10% to the best 10%, darker is the middle 50%. The line is the median.' : 'One steady-return path, so there is no range. Switch to Historical mode to see one.'}${canCompare ? ' The dashed line and faint band are the baseline.' : ''}</div>
       <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
       ${renderEventTimeline()}
+      <div class="verdict-notes">
+        <p>${verdict.detail}</p>
+        ${verdict.caveat ? `<p class="verdict-caveat">${verdict.caveat}</p>` : ''}
+        ${verdict.wedge ? `<div class="verdict-wedge">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
+      </div>
+
+      ${renderReadFirst(result)}
 
       ${renderAssumptions(result)}
 
@@ -1288,7 +1294,8 @@ function moreOptionsHTML() {
 
 // ===== VERDICT =====
 function getVerdict(result) {
-  const v = { headline: '', body: '', caveat: '' };
+  // headline + lead show in the verdict card; detail, caveat and wedge show under the chart.
+  const v = { headline: '', lead: '', detail: '', caveat: '' };
   const yc = state.targetAge - state.age + 1;
   const cuts = result.medianRunFlexCuts || 0;
   const flexNote = state.guardrailsEnabled && cuts > 0 ? ' The median path includes spending cuts in ' + cuts + ' year' + (cuts > 1 ? 's' : '') + ' (guardrails are on; see Assumptions).' : '';
@@ -1299,39 +1306,44 @@ function getVerdict(result) {
     const tested = 'We ran your plan through every rolling ' + yc + '-year stretch of real U.S. market returns since 1926 for a ' + mixLabel() + ' stock/bond mix: ' + totalPeriods + ' periods, starting ' + windows.firstStart + ' through ' + windows.lastStart + '.';
     if (maxSpendView) {
       v.headline = 'You could spend about ' + fmtMoney(state.spending) + ' a year and still make it through ' + successCount + ' of ' + totalPeriods + ' historical periods';
-      v.body = 'This is the highest spending level that lasted to age ' + state.targetAge + ' in at least ' + threshold + '% of history with steady spending and no cuts. ' + tested + ' The spending explorer below shows how the count moves if you spend a little more or less.';
+      v.lead = 'This is the highest spending level that lasted to age ' + state.targetAge + ' in at least ' + threshold + '% of history, with steady spending and no cuts.';
+      v.detail = tested + ' The spending explorer below shows how the count moves if you spend a little more or less.';
     } else if (successCount === totalPeriods) {
       v.headline = 'This plan lasted through every historical period since 1926';
-      v.body = tested + ' This spending level survived them all, including the Great Depression, 1970s stagflation, and 2008.' + flexNote + ' Surviving every period, including 1929, usually means there is room to spend more.';
+      v.lead = 'That includes periods starting in the Great Depression, the 1970s, and 2000.';
+      v.detail = tested + flexNote + ' Surviving every period, including 1929, usually means there is room to spend more.';
     } else {
       v.headline = 'This plan lasted in ' + successCount + ' of ' + totalPeriods + ' historical periods';
       const failCount = totalPeriods - successCount;
       const worst = failures[0];
-      v.body = tested + ' In ' + failCount + ' period' + (failCount > 1 ? 's' : '') + ' the portfolio ran out before age ' + state.targetAge + (worst ? '; the hardest started in ' + worst.label.split('\u2013')[0] + ' and ran out around age ' + worst.ranOutAge : '') + '.' + (failCount > 1 ? ' Among the periods that failed, half had run out by age ' + result.medianRunOutAge + '.' : '') + flexNote;
-      if (rate >= 0.85) v.body += ' Failures cluster around retiring into a long downturn.';
-      else if (rate >= 0.6) v.body += ' At this spending level the outcome depends heavily on which market you retire into.';
-      else v.body += ' This spending level is risky by historical standards. Try a lower level in the spending explorer.';
+      v.lead = 'In ' + failCount + ' period' + (failCount > 1 ? 's' : '') + ' the portfolio ran out before age ' + state.targetAge + (worst ? '. The hardest started in ' + worst.label.split('–')[0] + ' and ran out around age ' + worst.ranOutAge + '.' : '.');
+      v.detail = tested + (failCount > 1 ? ' Among the periods that failed, half had run out by age ' + result.medianRunOutAge + '.' : '') + flexNote;
+      if (rate >= 0.85) v.detail += ' Failures cluster around retiring into a long downturn.';
+      else if (rate >= 0.6) v.detail += ' At this spending level the outcome depends heavily on which market you retire into.';
+      else v.detail += ' This spending level is risky by historical standards. Try a lower level in the spending explorer.';
     }
-    v.caveat = 'Past performance does not predict future results. These ' + totalPeriods + ' periods overlap heavily and all come from one country\u2019s history.';
+    v.caveat = 'Past performance does not predict future results. These ' + totalPeriods + ' periods overlap heavily, and all of them come from one country’s history.';
   } else if (result.mode === 'montecarlo') {
     const rate = result.successRate;
     const src = mcParams(state).fromHistory ? 'the historical figures for your ' + mixLabel() + ' mix' : 'figures you set';
     v.headline = 'The portfolio lasted to age ' + state.targetAge + ' in ' + Math.round(rate * 100) + '% of ' + result.mcSims + ' simulated futures';
-    v.body = (maxSpendView ? fmtMoney(state.spending) + ' a year is the most that made it through ' + threshold + '% of history. In ' : 'In ') + result.mcSims + ' randomized futures with ' + pct(result.mcSd, 1) + ' volatility around a ' + pct(result.mcMean, 1) + ' average real return (' + src + '), the median ending balance was ' + fmtMoneyShort(result.medianFinal) + '.' + flexNote;
-    v.caveat = 'Each future is a random draw from a bell curve. Real markets have fatter tails and streaks. Re-roll the seed under Assumptions to see how much the number moves.';
+    v.lead = 'The median ending balance was ' + fmtMoneyShort(result.medianFinal) + '.';
+    v.detail = (maxSpendView ? fmtMoney(state.spending) + ' a year is the most that made it through ' + threshold + '% of history. ' : '') + 'Each of the ' + result.mcSims + ' futures draws every year’s return from a bell curve with ' + pct(result.mcSd, 1) + ' volatility around a ' + pct(result.mcMean, 1) + ' average real return (' + src + ').' + flexNote;
+    v.caveat = 'Real markets have fatter tails and streaks than a bell curve. Re-roll the seed under Assumptions to see how much the number moves.';
   } else {
     const lasts = result.successRate >= 1;
     const r = pct(state.returnRate, 1);
     if (maxSpendView) {
       v.headline = 'At a steady ' + r + ' return, the most you could spend is about ' + fmtMoney(state.spending) + ' a year';
-      v.body = lasts ? 'This is the highest annual spending that keeps the portfolio going to age ' + state.targetAge + ' if returns were the same every year. Real markets are not steady, and bad years early on can sink a plan whose average is fine. Switch to Historical mode to see how this level held up in real sequences.' : 'At a steady ' + r + ' return the portfolio would run out around age ' + result.medianRunOutAge + '.';
+      v.lead = lasts ? 'This is the highest annual spending that keeps the portfolio going to age ' + state.targetAge + ' if returns were the same every year.' : 'At a steady ' + r + ' return the portfolio would run out around age ' + result.medianRunOutAge + '.';
+      v.detail = 'Real markets are not steady, and bad years early on can sink a plan whose average is fine. Switch to Historical mode to see how this level held up in real sequences.';
     } else {
       v.headline = lasts ? 'At a steady ' + r + ' return, the portfolio lasts past age ' + state.targetAge : 'At a steady ' + r + ' return, the portfolio runs out around age ' + result.medianRunOutAge;
-      v.body = (lasts ? 'Ending balance at age ' + state.targetAge + ' would be about ' + fmtMoneyShort(result.medianFinal) + '. ' : '') + 'This assumes the same return every year, so it hides sequence-of-returns risk. Historical mode runs the same plan through every real market stretch since 1926.' + flexNote;
+      v.lead = lasts ? 'Ending balance at age ' + state.targetAge + ' would be about ' + fmtMoneyShort(result.medianFinal) + '.' : 'The same return every year is assumed.';
+      v.detail = 'This assumes the same return every year, so it hides sequence-of-returns risk. Historical mode runs the same plan through every real market stretch since 1926.' + flexNote;
     }
     v.caveat = 'A steady return hides the good and bad years. Historical mode shows them.';
   }
-  // "Money left on the table" wedge: the median outcome's ending balance.
   if (!maxSpendView && result.medianFinal > 10000) {
     v.wedge = fmtMoneyShort(result.medianFinal);
     if (result.mode === 'historical') v.wedgeSub = 'Half of the ' + result.totalPeriods + ' historical periods ended with more than this at age ' + state.targetAge + ', half with less. The spending explorer below shows what happens to the count if you spend some of it now.';
@@ -1341,7 +1353,6 @@ function getVerdict(result) {
   return v;
 }
 
-// ===== IMPACT BANNER =====
 const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax' });
 function fmtField(k, v) {
   if (['spending','lateSpending','portfolio','yourIncome','partnerIncome','housing'].includes(k)) return fmtMoneyShort(v);
