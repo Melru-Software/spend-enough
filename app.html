@@ -1071,7 +1071,6 @@ function renderDashboard() {
     <aside class="sidebar" role="complementary" aria-label="Planning controls">
       <div class="sidebar-section">
         <div class="sidebar-heading">Try a scenario</div>
-        <div class="sidebar-sub">${isPaid() ? 'Each one puts the result next to where you started.' : 'Each one shows how the numbers change from where you started.'}</div>
         ${presets.map(p => `<button class="preset-btn" onclick="applyPreset('${p.id}')">${p.label}</button>`).join('')}
         ${renderSidebarImpact()}
       </div>
