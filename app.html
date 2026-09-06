@@ -375,6 +375,7 @@
 
   @media (max-width: 860px) {
     .dashboard { grid-template-columns: 1fr; grid-template-areas: "main" "sidebar" "resources"; }
+    .preset-btn { text-align: center; }
     .sidebar { border-right: none; border-bottom: 1px solid var(--line); }
     .bands, .scenario-cards, .ss-grid { grid-template-columns: 1fr 1fr; }
   }
@@ -735,7 +736,7 @@ window.showPayoffModal = function(fromPreset) {
         </label>
       </div>
       <div id="po_preview" style="margin-top:12px;font-size:14px;color:var(--ink-mute);min-height:18px"></div>
-      <div class="field" style="margin-top:12px"><label>After it is paid off, the old payment goes to</label><div class="toggle-group"><button type="button" class="toggle-btn ${state.postPayoffSpend > 0 ? '' : 'active'}" data-after="invest" onclick="pickAfter(this)">Investing</button><button type="button" class="toggle-btn ${state.postPayoffSpend > 0 ? 'active' : ''}" data-after="spend" onclick="pickAfter(this)">Spending</button></div><span class="field-hint">Investing: the freed ${fmtMoney(state.housing)} a year goes into the portfolio, or is not drawn from it. Spending: your spending rises by that much from the payoff year.</span></div>
+      <div class="field" style="margin-top:12px"><label>Once it is paid off, how much of the freed ${fmtMoney(state.housing)} a year do you spend?</label><input type="number" id="po_spend" min="0" max="${state.housing}" step="1000" value="${Math.min(state.housing, state.postPayoffSpend || 0)}" style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;background:var(--bone)"/><span class="field-hint">The rest goes into the portfolio, or is not drawn from it. 0 means all of it is invested.</span></div>
       <div style="display:flex;gap:8px;margin-top:16px">
         <button onclick="applyPayoffModal()" style="flex:1;padding:10px;background:var(--rust);color:var(--paper);border:none;border-radius:3px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit">Apply to plan</button>
         <button onclick="closeModal()" style="padding:10px 16px;background:none;border:1px solid var(--line);border-radius:3px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink-soft)">Cancel</button>
@@ -762,7 +763,6 @@ function updatePayoffPreview() {
     + (diff > 0 ? ` <span style="color:var(--danger)">(+${fmtMoney(Math.round(diff/100)*100)}/yr for ${years} yrs)</span>` : '');
 }
 
-window.pickAfter = function(btn) { document.querySelectorAll('.modal .toggle-btn[data-after]').forEach(b => b.classList.toggle('active', b === btn)); };
 window.applyPayoffModal = function() {
   const balance = parseFloat(document.getElementById('po_balance').value) || 0;
   const rate = (parseFloat(document.getElementById('po_rate').value) || 6.5) / 100;
@@ -772,8 +772,8 @@ window.applyPayoffModal = function() {
     return;
   }
   if (payoffFromPreset) { startComparison('Pay off the house early'); payoffFromPreset = false; }
-  const spendIt = !!document.querySelector('.modal .toggle-btn[data-after="spend"].active');
-  state.postPayoffSpend = spendIt ? state.housing : 0;
+  const spendPart = parseFloat((document.getElementById('po_spend') || {}).value) || 0;
+  state.postPayoffSpend = Math.max(0, Math.min(state.housing, spendPart));
   const annual = calcAnnualMortgagePayment(balance, rate, years);
   state.housing = Math.round(annual / 100) * 100;
   state.mortgagePayoffAge = state.age + years;
@@ -1503,7 +1503,7 @@ function renderAssumptions(result) {
     : 'The same amount is withdrawn every year no matter what markets do.'}`));
   if (state.housing > 0 || has(state.homeSaleAge)) {
     const h = [];
-    if (state.housing > 0) h.push('The mortgage payment is <strong>' + fmtMoney(state.housing) + '</strong> a year until it is paid off at ' + state.mortgagePayoffAge + (state.postPayoffSpend > 0 ? ', after which that money is spent' : ', after which it stays in the portfolio') + '. Property tax and insurance are part of your spending and continue.');
+    if (state.housing > 0) h.push('The mortgage payment is <strong>' + fmtMoney(state.housing) + '</strong> a year until it is paid off at ' + state.mortgagePayoffAge + (state.postPayoffSpend > 0 ? (state.postPayoffSpend >= state.housing ? ', after which that money is spent' : ', after which ' + fmtMoney(state.postPayoffSpend) + ' of it is spent and the rest stays in the portfolio') : ', after which it stays in the portfolio') + '. Property tax and insurance are part of your spending and continue.');
     if (has(state.homeSaleAge)) h.push('At ' + state.homeSaleAge + ' the house is sold: <strong>' + fmtMoney(state.homeSaleProceeds) + '</strong> goes into the portfolio and housing costs ' + fmtMoney(state.postSaleHousing || 0) + ' a year from then on.');
     h.push('Housing is held in today’s dollars.');
     rows.push(asmRow('Housing', h.join(' ')));
@@ -1575,7 +1575,7 @@ function renderEventTimeline() {
   }
   else if (state.yourStopWorkAge > state.age && state.yourIncome > 0) events.push({ age: state.yourStopWorkAge, label: 'You retire', detail: 'Income drops from ' + fmtMoneyShort(state.yourIncome) + ' to $0' });
   if (state.hasPartner && state.partnerStopWorkAge > state.partnerAge && state.partnerIncome > 0) events.push({ age: state.partnerStopWorkAge, label: 'Partner retires', detail: 'Partner income drops to $0' });
-  if (state.housing > 0 && state.mortgagePayoffAge > state.age && (!has(state.homeSaleAge) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr payment ' + (state.postPayoffSpend > 0 ? 'moves to spending' : 'ends') });
+  if (state.housing > 0 && state.mortgagePayoffAge > state.age && (!has(state.homeSaleAge) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr payment ends' + (state.postPayoffSpend > 0 ? '; ' + fmtMoneyShort(state.postPayoffSpend) + '/yr of it goes to spending' : '') });
   if (has(state.homeSaleAge)) events.push({ age: state.homeSaleAge, label: 'House sold', detail: fmtMoneyShort(state.homeSaleProceeds) + ' into the portfolio; housing ' + fmtMoneyShort(state.postSaleHousing || 0) + '/yr after' });
   if (has(state.yourBreakStart) && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Career break', detail: 'No wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd }); events.push({ age: state.yourBreakEnd, label: 'Back to work', detail: 'Wages resume' }); }
   if (state.hasPartner && has(state.partnerBreakStart)) { events.push({ age: state.age + (state.partnerBreakStart - state.partnerAge), label: 'Partner’s break', detail: 'Partner has no wages for ' + (state.partnerBreakEnd - state.partnerBreakStart) + ' years' }); }
