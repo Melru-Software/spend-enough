@@ -1071,8 +1071,9 @@ function renderDashboard() {
     <aside class="sidebar" role="complementary" aria-label="Planning controls">
       <div class="sidebar-section">
         <div class="sidebar-heading">Try a scenario</div>
-        <div class="sidebar-sub">Each one shows the result next to where you started.</div>
+        <div class="sidebar-sub">${isPaid() ? 'Each one puts the result next to where you started.' : 'Each one shows how the numbers change from where you started.'}</div>
         ${presets.map(p => `<button class="preset-btn" onclick="applyPreset('${p.id}')">${p.label}</button>`).join('')}
+        ${renderSidebarImpact()}
       </div>
 
       <div class="sidebar-section">
@@ -1126,7 +1127,6 @@ function renderDashboard() {
         <fieldset class="locked-preview" disabled>${moreOptionsHTML()}</fieldset>`) : ''}
       </div>
 
-      ${renderSidebarImpact()}
 
       <div class="sidebar-section">
         <div class="sidebar-heading">Saved scenarios</div>
@@ -1421,7 +1421,7 @@ function renderSidebarImpact() {
   const im = computeImpact();
   const compareBtn = `<button style="font-size:13px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;margin-top:2px" onclick="toggleCompare()">${compareOn && isPaid() ? 'Stop comparing' : 'Compare side by side'}${!isPaid() ? ' &#x1f512;' : ''}</button>`;
   if (!im) {
-    if (compareOn && isPaid()) return `<div style="background:var(--bone-2);margin:-4px -20px 10px;padding:8px 20px;border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--ink-mute)">Comparing against <strong style="color:var(--ink)">${baselineName}</strong>. Change something to see the two futures diverge. ${compareBtn}</div>`;
+    if (compareOn && isPaid()) return `<div style="background:var(--bone-2);margin:10px -20px 0;padding:10px 20px;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);font-size:13px;color:var(--ink-mute)">Comparing against <strong style="color:var(--ink)">${baselineName}</strong>. Change something to see the two futures diverge. ${compareBtn}</div>`;
     return '';
   }
   const fdTxt = (im.finalDelta >= 0 ? '+' : '') + fmtMoneyShort(im.finalDelta);
@@ -1431,8 +1431,8 @@ function renderSidebarImpact() {
       <button onclick="revertChange('${c.key}')" title="Undo this change" style="flex-shrink:0;background:none;border:none;cursor:pointer;font-size:11px;color:var(--ink-mute);padding:0;font-family:inherit;text-decoration:underline;text-decoration-style:dotted">undo</button>
     </div>`
   ).join('');
-  return `<div style="background:var(--bone-2);margin:-4px -20px 10px;padding:8px 20px;border-bottom:1px solid var(--line-soft)">
-    <div style="font-size:12px;color:var(--ink-mute);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em">Versus ${baselineName}</div>
+  return `<div style="background:var(--bone-2);margin:10px -20px 0;padding:10px 20px;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)">
+    <div style="font-size:12px;color:var(--ink-mute);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.06em">${currentName !== 'Current' ? currentName + ' versus ' + baselineName : 'Versus ' + baselineName}</div>
     ${changeRows}
     <div style="font-size:13px;color:var(--ink-mute);margin-top:6px;padding-top:6px;border-top:1px solid var(--line-soft)">Success ${succLabel(baselineResult)} \u2192 <strong style="color:var(--ink)">${succLabel(lastSimResult)}</strong> &middot; ${fdTxt} median ending</div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
