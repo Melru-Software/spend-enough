@@ -586,7 +586,7 @@ window.track=function(n){try{if(window.plausible)window.plausible(n);else if(win
    only UI: state wiring, rendering, charts, handlers, and modals.
    ---------------------------------------------------------------------------- */
 
-let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+let state = withDefaults(null);
 let activeView = 'onboarding';
 let savedScenarios = JSON.parse(localStorage.getItem('zeroline_scenarios') || '[]');
 let chart = null, cashflowChart = null;
@@ -612,6 +612,9 @@ const CONFIG = Object.assign({ checkoutUrl: '', price: '$39', emailEndpoint: '' 
 const FLAGS = { hardcodedPresets: false };
 // Lemon Squeezy license keys are UUIDs. Anything else is not a key.
 const KEY_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const has = (v) => v !== null && v !== undefined;
+// Fill any field a saved or older state lacks, so 'not set' is always null rather than undefined.
+function withDefaults(s) { return Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), s || {}); }
 const pct = (x, d) => ((+x || 0) * 100).toFixed(d === undefined ? 1 : d) + '%';
 
 // ============================================================================
@@ -785,13 +788,13 @@ function generatePresets(s) {
 
   // ---- Time off and saving (the decisions this tool was built for) ----
   if (s.yourIncome > 0 && yearsToRetire > 2) {
-    presets.push({ id: 'careerBreak', label: s.yourBreakStart !== null ? 'Change my time off' : 'Take time off, then go back' });
+    presets.push({ id: 'careerBreak', label: has(s.yourBreakStart) ? 'Change my time off' : 'Take time off, then go back' });
   }
   if (s.hasPartner && s.partnerIncome > 0 && s.partnerStopWorkAge - s.partnerAge > 2) {
-    presets.push({ id: 'partnerBreak', label: s.partnerBreakStart !== null ? 'Change my partner’s time off' : 'Partner takes time off' });
+    presets.push({ id: 'partnerBreak', label: has(s.partnerBreakStart) ? 'Change my partner’s time off' : 'Partner takes time off' });
   }
-  presets.push({ id: 'spendMore', label: s.extraSpendStart !== null ? 'Change the extra spending' : 'Spend more for a while' });
-  if (s.housing > 0 || s.homeSaleAge !== null) presets.push({ id: 'sellHouse', label: s.homeSaleAge !== null ? 'Change the house sale' : 'Sell the house later' });
+  presets.push({ id: 'spendMore', label: has(s.extraSpendStart) ? 'Change the extra spending' : 'Spend more for a while' });
+  if (s.housing > 0 || has(s.homeSaleAge)) presets.push({ id: 'sellHouse', label: has(s.homeSaleAge) ? 'Change the house sale' : 'Sell the house later' });
   if (s.housing > 0 && s.mortgagePayoffAge > s.age + 2 && !(s.mortgageBalance > 0)) {
     presets.push({ id: 'payoffHouse', label: 'Pay off the house early' });
   }
@@ -878,7 +881,7 @@ function succLabel(r) {
 function modeName(m) { return m === 'historical' ? 'Historical' : m === 'montecarlo' ? 'Simulated' : 'Fixed'; }
 const SHOCK_ERAS = [['dotcom', '2000 to 2009'], ['depression', '1929 to 1938'], ['stagflation', '1969 to 1978']];
 function shockLabel(id) { const e = SHOCK_ERAS.find(x => x[0] === id); return e ? e[1] : (id || 'none'); }
-function shockSentence(unit) { return state.shockEra && state.shockAge !== null ? ' From age ' + state.shockAge + ', every ' + unit + ' gets the real ' + shockLabel(state.shockEra) + ' returns for ten years, so the count answers what happens if that decade hits right then.' : ''; }
+function shockSentence(unit) { return state.shockEra && has(state.shockAge) ? ' From age ' + state.shockAge + ', every ' + unit + ' gets the real ' + shockLabel(state.shockEra) + ' returns for ten years, so the count answers what happens if that decade hits right then.' : ''; }
 function mixLabel() { return Math.round(state.stockPct * 100) + '/' + Math.round((1 - state.stockPct) * 100); }
 
 const app = document.getElementById('app');
@@ -1001,6 +1004,9 @@ window.finishOnboarding = function() {
   state.partnerSSAmount = num('ob_partnerSS');
   state.yourBreakStart = state.yourBreakEnd = state.partnerBreakStart = state.partnerBreakEnd = null;
   state.contribPauseStart = state.contribPauseEnd = null;
+  state.extraSpend = 0; state.extraSpendStart = state.extraSpendEnd = null;
+  state.shockEra = null; state.shockAge = null;
+  state.yourPartTimeAmount = 0; state.partnerPartTimeAmount = 0;
   // Reset any preset-derived state (home sale, life events) so nothing carries over
   state.homeSaleAge = null;
   state.homeSaleProceeds = 0; state.postSaleHousing = 0; state.postPayoffSpend = 0;
@@ -1049,7 +1055,7 @@ function runPendingScenario() {
 
 window.goToOnboarding = function() { activeView = 'onboarding'; render(); };
 window.resetToDefaults = function() {
-  if (confirm('Reset to your starting values?')) { state = JSON.parse(JSON.stringify(baselineState || DEFAULT_STATE)); maxSpendStale = true; spendingLevelsStale = true; render(); }
+  if (confirm('Reset to your starting values?')) { state = withDefaults(baselineState); maxSpendStale = true; spendingLevelsStale = true; render(); }
 };
 
 // ============================================================================
@@ -1481,20 +1487,20 @@ function renderAssumptions(result) {
   rows.push(asmRow('Fees', `${asmInput('feeRate', ((state.feeRate || 0) * 100).toFixed(2), { min: 0, max: 3, step: 0.05, label: 'Annual fee percent' })} a year is subtracted from every year’s return. That covers fund expense ratios and any advisor fee. The default, 0.10%, is a typical low-cost index fund. Index funds run about 0.03 to 0.2%, and with an advisor the total is often near 1%.`));
   rows.push(asmRow('Inflation', `Everything is in today’s dollars. Spending, Social Security, and housing are held constant in real terms, and the return data is already inflation-adjusted. Wages grow <strong>${pct(state.yourIncomeGrowth)}</strong> a year above inflation${isPaid() ? ' (change it under More options)' : ''}. A fixed mortgage payment is treated as if it rose with inflation, which slightly overstates housing cost in later years.`));
   const gr = state.guardrailsEnabled;
-  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending)}</strong> a year until age ${state.slowDownAge}, then <strong>${fmtMoney(state.lateSpending)}</strong>${state.extraSpend > 0 && state.extraSpendStart !== null ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails <strong>${gr ? 'on' : 'off'}</strong> <label class="asm-toggle"><input type="checkbox" ${gr ? 'checked' : ''} onchange="update('guardrailsEnabled', this.checked)"/> flex spending with the market</label>. ${gr
+  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending)}</strong> a year until age ${state.slowDownAge}, then <strong>${fmtMoney(state.lateSpending)}</strong>${state.extraSpend > 0 && has(state.extraSpendStart) ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails <strong>${gr ? 'on' : 'off'}</strong> <label class="asm-toggle"><input type="checkbox" ${gr ? 'checked' : ''} onchange="update('guardrailsEnabled', this.checked)"/> flex spending with the market</label>. ${gr
     ? `Starting from the withdrawal rate in your first retired year, spending is cut <strong>${pct(state.guardrailCutPct, 0)}</strong> in any year the rate runs more than ${pct(state.guardrailBandPct, 0)} above it, and boosted <strong>${pct(state.guardrailBoostPct, 0)}</strong> when more than ${pct(state.guardrailBandPct, 0)} below. Cuts do not compound. The median path shown cut spending in <strong>${result.medianRunFlexCuts || 0}</strong> year${(result.medianRunFlexCuts || 0) === 1 ? '' : 's'}.${isPaid() ? ' Cut and boost sizes are under Spending flexibility below.' : ''}`
     : 'The same amount is withdrawn every year no matter what markets do.'}`));
-  if (state.housing > 0 || state.homeSaleAge !== null) {
+  if (state.housing > 0 || has(state.homeSaleAge)) {
     const h = [];
     if (state.housing > 0) h.push('<strong>' + fmtMoney(state.housing) + '</strong> a year until the mortgage is paid off at ' + state.mortgagePayoffAge + (state.postPayoffSpend > 0 ? ', after which that money is spent' : ', after which it stays in the portfolio') + '.');
-    if (state.homeSaleAge !== null) h.push('At ' + state.homeSaleAge + ' the house is sold: <strong>' + fmtMoney(state.homeSaleProceeds) + '</strong> goes into the portfolio and housing costs ' + fmtMoney(state.postSaleHousing || 0) + ' a year from then on.');
+    if (has(state.homeSaleAge)) h.push('At ' + state.homeSaleAge + ' the house is sold: <strong>' + fmtMoney(state.homeSaleProceeds) + '</strong> goes into the portfolio and housing costs ' + fmtMoney(state.postSaleHousing || 0) + ' a year from then on.');
     h.push('Housing is held in today’s dollars.');
     rows.push(asmRow('Housing', h.join(' ')));
   }
   if (state.yourIncome > 0 || (state.hasPartner && state.partnerIncome > 0)) {
     const bits = [];
-    if (state.yourIncome > 0) bits.push('You earn <strong>' + fmtMoney(state.yourIncome) + '</strong> a year until age ' + state.yourStopWorkAge + (state.yourPartTimeAmount > 0 ? ', with ' + fmtMoney(state.yourPartTimeAmount) + ' part-time from ' + state.yourPartTimeStart + ' to ' + state.yourPartTimeEnd + (state.yourPartTimeEnd < state.yourStopWorkAge ? ' and full-time wages after' : '') : '') + (state.yourBreakStart !== null ? ', with no wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd : '') + '.');
-    if (state.hasPartner && state.partnerIncome > 0) bits.push('Your partner earns ' + fmtMoney(state.partnerIncome) + ' until ' + state.partnerStopWorkAge + (state.partnerBreakStart !== null ? ', off from ' + state.partnerBreakStart + ' to ' + state.partnerBreakEnd : '') + '.');
+    if (state.yourIncome > 0) bits.push('You earn <strong>' + fmtMoney(state.yourIncome) + '</strong> a year until age ' + state.yourStopWorkAge + (state.yourPartTimeAmount > 0 ? ', with ' + fmtMoney(state.yourPartTimeAmount) + ' part-time from ' + state.yourPartTimeStart + ' to ' + state.yourPartTimeEnd + (state.yourPartTimeEnd < state.yourStopWorkAge ? ' and full-time wages after' : '') : '') + (has(state.yourBreakStart) ? ', with no wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd : '') + '.');
+    if (state.hasPartner && state.partnerIncome > 0) bits.push('Your partner earns ' + fmtMoney(state.partnerIncome) + ' until ' + state.partnerStopWorkAge + (has(state.partnerBreakStart) ? ', off from ' + state.partnerBreakStart + ' to ' + state.partnerBreakEnd : '') + '.');
     bits.push('Whatever is left after tax, spending, and housing goes into the portfolio each year.');
     rows.push(asmRow('Work', bits.join(' ')));
   }
@@ -1558,12 +1564,12 @@ function renderEventTimeline() {
   }
   else if (state.yourStopWorkAge > state.age && state.yourIncome > 0) events.push({ age: state.yourStopWorkAge, label: 'You retire', detail: 'Income drops from ' + fmtMoneyShort(state.yourIncome) + ' to $0' });
   if (state.hasPartner && state.partnerStopWorkAge > state.partnerAge && state.partnerIncome > 0) events.push({ age: state.partnerStopWorkAge, label: 'Partner retires', detail: 'Partner income drops to $0' });
-  if (state.housing > 0 && state.mortgagePayoffAge > state.age && (state.homeSaleAge === null || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr housing cost ' + (state.postPayoffSpend > 0 ? 'moves to spending' : 'drops') });
-  if (state.homeSaleAge !== null) events.push({ age: state.homeSaleAge, label: 'House sold', detail: fmtMoneyShort(state.homeSaleProceeds) + ' into the portfolio; housing ' + fmtMoneyShort(state.postSaleHousing || 0) + '/yr after' });
-  if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Career break', detail: 'No wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd }); events.push({ age: state.yourBreakEnd, label: 'Back to work', detail: 'Wages resume' }); }
-  if (state.hasPartner && state.partnerBreakStart !== null) { events.push({ age: state.age + (state.partnerBreakStart - state.partnerAge), label: 'Partner’s break', detail: 'Partner has no wages for ' + (state.partnerBreakEnd - state.partnerBreakStart) + ' years' }); }
-  if (state.shockEra && state.shockAge !== null) events.push({ age: state.shockAge, label: 'Bad decade starts', detail: shockLabel(state.shockEra) + ' returns for ten years' });
-  if (state.extraSpend > 0 && state.extraSpendStart !== null) { events.push({ age: state.extraSpendStart, label: 'Extra spending', detail: '+' + fmtMoneyShort(state.extraSpend) + '/yr until ' + state.extraSpendEnd }); events.push({ age: state.extraSpendEnd, label: 'Extra spending ends', detail: '' }); }
+  if (state.housing > 0 && state.mortgagePayoffAge > state.age && (!has(state.homeSaleAge) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr housing cost ' + (state.postPayoffSpend > 0 ? 'moves to spending' : 'drops') });
+  if (has(state.homeSaleAge)) events.push({ age: state.homeSaleAge, label: 'House sold', detail: fmtMoneyShort(state.homeSaleProceeds) + ' into the portfolio; housing ' + fmtMoneyShort(state.postSaleHousing || 0) + '/yr after' });
+  if (has(state.yourBreakStart) && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Career break', detail: 'No wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd }); events.push({ age: state.yourBreakEnd, label: 'Back to work', detail: 'Wages resume' }); }
+  if (state.hasPartner && has(state.partnerBreakStart)) { events.push({ age: state.age + (state.partnerBreakStart - state.partnerAge), label: 'Partner’s break', detail: 'Partner has no wages for ' + (state.partnerBreakEnd - state.partnerBreakStart) + ' years' }); }
+  if (state.shockEra && has(state.shockAge)) events.push({ age: state.shockAge, label: 'Bad decade starts', detail: shockLabel(state.shockEra) + ' returns for ten years' });
+  if (state.extraSpend > 0 && has(state.extraSpendStart)) { events.push({ age: state.extraSpendStart, label: 'Extra spending', detail: '+' + fmtMoneyShort(state.extraSpend) + '/yr until ' + state.extraSpendEnd }); events.push({ age: state.extraSpendEnd, label: 'Extra spending ends', detail: '' }); }
   if (state.ssStartAge > state.age && (state.yourSSAmount > 0 || state.partnerSSAmount > 0)) events.push({ age: state.ssStartAge, label: 'Social Security begins', detail: fmtMoneyShort(state.yourSSAmount + state.partnerSSAmount) + '/yr starts' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending changes', detail: fmtMoneyShort(state.spending) + ' \u2192 ' + fmtMoneyShort(state.lateSpending) + '/yr' });
   if (state.oneTimeEvents) state.oneTimeEvents.forEach(ev => events.push({ age: ev.age, label: ev.label, detail: fmtMoneyShort(ev.amount) }));
@@ -1896,11 +1902,11 @@ function drawMainChart(result, compare) {
   if (state.yourPartTimeAmount > 0) { const glide = state.yourPartTimeEnd >= state.yourStopWorkAge; events.push({ age: state.yourPartTimeStart, label: 'Part-time' }); events.push({ age: state.yourPartTimeEnd, label: glide ? 'Stop working' : 'Full time' }); if (!glide && state.yourStopWorkAge < state.targetAge) events.push({ age: state.yourStopWorkAge, label: 'Retire' }); }
   else if (state.yourStopWorkAge > state.age && state.yourStopWorkAge < state.targetAge) events.push({ age: state.yourStopWorkAge, label: 'Retire' });
   if (state.ssStartAge > state.age) events.push({ age: state.ssStartAge, label: 'SS starts' });
-  if (state.mortgagePayoffAge > state.age && state.housing > 0 && (state.homeSaleAge === null || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
-  if (state.homeSaleAge !== null) events.push({ age: state.homeSaleAge, label: 'House sold' });
-  if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Break' }); events.push({ age: state.yourBreakEnd, label: 'Back to work' }); }
-  if (state.extraSpend > 0 && state.extraSpendStart !== null) events.push({ age: state.extraSpendStart, label: 'Extra spending' });
-  if (state.shockEra && state.shockAge !== null) events.push({ age: state.shockAge, label: 'Bad decade' });
+  if (state.mortgagePayoffAge > state.age && state.housing > 0 && (!has(state.homeSaleAge) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
+  if (has(state.homeSaleAge)) events.push({ age: state.homeSaleAge, label: 'House sold' });
+  if (has(state.yourBreakStart) && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Break' }); events.push({ age: state.yourBreakEnd, label: 'Back to work' }); }
+  if (state.extraSpend > 0 && has(state.extraSpendStart)) events.push({ age: state.extraSpendStart, label: 'Extra spending' });
+  if (state.shockEra && has(state.shockAge)) events.push({ age: state.shockAge, label: 'Bad decade' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: state.lateSpending < state.spending ? 'Spending drops' : 'Spending rises' });
 
   // Chart.js plugin for vertical annotation lines
@@ -2169,7 +2175,7 @@ window.toggleCompare = function() {
 window.compareWith = function(i) {
   if (!isPaid()) { showUnlockModal(); return; }
   if (!savedScenarios[i]) return;
-  baselineState = JSON.parse(JSON.stringify(savedScenarios[i].state));
+  baselineState = withDefaults(savedScenarios[i].state);
   baselineName = savedScenarios[i].name; currentName = 'Current';
   compareOn = true; render();
 };
@@ -2303,20 +2309,20 @@ function dlgField(label, id, val, attrs, hint) {
   return `<div class="field" style="margin-top:10px"><label>${label}</label><input type="number" id="${id}" value="${val === null || val === undefined ? '' : val}" ${attrs}/>${hint ? `<span class="field-hint">${hint}</span>` : ''}</div>`;
 }
 window.showScenarioModal = function(id) {
-  const isSet = { careerBreak: state.yourBreakStart !== null, partnerBreak: state.partnerBreakStart !== null, spendMore: state.extraSpendStart !== null, shockAtRetirement: !!state.shockEra, partTime: state.yourPartTimeAmount > 0, sellHouse: state.homeSaleAge !== null }[id];
+  const isSet = { careerBreak: has(state.yourBreakStart), partnerBreak: has(state.partnerBreakStart), spendMore: has(state.extraSpendStart), shockAtRetirement: !!state.shockEra, partTime: state.yourPartTimeAmount > 0, sellHouse: has(state.homeSaleAge) }[id];
   let body = '', intro = '';
   if (id === 'careerBreak') {
     intro = 'No wages between these ages, and no raises while you are off. Everything else stays the same.';
-    body = dlgField('Off from age', 'sc_a', state.yourBreakStart !== null ? state.yourBreakStart : state.age, `min="${state.age}" max="${state.yourStopWorkAge - 1}" step="1"`) + dlgField('Back to work at age', 'sc_b', state.yourBreakEnd !== null ? state.yourBreakEnd : Math.min(state.age + 2, state.yourStopWorkAge), `min="${state.age + 1}" max="${state.yourStopWorkAge}" step="1"`);
+    body = dlgField('Off from age', 'sc_a', has(state.yourBreakStart) ? state.yourBreakStart : state.age, `min="${state.age}" max="${state.yourStopWorkAge - 1}" step="1"`) + dlgField('Back to work at age', 'sc_b', has(state.yourBreakEnd) ? state.yourBreakEnd : Math.min(state.age + 2, state.yourStopWorkAge), `min="${state.age + 1}" max="${state.yourStopWorkAge}" step="1"`);
   } else if (id === 'partnerBreak') {
     intro = 'Your partner has no wages between these ages, and no raises while off.';
-    body = dlgField('Off from age', 'sc_a', state.partnerBreakStart !== null ? state.partnerBreakStart : state.partnerAge, `min="${state.partnerAge}" max="${state.partnerStopWorkAge - 1}" step="1"`) + dlgField('Back to work at age', 'sc_b', state.partnerBreakEnd !== null ? state.partnerBreakEnd : Math.min(state.partnerAge + 2, state.partnerStopWorkAge), `min="${state.partnerAge + 1}" max="${state.partnerStopWorkAge}" step="1"`);
+    body = dlgField('Off from age', 'sc_a', has(state.partnerBreakStart) ? state.partnerBreakStart : state.partnerAge, `min="${state.partnerAge}" max="${state.partnerStopWorkAge - 1}" step="1"`) + dlgField('Back to work at age', 'sc_b', state.partnerBreakEnd !== null ? state.partnerBreakEnd : Math.min(state.partnerAge + 2, state.partnerStopWorkAge), `min="${state.partnerAge + 1}" max="${state.partnerStopWorkAge}" step="1"`);
   } else if (id === 'spendMore') {
-    const on = state.extraSpendStart !== null;
+    const on = has(state.extraSpendStart);
     intro = 'Extra spending on top of your usual amount for these years. College, childcare, a parent’s care, a year of travel, or money you would otherwise have invested. It is treated as committed, so the guardrails do not cut it.';
     body = dlgField('Extra spending per year', 'sc_c', on ? state.extraSpend : '', 'min="0" step="1000" placeholder="e.g. 25000"', 'In today’s dollars, before any tax.') + dlgField('From age', 'sc_a', on ? state.extraSpendStart : state.age, `min="${state.age}" max="${state.targetAge - 1}" step="1"`) + dlgField('Until age', 'sc_b', on ? state.extraSpendEnd : state.age + 4, `min="${state.age + 1}" max="${state.targetAge}" step="1"`);
   } else if (id === 'sellHouse') {
-    const on = state.homeSaleAge !== null;
+    const on = has(state.homeSaleAge);
     intro = 'What you clear from the sale goes into the portfolio that year, and housing switches to whatever it costs after that (rent, or zero if you move somewhere paid for).';
     body = dlgField('Sell at age', 'sc_a', on ? state.homeSaleAge : Math.max(state.age + 1, state.mortgagePayoffAge), `min="${state.age + 1}" max="${state.targetAge}" step="1"`) + dlgField('What you clear after costs and any mortgage', 'sc_c', on ? state.homeSaleProceeds : '', 'min="0" step="10000" placeholder="e.g. 400000"', 'In today’s dollars.') + dlgField('Housing cost per year after the sale', 'sc_b', on ? state.postSaleHousing : 0, 'min="0" step="1000"', 'Rent, or 0.');
   } else if (id === 'partTime') {
@@ -2327,7 +2333,7 @@ window.showScenarioModal = function(id) {
       + `<div class="field" style="margin-top:12px"><label>Then</label><div class="toggle-group"><button type="button" class="toggle-btn ${glide ? '' : 'active'}" data-then="resume" onclick="pickThen(this)">Back to full time</button><button type="button" class="toggle-btn ${glide ? 'active' : ''}" data-then="stop" onclick="pickThen(this)">Stop working</button></div><span class="field-hint" id="sc_then_hint">${glide ? 'Wages end for good at the second age.' : 'Full-time wages come back until your retirement age of ' + state.yourStopWorkAge + '.'}</span></div>`;
   } else if (id === 'shockAtRetirement') {
     intro = 'From the age you pick, the market does what it did in that decade. Every period in the history test gets the same ten bad years there, so the count answers what happens if it hits right then.';
-    const defAge = state.shockAge !== null ? state.shockAge : ((state.yourIncome > 0 && state.yourStopWorkAge > state.age) ? state.yourStopWorkAge : state.age);
+    const defAge = has(state.shockAge) ? state.shockAge : ((state.yourIncome > 0 && state.yourStopWorkAge > state.age) ? state.yourStopWorkAge : state.age);
     body = `<div class="field" style="margin-top:10px"><label>Which decade</label><select id="sc_era">${SHOCK_ERAS.map(([v, l]) => `<option value="${v}" ${(state.shockEra || 'dotcom') === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>` + dlgField('Starting at age', 'sc_a', defAge, `min="${state.age}" max="${state.targetAge}" step="1"`);
   }
   openModal(`<h2>${SCENARIO_TITLES[id]}</h2><p>${intro}</p>${body}
@@ -2406,7 +2412,7 @@ window.saveScenario = function() {
   localStorage.setItem('zeroline_scenarios', JSON.stringify(savedScenarios));
   render();
 };
-window.loadScenario = function(i) { state = JSON.parse(JSON.stringify(savedScenarios[i].state)); invalidateCaches(); render(); };
+window.loadScenario = function(i) { state = withDefaults(savedScenarios[i].state); invalidateCaches(); render(); };
 window.deleteScenario = function(i) { savedScenarios.splice(i, 1); localStorage.setItem('zeroline_scenarios', JSON.stringify(savedScenarios)); render(); };
 
 // ============================================================================
