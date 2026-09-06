@@ -1024,8 +1024,8 @@ function renderDashboard() {
         <div class="sidebar-sub">How returns are modeled</div>
         <div class="toggle-group">
           <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
-          <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
           <button class="toggle-btn ${state.simMode==='fixed'?'active':''}" onclick="setMode('fixed')">Fixed</button>
+          <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
         </div>
         <div style="font-size:14px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Runs your plan through every rolling period of real U.S. market returns since 1926 for your '+mixLabel()+' stock/bond mix.':state.simMode==='montecarlo'?'Runs '+state.mcSims+' randomized futures drawn from a bell curve matched to your mix’s history (change it under Assumptions).':'Projects a single path at one steady real return. No range.'}</div>
       </div>
