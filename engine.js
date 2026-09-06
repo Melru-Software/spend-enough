@@ -252,9 +252,14 @@ function simulateOnce(state, returnSeries) {
     if (age >= state.ssStartAge) ssIncome += state.yourSSAmount;
     if (state.hasPartner && partnerAge >= state.ssStartAge) ssIncome += state.partnerSSAmount;
 
-    const housing = age < mortgagePayoffAge ? state.housing : 0;
+    // Housing: the payment until the mortgage is paid off, then nothing; after a home
+    // sale, whatever housing costs from then on (rent, or zero).
+    const sold = state.homeSaleAge !== null && state.homeSaleAge !== undefined && age >= state.homeSaleAge;
+    const housing = sold ? (state.postSaleHousing || 0) : (age < mortgagePayoffAge ? state.housing : 0);
 
     let spend = age >= state.slowDownAge ? state.lateSpending : state.spending;
+    // Freed mortgage payment redirected to spending after payoff (owner's choice in the payoff dialog).
+    if (state.postPayoffSpend > 0 && age >= mortgagePayoffAge && !sold) spend += state.postPayoffSpend;
     const contribPaused = state.contributions > 0 && inWindow(age, state.contribPauseStart, state.contribPauseEnd);
 
     // Compute income first (independent of spend). Wages carry the wage rate (which
@@ -705,7 +710,9 @@ const DEFAULT_STATE = {
   // Extra spending per year for a window (null ages = none).
   extraSpend: 0, extraSpendStart: null, extraSpendEnd: null,
   ssStartAge: 67, yourSSAmount: 0, partnerSSAmount: 0,
-  oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0,
+  oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0, postSaleHousing: 0,
+  // After an accelerated payoff, the old payment can be spent instead of invested.
+  postPayoffSpend: 0,
   // Portfolio: share in stocks (rest in 10-year Treasuries), annual fee drag
   // (0.10% = a typical low-cost index fund; owner-chosen default, editable in the app).
   stockPct: 0.6, feeRate: 0.001,

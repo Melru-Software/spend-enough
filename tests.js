@@ -442,6 +442,22 @@ test('extra spending applies for its window only and lowers the ending balance',
   assert.ok(more.medianFinal < base.medianFinal && more.successRate <= base.successRate);
 });
 
+test('freed mortgage payment can be spent after payoff; a home sale adds proceeds and switches housing', () => {
+  const base = mk({ age: 50, targetAge: 90, portfolio: 1000000, spending: 30000, lateSpending: 30000, slowDownAge: 200,
+                    housing: 24000, mortgagePayoffAge: 60, yourIncome: 0, hasPartner: false, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false });
+  const flat = new Array(41).fill(0.03);
+  const y = (yrs, a) => yrs.find(r => r.age === a);
+  const inv = E.simulateOnce(base, flat);
+  assert.strictEqual(y(inv, 59).spending, 54000); assert.strictEqual(y(inv, 60).spending, 30000, 'housing drops to zero after payoff');
+  const spent = E.simulateOnce(Object.assign({}, base, { postPayoffSpend: 24000 }), flat);
+  assert.strictEqual(y(spent, 60).spending, 54000, 'freed payment spent instead');
+  assert.ok(y(spent, 89).portfolio < y(inv, 89).portfolio);
+  const sale = E.simulateOnce(Object.assign({}, base, { homeSaleAge: 70, homeSaleProceeds: 400000, postSaleHousing: 18000 }), flat);
+  assert.strictEqual(y(sale, 69).spending, 30000); assert.strictEqual(y(sale, 70).spending, 48000, 'rent from the sale year');
+  assert.ok(y(sale, 70).portfolio - y(inv, 70).portfolio > 300000, 'proceeds arrive in the sale year');
+  assert.ok(Math.abs((y(sale, 70).portfolio) - (y(sale, 70).portfolioStart - y(sale, 70).withdrawal) * 1.03) < 1, 'sale-year balance grows normally');
+});
+
 // ---- 14. Market shock ------------------------------------------------------------
 test('a market shock splices the era sequence in at the shock age and lowers success', () => {
   const s = pureWithdrawal(1000000, 40000, 30, { stockPct: 1.0 });
