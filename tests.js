@@ -371,20 +371,38 @@ test('career break is not retirement for the guardrail reference', () => {
   const years = E.simulateOnce(s, new Array(56).fill(0.05));
   assert.ok(!years.filter(y => y.age < 60).some(y => y.flexed), 'nothing flexes before the stop-work age, break included');
 });
-test('pausing contributions spends that money for the window only', () => {
+test('a stated investment amount caps what is invested; the rest of take-home is spent', () => {
+  // net = 120k * 0.8 = 96k; spend 50k; surplus 46k; invest 15k -> 31k treated as spent.
   const s = mk({ age: 40, targetAge: 80, portfolio: 200000, spending: 50000, lateSpending: 50000, slowDownAge: 200,
                  yourIncome: 120000, yourStopWorkAge: 65, taxRate: 0.2, capGainsTax: 0, contributions: 15000,
-                 contribPauseStart: 41, contribPauseEnd: 44, hasPartner: false, guardrailsEnabled: false });
-  const years = E.simulateOnce(s, new Array(41).fill(0.05));
+                 hasPartner: false, guardrailsEnabled: false, yourIncomeGrowth: 0 });
+  const y = E.simulateOnce(s, new Array(41).fill(0)).find(r => r.age === 40);
+  assert.strictEqual(Math.round(y.spending), 81000); assert.strictEqual(Math.round(y.unallocated), 31000);
+  assert.strictEqual(Math.round(-y.withdrawal), 15000, 'exactly the stated amount is invested');
+  // blank contributions: everything unspent is invested
+  const b = E.simulateOnce(Object.assign({}, s, { contributions: 0 }), new Array(41).fill(0)).find(r => r.age === 40);
+  assert.strictEqual(Math.round(b.spending), 50000); assert.strictEqual(Math.round(-b.withdrawal), 46000);
+  // stated amount above the surplus: the surplus is what goes in, nothing is treated as spent
+  const c = E.simulateOnce(Object.assign({}, s, { contributions: 60000 }), new Array(41).fill(0)).find(r => r.age === 40);
+  assert.strictEqual(Math.round(c.spending), 50000); assert.strictEqual(Math.round(-c.withdrawal), 46000); assert.strictEqual(c.unallocated, 0);
+  // no wages: the rule does not apply
+  const r = E.simulateOnce(Object.assign({}, s, { yourIncome: 0 }), new Array(41).fill(0)).find(x => x.age === 40);
+  assert.strictEqual(r.unallocated, 0);
+});
+test('pausing contributions invests nothing for the window and resumes after', () => {
+  const s = mk({ age: 40, targetAge: 80, portfolio: 200000, spending: 50000, lateSpending: 50000, slowDownAge: 200,
+                 yourIncome: 120000, yourStopWorkAge: 65, taxRate: 0.2, capGainsTax: 0, contributions: 15000,
+                 contribPauseStart: 41, contribPauseEnd: 44, hasPartner: false, guardrailsEnabled: false, yourIncomeGrowth: 0 });
+  const years = E.simulateOnce(s, new Array(41).fill(0));
   const y = (a) => years.find(r => r.age === a);
-  assert.strictEqual(y(40).spending, 50000); assert.strictEqual(y(41).spending, 65000); assert.strictEqual(y(43).spending, 65000); assert.strictEqual(y(44).spending, 50000);
+  assert.strictEqual(Math.round(-y(40).withdrawal), 15000);
+  assert.strictEqual(Math.abs(Math.round(y(41).withdrawal)), 0, 'nothing invested while paused');
+  assert.strictEqual(Math.round(y(41).spending), 96000, 'all take-home spent while paused');
+  assert.strictEqual(Math.round(-y(44).withdrawal), 15000, 'investing resumes');
   assert.ok(y(41).contribPaused && !y(44).contribPaused);
   const paused = E.runForState(Object.assign({}, s, { simMode: 'historical' }));
   const not = E.runForState(Object.assign({}, s, { contribPauseStart: null, contribPauseEnd: null, simMode: 'historical' }));
   assert.ok(paused.medianFinal < not.medianFinal);
-  // contributions with no pause window change nothing
-  const zero = E.runForState(Object.assign({}, s, { contributions: 0, contribPauseStart: null, contribPauseEnd: null, simMode: 'historical' }));
-  assert.strictEqual(not.medianFinal, zero.medianFinal);
 });
 test('inWindow treats null bounds as no window and end as exclusive', () => {
   assert.strictEqual(E.inWindow(40, null, null), false);

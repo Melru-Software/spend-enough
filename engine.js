@@ -253,10 +253,7 @@ function simulateOnce(state, returnSeries) {
     const housing = age < mortgagePayoffAge ? state.housing : 0;
 
     let spend = age >= state.slowDownAge ? state.lateSpending : state.spending;
-    // Paused retirement contributions: the money that would have gone into the portfolio
-    // is spent (or sits in cash) for these years instead. Modelled as extra spending.
     const contribPaused = state.contributions > 0 && inWindow(age, state.contribPauseStart, state.contribPauseEnd);
-    if (contribPaused) spend += state.contributions;
 
     // Compute income first (independent of spend). Wages carry the wage rate (which
     // includes payroll tax); Social Security is taxed at half the retirement rate as a
@@ -264,6 +261,18 @@ function simulateOnce(state, returnSeries) {
     const grossIncome = yourIncomeThisYear + partnerIncomeThisYear + ssIncome;
     const taxedIncome = (yourIncomeThisYear + partnerIncomeThisYear) * state.taxRate + ssIncome * (retRate * 0.5);
     const netIncome = grossIncome - taxedIncome;
+
+    // How much of a working year's surplus gets invested. Blank contributions (0) means
+    // everything not spent goes into the portfolio. A stated amount means exactly that much
+    // is invested and the rest of take-home is treated as spent (lifestyle, cash); while
+    // the contributions are paused, none of it is invested.
+    let unallocated = 0;
+    const wagesThisYear = yourIncomeThisYear + partnerIncomeThisYear;
+    if (state.contributions > 0 && wagesThisYear > 0) {
+      const target = contribPaused ? 0 : state.contributions;
+      const surplus = netIncome - spend - housing;
+      if (surplus > target) { unallocated = surplus - target; spend += unallocated; }
+    }
 
     // One-time events + home sale inflows/outflows
     let eventAdj = 0;
@@ -346,7 +355,7 @@ function simulateOnce(state, returnSeries) {
     let ranOutThisYear = false;
     if (portfolio <= 0) { portfolio = 0; ranOutThisYear = true; broken = true; if (useAccts) { accts.traditional = accts.roth = accts.taxable = 0; } }
 
-    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, onBreak: yourBreak || partnerBreak, contribPaused, ranOut: ranOutThisYear || broken });
+    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, onBreak: yourBreak || partnerBreak, contribPaused, unallocated, ranOut: ranOutThisYear || broken });
 
     // Real wage growth applies only in years actually worked (no raises during a break).
     if (!yourBreak) yourSalary *= (1 + (state.yourIncomeGrowth || 0));
@@ -680,9 +689,9 @@ const DEFAULT_STATE = {
   partnerIncome: 0, partnerStopWorkAge: 65, partnerIncomeGrowth: 0.01,
   yourPartTimeAmount: 0, yourPartTimeStart: 65, yourPartTimeEnd: 70,
   partnerPartTimeAmount: 0, partnerPartTimeStart: 65, partnerPartTimeEnd: 70,
-  // Career breaks (no wages from start age until the back-to-work age; null = none) and
-  // retirement contributions per year, with an optional pause window during which that
-  // money is spent instead of invested.
+  // Career breaks (no wages from start age until the back-to-work age; null = none).
+  // contributions = how much of take-home is invested each year while working (0 = all of
+  // what is not spent); the rest is treated as spent. The pause window invests nothing.
   yourBreakStart: null, yourBreakEnd: null, partnerBreakStart: null, partnerBreakEnd: null,
   contributions: 0, contribPauseStart: null, contribPauseEnd: null,
   // Market shock: id from HISTORICAL_SCENARIOS whose first ten years replace the returns

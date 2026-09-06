@@ -794,7 +794,7 @@ function generatePresets(s) {
     presets.push({ id: 'partnerBreak', label: 'Partner takes 2 years off' });
   }
   if (s.yourIncome > 0 && yearsToRetire > 3 && s.contribPauseStart === null) {
-    presets.push({ id: 'pauseContrib', label: 'Stop contributing for 3 years' });
+    presets.push({ id: 'pauseContrib', label: 'Stop investing for 3 years' });
   }
   if (s.housing > 0 && s.mortgagePayoffAge > s.age + 2 && !(s.mortgageBalance > 0)) {
     presets.push({ id: 'payoffHouse', label: 'Pay off the house early' });
@@ -945,10 +945,9 @@ function renderOnboarding() {
         <div class="step-number">ii. What you have & spend</div>
         <h2 class="step-title">Your savings and spending</h2>
         <p class="step-hint">How much you've saved, and what you spend each year.</p>
-        <div class="field-grid cols-3">
+        <div class="field-grid">
           <div class="field"><label>Investment portfolio</label><input type="number" id="ob_portfolio" min="0" value="${state.portfolio || ''}" placeholder="e.g. 600000" step="10000"/><span class="field-hint">401k, IRA, brokerage, combined</span></div>
           <div class="field"><label>Annual spending</label><input type="number" id="ob_spending" min="0" value="${state.spending || ''}" placeholder="e.g. 70000" step="5000"/><span class="field-hint">Leave blank to find your "enough" number</span></div>
-          <div class="field"><label>Retirement savings per year</label><input type="number" id="ob_contrib" min="0" value="${state.contributions || ''}" placeholder="optional" step="1000"/><span class="field-hint">What you put into 401k, IRA and the like</span></div>
         </div>
       </div>
 
@@ -1006,7 +1005,6 @@ window.finishOnboarding = function() {
   state.mortgagePayoffAge = num('ob_mortgagePayoff') || 60;
   state.yourSSAmount = num('ob_yourSS');
   state.partnerSSAmount = num('ob_partnerSS');
-  state.contributions = num('ob_contrib');
   state.yourBreakStart = state.yourBreakEnd = state.partnerBreakStart = state.partnerBreakEnd = null;
   state.contribPauseStart = state.contribPauseEnd = null;
   // Reset any preset-derived state (home sale, life events) so nothing carries over
@@ -1080,7 +1078,7 @@ function renderDashboard() {
       <div class="sidebar-section">
         <div class="sidebar-heading">Try a scenario</div>
         <div class="sidebar-sub">Each one shows the result next to where you started.</div>
-        ${presets.map((p, i) => `<button class="preset-btn" onclick="applyPreset('${p.id}')"><span class="preset-icon">${roman(i+1)}.</span> ${p.label}</button>`).join('')}
+        ${presets.map(p => `<button class="preset-btn" onclick="applyPreset('${p.id}')">${p.label}</button>`).join('')}
       </div>
 
       <div class="sidebar-section">
@@ -1120,8 +1118,8 @@ function renderDashboard() {
           <input type="range" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" class="slider-input"/>
           <input type="number" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
         </div>` : ''}
-        ${(state.yourIncome > 0 || state.contributions > 0) ? `<div class="control">
-          <div class="control-row"><span class="control-label">Retirement savings<span class="help-mark" data-tip="What you put into 401k, IRA and the like each year. It is already part of what you do not spend; naming it lets you pause it.">i</span></span><span class="control-value">${fmtMoney(state.contributions)}</span></div>
+        ${state.contributions > 0 ? `<div class="control">
+          <div class="control-row"><span class="control-label">Invested each year<span class="help-mark" data-tip="401k, IRA, brokerage. Exactly this much goes into the portfolio while you work, and the rest of your take-home counts as spent. Set it to 0 to invest everything you don’t spend.">i</span></span><span class="control-value">${fmtMoney(state.contributions)}</span></div>
           <input type="range" min="0" max="80000" step="1000" value="${state.contributions}" oninput="slideLive(this,'contributions',this.value)" onchange="sliderCommit('contributions',this.value)" class="slider-input"/>
           <input type="number" min="0" max="80000" step="1000" value="${state.contributions}" oninput="slideLive(this,'contributions',this.value)" onchange="sliderCommit('contributions',this.value)" placeholder="Per year" class="mobile-input"/>
         </div>` : ''}
@@ -1260,20 +1258,19 @@ function renderChanges() {
   else if (working) adds.push(`<button class="link-btn" onclick="addBreak('your')">+ Career break</button>`);
   if (state.partnerBreakStart !== null) cards.push(card('Partner\u2019s career break', `Off from age ${ageInput(state.partnerBreakStart, state.partnerAge, state.partnerStopWorkAge, "setBreak('partner','start',this.value)", 'Partner break starts at age')} and back at ${ageInput(state.partnerBreakEnd, state.partnerAge + 1, state.partnerStopWorkAge, "setBreak('partner','end',this.value)", 'Partner back to work at age')}`, "clearBreak('partner')"));
   else if (pWorking) adds.push(`<button class="link-btn" onclick="addBreak('partner')">+ Partner\u2019s break</button>`);
-  if (state.contribPauseStart !== null && state.contributions > 0) cards.push(card('Savings paused', `From age ${ageInput(state.contribPauseStart, state.age, state.yourStopWorkAge, "setPause('start',this.value)", 'Pause starts at age')} to ${ageInput(state.contribPauseEnd, state.age + 1, state.yourStopWorkAge, "setPause('end',this.value)", 'Pause ends at age')}, the ${fmtMoney(state.contributions)} a year is spent instead of invested`, "clearPause()"));
-  else if (working) adds.push(`<button class="link-btn" onclick="addPause()">+ Pause savings</button>`);
+  if (state.contribPauseStart !== null && state.contributions > 0) cards.push(card('Investing paused', `From age ${ageInput(state.contribPauseStart, state.age, state.yourStopWorkAge, "setPause('start',this.value)", 'Pause starts at age')} to ${ageInput(state.contribPauseEnd, state.age + 1, state.yourStopWorkAge, "setPause('end',this.value)", 'Pause ends at age')}, nothing goes into the portfolio and the ${fmtMoney(state.contributions)} a year is spent`, "clearPause()"));
+  else if (working) adds.push(`<button class="link-btn" onclick="addPause()">+ Pause investing</button>`);
   if (state.shockEra) cards.push(card('Bad decade', `<select class="asm-select" onchange="setShock(this.value)" aria-label="Which decade">${SHOCK_ERAS.map(([v, l]) => `<option value="${v}" ${state.shockEra === v ? 'selected' : ''}>${l}</option>`).join('')}</select> returns, starting at age ${ageInput(state.shockAge, state.age, state.targetAge, "setShockAge(this.value)", 'Shock starts at age')}, in every period`, "setShock('')"));
   else adds.push(`<button class="link-btn" onclick="setShock('dotcom')">+ Bad decade</button>`);
   if (!cards.length && !adds.length) return '';
   return `<div class="sidebar-section">
         <div class="sidebar-heading">Changes along the way</div>
-        ${cards.length ? '' : '<div class="sidebar-sub">Time off, a pause in saving, or a bad stretch of markets.</div>'}
+        ${cards.length ? '' : '<div class="sidebar-sub">Time off, a pause in investing, or a bad stretch of markets.</div>'}
         ${cards.join('')}
         ${adds.length ? `<div class="ec-add">${adds.join('')}</div>` : ''}
       </div>`;
 }
 
-function roman(n) { return ['i','ii','iii','iv','v','vi','vii','viii'][n-1] || String(n); }
 
 function moreOptionsHTML() {
   const effRate = state.taxRate ? (state.taxRate * 100).toFixed(0) : '18';
@@ -1437,7 +1434,7 @@ function getVerdict(result) {
   return v;
 }
 
-const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', contributions: 'Retirement savings', contribPauseStart: 'Savings paused from', contribPauseEnd: 'Savings resume', shockEra: 'Bad decade', shockAge: 'Bad decade starts' });
+const IMPACT_FIELDS = () => ({ spending: 'Annual spending', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Housing cost', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', contributions: 'Invested each year', contribPauseStart: 'Investing paused from', contribPauseEnd: 'Investing resumes', shockEra: 'Bad decade', shockAge: 'Bad decade starts' });
 function fmtField(k, v) {
   if (v === null || v === undefined) return 'none';
   if (k === 'shockEra') return shockLabel(v);
@@ -1531,8 +1528,17 @@ function renderAssumptions(result) {
     const bits = [];
     if (state.yourIncome > 0) bits.push('You earn <strong>' + fmtMoney(state.yourIncome) + '</strong> a year until age ' + state.yourStopWorkAge + (state.yourBreakStart !== null ? ', with no wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd : '') + '.');
     if (state.hasPartner && state.partnerIncome > 0) bits.push('Your partner earns ' + fmtMoney(state.partnerIncome) + ' until ' + state.partnerStopWorkAge + (state.partnerBreakStart !== null ? ', off from ' + state.partnerBreakStart + ' to ' + state.partnerBreakEnd : '') + '.');
-    bits.push('Whatever is left after tax, spending, and housing goes into the portfolio each year.');
-    if (state.contributions > 0) bits.push('You said <strong>' + fmtMoney(state.contributions) + '</strong> of that is retirement savings' + (state.contribPauseStart !== null ? ', and from ' + state.contribPauseStart + ' to ' + state.contribPauseEnd + ' that money is spent instead.' : '.'));
+    const yr0 = (result.medianRun || []).find(y => y.yourIncome + y.partnerIncome > 0);
+    if (state.contributions > 0 && yr0) {
+      const takeHome = yr0.yourIncome + yr0.partnerIncome - (yr0.yourIncome + yr0.partnerIncome) * state.taxRate;
+      const surplus = takeHome - state.spending - (yr0.housing || 0);
+      if (surplus > state.contributions) bits.push('Your take-home is about ' + fmtMoneyShort(takeHome) + ' a year. You spend ' + fmtMoneyShort(state.spending + (yr0.housing || 0)) + ' and invest <strong>' + fmtMoney(state.contributions) + '</strong>, so the model treats the other ' + fmtMoneyShort(surplus - state.contributions) + ' as spent too.');
+      else if (surplus > 0) bits.push('Your take-home is about ' + fmtMoneyShort(takeHome) + ' a year, which leaves ' + fmtMoneyShort(surplus) + ' after spending and housing. That is less than the <strong>' + fmtMoney(state.contributions) + '</strong> you said you invest, so ' + fmtMoneyShort(surplus) + ' is what goes in.');
+      else bits.push('Your spending and housing use up your take-home, so nothing is invested while you work and the portfolio covers the gap.');
+      if (state.contribPauseStart !== null) bits.push('From ' + state.contribPauseStart + ' to ' + state.contribPauseEnd + ' nothing is invested and that money is spent.');
+    } else {
+      bits.push('Whatever is left after tax, spending, and housing goes into the portfolio each year.');
+    }
     rows.push(asmRow('Work', bits.join(' ')));
   }
   rows.push(asmRow('Taxes', `Wages are taxed at ${asmInput('taxRate', Math.round(state.taxRate * 100), { min: 0, max: 60, step: 1, label: 'Wage tax rate percent' })}, estimated from your income, filing status, and state, including payroll tax. In retirement, traditional-IRA withdrawals and half of Social Security are taxed at ${asmInput('retirementTaxRate', Math.round(retRate * 100), { min: 0, max: 60, step: 1, label: 'Retirement tax rate percent' })}. ${state.accountsEnabled
@@ -1593,7 +1599,7 @@ function renderEventTimeline() {
   if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Career break', detail: 'No wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd }); events.push({ age: state.yourBreakEnd, label: 'Back to work', detail: 'Wages resume' }); }
   if (state.hasPartner && state.partnerBreakStart !== null) { events.push({ age: state.age + (state.partnerBreakStart - state.partnerAge), label: 'Partner’s break', detail: 'Partner has no wages for ' + (state.partnerBreakEnd - state.partnerBreakStart) + ' years' }); }
   if (state.shockEra && state.shockAge !== null) events.push({ age: state.shockAge, label: 'Bad decade starts', detail: shockLabel(state.shockEra) + ' returns for ten years' });
-  if (state.contributions > 0 && state.contribPauseStart !== null) { events.push({ age: state.contribPauseStart, label: 'Savings paused', detail: fmtMoneyShort(state.contributions) + '/yr spent instead of invested until ' + state.contribPauseEnd }); events.push({ age: state.contribPauseEnd, label: 'Savings resume', detail: '' }); }
+  if (state.contributions > 0 && state.contribPauseStart !== null) { events.push({ age: state.contribPauseStart, label: 'Investing paused', detail: 'Nothing invested until ' + state.contribPauseEnd }); events.push({ age: state.contribPauseEnd, label: 'Investing resumes', detail: fmtMoneyShort(state.contributions) + '/yr' }); }
   if (state.ssStartAge > state.age && (state.yourSSAmount > 0 || state.partnerSSAmount > 0)) events.push({ age: state.ssStartAge, label: 'Social Security begins', detail: fmtMoneyShort(state.yourSSAmount + state.partnerSSAmount) + '/yr starts' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending changes', detail: fmtMoneyShort(state.spending) + ' \u2192 ' + fmtMoneyShort(state.lateSpending) + '/yr' });
   if (state.oneTimeEvents) state.oneTimeEvents.forEach(ev => events.push({ age: ev.age, label: ev.label, detail: fmtMoneyShort(ev.amount) }));
@@ -1927,7 +1933,7 @@ function drawMainChart(result, compare) {
   if (state.ssStartAge > state.age) events.push({ age: state.ssStartAge, label: 'SS starts' });
   if (state.mortgagePayoffAge > state.age && state.housing > 0) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
   if (state.yourBreakStart !== null && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Break' }); events.push({ age: state.yourBreakEnd, label: 'Back to work' }); }
-  if (state.contributions > 0 && state.contribPauseStart !== null) events.push({ age: state.contribPauseStart, label: 'Savings paused' });
+  if (state.contributions > 0 && state.contribPauseStart !== null) events.push({ age: state.contribPauseStart, label: 'Investing paused' });
   if (state.shockEra && state.shockAge !== null) events.push({ age: state.shockAge, label: 'Bad decade' });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: state.lateSpending < state.spending ? 'Spending drops' : 'Spending rises' });
 
@@ -2371,10 +2377,10 @@ function startComparison(label) {
   maxSpendView = false;
 }
 window.askContributions = function(thenId) {
-  openModal(`<h2>How much do you put into retirement each year?</h2>
-    <p>Your 401k, IRA, and anything else you save for later, in today's dollars. The scenario sends that money to spending instead for a few years.</p>
+  openModal(`<h2>How much do you invest each year?</h2>
+    <p>401k, IRA, brokerage, in today's dollars. From now on exactly this much goes into the portfolio while you work, and the rest of your take-home counts as spent. The scenario then pauses it for a few years.</p>
     <div class="field"><label>Per year</label><input type="number" id="ask_contrib" min="0" step="1000" placeholder="e.g. 15000"/></div>
-    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn-primary" onclick="finishAskContributions('${thenId}')">Run it</button><button class="btn-secondary" onclick="closeModal()">Cancel</button></div>`);
+    <div style="margin-top:14px;display:flex;gap:8px"><button class="btn-primary" onclick="finishAskContributions('${thenId}')">Run it</button><button class="btn-secondary" onclick="cancelAsk()">Cancel</button></div>`);
   const el = document.getElementById('ask_contrib'); if (el) el.focus();
 };
 window.finishAskContributions = function(thenId) {
@@ -2382,10 +2388,13 @@ window.finishAskContributions = function(thenId) {
   if (v <= 0) { const el = document.getElementById('ask_contrib'); if (el) el.style.borderColor = 'var(--danger)'; return; }
   state.contributions = v;
   closeModal();
-  if (thenId === 'addPause') addPause(); else applyPreset(thenId);
+  if (thenId === 'addPause') { addPause(); return; }
+  state.contribPauseStart = state.age; state.contribPauseEnd = Math.min(state.age + 3, state.yourStopWorkAge);
+  maxSpendView = false; invalidateCaches(); render();
 };
+window.cancelAsk = function() { closeModal(); if (compareOn && !computeImpact()) { compareOn = false; currentName = 'Current'; render(); } };
 window.applyPreset = function(id) {
-  if (id === 'pauseContrib' && !(state.contributions > 0)) { askContributions(id); return; }
+  if (id === 'pauseContrib' && !(state.contributions > 0)) { startComparison(presetLabel(id)); askContributions(id); return; }
   if (id === 'payoffHouse') { showPayoffModal(true); return; }
   startComparison(presetLabel(id));
   switch (id) {
