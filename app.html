@@ -6,7 +6,7 @@
 <title>Spend Enough</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600;8..60,700&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -83,7 +83,7 @@
     background: var(--paper);
   }
   .logo {
-    font-family: 'Fraunces', serif;
+    font-family: 'Source Serif 4', serif;
     font-size: 24px;
     font-weight: 600;
     letter-spacing: -0.02em;
@@ -99,7 +99,7 @@
     margin-right: 2px;
     transform: translateY(-2px);
   }
-  .tagline { color: var(--ink-mute); font-size: 14px; font-style: italic; font-family: 'Fraunces', serif; }
+  .tagline { color: var(--ink-mute); font-size: 14px; font-style: italic; font-family: 'Source Serif 4', serif; }
   .scenarios-bar { display: flex; gap: 8px; align-items: center; }
   .scenario-pill {
     padding: 6px 14px; border: 1px solid var(--line); background: var(--paper);
@@ -112,14 +112,14 @@
   .onboarding { max-width: 960px; margin: 0 auto; padding: 64px 40px; }
   .onboard-hero { margin-bottom: 48px; text-align: center; }
   .onboard-eyebrow { text-transform: uppercase; letter-spacing: 0.18em; font-size: 14px; color: var(--rust); font-weight: 600; margin-bottom: 18px; }
-  .onboard-title { font-family: 'Fraunces', serif; font-size: clamp(38px, 6vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 22px; white-space: nowrap; }
+  .onboard-title { font-family: 'Source Serif 4', serif; font-size: clamp(38px, 6vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 22px; white-space: nowrap; }
   .onboard-title em { font-style: italic; color: var(--rust); font-weight: 500; }
   .onboard-sub { font-size: 17px; color: var(--ink-mute); max-width: 520px; margin: 0 auto; line-height: 1.6; }
   .onboard-fine { font-size: 14px; color: var(--ink-faint); margin-top: 18px; }
   .onboard-fine a { color: var(--rust); }
   .onboard-step { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 32px; margin-bottom: 14px; box-shadow: var(--shadow-sm); max-width: 680px; margin-left: auto; margin-right: auto; }
-  .step-number { font-family: 'Fraunces', serif; font-size: 14px; color: var(--rust); font-style: italic; margin-bottom: 8px; }
-  .step-title { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .step-number { font-family: 'Source Serif 4', serif; font-size: 14px; color: var(--rust); font-style: italic; margin-bottom: 8px; }
+  .step-title { font-family: 'Source Serif 4', serif; font-size: 24px; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.01em; }
   .step-hint { color: var(--ink-mute); font-size: 14px; margin-bottom: 22px; }
   .field-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
   .field-grid.cols-1 { grid-template-columns: 1fr; }
@@ -149,7 +149,7 @@
   .sidebar-sub { font-size: 14px; color: var(--ink-mute); margin-bottom: 12px; }
   .preset-btn { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--bone); padding: 9px 11px; font-size: 14px; color: var(--ink-soft); margin-bottom: 5px; border-radius: 3px; font-family: inherit; cursor: pointer; transition: border-color 0.15s ease; }
   .preset-btn:hover { border-color: var(--rust); color: var(--ink); }
-  .preset-icon { color: var(--rust); font-style: italic; font-family: 'Fraunces', serif; margin-right: 5px; }
+  .preset-icon { color: var(--rust); font-style: italic; font-family: 'Source Serif 4', serif; margin-right: 5px; }
   .toggle-group { display: flex; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
   .toggle-btn { flex: 1; padding: 7px 4px; font-size: 14px; text-align: center; border: none; cursor: pointer; font-family: inherit; background: var(--bone); color: var(--ink-mute); transition: all 0.12s ease; }
   .toggle-btn:hover { background: var(--bone-2); }
@@ -164,7 +164,7 @@
   .control input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; border: none; }
   .control input[type=number] { width: 100%; background: var(--bone); border: 1px solid var(--line); padding: 7px 9px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--ink); border-radius: 2px; }
   .control input[type=number]:focus { outline: none; border-color: var(--ink); }
-  .help-mark { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; min-width: 15px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-mute); font-size: 10px; font-style: italic; margin-left: 4px; cursor: help; font-family: 'Fraunces', serif; vertical-align: middle; overflow: hidden; box-sizing: border-box; }
+  .help-mark { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; min-width: 15px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-mute); font-size: 10px; font-style: italic; margin-left: 4px; cursor: help; font-family: 'Source Serif 4', serif; vertical-align: middle; overflow: hidden; box-sizing: border-box; }
   #tip-popup { position: fixed; z-index: 9999; background: var(--ink); color: var(--paper); font-size: 13px; padding: 6px 10px; border-radius: 4px; max-width: 260px; line-height: 1.4; pointer-events: none; display: none; font-family: inherit; }
   .more-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; text-align: left; border: 1px solid var(--line); border-radius: 3px; background: var(--bone); padding: 7px 10px; font-size: 14px; color: var(--ink-soft); font-family: inherit; cursor: pointer; font-weight: 600; }
   .more-toggle:hover { border-color: var(--ink-mute); color: var(--ink); }
@@ -188,7 +188,7 @@
 
   /* Verdict */
   .verdict { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 24px 28px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
-  .verdict-head { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 400; color: var(--ink); line-height: 1.25; margin-bottom: 10px; letter-spacing: -0.01em; }
+  .verdict-head { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 400; color: var(--ink); line-height: 1.25; margin-bottom: 10px; letter-spacing: -0.01em; }
   .verdict-body { font-size: 14px; color: var(--ink-soft); line-height: 1.6; }
   .verdict-caveat { font-size: 14px; color: var(--ink-faint); margin-top: 10px; font-style: italic; }
   .verdict-wedge { margin-top: 14px; padding: 12px 16px; background: rgba(184,92,56,0.06); border-left: 3px solid var(--rust); border-radius: 0 4px 4px 0; font-size: 15px; color: var(--ink); line-height: 1.5; }
@@ -209,7 +209,7 @@
   .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
   .compare-col { border: 1px solid var(--line); border-radius: 5px; padding: 14px 16px; background: var(--bone); min-width: 0; }
   .compare-col.pro { border-color: var(--rust); background: rgba(184,92,56,0.05); }
-  .compare-head { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: var(--ink); }
+  .compare-head { font-family: 'Source Serif 4', serif; font-size: 17px; font-weight: 600; color: var(--ink); }
   .compare-col.pro .compare-head { color: var(--rust-deep); }
   .compare-sub { font-size: 14px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
   .compare-plus { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
@@ -226,7 +226,7 @@
   .modal ul li:before { content: "✓"; position: absolute; left: 0; color: var(--moss); font-weight: 600; }
 
   /* Sections */
-  .section-heading { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: var(--ink); margin: 26px 0 4px; }
+  .section-heading { font-family: 'Source Serif 4', serif; font-size: 18px; font-weight: 500; color: var(--ink); margin: 26px 0 4px; }
   .section-sub { font-size: 14px; color: var(--ink-mute); line-height: 1.5; margin-bottom: 14px; }
 
   /* Confidence bands */
@@ -280,7 +280,7 @@
   .ss-card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px; text-align: center; cursor: pointer; transition: border-color 0.15s ease; }
   .ss-card:hover { border-color: var(--rust); }
   .ss-card.highlight { border: 2px solid var(--moss); }
-  .ss-age { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 500; color: var(--ink); }
+  .ss-age { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 500; color: var(--ink); }
   .ss-label { font-size: 14px; color: var(--ink-mute); margin: 2px 0 8px; text-transform: uppercase; letter-spacing: 0.08em; }
   .ss-benefit { font-size: 14px; color: var(--ink-soft); margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
   .ss-success { font-size: 14px; font-weight: 600; }
@@ -293,7 +293,7 @@
   .faq-toggle-chevron { font-size: 14px; color: var(--ink-mute); }
   .faq-inner { padding: 8px 32px 32px; }
   .faq { max-width: 800px; margin: 0 auto; }
-  .faq-heading { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 18px; letter-spacing: -0.01em; }
+  .faq-heading { font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 18px; letter-spacing: -0.01em; }
   .faq-item { border-top: 1px solid var(--line-soft); }
   .faq-item:last-child { border-bottom: 1px solid var(--line-soft); }
   .faq-item summary { font-size: 15px; font-weight: 600; color: var(--ink-soft); cursor: pointer; padding: 14px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; text-align: left; }
@@ -344,7 +344,7 @@
   /* Modal */
   .modal-overlay { position: fixed; inset: 0; background: rgba(26,24,20,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
   .modal { background: var(--paper); border-radius: 6px; max-width: 600px; max-height: 80vh; overflow-y: auto; padding: 32px; box-shadow: var(--shadow-md); }
-  .modal h2 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; margin-bottom: 16px; }
+  .modal h2 { font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 500; margin-bottom: 16px; }
   .modal p { font-size: 14px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 12px; }
   .modal .modal-close { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-mute); }
 
@@ -617,10 +617,10 @@ function isPaid() { const k = localStorage.getItem('spendenough_key'); return !!
 window.showUnlockModal = function() {
   track('hit_paywall');
   const buy = CONFIG.checkoutUrl
-    ? `<a class="btn-primary" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" onclick="track('clicked_checkout')" style="width:100%;justify-content:center;text-decoration:none">Unlock Pro &middot; ${CONFIG.price} one-time</a>`
-    : `<button class="btn-primary" disabled style="width:100%;justify-content:center;opacity:0.6;cursor:default">Unlock Pro &middot; ${CONFIG.price} one-time &middot; checkout opening soon</button>`;
+    ? `<a class="btn-primary" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" onclick="track('clicked_checkout')" style="width:100%;justify-content:center;text-decoration:none">Get Pro &middot; ${CONFIG.price}, one payment</a>`
+    : `<button class="btn-primary" disabled style="width:100%;justify-content:center;opacity:0.6;cursor:default">Get Pro &middot; ${CONFIG.price}, one payment &middot; checkout opens soon</button>`;
   openModal(`<h2>Free vs. Pro</h2>
-    <p style="margin-bottom:16px">You're on the free version. A one-time unlock adds scenario comparison and the deeper analysis. Here's the full picture:</p>
+    <p style="margin-bottom:16px">You're on the free version. Pro is a one-time purchase that adds scenario comparison and the deeper analysis.</p>
     <div class="compare-grid">
       <div class="compare-col">
         <div class="compare-head">Free</div>
@@ -630,21 +630,21 @@ window.showUnlockModal = function() {
           <li>Core inputs: savings, spending, income, retirement age</li>
           <li>What-if presets</li>
           <li>Spending explorer</li>
-          <li>Every assumption visible and editable: asset mix, fees, taxes, guardrails</li>
+          <li>Every assumption on screen and editable (asset mix, fees, taxes, guardrails)</li>
         </ul>
       </div>
       <div class="compare-col pro">
         <div class="compare-head">Pro</div>
-        <div class="compare-sub">One-time unlock</div>
+        <div class="compare-sub">One-time purchase</div>
         <div class="compare-plus">Everything in Free, plus:</div>
         <ul class="compare-list">
-          <li>Side-by-side scenario comparison: change a decision, see both futures on one chart</li>
+          <li>Side-by-side scenario comparison, both futures on one chart</li>
           <li>Percentile bands and five named historical stress tests</li>
           <li>Spending-flexibility comparison</li>
           <li>Social Security claiming comparison</li>
           <li>Cashflow chart</li>
           <li>Simulated (Monte Carlo) mode</li>
-          <li>Planning options: plan-to age, late-life spending, housing payoff, income growth</li>
+          <li>Planning options (plan-to age, late-life spending, housing payoff, income growth)</li>
           <li>Account types, withdrawal order, life events</li>
           <li>Save up to 8 scenarios</li>
         </ul>
@@ -654,7 +654,7 @@ window.showUnlockModal = function() {
     <p style="font-size:14px;color:var(--ink-mute);margin:0 0 14px;text-align:center">One-time payment. No subscription. No account. Your numbers stay on your device.<br/>Educational modelling tool, not financial advice.</p>
     <div class="unlock-input-row">
       <input type="text" id="unlockKeyInput" placeholder="Already bought? Paste your license key" autocomplete="off" />
-      <button onclick="submitUnlockKey()" style="background:var(--rust);color:var(--paper);border:none;padding:10px 16px;border-radius:3px;font-weight:600;cursor:pointer;font-size:14px">Unlock</button>
+      <button onclick="submitUnlockKey()" style="background:var(--rust);color:var(--paper);border:none;padding:10px 16px;border-radius:3px;font-weight:600;cursor:pointer;font-size:14px">Activate</button>
     </div>
     <p style="margin-top:14px;font-size:14px;text-align:center"><a href="#" onclick="closeModal();return false" style="color:var(--rust);text-decoration:none;cursor:pointer">Continue with the free version</a></p>`);
 };
@@ -688,7 +688,7 @@ window.showPayoffModal = function() {
   const currentYearsLeft = Math.max(1, state.mortgagePayoffAge - state.age);
   openModal(`
     <div style="max-width:380px">
-      <div style="font-size:16px;font-weight:700;margin-bottom:4px;font-family:'Fraunces',serif">Accelerated mortgage payoff</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px;font-family:'Source Serif 4',serif">Accelerated mortgage payoff</div>
       <p style="font-size:14px;color:var(--ink-mute);margin-bottom:16px">We'll calculate your new required payment and update your housing costs accordingly. After payoff, housing costs drop to zero in the model.</p>
       <div style="display:grid;gap:10px">
         <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Remaining mortgage balance
@@ -873,10 +873,10 @@ function renderOnboarding() {
     </header>
     <div class="onboarding">
       <div class="onboard-hero">
-        <div class="onboard-eyebrow">Answer the hard question first</div>
+        <div class="onboard-eyebrow">A scenario tool for life decisions</div>
         <h1 class="onboard-title">How much is enough?</h1>
-        <p class="onboard-sub">Most tools help you hoard. We help you spend wisely. Enter your numbers and see: can you actually afford the life you want, or are you leaving a fortune unspent?</p>
-        <p style="margin-top:16px"><a onclick="showAbout()" style="color:var(--rust);cursor:pointer;font-size:14px;font-family:'Fraunces',serif;font-style:italic">Why this matters \u2192</a></p>
+        <p class="onboard-sub">Enter your numbers and see whether you can afford the life you want, or whether you are leaving money unspent that you could be living on.</p>
+        <p style="margin-top:16px"><a onclick="showAbout()" style="color:var(--rust);cursor:pointer;font-size:14px;font-family:'Source Serif 4',serif;font-style:italic">Why this matters \u2192</a></p>
         <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a></p>
       </div>
 
@@ -895,7 +895,7 @@ function renderOnboarding() {
         <h2 class="step-title">Your savings and spending</h2>
         <p class="step-hint">How much you've saved, and what you spend each year.</p>
         <div class="field-grid">
-          <div class="field"><label>Investment portfolio</label><input type="number" id="ob_portfolio" min="0" value="${state.portfolio || ''}" placeholder="e.g. 600000" step="10000"/><span class="field-hint">401k, IRA, brokerage \u2014 combined</span></div>
+          <div class="field"><label>Investment portfolio</label><input type="number" id="ob_portfolio" min="0" value="${state.portfolio || ''}" placeholder="e.g. 600000" step="10000"/><span class="field-hint">401k, IRA, brokerage, combined</span></div>
           <div class="field"><label>Annual spending</label><input type="number" id="ob_spending" min="0" value="${state.spending || ''}" placeholder="e.g. 70000" step="5000"/><span class="field-hint">Leave blank to find your "enough" number</span></div>
         </div>
       </div>
@@ -915,7 +915,7 @@ function renderOnboarding() {
       <div class="onboard-step">
         <div class="step-number">iv. The safety net</div>
         <h2 class="step-title">Social Security</h2>
-        <p class="step-hint">A rough annual figure is fine \u2014 your ssa.gov statement has the exact number.</p>
+        <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number.</p>
         <div class="field-grid">
           <div class="field"><label>Your SS at full age</label><input type="number" id="ob_yourSS" min="0" value="${state.yourSSAmount || ''}" placeholder="e.g. 30000" step="1000"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper()">estimate from income</button></span></div>
           <div class="field"><label>Partner's SS at full age</label><input type="number" id="ob_partnerSS" min="0" value="${state.partnerSSAmount || ''}" placeholder="0 if none" step="1000"/><span class="field-hint">Annual \u00b7 in today's dollars</span></div>
@@ -924,7 +924,7 @@ function renderOnboarding() {
 
       <div class="step-actions">
         <button class="btn-primary" onclick="finishOnboarding()">See the picture <span>\u2192</span></button>
-        <p style="margin-top:12px;font-size:14px;text-align:center"><a onclick="loadSample()" style="color:var(--rust);cursor:pointer;font-family:'Fraunces',serif;font-style:italic">or see a sample \u2192</a></p>
+        <p style="margin-top:12px;font-size:14px;text-align:center"><a onclick="loadSample()" style="color:var(--rust);cursor:pointer;font-family:'Source Serif 4',serif;font-style:italic">or see a sample \u2192</a></p>
       </div>
       <div class="validation-msg" id="ob_validation"></div>
     </div>
@@ -1078,7 +1078,7 @@ function renderDashboard() {
         ${!showMoreOptions ? `<div class="more-hint">${state.taxRate ? Math.round(state.taxRate*100) : 18}% tax &middot; ${(state.returnRate*100).toFixed(1)}% return &middot; plan to age ${state.targetAge}</div>` : ''}
         ${showMoreOptions ? (isPaid()
           ? moreOptionsHTML()
-          : `<div class="locked-note">These settings are part of the paid plan. <button class="link-btn" onclick="showUnlockModal()">Unlock to adjust \u2192</button></div>
+          : `<div class="locked-note">These settings are part of the paid plan. <button class="link-btn" onclick="showUnlockModal()">Get Pro to adjust \u2192</button></div>
         <fieldset class="locked-preview" disabled>${moreOptionsHTML()}</fieldset>`) : ''}
       </div>
 
@@ -1114,7 +1114,7 @@ function renderDashboard() {
 
       ${canCompare ? renderCompareSummary(baselineResult, result) : ''}
 
-      ${isPaid() ? (notFixed ? renderBands(result) : '') : `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">Unlock side-by-side comparison, percentile bands, stress tests and more <span class="lock-icon">&#x1f512;</span></button>`}
+      ${isPaid() ? (notFixed ? renderBands(result) : '') : `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">Pro adds side-by-side comparison, percentile bands and stress tests <span class="lock-icon">&#x1f512;</span></button>`}
 
       ${isPaid() && state.simMode==='historical' ? renderStressTests() : ''}
 
@@ -1138,7 +1138,7 @@ function renderDashboard() {
 
       ${isPaid() && notFixed && state.accountsEnabled ? renderTaxComparison() : ''}
 
-      <div class="disclaimer-bar" style="margin-top:22px">These results are an educational model, not advice. The tool does not know your full situation, and it treats taxes, Social Security, and healthcare in simplified ways. What you see is a range of outcomes under the assumptions shown, built from past market returns and randomized simulations. Past performance does not predict future results. Before you make a decision based on these numbers, talk to a qualified financial, tax, or legal professional who can look at the whole picture. <a onclick="showFullDisclaimer()">Full disclaimer</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></div>
+      <div class="disclaimer-bar" style="margin-top:22px">These results are an educational model. They are not advice. The tool does not know your full situation, and it treats taxes, Social Security, and healthcare in simplified ways. What you see is a range of outcomes under the assumptions shown, built from past market returns and randomized simulations. Past performance does not predict future results. Before you make a decision based on these numbers, talk to a qualified financial, tax, or legal professional who can look at the whole picture. <a onclick="showFullDisclaimer()">Full disclaimer</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="terms.html">Terms</a></div>
     </div>`;
 
   app.innerHTML = `
@@ -1325,7 +1325,7 @@ function getVerdict(result) {
       v.headline = lasts ? 'At a steady ' + r + ' return, the portfolio lasts past age ' + state.targetAge : 'At a steady ' + r + ' return, the portfolio runs out around age ' + result.medianRunOutAge;
       v.body = (lasts ? 'Ending balance at age ' + state.targetAge + ' would be about ' + fmtMoneyShort(result.medianFinal) + '. ' : '') + 'This assumes the same return every year, so it hides sequence-of-returns risk. Historical mode runs the same plan through every real market stretch since 1926.' + flexNote;
     }
-    v.caveat = 'A steady-return projection is a sanity check, not a range.';
+    v.caveat = 'A steady-return projection has no range in it. Treat it as a sanity check.';
   }
   // "Money left on the table" wedge: the median outcome's ending balance.
   if (!maxSpendView && result.medianFinal > 10000) {
@@ -1388,10 +1388,10 @@ function renderReadFirst() {
   return `<details class="read-first" ${readFirstOpen ? 'open' : ''} ontoggle="readFirstOpen=this.open">
     <summary>Read this first: what these numbers are, and what they are not</summary>
     <div class="read-first-body">
-      <p>These numbers are a model of your inputs, not a forecast of your life. Everything is in today’s dollars, so inflation is already accounted for.</p>
-      <p><strong>What the model does well.</strong> It takes what you have, what comes in and goes out, and the ages you set, and runs that plan through real market history and through randomized futures. It shows which decisions move the outcome a lot and which barely register, what a bad stretch of markets at the wrong time would have done, and how much you could spend and still make it in most of those worlds.</p>
-      <p><strong>What it simplifies.</strong> Taxes are flat rates you can see and change under Assumptions, not a bracket-by-bracket calculation. Social Security is whatever you entered; the built-in estimator runs high. Healthcare has no separate line, so put it in your spending. Your portfolio is a fixed stock/bond mix rebalanced yearly, less the fee you set. History is one sample: overlapping U.S. periods since 1926, and the future does not have to look like any of them. The model knows nothing that is not a number.</p>
-      <p><strong>How to read the range.</strong> The shaded band is the spread of outcomes and the line is the median. If most of the band stays above zero, the plan held up in most of the worlds tested. That is a good sign, not a guarantee. If the bottom edge hits zero, some worlds ran out, which is a reason to adjust a lever and look again, not a prediction. “Failing” here usually means running low in the final years of a plan that runs to age ${state.targetAge}. A plan that survives every period, including 1929, is probably more cautious than you need.</p>
+      <p>These numbers are a model built from your inputs. They are not a forecast of your life. Everything is in today’s dollars, so inflation is already accounted for.</p>
+      <p>The model takes what you have, what comes in and goes out, and the ages you set, and runs that plan through real market history and through randomized futures. It shows which decisions move the outcome a lot and which barely register, what a bad stretch of markets at the wrong time would have done, and how much you could spend and still make it in most of those worlds.</p>
+      <p>It simplifies a lot. Taxes are flat rates you can see and change under Assumptions, and the tool does not work through brackets. Social Security is whatever you entered, and the built-in estimator runs high. Healthcare has no separate line, so put it in your spending. Your portfolio is a fixed stock/bond mix rebalanced yearly, less the fee you set. History is one sample: overlapping U.S. periods since 1926, and the future does not have to look like any of them. The model knows nothing that is not a number.</p>
+      <p>The shaded band is the spread of outcomes and the line is the median. If most of the band stays above zero, the plan held up in most of the worlds tested. That is a good sign. It is not a guarantee. If the bottom edge hits zero, some worlds ran out. That is a reason to adjust a lever and look again, and it is not a prediction that you will run out. “Failing” here usually means running low in the final years of a plan that runs to age ${state.targetAge}. A plan that survives every period, including 1929, is probably more cautious than you need.</p>
       <p>Before you act on any of this, take the scenario to a qualified financial planner or tax professional.</p>
     </div></details>`;
 }
@@ -1441,7 +1441,7 @@ function renderCompareSummary(a, b) {
   const im = computeImpact();
   const diffs = im ? im.changes.map(c => c.label + ' ' + c.from + ' → ' + c.to).join('; ') : 'no inputs differ yet';
   return `<div class="section-heading">Side by side</div>
-    <div class="section-sub"><strong>${baselineName}</strong> versus your current settings, both run in ${modeName(b.mode)} mode. What differs: ${diffs}. <button class="link-btn" onclick="toggleCompare()">Stop comparing</button></div>
+    <div class="section-sub">${baselineName} versus your current settings, both run in ${modeName(b.mode)} mode. What differs: ${diffs}. <button class="link-btn" onclick="toggleCompare()">Stop comparing</button></div>
     <table class="data-table compare-table"><thead><tr><th></th><th>${baselineName}</th><th>Current</th></tr></thead><tbody>
       <tr><td>Lasted to age ${state.targetAge}</td><td>${periodsLabel(a)}</td><td style="font-weight:600;color:var(--ink)">${periodsLabel(b)}</td></tr>
       <tr><td>Ending balance, worst 10% to best 10%</td><td>${range(a)}</td><td>${range(b)}</td></tr>
@@ -1548,7 +1548,7 @@ function renderFlexibilityImpact() {
         </div>
       </div>
     </div>
-    <div class="flex-note">${state.guardrailsEnabled && improved ? 'Cutting spending by '+Math.round(state.guardrailCutPct*100)+'% when your portfolio is stressed improves outcomes. The trade-off: in some years you\u2019d live on less, but the portfolio recovers faster.' : state.guardrailsEnabled ? 'At these settings, flexibility has minimal impact on outcomes.' : 'With fixed spending, the same amount is withdrawn every year regardless of market conditions.'}</div>`;
+    <div class="flex-note">${state.guardrailsEnabled && improved ? 'Cutting spending by '+Math.round(state.guardrailCutPct*100)+'% when your portfolio is stressed improves the count. In some years you would live on less, and the portfolio recovers faster.' : state.guardrailsEnabled ? 'At these settings, flexibility has minimal impact on outcomes.' : 'With fixed spending, the same amount is withdrawn every year regardless of market conditions.'}</div>`;
 }
 
 // ===== STRESS TESTS =====
@@ -1631,10 +1631,8 @@ function renderResources() {
     <details class="faq-item">
       <summary>Why we made this tool</summary>
       <div class="faq-body">
-        <p>Most retirement planning tools are built around one fear: running out of money. Save more, spend less, build a cushion so large you will never risk zero. That is not bad advice, but it has a cost nobody talks about.</p>
-        <p>If you are 55 with a million dollars saved and a calculator tells you to spend like you have half that, you lose something money cannot buy back: time. The trips you skip. The moments you defer. The years you could have lived well.</p>
-        <p>Bill Perkins made this case in <em>Die With Zero</em>. Spending your life savings while you can enjoy them is not failure. It is the point.</p>
-        <p>Knowing you should spend more and knowing how much you can safely spend are two different problems. This tool tries to answer the second one. Enter your numbers, and we test your plan against every real U.S. market period since 1926 so you can see where it holds up and where it does not.</p>
+        <p>Most retirement tools are built to keep you from running out of money. Save more, spend less, keep a big cushion. That advice has a cost. If you are 55 with a million dollars saved and a calculator tells you to spend like you have half that, you give up trips, time off, and years you could have lived on money you already have.</p>
+        <p>Bill Perkins makes this case in <em>Die With Zero</em>. Knowing you should spend more and knowing how much you can safely spend are different problems, and this tool works on the second one. Enter your numbers and it runs your plan through every real U.S. market period since 1926, so you can see where the plan holds up and where it breaks.</p>
       </div>
     </details>
 
@@ -1679,12 +1677,12 @@ function renderResources() {
       <div class="faq-body">
         <p>Retirement portfolios are sensitive to small changes because the effects compound over decades and the math is nonlinear. A few forces drive this:</p>
         <ul>
-          <li><strong>Compounding cuts both ways.</strong> An extra $5,000 per year in spending does not just cost $5,000 — it also costs the growth that money would have generated over the next 20 or 30 years. At 5% real returns, $5,000 today becomes roughly $13,000 in 20 years. Every dollar you spend early is a dollar that stops compounding.</li>
+          <li><strong>Compounding cuts both ways.</strong> An extra $5,000 a year in spending costs $5,000 plus the growth that money would have earned over the next 20 or 30 years. At 5% real returns, $5,000 today becomes roughly $13,000 in 20 years. Every dollar you spend early is a dollar that stops compounding.</li>
           <li><strong>The withdrawal rate cliff.</strong> Portfolios under stress behave differently at different withdrawal rates. Going from 3.5% to 4% might drop your success rate a little. Going from 4% to 4.5% might drop it a lot, because you start hitting the same bad market sequences that caused most historical failures. The relationship is not linear.</li>
-          <li><strong>Early retirement is especially sensitive.</strong> A 10-year difference in retirement age does not just add 10 more years of withdrawals — it also removes 10 years of contributions and growth while adding 10 years of portfolio depletion risk. The two effects stack.</li>
+          <li><strong>Early retirement is especially sensitive.</strong> Retiring 10 years earlier adds 10 years of withdrawals and removes 10 years of contributions and growth. The two effects stack.</li>
           <li><strong>Sequence risk magnifies everything.</strong> In a bad market sequence, a slightly higher withdrawal rate means selling more shares at the bottom, leaving fewer shares to recover when the market rebounds. Small differences in withdrawal rate become large differences in survival.</li>
         </ul>
-        <p>This is why the tool uses historical sequences rather than averages — averages smooth over the exact dynamics that make small differences matter.</p>
+        <p>This is why the tool uses historical sequences rather than averages. Averages smooth over the exact dynamics that make small differences matter.</p>
       </div>
     </details>
 
@@ -1694,7 +1692,7 @@ function renderResources() {
         <p>Two retirees can experience the exact same average market return over 30 years and end up in completely different places, depending on whether the good years came first or the bad years did.</p>
         <p>If your portfolio drops 40% in year two of retirement, you have to sell investments at the bottom just to cover expenses. Those shares cannot recover because they are gone. A crash in year twenty, when your portfolio is smaller and your drawing period is shorter, does far less damage.</p>
         <p>This is why plugging in an average return and projecting forward is misleading for retirement planning. A steady 6% real return assumption says nothing about what happens if a 2008-style crash hits in your first year, even if 6% turns out to be the actual long-run average.</p>
-        <p>Historical mode addresses this by running your plan through every real sequence since 1926, not a smoothed average of them.</p>
+        <p>Historical mode runs your plan through every real sequence since 1926 rather than a smoothed average of them.</p>
       </div>
     </details>
 
@@ -1702,12 +1700,12 @@ function renderResources() {
       <summary>What is the 4% rule, and does this tool use it?</summary>
       <div class="faq-body">
         <p>The 4% rule comes from William Bengen's 1994 research, later expanded by the Trinity Study. The finding: a retiree withdrawing 4% of a portfolio that was 50 to 75% stocks and the rest intermediate-term government bonds in year one, then adjusting for inflation each year, had not run out of money over any 30-year period in the data those studies used. ${(() => { const t = runForState({ ...DEFAULT_STATE, age: 65, targetAge: 94, hasPartner: false, partnerAge: 0, portfolio: 1000000, spending: 40000, lateSpending: 40000, slowDownAge: 200, yourIncome: 0, yourStopWorkAge: 65, yourSSAmount: 0, housing: 0, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false, simMode: 'historical', stockPct: state.stockPct }); return 'On this tool’s own data, with your current ' + mixLabel() + ' mix, no fees and no taxes, 4% for 30 years lasted in ' + t.successCount + ' of ' + t.totalPeriods + ' periods.'; })()}</p>
-        <p>It became the dominant rule of thumb in financial planning, and it is not wrong for what it was designed to do. But it has real limits:</p>
+        <p>It became the dominant rule of thumb in financial planning, and it works for what it was designed to do. It has limits:</p>
         <ul>
           <li>It assumes a fixed withdrawal regardless of what the market does, with no adjustments in bad years.</li>
           <li>It was calibrated for a 30-year horizon. Retire at 55 planning to 95 and you need something more conservative.</li>
           <li>It ignores income. Social Security alone can dramatically change how hard your portfolio has to work.</li>
-          <li>It does not account for spending that changes in late life — healthcare costs may rise even as travel and discretionary spending fall.</li>
+          <li>It does not account for spending that changes in late life. Healthcare costs may rise even as travel and discretionary spending fall.</li>
         </ul>
         <p>This tool does not apply the 4% rule. It runs your actual numbers through historical and simulated market sequences, accounting for your income, Social Security, housing costs, and spending trajectory.</p>
       </div>
@@ -1722,7 +1720,7 @@ function renderResources() {
           <li>If your withdrawal rate climbs more than ${pct(state.guardrailBandPct, 0)} above that baseline, your portfolio is under stress and that year's spending is cut by ${pct(state.guardrailCutPct, 0)}.</li>
           <li>If it falls more than ${pct(state.guardrailBandPct, 0)} below, your portfolio is running ahead and that year's spending is boosted by ${pct(state.guardrailBoostPct, 0)}.</li>
         </ul>
-        <p>Cuts apply to one year at a time and do not compound. A plan with guardrails on will tighten in bad market stretches and loosen in good ones, which raises the survival count versus rigid spending. The trade-off is real: the verdict tells you how many years the median path cut spending, so you can judge whether you would actually live that way. One known quirk: if Social Security starts years after you retire, the baseline is set in a "bridge" year with a high withdrawal rate, which makes boosts more likely once benefits begin.</p>
+        <p>Cuts apply to one year at a time and do not compound. A plan with guardrails on will tighten in bad market stretches and loosen in good ones, which raises the survival count versus rigid spending. The verdict tells you how many years the median path cut spending, so you can judge whether you would live that way. There is one known quirk. If Social Security starts years after you retire, the baseline is set in a bridge year with a high withdrawal rate, which makes boosts more likely once benefits begin.</p>
         <p>Toggle guardrails on or off under Assumptions. The cut and boost percentages are in the Spending flexibility section (Pro).</p>
       </div>
     </details>
@@ -1768,7 +1766,7 @@ function renderResources() {
     <details class="faq-item">
       <summary>Should I talk to a financial advisor?</summary>
       <div class="faq-body">
-        <p>This tool is a starting point, not a substitute for professional advice. A good advisor can account for your full picture: estate planning, insurance, tax optimization, account structure, and the things a model cannot capture about your situation.</p>
+        <p>This tool is a starting point. A good advisor can account for your full picture: estate planning, insurance, tax optimization, account structure, and the things a model cannot capture about your situation.</p>
         <p>Find one: <a href="https://www.napfa.org/find-an-advisor" target="_blank">fee-only advisors (NAPFA)</a> &middot; <a href="https://www.letsmakeaplan.org/" target="_blank">certified planners (CFP Board)</a> &middot; <a href="https://www.aicpa.org" target="_blank">tax professionals (AICPA)</a></p>
       </div>
     </details>
@@ -2253,13 +2251,10 @@ window.showFullDisclaimer = function() {
 
 window.showAbout = function() {
   openModal(`<h2>Why Spend Enough exists</h2>
-    <p>Most retirement planning tools are built around one fear: running out of money. They tell you to save more, spend less, and build a cushion so enormous you'll never risk zero. That's not bad advice. But it has a cost nobody talks about.</p>
-    <p>If you're 55 with a million dollars saved and a calculator tells you to spend like you have half that to be "safe," you lose something money can't buy back: time. The trips you skip. The moments you defer. The years you could have lived well instead of hoarding.</p>
-    <p>Bill Perkins made this case in <em>Die With Zero</em>. The insight is powerful: spending your life's earnings while you can enjoy them isn't failure. It's the point.</p>
-    <p>But philosophy and math are different problems. Knowing you <em>should</em> spend more and knowing <em>how much</em> you can safely spend are two separate things.</p>
-    <p>Spend Enough answers the second question. You enter your numbers. We test your plan against every real U.S. market period since 1926 to show you what would have happened. Not a prediction—a range. Where does your plan hold up? Where does it break? How much room do you actually have to live?</p>
-    <p>We don't tell you what to do. We show you the trade-offs so you can decide.</p>
-    <p>This is an educational planning tool, not financial advice. Consult a qualified advisor before making major decisions.</p>`);
+    <p>Most retirement tools are built to keep you from running out of money. Save more, spend less, keep a big cushion. That advice has a cost. If you are 55 with a million dollars saved and a calculator tells you to spend like you have half that, you give up trips, time off, and years you could have lived on money you already have.</p>
+    <p>Bill Perkins makes this case in <em>Die With Zero</em>. Knowing you should spend more and knowing how much you can safely spend are different problems, and Spend Enough works on the second one.</p>
+    <p>You enter your numbers. The tool runs your plan through every real U.S. market period since 1926 and shows you the range of what would have happened, where the plan holds up, where it breaks, and how much room you have. It does not tell you what to do. It shows you the trade-offs so you can decide.</p>
+    <p>This is an educational planning tool and it is not financial advice. Talk to a qualified advisor before making major decisions.</p>`);
 };
 
 window.showScenarioDetail = function(id) {
