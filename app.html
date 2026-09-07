@@ -353,8 +353,10 @@
   .year-preview td.milestone, .year-preview th:first-child { text-align: left; color: var(--ink-mute); font-size: 13px; }
   .year-preview tr.out td { color: var(--danger); }
   .year-preview { max-width: 520px; }
-  .year-preview.year-full { max-width: none; font-size: 11px; }
-  .year-preview.year-full td, .year-preview.year-full th { padding: 3px 8px; }
+  .year-preview.year-full { max-width: none; font-size: 11px; width: auto; }
+  .year-preview.year-full td, .year-preview.year-full th { padding: 2px 10px; text-align: right; }
+  .year-preview.year-full td.agecell, .year-preview.year-full th:first-child { text-align: left; }
+  .year-preview.year-full .ms { color: var(--ink-mute); font-size: 9px; margin-left: 5px; text-transform: uppercase; letter-spacing: 0.05em; }
   .saved-note { font-size: 12px; color: var(--ink-faint); margin-top: -4px; margin-bottom: 6px; line-height: 1.4; }
   .print-only { display: none; }
   @media print {
@@ -1625,9 +1627,9 @@ function renderYearTable(result) {
   const flow = (r) => r.fromPortfolio > 0 ? '\u2212' + fmtMoneyShort(r.fromPortfolio) : r.added > 0 ? '+' + fmtMoneyShort(r.added) : '';
   const label = (a) => a === state.age ? 'Now' : a === state.targetAge ? 'Plan ends' : (a === state.yourStopWorkAge && state.yourIncome > 0) ? 'Retire' : a === state.ssStartAge ? 'Social Security' : (a === state.mortgagePayoffAge && state.housing > 0) ? 'Mortgage paid' : a === state.slowDownAge ? 'Spending eases' : has(state.homeSaleAge) && a === state.homeSaleAge ? 'House sold' : has(state.yourBreakStart) && a === state.yourBreakStart ? 'Career break' : has(state.shockAge) && a === state.shockAge ? 'Bad decade' : has(state.extraSpendStart) && a === state.extraSpendStart ? 'Extra spending' : state.yourPartTimeAmount > 0 && a === state.yourPartTimeStart ? 'Part-time' : '';
   if (printing) return `<div class="section-heading">Year by year</div>
-    <div class="section-sub">The median path, in today’s dollars.${notFixed ? ' The last column is where the worst 10% and best 10% of ' + (result.mode === 'historical' ? 'periods' : 'futures') + ' stood at each age.' : ''}</div>
-    <table class="data-table year-preview year-full"><thead><tr><th></th><th>Age</th><th>Income</th><th>Spending</th><th>Portfolio in / out</th><th>Balance</th>${notFixed ? '<th>Worst 10% to best 10%</th>' : ''}</tr></thead><tbody>
-    ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td class="milestone">${label(r.age)}</td><td>${r.age}</td><td>${r.wages + r.ss > 0 ? fmtMoneyShort(r.wages + r.ss) : ''}</td><td>${fmtMoneyShort(r.spending)}</td><td>${flow(r)}</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td>${notFixed ? '<td>' + (r.p10 <= 0 ? 'ran out' : fmtMoneyShort(r.p10)) + ' to ' + fmtMoneyShort(r.p90) + '</td>' : ''}</tr>`).join('')}
+    <div class="section-sub">The median path, in today’s dollars. In / out is money taken from the portfolio (\u2212) or added to it (+).${notFixed ? ' Range is where the worst 10% and the best 10% of ' + (result.mode === 'historical' ? 'periods' : 'futures') + ' stood at that age.' : ''}</div>
+    <table class="data-table year-preview year-full"><thead><tr><th>Age</th><th>Income</th><th>Spending</th><th>In / out</th><th>Balance</th>${notFixed ? '<th>Range</th>' : ''}</tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td class="agecell">${r.age}${label(r.age) ? '<span class="ms">' + label(r.age) + '</span>' : ''}</td><td>${r.wages + r.ss > 0 ? fmtMoneyShort(r.wages + r.ss) : ''}</td><td>${fmtMoneyShort(r.spending)}</td><td>${flow(r)}</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td>${notFixed ? '<td>' + (r.p10 <= 0 ? 'ran out' : fmtMoneyShort(r.p10)) + '\u2013' + fmtMoneyShort(r.p90) + '</td>' : ''}</tr>`).join('')}
     </tbody></table>`;
   return `<div class="section-heading">Year by year</div>
     <div class="section-sub">A few milestones along the median path, in today’s dollars. For every year, with income and spending broken down and the worst and best 10% at each age, <button class="link-btn" onclick="downloadCsv()">download the spreadsheet</button> or <button class="link-btn" onclick="printReport()">print the report</button>.</div>
