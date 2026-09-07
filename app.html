@@ -349,14 +349,10 @@
   .wwit ul { margin: 6px 0 0 18px; }
   .wwit li { margin-bottom: 3px; }
   .wwit strong { color: var(--ink); font-weight: 600; }
-  .year-table-wrap { max-height: 420px; overflow: auto; border: 1px solid var(--line-soft); border-radius: 4px; margin-bottom: 8px; }
-  .year-table-wrap tbody tr:nth-child(even) td { background: var(--bone); }
-  .year-table-wrap td { color: var(--ink-soft); }
-  .year-table-wrap .data-table { margin: 0; }
-  .year-table-wrap th { position: sticky; top: 0; background: var(--paper); }
-  .year-table-wrap td, .year-table-wrap th { text-align: right; white-space: nowrap; }
-  .year-table-wrap td:first-child, .year-table-wrap th:first-child { text-align: left; }
-  .year-table-wrap tr.out td { color: var(--danger); }
+  .year-preview td, .year-preview th { text-align: right; white-space: nowrap; }
+  .year-preview td.milestone, .year-preview th:first-child { text-align: left; color: var(--ink-mute); font-size: 13px; }
+  .year-preview tr.out td { color: var(--danger); }
+  .year-preview { max-width: 520px; }
   .saved-note { font-size: 12px; color: var(--ink-faint); margin-top: -4px; margin-bottom: 6px; line-height: 1.4; }
   .print-only { display: none; }
   @media print {
@@ -373,7 +369,6 @@
     .assumptions, .deep, .wwit, .verdict, .chart-card, .bands, .scenario-cards { break-inside: avoid; box-shadow: none; }
     .section-heading { break-after: avoid; }
     input.asm-input[type="number"], select.asm-select { border-bottom: none; }
-    .year-table-wrap { max-height: none; overflow: visible; border: none; }
     .data-table { font-size: 11px; }
     a { text-decoration: none; color: inherit; }
   }
@@ -1615,19 +1610,20 @@ function yearRows(result) {
     return { age: y.age, year: y.year, wages: y.yourIncome + y.partnerIncome, ss: y.ssIncome, spending: y.spending, fromPortfolio: y.withdrawal > 0 ? y.withdrawal : 0, added: y.withdrawal < 0 ? -y.withdrawal : 0, tax: y.tax, ret: y.marketReturn, balance: y.portfolio, p10: p.p10, p90: p.p90, ranOut: y.ranOut };
   });
 }
-let yearTableAll = false;
-window.toggleYearTable = function() { yearTableAll = !yearTableAll; render(); };
 function renderYearTable(result) {
   const all = yearRows(result);
-  const notFixed = result.mode !== 'fixed';
-  const marks = new Set([state.yourStopWorkAge, state.partnerStopWorkAge, state.ssStartAge, state.mortgagePayoffAge, state.slowDownAge, state.targetAge, state.yourBreakStart, state.yourBreakEnd, state.homeSaleAge, state.shockAge, state.extraSpendStart, state.extraSpendEnd, state.yourPartTimeStart, state.yourPartTimeEnd].filter(v => has(v)));
-  const rows = yearTableAll ? all : all.filter((r, i) => i === 0 || i === all.length - 1 || (r.age % 5 === 0) || marks.has(r.age) || (r.ranOut && !all[i - 1].ranOut));
-  const flow = (r) => r.fromPortfolio > 0 ? '\u2212' + fmtMoneyShort(r.fromPortfolio) : r.added > 0 ? '+' + fmtMoneyShort(r.added) : '';
+  if (!all.length) return '';
+  // A handful of milestone ages: now, the ages where something changes, then the end.
+  const marks = [state.age, state.yourStopWorkAge, state.ssStartAge, state.mortgagePayoffAge, state.slowDownAge, state.yourBreakStart, state.homeSaleAge, state.shockAge, state.extraSpendStart, state.yourPartTimeStart, state.targetAge]
+    .filter(v => has(v) && v >= state.age && v <= state.targetAge);
+  const ages = [...new Set(marks)].sort((a, b) => a - b).slice(0, 7);
+  const rows = ages.map(a => all.find(r => r.age === a)).filter(Boolean);
+  const label = (a) => a === state.age ? 'Now' : a === state.targetAge ? 'Plan ends' : (a === state.yourStopWorkAge && state.yourIncome > 0) ? 'Retire' : a === state.ssStartAge ? 'Social Security' : (a === state.mortgagePayoffAge && state.housing > 0) ? 'Mortgage paid' : a === state.slowDownAge ? 'Spending eases' : has(state.homeSaleAge) && a === state.homeSaleAge ? 'House sold' : has(state.yourBreakStart) && a === state.yourBreakStart ? 'Career break' : has(state.shockAge) && a === state.shockAge ? 'Bad decade' : has(state.extraSpendStart) && a === state.extraSpendStart ? 'Extra spending' : has(state.yourPartTimeStart) && a === state.yourPartTimeStart ? 'Part-time' : '';
   return `<div class="section-heading">Year by year</div>
-    <div class="section-sub">${yearTableAll ? 'Every year of the median path' : 'Every fifth year of the median path, plus the years something changes'}, in today’s dollars. <button class="link-btn year-actions" onclick="toggleYearTable()">${yearTableAll ? 'Show fewer years' : 'Show every year'}</button> &middot; <button class="link-btn year-actions" onclick="downloadCsv()">Download the full table (CSV)</button></div>
-    <div class="year-table-wrap"><table class="data-table"><thead><tr><th>Age</th><th>Income</th><th>Spending</th><th>Portfolio in / out</th><th>Balance</th>${notFixed ? '<th>Worst 10% to best 10%</th>' : ''}</tr></thead><tbody>
-    ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td>${r.age}</td><td>${r.wages + r.ss > 0 ? fmtMoneyShort(r.wages + r.ss) : ''}</td><td>${fmtMoneyShort(r.spending)}</td><td>${flow(r)}</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td>${notFixed ? '<td>' + (r.p10 <= 0 ? 'ran out' : fmtMoneyShort(r.p10)) + ' to ' + fmtMoneyShort(r.p90) + '</td>' : ''}</tr>`).join('')}
-    </tbody></table></div>`;
+    <div class="section-sub">A few milestones along the median path, in today’s dollars. The full table has every year, income and spending broken down, and the worst and best 10% at each age: <button class="link-btn" onclick="downloadCsv()">download it as a spreadsheet</button>.</div>
+    <table class="data-table year-preview"><thead><tr><th></th><th>Age</th><th>Income</th><th>Spending</th><th>Balance</th></tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td class="milestone">${label(r.age)}</td><td>${r.age}</td><td>${r.wages + r.ss > 0 ? fmtMoneyShort(r.wages + r.ss) : '\u2014'}</td><td>${fmtMoneyShort(r.spending)}</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td></tr>`).join('')}
+    </tbody></table>`;
 }
 window.downloadCsv = function() {
   if (!isPaid()) { showUnlockModal(); return; }
