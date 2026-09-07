@@ -1632,7 +1632,14 @@ window.downloadCsv = function() {
   const head = ['Age', 'Year', 'Wages', 'Social Security', 'Spending (all in)', 'From portfolio', 'Added to portfolio', 'Tax on withdrawals', 'Real return', 'Balance (median path)', 'Balance worst 10%', 'Balance best 10%', 'Ran out'];
   const lines = [head.join(',')].concat(rows.map(x => [x.age, x.year, Math.round(x.wages), Math.round(x.ss), Math.round(x.spending), Math.round(x.fromPortfolio), Math.round(x.added), Math.round(x.tax), (x.ret * 100).toFixed(2) + '%', Math.round(x.balance), Math.round(x.p10 || 0), Math.round(x.p90 || 0), x.ranOut ? 'yes' : 'no'].join(',')));
   lines.push('');
-  lines.push('"Spend Enough scenario export, ' + new Date().toISOString().slice(0, 10) + '. ' + modeName(r.mode) + ' mode, ' + mixLabel() + ' stocks/bonds, fees ' + pct(state.feeRate || 0, 2) + '. Today\'s dollars. Educational model, not advice."');
+  lines.push('Exported,' + new Date().toISOString().slice(0, 10));
+  lines.push('Source,Spend Enough');
+  lines.push('Mode,' + modeName(r.mode));
+  lines.push('Stocks / bonds,' + mixLabel());
+  lines.push('Fees,' + pct(state.feeRate || 0, 2));
+  lines.push('Dollars,today\'s');
+  lines.push('Note,Educational model');
+  lines.push(',not advice');
   const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'spend-enough-' + (currentName !== 'Current' ? currentName : 'scenario').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.csv';
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
