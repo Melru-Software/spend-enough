@@ -349,7 +349,9 @@
   .wwit ul { margin: 6px 0 0 18px; }
   .wwit li { margin-bottom: 3px; }
   .wwit strong { color: var(--ink); font-weight: 600; }
-  .year-table-wrap { max-height: 360px; overflow: auto; border: 1px solid var(--line-soft); border-radius: 4px; margin-bottom: 8px; }
+  .year-table-wrap { max-height: 420px; overflow: auto; border: 1px solid var(--line-soft); border-radius: 4px; margin-bottom: 8px; }
+  .year-table-wrap tbody tr:nth-child(even) td { background: var(--bone); }
+  .year-table-wrap td { color: var(--ink-soft); }
   .year-table-wrap .data-table { margin: 0; }
   .year-table-wrap th { position: sticky; top: 0; background: var(--paper); }
   .year-table-wrap td, .year-table-wrap th { text-align: right; white-space: nowrap; }
@@ -1613,13 +1615,18 @@ function yearRows(result) {
     return { age: y.age, year: y.year, wages: y.yourIncome + y.partnerIncome, ss: y.ssIncome, spending: y.spending, fromPortfolio: y.withdrawal > 0 ? y.withdrawal : 0, added: y.withdrawal < 0 ? -y.withdrawal : 0, tax: y.tax, ret: y.marketReturn, balance: y.portfolio, p10: p.p10, p90: p.p90, ranOut: y.ranOut };
   });
 }
+let yearTableAll = false;
+window.toggleYearTable = function() { yearTableAll = !yearTableAll; render(); };
 function renderYearTable(result) {
-  const rows = yearRows(result);
+  const all = yearRows(result);
   const notFixed = result.mode !== 'fixed';
+  const marks = new Set([state.yourStopWorkAge, state.partnerStopWorkAge, state.ssStartAge, state.mortgagePayoffAge, state.slowDownAge, state.targetAge, state.yourBreakStart, state.yourBreakEnd, state.homeSaleAge, state.shockAge, state.extraSpendStart, state.extraSpendEnd, state.yourPartTimeStart, state.yourPartTimeEnd].filter(v => has(v)));
+  const rows = yearTableAll ? all : all.filter((r, i) => i === 0 || i === all.length - 1 || (r.age % 5 === 0) || marks.has(r.age) || (r.ranOut && !all[i - 1].ranOut));
+  const flow = (r) => r.fromPortfolio > 0 ? '\u2212' + fmtMoneyShort(r.fromPortfolio) : r.added > 0 ? '+' + fmtMoneyShort(r.added) : '';
   return `<div class="section-heading">Year by year</div>
-    <div class="section-sub">The median path, in today’s dollars.${notFixed ? ' The last two columns are where the worst 10% and best 10% of ' + (result.mode === 'historical' ? 'periods' : 'futures') + ' stood at each age.' : ''} <button class="link-btn year-actions" onclick="downloadCsv()">Download as a spreadsheet (CSV)</button></div>
-    <div class="year-table-wrap"><table class="data-table"><thead><tr><th>Age</th><th>Wages</th><th>Social Security</th><th>Spending</th><th>From portfolio</th><th>Added</th><th>Return</th><th>Balance</th>${notFixed ? '<th>Worst 10%</th><th>Best 10%</th>' : ''}</tr></thead><tbody>
-    ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td>${r.age}</td><td>${r.wages > 0 ? fmtMoneyShort(r.wages) : ''}</td><td>${r.ss > 0 ? fmtMoneyShort(r.ss) : ''}</td><td>${fmtMoneyShort(r.spending)}</td><td>${r.fromPortfolio > 0 ? fmtMoneyShort(r.fromPortfolio) : ''}</td><td>${r.added > 0 ? fmtMoneyShort(r.added) : ''}</td><td>${(r.ret * 100).toFixed(1)}%</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td>${notFixed ? '<td>' + (r.p10 <= 0 ? 'ran out' : fmtMoneyShort(r.p10)) + '</td><td>' + fmtMoneyShort(r.p90) + '</td>' : ''}</tr>`).join('')}
+    <div class="section-sub">${yearTableAll ? 'Every year of the median path' : 'Every fifth year of the median path, plus the years something changes'}, in today’s dollars. <button class="link-btn year-actions" onclick="toggleYearTable()">${yearTableAll ? 'Show fewer years' : 'Show every year'}</button> &middot; <button class="link-btn year-actions" onclick="downloadCsv()">Download the full table (CSV)</button></div>
+    <div class="year-table-wrap"><table class="data-table"><thead><tr><th>Age</th><th>Income</th><th>Spending</th><th>Portfolio in / out</th><th>Balance</th>${notFixed ? '<th>Worst 10% to best 10%</th>' : ''}</tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td>${r.age}</td><td>${r.wages + r.ss > 0 ? fmtMoneyShort(r.wages + r.ss) : ''}</td><td>${fmtMoneyShort(r.spending)}</td><td>${flow(r)}</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td>${notFixed ? '<td>' + (r.p10 <= 0 ? 'ran out' : fmtMoneyShort(r.p10)) + ' to ' + fmtMoneyShort(r.p90) + '</td>' : ''}</tr>`).join('')}
     </tbody></table></div>`;
 }
 window.downloadCsv = function() {
