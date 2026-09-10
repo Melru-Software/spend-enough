@@ -47,9 +47,9 @@
 
   /* Data tables - horizontal scroll on mobile */
   .data-table { width: 100%; border-collapse: collapse; }
-  @media (max-width: 768px) {
-    .data-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -20px; padding: 0 20px; }
-  }
+  /* Tables sit inside containers with different padding (main, deep-body, modal), so no bleed trick. */
+  .data-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+  @media print { .data-table-wrapper { overflow: visible; } }
   
   /* Improve touch targets */
   button, input[type="button"], input[type="submit"], .clickable {
@@ -1120,13 +1120,13 @@ function renderDashboard() {
   const sidebar = `
     <aside class="sidebar" role="complementary" aria-label="Planning controls">
       <div class="sidebar-section">
-        <div class="sidebar-heading">Try a scenario</div>
+        <h2 class="sidebar-heading">Try a scenario</h2>
         ${presets.map(p => `<button class="preset-btn" onclick="applyPreset('${p.id}')">${p.label}</button>`).join('')}
         ${renderSidebarImpact()}
       </div>
 
       <div class="sidebar-section">
-        <div class="sidebar-heading">Your plan</div>
+        <h2 class="sidebar-heading">Your plan</h2>
         ${state.simMode==='fixed' ? `<div class="control">
           <div class="control-row"><span class="control-label">Real return<span class="help-mark" data-tip="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
           <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
@@ -1165,7 +1165,7 @@ function renderDashboard() {
       </div>
 
       <div class="sidebar-section">
-        <div class="sidebar-heading">Test against</div>
+        <h2 class="sidebar-heading">Test against</h2>
         <div class="toggle-group">
           <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
           <button class="toggle-btn ${state.simMode==='montecarlo'?'active':''} ${!isPaid()?'locked':''}" onclick="setMode('montecarlo')">Simulated${!isPaid()?'<span class="lock-icon"> &#x1f512;</span>':''}</button>
@@ -1188,7 +1188,7 @@ function renderDashboard() {
 
 
       <div class="sidebar-section">
-        <div class="sidebar-heading">Saved scenarios</div>
+        <h2 class="sidebar-heading">Saved scenarios</h2>
         ${isPaid()
           ? `<div class="scenario-save-row"><input type="text" id="scenarioName" placeholder="Name this scenario"/><button class="scenario-pill" onclick="saveScenario()">Save</button></div>
         <input type="text" id="scenarioNote" placeholder="A note to yourself (optional)" style="width:100%;margin:-6px 0 10px;background:var(--bone);border:1px solid var(--line);padding:6px 10px;font-size:13px;border-radius:2px;font-family:inherit"/>
@@ -1202,12 +1202,12 @@ function renderDashboard() {
     <div class="main" id="main-content" role="main">
       <div class="print-only print-head"><div class="logo"><span class="logo-dot"></span>Spend Enough</div><div>Scenario report &middot; ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}${currentName !== 'Current' ? ' &middot; ' + currentName + ' versus ' + baselineName : ''} &middot; ${modeName(state.simMode)} mode</div></div>
       <div class="verdict" aria-live="polite">
-        <div class="verdict-head">${verdict.headline}</div>
+        <h1 class="verdict-head">${verdict.headline}</h1>
         <div class="verdict-body">${verdict.lead}</div>
         ${verdict.wedge ? `<div class="verdict-wedge">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
       </div>
 
-      <div class="section-heading">Portfolio projection</div>
+      <h2 class="section-heading">Portfolio projection</h2>
       <div class="section-sub">${state.simMode==='historical' ? 'Shaded: where the portfolio stood across all '+result.totalPeriods+' periods, worst 10% to best 10%. Line: the median.' : state.simMode==='montecarlo' ? 'Shaded: the range across '+result.mcSims+' simulated futures, worst 10% to best 10%. Line: the median.' : 'One steady-return path, so no range.'}${canCompare ? ' Dashed line and faint band: ' + baselineName + '.' : ''}</div>
       <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
       ${renderEventTimeline()}
@@ -1220,7 +1220,7 @@ function renderDashboard() {
 
       ${canCompare ? renderCompareSummary(baselineResult, result) : (!isPaid() && computeImpact() ? `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">See “${baselineName}” and “${currentName}” on one chart, with the counts side by side <span class="lock-icon">&#x1f512;</span></button>` : '')}
 
-      <div class="section-heading">Explore spending levels</div>
+      <h2 class="section-heading">Explore spending levels</h2>
       <div class="section-sub">Click a row to apply that spending level and see how it changes the projection.${state.housing > 0 ? ' Figures include the ' + fmtMoneyShort(state.housing) + ' a year mortgage payment while it lasts.' : ''}</div>
       ${renderSpendingExplorer()}
 
@@ -1234,7 +1234,7 @@ function renderDashboard() {
           ${notFixed ? renderBands(result) : ''}
           ${state.simMode==='historical' ? renderStressTests() : ''}
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:26px">
-            <div class="section-heading" style="margin:0">Cashflow</div>
+            <h2 class="section-heading" style="margin:0">Cashflow</h2>
             <div class="toggle-group" style="width:auto">
               <button class="toggle-btn cf-toggle ${cashflowMode==='net'?'active':''}" data-mode="net" onclick="setCashflowMode('net')" style="padding:5px 12px;font-size:14px">Net flow</button>
               <button class="toggle-btn cf-toggle ${cashflowMode==='breakdown'?'active':''}" data-mode="breakdown" onclick="setCashflowMode('breakdown')" style="padding:5px 12px;font-size:14px">Breakdown</button>
@@ -1273,10 +1273,13 @@ function renderDashboard() {
   // Accessibility: auto-label range inputs from nearby control-label
   document.querySelectorAll('.control').forEach(c => {
     const label = c.querySelector('.control-label');
-    const input = c.querySelector('input[type=range], input[type=number]');
-    if (label && input && !input.getAttribute('aria-label')) {
-      input.setAttribute('aria-label', label.textContent.trim());
-    }
+    if (!label) return;
+    // The help-mark "i" is not part of the name.
+    const name = Array.from(label.childNodes).filter(n => !(n.classList && n.classList.contains('help-mark'))).map(n => n.textContent).join('').trim();
+    // Each control renders a slider (desktop) and a number box (mobile); label both.
+    c.querySelectorAll('input[type=range], input[type=number]').forEach(input => {
+      if (name && !input.getAttribute('aria-label')) input.setAttribute('aria-label', name);
+    });
   });
   // Label clickable table rows
   document.querySelectorAll('.data-table .clickable').forEach(row => {
@@ -1302,13 +1305,13 @@ function moreOptionsHTML() {
   const effRate = state.taxRate ? (state.taxRate * 100).toFixed(0) : '18';
   return `
     <div style="margin-top:12px">
-      <div class="sidebar-heading" style="margin-top:0">Plan to age</div>
+      <h3 class="sidebar-heading" style="margin-top:0">Plan to age</h3>
       <div class="control">
         <div class="control-row"><span class="control-label">Target age</span><span class="control-value">${state.targetAge}</span></div>
         <input type="range" min="70" max="110" step="1" value="${state.targetAge}" oninput="slideLive(this,'targetAge',this.value)" onchange="sliderCommit('targetAge',this.value)"/>
       </div>
 
-      <div class="sidebar-heading" style="margin-top:14px">Late-life spending</div>
+      <h3 class="sidebar-heading" style="margin-top:14px">Late-life spending</h3>
       <div class="control">
         <div class="control-row"><span class="control-label">After age ${state.slowDownAge}</span><span class="control-value">${fmtMoney(state.lateSpending)}</span></div>
         <input type="range" min="10000" max="400000" step="1000" value="${state.lateSpending}" oninput="slideLive(this,'lateSpending',this.value)" onchange="sliderCommit('lateSpending',this.value)"/>
@@ -1319,13 +1322,13 @@ function moreOptionsHTML() {
       </div>
 
 
-      <div class="sidebar-heading" style="margin-top:14px">Income growth</div>
+      <h3 class="sidebar-heading" style="margin-top:14px">Income growth</h3>
       <div class="control">
         <div class="control-row"><span class="control-label">Real income growth</span><span class="control-value">${(state.yourIncomeGrowth*100).toFixed(1)}%</span></div>
         <input type="range" min="0" max="5" step="0.25" value="${state.yourIncomeGrowth*100}" oninput="updateLive2(this,'yourIncomeGrowth','partnerIncomeGrowth',this.value/100)" onchange="state.partnerIncomeGrowth=this.value/100;sliderCommit('yourIncomeGrowth',this.value/100)"/>
       </div>
 
-      <div class="sidebar-heading" style="margin-top:14px">Mortgage</div>
+      <h3 class="sidebar-heading" style="margin-top:14px">Mortgage</h3>
       <div class="control">
         <div class="control-row"><span class="control-label">Mortgage payment per year</span><span class="control-value">${fmtMoney(state.housing)}</span></div>
         <input type="range" min="0" max="120000" step="1000" value="${state.housing}" oninput="slideLive(this,'housing',this.value)" onchange="sliderCommit('housing',this.value)"/>
@@ -1336,7 +1339,7 @@ function moreOptionsHTML() {
       </div>
       ${state.housing > 0 && state.mortgagePayoffAge > state.age + 2 ? `<button onclick="showPayoffModal()" style="margin-top:6px;font-size:14px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">+ Model accelerated payoff \u2192</button>` : ''}
 
-      <div class="sidebar-heading" style="margin-top:14px">Taxes</div>
+      <h3 class="sidebar-heading" style="margin-top:14px">Taxes</h3>
       <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">Used to estimate the tax rates shown under Assumptions, where you can also edit them directly.</div>
       <div class="control">
         <div class="control-row"><span class="control-label">Filing status</span></div>
@@ -1353,7 +1356,7 @@ function moreOptionsHTML() {
       </div>
       <div style="font-size:14px;color:var(--ink-mute);margin-top:8px">Estimated rate on wages: <strong style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums">${effRate}%</strong> &middot; in retirement: <strong style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums">${Math.round(retirementTaxRate(state)*100)}%</strong></div>
 
-      <div class="sidebar-heading" style="margin-top:14px">Account types</div>
+      <h3 class="sidebar-heading" style="margin-top:14px">Account types</h3>
       <div class="checkbox-row"><input type="checkbox" id="cb_accts" ${state.accountsEnabled?'checked':''} onchange="toggleAccounts(this.checked)"/><label for="cb_accts">Separate account types</label></div>
       ${state.accountsEnabled ? (() => {
         const acctTotal = state.accounts.traditional + state.accounts.roth + state.accounts.taxable;
@@ -1376,7 +1379,7 @@ function moreOptionsHTML() {
         </div>`;
       })() : ''}
 
-      <div class="sidebar-heading" style="margin-top:14px">Life events</div>
+      <h3 class="sidebar-heading" style="margin-top:14px">Life events</h3>
       <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">One-time income or expenses at a specific age. Use negative for costs.</div>
       ${(state.oneTimeEvents || []).map((ev, i) => `<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;font-size:14px">
         <span style="color:var(--ink-soft);flex:1">${ev.label || 'Event'} at ${ev.age}</span>
@@ -1626,16 +1629,16 @@ function renderYearTable(result) {
   const notFixed = result.mode !== 'fixed';
   const flow = (r) => r.fromPortfolio > 0 ? '\u2212' + fmtMoneyShort(r.fromPortfolio) : r.added > 0 ? '+' + fmtMoneyShort(r.added) : '';
   const label = (a) => a === state.age ? 'Now' : a === state.targetAge ? 'Plan ends' : (a === state.yourStopWorkAge && state.yourIncome > 0) ? 'Retire' : a === state.ssStartAge ? 'Social Security' : (a === state.mortgagePayoffAge && state.housing > 0) ? 'Mortgage paid' : a === state.slowDownAge ? 'Spending eases' : has(state.homeSaleAge) && a === state.homeSaleAge ? 'House sold' : has(state.yourBreakStart) && a === state.yourBreakStart ? 'Career break' : has(state.shockAge) && a === state.shockAge ? 'Bad decade' : has(state.extraSpendStart) && a === state.extraSpendStart ? 'Extra spending' : state.yourPartTimeAmount > 0 && a === state.yourPartTimeStart ? 'Part-time' : '';
-  if (printing) return `<div class="section-heading">Year by year</div>
+  if (printing) return `<h2 class="section-heading">Year by year</h2>
     <div class="section-sub">The median path, in today’s dollars. In / out is money taken from the portfolio (\u2212) or added to it (+).${notFixed ? ' Range is where the worst 10% and the best 10% of ' + (result.mode === 'historical' ? 'periods' : 'futures') + ' stood at that age.' : ''}</div>
-    <table class="data-table year-preview year-full"><thead><tr><th>Age</th><th>Income</th><th>Spending</th><th>In / out</th><th>Balance</th>${notFixed ? '<th>Range</th>' : ''}</tr></thead><tbody>
+    <div class="data-table-wrapper"><table class="data-table year-preview year-full"><thead><tr><th>Age</th><th>Income</th><th>Spending</th><th>In / out</th><th>Balance</th>${notFixed ? '<th>Range</th>' : ''}</tr></thead><tbody>
     ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td class="agecell">${r.age}${label(r.age) ? '<span class="ms">' + label(r.age) + '</span>' : ''}</td><td>${r.wages + r.ss > 0 ? fmtMoneyShort(r.wages + r.ss) : ''}</td><td>${fmtMoneyShort(r.spending)}</td><td>${flow(r)}</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td>${notFixed ? '<td>' + (r.p10 <= 0 ? 'ran out' : fmtMoneyShort(r.p10)) + '\u2013' + fmtMoneyShort(r.p90) + '</td>' : ''}</tr>`).join('')}
-    </tbody></table>`;
-  return `<div class="section-heading">Year by year</div>
+    </tbody></table></div>`;
+  return `<h2 class="section-heading">Year by year</h2>
     <div class="section-sub">A few milestones along the median path, in today’s dollars. To see every year as a readable table, <button class="link-btn" onclick="printReport()">print the report</button>. To get all the raw numbers, <button class="link-btn" onclick="downloadCsv()">download the spreadsheet</button>.</div>
-    <table class="data-table year-preview"><thead><tr><th></th><th>Age</th><th>Income</th><th>Spending</th><th>Balance</th></tr></thead><tbody>
+    <div class="data-table-wrapper"><table class="data-table year-preview"><thead><tr><th></th><th>Age</th><th>Income</th><th>Spending</th><th>Balance</th></tr></thead><tbody>
     ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td class="milestone">${label(r.age)}</td><td>${r.age}</td><td>${r.wages + r.ss > 0 ? fmtMoneyShort(r.wages + r.ss) : '\u2014'}</td><td>${fmtMoneyShort(r.spending)}</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td></tr>`).join('')}
-    </tbody></table>`;
+    </tbody></table></div>`;
 }
 window.downloadCsv = function() {
   if (!isPaid()) { showUnlockModal(); return; }
@@ -1677,15 +1680,15 @@ function renderCompareSummary(a, b) {
   const range = r => r.mode === 'fixed' ? fmtMoneyShort(last(r).p50) + ' (steady return)' : (last(r).p10 <= 0 ? 'ran out' : fmtMoneyShort(last(r).p10)) + ' to ' + fmtMoneyShort(last(r).p90);
   const im = computeImpact();
   const diffs = im ? im.changes.map(c => c.label + ' ' + c.from + ' → ' + c.to).join('; ') : 'no inputs differ yet';
-  return `<div class="section-heading">Side by side</div>
+  return `<h2 class="section-heading">Side by side</h2>
     <div class="section-sub">${baselineName} and ${currentName}, both run in ${modeName(b.mode)} mode. What differs: ${diffs}. <button class="link-btn" onclick="toggleCompare()">Stop comparing</button></div>
-    <table class="data-table compare-table"><thead><tr><th></th><th>${baselineName}</th><th>${currentName}</th></tr></thead><tbody>
+    <div class="data-table-wrapper"><table class="data-table compare-table"><thead><tr><th></th><th>${baselineName}</th><th>${currentName}</th></tr></thead><tbody>
       <tr><td>Lasted to age ${state.targetAge}</td><td>${periodsLabel(a)}</td><td style="font-weight:600;color:var(--ink)">${periodsLabel(b)}</td></tr>
       <tr><td>Ending balance, worst 10% to best 10%</td><td>${range(a)}</td><td>${range(b)}</td></tr>
       <tr><td>Median ending balance</td><td>${fmtMoneyShort(a.medianFinal)}</td><td>${fmtMoneyShort(b.medianFinal)}</td></tr>
       <tr><td>Spending, all in</td><td>${fmtMoney(baselineState.spending + baselineState.housing)}</td><td>${fmtMoney(state.spending + state.housing)}</td></tr>
       <tr><td>Portfolio today</td><td>${fmtMoneyShort(baselineState.portfolio)}</td><td>${fmtMoneyShort(state.portfolio)}</td></tr>
-    </tbody></table>`;
+    </tbody></table></div>`;
 }
 
 // ===== CONFIDENCE BANDS =====
@@ -1698,7 +1701,7 @@ function renderBands(result) {
   // p10 <= 0 means at least 10% of runs were depleted by the end; say that, not a single age.
   const consTxt = last.p10 <= 0 ? 'Ran out' : fmtMoneyShort(last.p10);
   const consSub = last.p10 <= 0 ? `${result.failureCount} of ${result.totalPeriods} ${unit} ran out; among those, half by age ${result.medianRunOutAge}` : `10% of ${unit} ended below this`;
-  return `<div class="section-heading">Ending balance at age ${state.targetAge}</div>
+  return `<h2 class="section-heading">Ending balance at age ${state.targetAge}</h2>
   <div class="section-sub">Where the ${result.totalPeriods} ${unit} finished. Every figure is in today's dollars.</div>
   <div class="bands">
     <div class="band warn"><div class="band-label">Worst 10%</div><div class="band-sub">${consSub}</div><div class="band-value">${consTxt}</div></div>
@@ -1753,9 +1756,9 @@ function computeSpendingLevels() {
 function renderSpendingExplorer() {
   const rows = computeSpendingLevels();
   const isHist = state.simMode === 'historical';
-  return `<table class="data-table"><thead><tr><th>Spending, all in</th><th>${isHist?'Historical success':'Success'}</th><th>Median ending</th><th>Worst 10%</th></tr></thead><tbody>
+  return `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Spending, all in</th><th>${isHist?'Historical success':'Success'}</th><th>Median ending</th><th>Worst 10%</th></tr></thead><tbody>
     ${rows.map(r => `<tr class="${r.isCurrent?'current-row':''} clickable" onclick="applySpending(${r.spending})" title="Click to set spending to ${fmtMoney(r.spending)}/yr"><td>${fmtMoney(r.spending + state.housing)}/yr ${r.isCurrent?'<span class="tag-current">current</span>':''}</td><td>${isHist ? r.successCount+' of '+r.totalPeriods : Math.round(r.successRate*100)+'%'}</td><td>${fmtMoneyShort(r.medianFinal)}</td><td>${r.p10<=0?'<span class="fail">Ran out</span>':fmtMoneyShort(r.p10)}</td></tr>`).join('')}
-  </tbody></table>`;
+  </tbody></table></div>`;
 }
 
 // ===== FLEXIBILITY IMPACT =====
@@ -1768,7 +1771,7 @@ function renderFlexibilityImpact() {
   const activeLeft = !state.guardrailsEnabled;
   const activeRight = state.guardrailsEnabled;
 
-  return `<div class="section-heading">Spending flexibility</div>
+  return `<h2 class="section-heading">Spending flexibility</h2>
     <div class="section-sub">What happens if you adjust spending when your portfolio is under pressure?</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
       <div onclick="update('guardrailsEnabled',false)" style="background:var(--paper);border:${activeLeft?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeLeft?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
@@ -1813,7 +1816,7 @@ function renderStressTests() {
       <div class="scenario-desc">${s.description}</div>
     </div>`;
   }).join('');
-  return `<div class="section-heading">Historical stress tests</div>
+  return `<h2 class="section-heading">Historical stress tests</h2>
     <div class="section-sub">How this scenario would have played out starting in specific market environments.</div>
     <div class="scenario-cards">${cards}</div>
     ${HISTORICAL_SCENARIOS.some(s => runNamedScenario(state, s).padded) ? '<div class="section-sub" style="margin-top:-8px">* Your horizon runs past the end of the data; padded years use the mix’s long-run compound return.</div>' : ''}`;
@@ -1834,7 +1837,7 @@ function renderSSComparison() {
     const highlight = a === state.ssStartAge ? 'highlight' : '';
     return `<div class="ss-card ${highlight}" onclick="applySSAge(${a})" style="cursor:pointer" title="Click to use age ${a}"><div class="ss-age">${a}</div><div class="ss-label">${label}</div><div class="ss-benefit">${fmtMoney(benefit)}/yr</div><div class="ss-success" style="color:${r.successRate>=0.85?'var(--moss)':r.successRate>=0.6?'var(--gold)':'var(--danger)'}">${isHist ? 'Survived ' + r.successCount+' of '+r.totalPeriods : Math.round(r.successRate*100)+'%'}</div></div>`;
   }).join('');
-  return `<div class="section-heading">Social Security claiming</div>
+  return `<h2 class="section-heading">Social Security claiming</h2>
     <div class="section-sub">Claiming earlier means smaller payments for more years; later means larger payments for fewer. Click a card to see what happens if you claim at that age.</div>
     <div class="ss-grid">${cards}</div>`;
 }
@@ -1856,13 +1859,13 @@ function renderTaxComparison() {
   };
   const propATW = afterTaxWealth(prop), smartATW = afterTaxWealth(smart);
   const smartBetter = smartATW > propATW;
-  return `<div class="section-heading">Withdrawal strategy</div>
+  return `<h2 class="section-heading">Withdrawal strategy</h2>
     <div class="section-sub">How you draw from different account types affects after-tax wealth. Preserving Roth (tax-free) growth typically leaves more usable money. These are simplified estimates at a steady ${(state.returnRate*100).toFixed(1)}% return.</div>
-    <table class="data-table"><thead><tr><th></th><th>Proportional</th><th>Tax-aware order</th></tr></thead><tbody>
+    <div class="data-table-wrapper"><table class="data-table"><thead><tr><th></th><th>Proportional</th><th>Tax-aware order</th></tr></thead><tbody>
       <tr><td>After-tax ending wealth</td><td>${fmtMoneyShort(propATW)}</td><td style="color:${smartBetter?'var(--moss)':'var(--ink-soft)'};font-weight:600">${fmtMoneyShort(smartATW)}</td></tr>
       <tr><td>Estimated total tax paid</td><td>${fmtMoneyShort(propTax)}</td><td>${fmtMoneyShort(smartTax)}</td></tr>
       <tr><td>Pre-tax ending balance</td><td>${fmtMoneyShort(prop.medianFinal)}</td><td>${fmtMoneyShort(smart.medianFinal)}</td></tr>
-    </tbody></table>
+    </tbody></table></div>
     <div class="flex-note">Tax-aware ordering (taxable \u2192 traditional \u2192 Roth) preserves tax-free Roth growth. It may show higher nominal tax, but the leftover money is worth more after tax. Estimated difference in after-tax wealth: ${fmtMoneyShort(Math.abs(smartATW - propATW))}. A tax professional can model your specific situation.</div>`;
 }
 
@@ -2064,28 +2067,48 @@ function drawMainChart(result, compare) {
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: state.lateSpending < state.spending ? 'Spending drops' : 'Spending rises' });
 
   // Chart.js plugin for vertical annotation lines
+  const EV_FONT = '10px Inter Tight, sans-serif';
+  const EV_ROW_H = 12;
+  // Stagger labels into rows so labels that share an age (or sit close together) stack
+  // vertically instead of overlapping, and keep every label inside the canvas.
+  // `xFor(idx)` gives the pixel x for a label index; returns the positioned list.
+  function layoutEventLabels(chart, xFor) {
+    const ctx2 = chart.ctx;
+    ctx2.save();
+    ctx2.font = EV_FONT;
+    const positioned = events.map(ev => {
+      const idx = labels.indexOf(ev.age);
+      if (idx < 0) return null;
+      const half = ctx2.measureText(ev.label).width / 2;
+      const x = xFor(idx);
+      return { ...ev, idx, x, half, tx: Math.min(Math.max(x, half + 2), chart.width - half - 2) };
+    }).filter(Boolean).sort((a, b) => a.x - b.x);
+    ctx2.restore();
+    const rowLast = [];
+    positioned.forEach(ev => {
+      let row = 0;
+      while (rowLast[row] && (ev.tx - ev.half) < (rowLast[row].tx + rowLast[row].half + 6)) row++;
+      ev.row = row;
+      rowLast[row] = ev;
+    });
+    return { positioned, rows: rowLast.length };
+  }
   const annotationPlugin = {
     id: 'eventAnnotations',
+    // Before layout the scales don't exist yet, so estimate label spacing from the canvas
+    // width (conservatively narrow) and reserve enough top padding for the stacked rows.
+    // Doing it here means no second render pass; the real positions are used in afterDraw.
+    beforeLayout(chart) {
+      const plotW = Math.max(40, chart.width - 70);
+      const n = Math.max(1, labels.length - 1);
+      const { rows } = layoutEventLabels(chart, idx => 60 + idx / n * plotW);
+      chart.options.layout.padding.top = Math.max(34, 4 + rows * EV_ROW_H + 6);
+    },
     afterDraw(chart) {
       const xScale = chart.scales.x;
       const yScale = chart.scales.y;
       const ctx2 = chart.ctx;
-      // Sort events and calculate pixel positions to detect collisions
-      const positioned = events.map(ev => {
-        const idx = labels.indexOf(ev.age);
-        if (idx < 0) return null;
-        return { ...ev, idx, x: xScale.getPixelForValue(idx) };
-      }).filter(Boolean);
-      // Assign each label to the lowest stagger row with no nearby label, so labels that
-      // share an age (or sit close together) stack vertically instead of overlapping.
-      positioned.sort((a, b) => a.x - b.x);
-      const rowLastX = [];
-      positioned.forEach(ev => {
-        let row = 0;
-        while (rowLastX[row] !== undefined && Math.abs(rowLastX[row] - ev.x) < 64) row++;
-        ev.row = row;
-        rowLastX[row] = ev.x;
-      });
+      const { positioned } = layoutEventLabels(chart, idx => xScale.getPixelForValue(idx));
       positioned.forEach(ev => {
         ctx2.save();
         ctx2.strokeStyle = '#d4cab8';
@@ -2097,9 +2120,9 @@ function drawMainChart(result, compare) {
         ctx2.stroke();
         ctx2.setLineDash([]);
         ctx2.fillStyle = '#75695a';
-        ctx2.font = '10px Inter Tight, sans-serif';
+        ctx2.font = EV_FONT;
         ctx2.textAlign = 'center';
-        ctx2.fillText(ev.label, ev.x, yScale.top - 4 - ev.row * 12);
+        ctx2.fillText(ev.label, ev.tx, yScale.top - 4 - ev.row * EV_ROW_H);
         ctx2.restore();
       });
     }
@@ -2615,7 +2638,7 @@ window.showScenarioDetail = function(id) {
   narrative += survived ? 'The portfolio still lasted to age ' + state.targetAge + ', ending near ' + fmtMoneyShort(final.portfolio) + '.' : 'The portfolio was depleted around age ' + years.find(y => y.ranOut).age + '.';
 
   const sampleRows = years.filter((y, i) => i % 5 === 0 || y.ranOut).slice(0, 16);
-  const table = `<table class="data-table"><thead><tr><th>Age</th><th>Market</th><th>Portfolio</th><th>Spending</th></tr></thead><tbody>${sampleRows.map(y => `<tr><td>${y.age}</td><td style="color:${y.marketReturn<0?'var(--danger)':'var(--moss)'}">${(y.marketReturn*100).toFixed(0)}%</td><td>${fmtMoneyShort(y.portfolio)}</td><td>${fmtMoneyShort(y.spending)}</td></tr>`).join('')}</tbody></table>`;
+  const table = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Age</th><th>Market</th><th>Portfolio</th><th>Spending</th></tr></thead><tbody>${sampleRows.map(y => `<tr><td>${y.age}</td><td style="color:${y.marketReturn<0?'var(--danger)':'var(--moss)'}">${(y.marketReturn*100).toFixed(0)}%</td><td>${fmtMoneyShort(y.portfolio)}</td><td>${fmtMoneyShort(y.spending)}</td></tr>`).join('')}</tbody></table></div>`;
   openModal(`<h2>${s.name} \u00b7 ${s.startYear}\u2013${s.startYear + (state.targetAge - state.age)}${run.padded?'*':''}</h2>
     <div class="detail-narrative">${narrative}</div>
     ${table}
