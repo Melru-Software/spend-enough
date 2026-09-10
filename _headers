@@ -1,0 +1,23 @@
+# Response headers for every page (Netlify _headers format).
+#
+# Content-Security-Policy, what each source is for:
+#   script-src   inline scripts and onclick handlers in the pages, Chart.js from jsDelivr
+#   style-src    inline styles, Google Fonts stylesheet
+#   font-src     Google Fonts files
+#   connect-src  Lemon Squeezy License API (activate / validate / deactivate)
+#   img-src      local images and data: URIs
+# When you turn on analytics or the email form in config.js, add that provider's host to
+# script-src and connect-src (analytics), or connect-src / form-action (email endpoint).
+# The optional Lemon.js overlay checkout would need https://app.lemonsqueezy.com in
+# script-src and frame-src.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.lemonsqueezy.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Cross-Origin-Opener-Policy: same-origin
+
+# HTML is never cached long: every visit gets the latest app.
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate

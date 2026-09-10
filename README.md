@@ -81,22 +81,23 @@ the app's "Read this first" note and FAQ, and in code comments in `engine.js`.
 
 ## Deploying
 
-The site is static files at the repo root, so any static host works. Recommended:
-**Netlify** (or Cloudflare Pages): connect the GitHub repo, no build command, publish
-directory `/`. Every push to `main` deploys.
+The site is static files at the repo root, so any static host works. It is deployed on
+**Netlify** from the GitHub repo: `netlify.toml` sets no build command and publishes the
+repo root, and `_headers` sets the Content-Security-Policy and other security headers.
+Every push to `main` deploys.
 
-1. Fill in `config.js` (checkout URL and price from the payment provider, optional email
-   endpoint and analytics, and `siteUrl` once the domain exists). Commit.
-2. Fill the placeholders in `privacy.html` and `terms.html` (`[BUSINESS NAME]`,
-   `[CONTACT EMAIL]`, `[DATE]`, `[STATE]`, `[PAYMENT PROCESSOR]`, `[ANALYTICS PROVIDER]`,
-   `[HOST]`) and review the `TODO` boxes. Commit.
+1. Fill in `config.js` (checkout URL from the payment provider, optional email endpoint
+   and analytics). If you enable analytics or the email form, add the provider's host to
+   the policy in `_headers` (the comments there say where).
+2. Set `[DATE]` in `privacy.html` and `terms.html`, fill `[ANALYTICS PROVIDER]` if used, and
+   review the remaining `TODO` boxes.
 3. Replace the results-screen mock and the `og:image` placeholder in `index.html` with real
    images (`results-screen.png`, `og-image.png`).
-4. Create the host account, import the repo, deploy. Add the custom domain in the host
-   dashboard and follow its DNS instructions.
-5. Payments (Lemon Squeezy recommended, merchant of record): create the product
-   "Spend Enough Pro — founder lifetime" at the configured price, copy the hosted checkout
-   URL into `config.js`. License keys are UUIDs; the app accepts them pasted into the unlock
-   screen or via `app.html?key=<KEY>` if the provider's redirect can insert them.
+4. Add the custom domain in the Netlify dashboard and follow its DNS instructions.
+5. Payments (Lemon Squeezy, merchant of record): create the product "Spend Enough Pro —
+   founder lifetime" at the configured price with license keys enabled and an activation
+   limit of 3; set the post-purchase redirect, confirmation button, and receipt-email button
+   to `https://<domain>/app.html?key=[license_key]`; copy the hosted checkout URL into
+   `config.js`.
 
 There are no server-side secrets: nothing in this repo needs an environment variable.

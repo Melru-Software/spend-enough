@@ -1,0 +1,8 @@
+# Netlify build settings. Static site, no build step: publish the repo root as-is.
+# Keeping this in the repo means the dashboard's build settings can't drift.
+[build]
+  command = ""
+  publish = "."
+
+# Security and caching headers live in _headers (same folder) so they are easy
+# to read and diff without TOML quoting.
