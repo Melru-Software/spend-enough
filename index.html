@@ -233,6 +233,14 @@
   .mode .val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 15px; color: var(--ink-soft); }
 
   /* ========== WHAT IT ISN'T ========== */
+  .plans { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 22px; }
+  .plan { border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; background: var(--paper); }
+  .plan.pro { border-color: var(--rust); }
+  .plan-head { font-family: var(--serif); font-size: 20px; font-weight: 500; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .plan-price { font-family: var(--sans, inherit); font-size: 14px; font-weight: 600; color: var(--rust); font-variant-numeric: tabular-nums; }
+  .plan p { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin: 0; }
+  .plan-fine { font-size: 14px; color: var(--ink-mute); margin-top: 16px; }
+  @media (min-width: 700px) { .plans { grid-template-columns: 1fr 1fr; } }
   .isnt .box {
     background: var(--bone-2); border: 1px solid var(--line); border-radius: 4px;
     padding: 18px 20px; font-size: 16px; line-height: 1.6; color: var(--ink-soft); max-width: var(--measure);
@@ -434,6 +442,25 @@
     </div>
   </section>
 
+  <!-- 8b. Pricing -->
+  <section class="pricing" id="pricing" aria-labelledby="pricing-h">
+    <div class="wrap">
+      <p class="eyebrow">Free and Pro</p>
+      <h2 id="pricing-h">Try it free. Pay once if you want the comparison.</h2>
+      <div class="plans">
+        <div class="plan">
+          <div class="plan-head">Free</div>
+          <p>Your plan run through every market period since 1926 with the full range on the chart, the core inputs, the what-if presets, the spending explorer, and every assumption on screen and editable.</p>
+        </div>
+        <div class="plan pro">
+          <div class="plan-head">Pro <span class="plan-price"><span id="pro-price">$39</span>, once</span></div>
+          <p>Everything in Free, plus side-by-side scenario comparison with both futures on one chart, what it would take to get a plan over the line, a printable one-page report, the year-by-year table as a spreadsheet, stress tests, Simulated mode, and saved scenarios.</p>
+        </div>
+      </div>
+      <p class="plan-fine">Not for you? Full refund within 14 days, no questions asked.</p>
+    </div>
+  </section>
+
   <!-- 9. What it isn't -->
   <section class="isnt" aria-labelledby="isnt-h">
     <div class="wrap">
@@ -496,6 +523,7 @@ window.track=function(n){try{if(window.plausible)window.plausible(n);else if(win
   }
 
   document.getElementById("year").textContent = String(new Date().getFullYear());
+  if (CFG.price) { var pp = document.getElementById("pro-price"); if (pp) pp.textContent = CFG.price; }
 
   // ---------- Email capture ----------
   (function wireSignup() {

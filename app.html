@@ -386,6 +386,14 @@
   .more-toggle .asm-hint { font-weight: 400; margin-left: 6px; }
   .field-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
   .compare-table td:first-child { color: var(--ink-mute); }
+  .unlock-note { font-size: 13px; color: var(--ink-faint); margin: 6px 0 0; text-align: center; }
+  .unlock-msg { font-size: 14px; color: var(--danger); margin: 8px 0 0; text-align: center; min-height: 0; }
+  .unlock-msg:empty { display: none; }
+  .unlock-hint { font-size: 14px; color: var(--ink-soft); margin: 0 0 10px; text-align: center; }
+  .pro-status { font-size: 13px; color: var(--ink-faint); margin: 0 0 10px; }
+  .unlock-already { font-size: 14px; color: var(--ink-mute); margin: 0 0 10px; text-align: center; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 4px; font-size: 14px; box-shadow: var(--shadow-md); z-index: 150; max-width: calc(100vw - 32px); text-align: center; }
+  @media print { .toast { display: none; } }
   @media (max-width: 600px) { .asm-row { grid-template-columns: 1fr; gap: 4px; } }
 
   /* Saved scenarios */
@@ -618,13 +626,15 @@
 (function(){var c=window.SPENDENOUGH_CONFIG||{};if(!c.analyticsScript)return;var s=document.createElement('script');s.defer=true;s.src=c.analyticsScript;if(c.analyticsSite){s.setAttribute('data-domain',c.analyticsSite);s.setAttribute('data-site',c.analyticsSite);}document.head.appendChild(s);})();
 window.track=function(n){try{if(window.plausible)window.plausible(n);else if(window.fathom&&window.fathom.trackEvent)window.fathom.trackEvent(n);}catch(e){}};</script>
 <script src="engine.js"></script>
+<script src="paywall.js"></script>
 <script>
 "use strict";
 
 /* ----------------------------------------------------------------------------
    Simulation engine, estimators, DEFAULT_STATE and SAMPLE_STATE now live in
-   engine.js (loaded above) and are available here as globals. This file holds
-   only UI: state wiring, rendering, charts, handlers, and modals.
+   engine.js (loaded above) and are available here as globals; the pure license
+   decisions live in paywall.js. This file holds only UI: state wiring, rendering,
+   charts, handlers, modals, and the license-server calls.
    ---------------------------------------------------------------------------- */
 
 let state = withDefaults(null);
@@ -651,8 +661,6 @@ const CONFIG = Object.assign({ checkoutUrl: '', price: '$39', emailEndpoint: '' 
 // Presets that invent a dollar figure (home sale $400k at 70, long-term care $90k x 5)
 // stay off until the owner decides on defaults. See LAUNCH.md: never invent assumptions.
 const FLAGS = { hardcodedPresets: false };
-// Lemon Squeezy license keys are UUIDs. Anything else is not a key.
-const KEY_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const has = (v) => v !== null && v !== undefined;
 // Fill any field a saved or older state lacks, so 'not set' is always null rather than undefined.
 function withDefaults(s) { return Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), s || {}); }
@@ -661,29 +669,172 @@ const pct = (x, d) => ((+x || 0) * 100).toFixed(d === undefined ? 1 : d) + '%';
 // ============================================================================
 // PAID UNLOCK
 // ============================================================================
-function isPaid() { const k = localStorage.getItem('spendenough_key'); return !!k && KEY_RE.test(k); }
+// The decision logic (licenseDecision and friends) is in paywall.js. This section does
+// storage and the three Lemon Squeezy License API calls. Only the license key ever leaves
+// the browser. Plan: docs/launch/phase6-license-activation.md.
+const LS_LICENSE_API = 'https://api.lemonsqueezy.com/v1/licenses';
+const LICENSE_STORE = 'spendenough_license';
+const LEGACY_KEY_STORE = 'spendenough_key';
+let licenseSessionGrace = false; // an old un-checked key could not be verified (offline): Pro for this session only
 
-// After checkout the buyer lands on app.html?key=<license key>; store it and clean the URL.
-// (Phase 6: point the provider's redirect here if it can insert the key; otherwise the
-// buyer pastes the key from the receipt email.)
+// Small non-blocking status line at the bottom of the screen. ms = 0 keeps it until replaced.
+let toastTimer = null;
+function showToast(text, ms) {
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
+  el.textContent = text;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  if (ms) toastTimer = setTimeout(hideToast, ms);
+}
+function hideToast() { const el = document.getElementById('toast'); if (el) el.hidden = true; }
+
+function readLicense() { try { const raw = localStorage.getItem(LICENSE_STORE); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
+function writeLicense(obj) { try { localStorage.setItem(LICENSE_STORE, JSON.stringify(obj)); } catch (e) { /* private mode */ } }
+function clearLicense() { try { localStorage.removeItem(LICENSE_STORE); localStorage.removeItem(LEGACY_KEY_STORE); } catch (e) { /* private mode */ } }
+
+// Synchronous on purpose (29 call sites). A stale or failed check never locks anyone out.
+function isPaid() { return licenseSessionGrace || licenseDecision(readLicense(), Date.now()).paid; }
+
+// POST to the License API. Resolves with the parsed JSON (Lemon Squeezy answers 4xx with a
+// JSON body too); rejects with {network:true} on timeout, offline, or a non-JSON reply.
+async function lsLicenseCall(path, params) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 10000);
+  try {
+    const res = await fetch(LS_LICENSE_API + '/' + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+      body: new URLSearchParams(params).toString(),
+      signal: ctrl.signal
+    });
+    return await res.json();
+  } catch (e) {
+    throw { network: true, cause: e };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function licenseInstanceName() {
+  let hex = '';
+  try { hex = Array.from(crypto.getRandomValues(new Uint8Array(3))).map(b => b.toString(16).padStart(2, '0')).join(''); }
+  catch (e) { hex = Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'); }
+  return instanceLabel(navigator.userAgent, navigator.platform, hex);
+}
+
+// Activate a key in this browser. opts.onError(message) receives the user-facing text;
+// opts.onSuccess(res) runs after the modal is closed and the app re-rendered.
+// Resolves true when Pro was unlocked.
+async function activateLicense(key, opts) {
+  opts = opts || {};
+  const onError = opts.onError || (() => {});
+  key = (key || '').trim();
+  if (!KEY_RE.test(key)) { onError(LICENSE_MSG.shape); return false; }
+  let res;
+  try { res = await lsLicenseCall('activate', { license_key: key, instance_name: licenseInstanceName() }); }
+  catch (e) { onError(LICENSE_MSG.network); return false; }
+  const blob = licenseFromActivation(key, res, Date.now());
+  if (!blob) { onError(activationOutcome(res) === 'limit' ? LICENSE_MSG.limit : LICENSE_MSG.inactive); return false; }
+  writeLicense(blob);
+  try { localStorage.removeItem(LEGACY_KEY_STORE); } catch (e) { /* private mode */ }
+  licenseSessionGrace = false;
+  track('purchased');
+  closeModal();
+  render();
+  if (opts.onSuccess) opts.onSuccess(res);
+  return true;
+}
+
+// About once a day, confirm the key is still good (refunds, disabled keys, a freed slot).
+// Runs after render, never blocks, and only an explicit "not valid" answer locks Pro.
+async function revalidateLicense() {
+  const L = readLicense();
+  if (!licenseDecision(L, Date.now()).needsCheck) return;
+  let res = null;
+  try { res = await lsLicenseCall('validate', { license_key: L.key, instance_id: L.instanceId }); }
+  catch (e) { writeLicense(applyValidation(L, null, Date.now())); return; }
+  const next = applyValidation(L, res, Date.now());
+  writeLicense(next);
+  if (!licenseDecision(next, Date.now()).paid) {
+    render();
+    showUnlockModal({ silent: true, message: LICENSE_MSG.inactive });
+  }
+}
+
+// Free this browser's activation slot so the key can be used on another machine.
+window.deactivateLicense = async function() {
+  const L = readLicense();
+  if (!L) return;
+  if (!confirm('Deactivate Pro in this browser? The key will then work in another browser, and you can paste it here again any time.')) return;
+  try { await lsLicenseCall('deactivate', { license_key: L.key, instance_id: L.instanceId }); }
+  catch (e) { /* offline: the slot can also be freed from the order page */ }
+  clearLicense();
+  closeModal();
+  render();
+};
+
+// After checkout the buyer lands on app.html?key=<license key> (or app.html?purchased=1
+// when the provider can't put the key in the redirect). Both are stripped from the URL at
+// once so a reload doesn't re-activate; the work happens in startLicense() after render.
+let urlLicenseKey = '', urlPurchased = false;
 (function acceptKeyFromUrl() {
   try {
     const u = new URL(location.href);
-    const k = (u.searchParams.get('key') || '').trim();
-    if (k && KEY_RE.test(k)) {
-      localStorage.setItem('spendenough_key', k);
-      track('purchased');
+    urlLicenseKey = (u.searchParams.get('key') || '').trim();
+    urlPurchased = u.searchParams.get('purchased') === '1';
+    if (urlLicenseKey || urlPurchased) {
       u.searchParams.delete('key');
+      u.searchParams.delete('purchased');
       history.replaceState(null, '', u.pathname + (u.searchParams.toString() ? '?' + u.searchParams.toString() : '') + u.hash);
     }
   } catch (e) { /* ignore malformed URLs */ }
 })();
 
-window.showUnlockModal = function() {
-  track('hit_paywall');
+// Called once after the first render(). In order: a key in the URL -> activate it;
+// ?purchased=1 -> ask for the key; an old un-checked key -> activate it once; else the
+// daily re-check.
+function startLicense() {
+  if (urlLicenseKey) {
+    const k = urlLicenseKey; urlLicenseKey = '';
+    showToast(LICENSE_MSG.unlocking, 0);
+    activateLicense(k, {
+      onSuccess: res => showToast(proOnMessage(res), 6000),
+      onError: msg => { hideToast(); showUnlockModal({ silent: true, message: msg, key: k }); }
+    });
+    return;
+  }
+  if (urlPurchased) {
+    urlPurchased = false;
+    showUnlockModal({ silent: true, hint: LICENSE_MSG.purchased });
+    return;
+  }
+  let legacy = null;
+  try { legacy = localStorage.getItem(LEGACY_KEY_STORE); } catch (e) { /* private mode */ }
+  const mig = legacyKeyDecision(legacy, readLicense());
+  if (mig.needsActivate) {
+    activateLicense(mig.key, { onError: msg => {
+      if (msg === LICENSE_MSG.network) { licenseSessionGrace = true; render(); return; } // retry next load
+      try { localStorage.removeItem(LEGACY_KEY_STORE); } catch (e) { /* private mode */ }
+      showUnlockModal({ silent: true, message: msg });
+    } });
+    return;
+  }
+  revalidateLicense();
+}
+
+// opts: silent (no paywall analytics event), message (error under the key field),
+// hint (note above it), key (prefill), busy (activation in flight). Any of those reveals
+// the key field; otherwise it stays behind the "enter your key" link.
+window.showUnlockModal = function(opts) {
+  opts = opts || {};
+  if (!opts.silent) track('hit_paywall');
   const buy = CONFIG.checkoutUrl
     ? `<a class="btn-primary" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" onclick="track('clicked_checkout')" style="width:100%;justify-content:center;text-decoration:none">Get Pro &middot; ${CONFIG.price}, one payment</a>`
     : `<button class="btn-primary" disabled style="width:100%;justify-content:center;opacity:0.6;cursor:default">Get Pro &middot; ${CONFIG.price}, one payment &middot; checkout opens soon</button>`;
+  const keyAttr = opts.key && KEY_RE.test(opts.key) ? ` value="${opts.key}"` : '';
+  const dis = opts.busy ? ' disabled' : '';
+  const reveal = !!(opts.key || opts.hint || opts.message || opts.busy);
   openModal(`<h2>Free vs. Pro</h2>
     <p style="margin-bottom:16px">You're on the free version. Pro is a one-time purchase that adds scenario comparison and the deeper analysis.</p>
     <div class="compare-grid">
@@ -719,26 +870,45 @@ window.showUnlockModal = function() {
       </div>
     </div>
     <div style="margin:16px 0 10px">${buy}</div>
-    <p style="font-size:14px;color:var(--ink-mute);margin:0 0 14px;text-align:center">One-time payment. No subscription. No account. Your numbers stay on your device.<br/>Educational modelling tool, not financial advice.</p>
+    <p style="font-size:14px;color:var(--ink-mute);margin:0 0 14px;text-align:center">One-time payment. No subscription. No account. Your numbers stay on your device; only the license key is checked with our payment provider.<br/>14-day refund, no questions asked. Educational modelling tool, not financial advice.</p>
+    <p class="unlock-already" id="unlockAlready"${reveal ? ' hidden' : ''}>Already bought? Open the button in your receipt email on this device, or <button type="button" class="link-btn" onclick="revealUnlockKey()">enter your key</button>.</p>
+    <div id="unlockKeyRow"${reveal ? '' : ' hidden'}>
+    ${opts.hint ? `<p class="unlock-hint">${opts.hint}</p>` : ''}
     <div class="unlock-input-row">
-      <input type="text" id="unlockKeyInput" placeholder="Already bought? Paste your license key" autocomplete="off" />
-      <button onclick="submitUnlockKey()" style="background:var(--rust);color:var(--paper);border:none;padding:10px 16px;border-radius:3px;font-weight:600;cursor:pointer;font-size:14px">Activate</button>
+      <input type="text" id="unlockKeyInput" placeholder="Already bought? Paste your license key" autocomplete="off" spellcheck="false" aria-label="License key" aria-describedby="unlockKeyMsg"${keyAttr}${dis}/>
+      <button id="unlockKeyBtn" onclick="submitUnlockKey()" style="background:var(--rust);color:var(--paper);border:none;padding:10px 16px;border-radius:3px;font-weight:600;cursor:pointer;font-size:14px"${dis}>${opts.busy ? 'Activating…' : 'Activate'}</button>
+    </div>
+    <p class="unlock-note">${LICENSE_MSG.slots}</p>
+    <p id="unlockKeyMsg" class="unlock-msg" role="status" aria-live="polite">${opts.message || ''}</p>
     </div>
     <p style="margin-top:14px;font-size:14px;text-align:center"><a href="#" onclick="closeModal();return false" style="color:var(--rust);text-decoration:none;cursor:pointer">Continue with the free version</a></p>`, 'modal-wide');
+  if ((opts.hint || opts.message) && !opts.busy) { const i = document.getElementById('unlockKeyInput'); if (i) i.focus(); }
 };
 
-window.submitUnlockKey = function() {
+// Fallback for "deleted the email and cleared the browser": show the paste field.
+window.revealUnlockKey = function() {
+  const a = document.getElementById('unlockAlready'), r = document.getElementById('unlockKeyRow');
+  if (a) a.hidden = true;
+  if (r) { r.hidden = false; const i = document.getElementById('unlockKeyInput'); if (i) i.focus(); }
+};
+
+window.submitUnlockKey = async function() {
   const input = document.getElementById('unlockKeyInput');
+  const btn = document.getElementById('unlockKeyBtn');
+  const msg = document.getElementById('unlockKeyMsg');
   const key = input ? input.value.trim() : '';
-  if (KEY_RE.test(key)) {
-    localStorage.setItem('spendenough_key', key);
-    closeModal();
-    render();
-  } else if (input) {
-    input.style.borderColor = 'var(--danger)';
-    input.value = '';
-    input.setAttribute('placeholder', 'That is not a license key (they look like xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)');
-  }
+  const setBusy = (b) => {
+    if (btn) { btn.disabled = b; btn.textContent = b ? 'Activating…' : 'Activate'; }
+    if (input) input.disabled = b;
+  };
+  if (msg) msg.textContent = '';
+  if (input) input.style.borderColor = '';
+  setBusy(true);
+  await activateLicense(key, { onError: m => {
+    if (msg) msg.textContent = m;
+    if (input) input.style.borderColor = 'var(--danger)';
+  } });
+  setBusy(false); // no-op when the modal closed on success
 };
 
 // ============================================================================
@@ -1873,6 +2043,7 @@ function renderTaxComparison() {
 let faqOpen = false;
 function renderResources() {
   return `
+    ${isPaid() && readLicense() ? `<p class="pro-status">Pro is active in this browser. <button class="link-btn" onclick="deactivateLicense()">Deactivate this browser</button> to use your key somewhere else.</p>` : ''}
     <button class="faq-toggle" onclick="toggleFaq()">
       <span class="faq-toggle-label">About this tool</span>
       <span class="faq-toggle-chevron">${faqOpen ? '&#9662;' : '&#9658;'}</span>
@@ -2664,6 +2835,7 @@ window.runSSHelper = function() {
 // INIT
 // ============================================================================
 render();
+startLicense(); // URL key / old key / daily re-check, all after the first paint
 </script>
 </body>
 </html>

@@ -500,7 +500,88 @@ test('a market shock splices the era sequence in at the shock age and lowers suc
   assert.strictEqual(E.runForState(Object.assign({}, s, { shockEra: 'nope', shockAge: 65 })).successRate, base.successRate, 'unknown era is ignored');
 });
 
+// ---- 15. Paywall decisions (paywall.js) -------------------------------------
+const P = require('./paywall.js');
+const HOUR = 60 * 60 * 1000, DAY = 24 * HOUR;
+const NOW = 1757500000000;
+const KEY = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
+const goodBlob = { key: KEY, instanceId: 'inst-1', status: 'active', activatedAt: NOW - 3 * DAY, lastCheck: NOW - HOUR, lastResult: 'valid' };
+
+test('paywall: no blob, or a blob without an instance, is not paid', () => {
+  assert.deepStrictEqual(P.licenseDecision(null, NOW), { paid: false, needsCheck: false });
+  assert.deepStrictEqual(P.licenseDecision(undefined, NOW), { paid: false, needsCheck: false });
+  assert.deepStrictEqual(P.licenseDecision({ key: KEY }, NOW), { paid: false, needsCheck: false }, 'missing instanceId');
+  assert.deepStrictEqual(P.licenseDecision({ instanceId: 'x' }, NOW), { paid: false, needsCheck: false }, 'missing key');
+});
+test('paywall: any status other than active is not paid', () => {
+  for (const status of ['inactive', 'disabled', 'expired', 'invalid', undefined]) {
+    assert.strictEqual(P.licenseDecision(Object.assign({}, goodBlob, { status }), NOW).paid, false, String(status));
+  }
+});
+test('paywall: an explicit invalid result locks Pro', () => {
+  assert.strictEqual(P.licenseDecision(Object.assign({}, goodBlob, { lastResult: 'invalid' }), NOW).paid, false);
+});
+test('paywall: a stale or network-failed check keeps Pro and asks for a re-check', () => {
+  const d = P.licenseDecision(Object.assign({}, goodBlob, { lastResult: 'network', lastCheck: NOW - 30 * DAY }), NOW);
+  assert.deepStrictEqual(d, { paid: true, needsCheck: true });
+  assert.deepStrictEqual(P.licenseDecision(Object.assign({}, goodBlob, { lastCheck: undefined }), NOW), { paid: true, needsCheck: true }, 'never checked');
+});
+test('paywall: a check within the last day is paid with no re-check', () => {
+  assert.deepStrictEqual(P.licenseDecision(goodBlob, NOW), { paid: true, needsCheck: false });
+  assert.strictEqual(P.licenseDecision(Object.assign({}, goodBlob, { lastCheck: NOW - DAY + 1 }), NOW).needsCheck, false, 'just under a day');
+  assert.strictEqual(P.licenseDecision(Object.assign({}, goodBlob, { lastCheck: NOW - DAY }), NOW).needsCheck, true, 'exactly a day');
+});
+test('paywall: an old un-checked spendenough_key is activated once, then ignored', () => {
+  assert.deepStrictEqual(P.legacyKeyDecision(KEY, null), { needsActivate: true, key: KEY });
+  assert.deepStrictEqual(P.legacyKeyDecision(' ' + KEY + ' ', null), { needsActivate: true, key: KEY }, 'trimmed');
+  assert.deepStrictEqual(P.legacyKeyDecision(KEY, goodBlob), { needsActivate: false, key: null }, 'blob already present');
+  assert.deepStrictEqual(P.legacyKeyDecision('not-a-key', null), { needsActivate: false, key: null });
+  assert.deepStrictEqual(P.legacyKeyDecision(null, null), { needsActivate: false, key: null });
+});
+test('paywall: /activate replies are classified and only the needed fields are kept', () => {
+  const ok = { activated: true, error: null, license_key: { status: 'active', activation_limit: 3, activation_usage: 1 }, instance: { id: 'inst-9', name: 'x' }, meta: { customer_email: 'buyer@example.com' } };
+  assert.strictEqual(P.activationOutcome(ok), 'activated');
+  const blob = P.licenseFromActivation(KEY, ok, NOW);
+  assert.deepStrictEqual(blob, { key: KEY, instanceId: 'inst-9', status: 'active', activatedAt: NOW, lastCheck: NOW, lastResult: 'valid' });
+  assert.ok(!JSON.stringify(blob).includes('example.com'), 'the buyer email is never stored');
+  assert.strictEqual(P.activationOutcome({ activated: false, error: 'This license key has reached the activation limit.' }), 'limit');
+  assert.strictEqual(P.activationOutcome({ activated: false, error: 'license_key not found.' }), 'inactive');
+  assert.strictEqual(P.activationOutcome({ activated: true }), 'inactive', 'activated without an instance id is not usable');
+  assert.strictEqual(P.activationOutcome(null), 'inactive');
+  assert.strictEqual(P.licenseFromActivation(KEY, { activated: false, error: 'x' }, NOW), null);
+});
+test('paywall: /validate replies update the blob; a network failure keeps lastCheck', () => {
+  const valid = P.applyValidation(Object.assign({}, goodBlob, { lastCheck: NOW - 2 * DAY }), { valid: true, license_key: { status: 'active' } }, NOW);
+  assert.strictEqual(valid.lastCheck, NOW); assert.strictEqual(valid.lastResult, 'valid'); assert.strictEqual(valid.status, 'active');
+  const bad = P.applyValidation(goodBlob, { valid: false, error: 'license_key not found.', license_key: { status: 'disabled' } }, NOW);
+  assert.strictEqual(bad.lastResult, 'invalid'); assert.strictEqual(bad.status, 'disabled');
+  assert.strictEqual(P.licenseDecision(bad, NOW).paid, false, 'a refunded or disabled key locks Pro');
+  const badNoStatus = P.applyValidation(goodBlob, { valid: false, error: 'x' }, NOW);
+  assert.strictEqual(badNoStatus.status, 'invalid');
+  const net = P.applyValidation(Object.assign({}, goodBlob, { lastCheck: NOW - 2 * DAY }), null, NOW);
+  assert.strictEqual(net.lastResult, 'network'); assert.strictEqual(net.lastCheck, NOW - 2 * DAY, 'retry next load');
+  assert.deepStrictEqual(P.licenseDecision(net, NOW), { paid: true, needsCheck: true }, 'grace: still Pro');
+  assert.strictEqual(goodBlob.lastResult, 'valid', 'input blob is not mutated');
+});
+test('paywall: the instance label names the browser and platform for the order page', () => {
+  const mac = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+  assert.strictEqual(P.instanceLabel(mac, 'MacIntel', 'a1b2c3'), 'Spend Enough web · Chrome on Mac · a1b2c3');
+  const ios = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+  assert.strictEqual(P.instanceLabel(ios, 'iPhone', '000000'), 'Spend Enough web · Safari on iOS · 000000');
+  assert.strictEqual(P.instanceLabel('', '', 'ff'), 'Spend Enough web · browser · ff');
+});
+test('paywall: the "Pro is on" toast reports the slot count from the activate reply', () => {
+  assert.strictEqual(P.proOnMessage({ activated: true, instance: { id: 'i' }, license_key: { activation_limit: 3, activation_usage: 1 } }), 'Pro is on. This browser is 1 of 3 for your key.');
+  assert.deepStrictEqual(P.activationSlots({ license_key: { activation_limit: 5, activation_usage: 4 } }), { used: 4, limit: 5 });
+  assert.deepStrictEqual(P.activationSlots({}), { used: 1, limit: P.ACTIVATION_LIMIT }, 'missing fields fall back sensibly');
+  assert.deepStrictEqual(P.activationSlots({ license_key: { activation_limit: 3, activation_usage: 7 } }), { used: 3, limit: 3 }, 'never above the limit');
+});
+test('paywall: KEY_RE accepts UUID-shaped keys only', () => {
+  assert.ok(P.KEY_RE.test(KEY)); assert.ok(P.KEY_RE.test(KEY.toUpperCase()));
+  assert.ok(!P.KEY_RE.test('abc')); assert.ok(!P.KEY_RE.test(KEY + 'x')); assert.ok(!P.KEY_RE.test(''));
+});
+
 // ---- summary ----------------------------------------------------------------
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed) { console.error(`\nFAILED: ${failures.length} test(s) above.`); process.exit(1); }
-console.log('All engine tests passed.');
+console.log('All engine and paywall tests passed.');

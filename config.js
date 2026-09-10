@@ -11,11 +11,17 @@
    the pages degrade gracefully (checkout button disabled, email form hidden).
 ============================================================================ */
 window.SPENDENOUGH_CONFIG = {
-  // Phase 6 — hosted checkout URL from Lemon Squeezy (recommended; merchant of
-  // record, handles sales tax/VAT) or a Stripe Payment Link. Opens in a new tab.
-  // If the provider can put the license key in the redirect URL, point the
-  // post-purchase redirect at https://<your-domain>/app.html?key=<KEY> and the app
-  // unlocks itself; otherwise buyers paste the key from their receipt email.
+  // Phase 6 — hosted checkout URL from Lemon Squeezy (merchant of record, handles
+  // sales tax/VAT). Opens in a new tab. The product must have license keys enabled
+  // with an activation limit of 3 (paywall.js ACTIVATION_LIMIT). The buyer never
+  // types a key: set the product's post-purchase redirect, the confirmation-screen
+  // button, and the receipt-email button ("Open Spend Enough") all to
+  // https://<your-domain>/app.html?key=[license_key]. The app activates the key on
+  // arrival and strips it from the URL. The receipt-email button is also how a buyer
+  // unlocks a second device or a cleared browser; the paste field in the unlock
+  // modal is the fallback. https://<your-domain>/app.html?purchased=1 is accepted too
+  // (asks for the key from the receipt). Keys are activated and re-checked against
+  // https://api.lemonsqueezy.com/v1/licenses (not configurable).
   checkoutUrl: '',
 
   // Display price on the unlock screen. Founder lifetime: $39 one-time.
@@ -32,5 +38,5 @@ window.SPENDENOUGH_CONFIG = {
   analyticsSite: '',
 
   // Public site URL, used for canonical and Open Graph tags on the landing page.
-  siteUrl: '',
+  siteUrl: 'https://spendenough.com',
 };

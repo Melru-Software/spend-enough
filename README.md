@@ -12,11 +12,12 @@ vanilla JS — **no build step**. Chart.js is loaded from a CDN.
 | `index.html` | Landing page (headline, what-ifs, founder story, how it works, email capture, footer). |
 | `app.html`   | The app: markup, styles, and all UI logic (state, rendering, charts, handlers, modals, paywall). |
 | `engine.js`  | The pure simulation engine + tax/Social-Security estimators. **No DOM.** Loaded by `app.html` (attaches its exports to `window`) and by `tests.js` (via `require`). |
+| `paywall.js` | Pure license-decision logic (is Pro unlocked, does the key need a re-check, how to read a Lemon Squeezy License API reply). **No DOM, no network.** Loaded by `app.html` and by `tests.js`. |
 | `config.js`  | Public deployment values (checkout URL, price, email endpoint, analytics, site URL). No secrets; every value is visible to visitors by design. |
 | `privacy.html`, `terms.html` | Legal pages. Drafts with `[BUSINESS NAME]`-style placeholders the owner must fill before launch. |
 | `data/shiller_stock_market_data.csv` | Snapshot of Robert Shiller's monthly dataset (through 2025-12). |
 | `data/build_returns.js` | Rebuilds the two annual real-return arrays in `engine.js` from the snapshot and documents the method. |
-| `tests.js`   | Node test suite for the engine. No framework, no dependencies. |
+| `tests.js`   | Node test suite for the engine and the paywall decisions. No framework, no dependencies. |
 | `LAUNCH.md`, `LAUNCH_LOG.md`, `docs/launch/` | The ship plan, its running log, and the Phase 1–3 audit reports. |
 
 ## Run it
