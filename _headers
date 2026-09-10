@@ -17,6 +17,8 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Cross-Origin-Opener-Policy: same-origin
+  # PRE-LAUNCH: keeps search engines from indexing the site while it is in progress. Delete this line at launch.
+  X-Robots-Tag: noindex, nofollow
 
 # HTML is never cached long: every visit gets the latest app.
 /*.html
