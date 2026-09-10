@@ -5,6 +5,13 @@ vanilla JS — **no build step**. Chart.js is loaded from a CDN.
 
 > Educational modelling tool, not financial advice.
 
+## Source-visible, not open source
+
+The code is public so that anyone can read and verify how Spend Enough does its math: the
+whole engine is in `engine.js`, and the site ships it to your browser unchanged. It is not
+open source. Copyright Melru Software LLC, all rights reserved; see [LICENSE](LICENSE) for
+what you may and may not do with it. Contributions are not accepted at this time.
+
 ## Files
 
 | File | What it is |
