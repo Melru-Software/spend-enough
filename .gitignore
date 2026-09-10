@@ -1,13 +1,5 @@
-# OS / editor cruft
+# Launch planning docs live in the private archive repo, never here.
+docs/
+LAUNCH.md
+LAUNCH_LOG.md
 .DS_Store
-*.swp
-*~
-.vscode/
-.idea/
-
-# Node (for tests / tooling only — app itself has no build step)
-node_modules/
-npm-debug.log*
-
-# Local preview tooling (absolute paths, not portable)
-.claude/
