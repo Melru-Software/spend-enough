@@ -25,7 +25,6 @@ what you may and may not do with it. Contributions are not accepted at this time
 | `data/shiller_stock_market_data.csv` | Snapshot of Robert Shiller's monthly dataset (through 2025-12). |
 | `data/build_returns.js` | Rebuilds the two annual real-return arrays in `engine.js` from the snapshot and documents the method. |
 | `tests.js`   | Node test suite for the engine and the paywall decisions. No framework, no dependencies. |
-| `LAUNCH.md`, `LAUNCH_LOG.md`, `docs/launch/` | The ship plan, its running log, and the Phase 1–3 audit reports. |
 
 ## Run it
 

@@ -659,7 +659,7 @@ let pendingScenario = (() => { try { return new URLSearchParams(location.search)
 // Deployment config (config.js, public values only) and feature flags.
 const CONFIG = Object.assign({ checkoutUrl: '', price: '$39', emailEndpoint: '' }, window.SPENDENOUGH_CONFIG || {});
 // Presets that invent a dollar figure (home sale $400k at 70, long-term care $90k x 5)
-// stay off until the owner decides on defaults. See LAUNCH.md: never invent assumptions.
+// stay off until the owner decides on defaults. Rule: never invent financial assumptions.
 const FLAGS = { hardcodedPresets: false };
 const has = (v) => v !== null && v !== undefined;
 // Fill any field a saved or older state lacks, so 'not set' is always null rather than undefined.
@@ -671,7 +671,7 @@ const pct = (x, d) => ((+x || 0) * 100).toFixed(d === undefined ? 1 : d) + '%';
 // ============================================================================
 // The decision logic (licenseDecision and friends) is in paywall.js. This section does
 // storage and the three Lemon Squeezy License API calls. Only the license key ever leaves
-// the browser. Plan: docs/launch/phase6-license-activation.md.
+// the browser.
 const LS_LICENSE_API = 'https://api.lemonsqueezy.com/v1/licenses';
 const LICENSE_STORE = 'spendenough_license';
 const LEGACY_KEY_STORE = 'spendenough_key';

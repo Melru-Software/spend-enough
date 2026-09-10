@@ -12,7 +12,7 @@
    lastCheck  = ms epoch of the last successful /validate (or the activation)
    lastResult = "valid" | "invalid" | "network"
 
-   Design (docs/launch/phase6-license-activation.md): a stale or network-failed
+   Design rule: a stale or network-failed
    check never locks a paying customer out; only an explicit "not valid" answer
    from the provider does.
 ============================================================================ */
