@@ -112,7 +112,7 @@
   .onboarding { max-width: 960px; margin: 0 auto; padding: 64px 40px; }
   .onboard-hero { margin-bottom: 48px; text-align: center; }
   .onboard-eyebrow { text-transform: uppercase; letter-spacing: 0.18em; font-size: 14px; color: var(--rust); font-weight: 600; margin-bottom: 18px; }
-  .onboard-title { font-family: 'Source Serif 4', serif; font-size: clamp(38px, 6vw, 60px); font-weight: 400; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 22px; white-space: nowrap; }
+  .onboard-title { font-family: 'Source Serif 4', serif; font-size: clamp(34px, 5vw, 52px); font-weight: 400; line-height: 1.1; letter-spacing: -0.025em; margin: 0 auto 22px; max-width: 14em; text-wrap: balance; }
   .onboard-title em { font-style: italic; color: var(--rust); font-weight: 500; }
   .onboard-sub { font-size: 17px; color: var(--ink-mute); max-width: 520px; margin: 0 auto; line-height: 1.6; }
   .onboard-fine { font-size: 14px; color: var(--ink-faint); margin-top: 18px; }
@@ -1135,8 +1135,8 @@ function renderOnboarding() {
     <div class="onboarding">
       <div class="onboard-hero">
         <div class="onboard-eyebrow">A scenario tool for life decisions</div>
-        <h1 class="onboard-title">How much is enough?</h1>
-        <p class="onboard-sub">Enter your numbers and see whether you can afford the life you want, or whether you are leaving money unspent that you could be living on.</p>
+        <h1 class="onboard-title">Are you spending enough to make the life you want?</h1>
+        <p class="onboard-sub">Enter what you have and see what you could spend each year and still make it. Then change one decision and see what it does.</p>
         <p style="margin-top:16px"><a onclick="showAbout()" style="color:var(--rust);cursor:pointer;font-size:14px;font-family:'Source Serif 4',serif;font-style:italic">Why this matters \u2192</a></p>
         <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a></p>
       </div>
