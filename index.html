@@ -12,23 +12,21 @@
   and terms.html. Public deployment values (checkout URL, email endpoint) come from config.js.
 -->
 
-<title>Spend Enough</title>
-<meta name="description" content="Enter what you have now, change one decision, and see two futures side by side, including how much you could spend each year and still make it, and how sure you can be. Free to try, no account, your numbers stay on your device." />
+<title>Spend Enough. Are you spending enough to make the life you want?</title>
+<meta name="description" content="Or holding back because the future feels unknowable? Make it a bit more known. Enter what you have, change one decision, and see the range of where it leads next to the version where you didn't. Free to try, no account, your numbers stay on your device." />
 
-<!-- TODO (Phase 5): replace with the real public URL once the domain and routing are decided. -->
-<link rel="canonical" href="https://example.com/" />
+<link rel="canonical" href="https://spendenough.com/" />
 
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Spend Enough. See what your life decisions do to your future, before you make them." />
-<meta property="og:description" content="Enter what you have now, change one decision, and see two futures side by side. Free to try, no account, your numbers stay on your device." />
-<meta property="og:url" content="https://example.com/" />
-<!-- TODO (Phase 5): export a 1200x630 image of the results screen and point this at it. -->
-<meta property="og:image" content="https://example.com/og-image.png" />
+<meta property="og:title" content="Spend Enough. Are you spending enough to make the life you want?" />
+<meta property="og:description" content="Or holding back because the future feels unknowable? Make it a bit more known. Enter what you have, change one decision, and see the range of where it leads next to the version where you didn't. Free to try, no account, your numbers stay on your device." />
+<meta property="og:url" content="https://spendenough.com/" />
+<meta property="og:image" content="https://spendenough.com/og-image.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Spend Enough. See what your life decisions do to your future, before you make them." />
-<meta name="twitter:description" content="Enter what you have now, change one decision, and see two futures side by side. Free to try, no account, your numbers stay on your device." />
+<meta name="twitter:title" content="Spend Enough. Are you spending enough to make the life you want?" />
+<meta name="twitter:description" content="Or holding back because the future feels unknowable? Make it a bit more known. Enter what you have, change one decision, and see the range of where it leads next to the version where you didn't. Free to try, no account, your numbers stay on your device." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -185,21 +183,6 @@
       repeating-linear-gradient(-45deg, transparent 0 14px, rgba(26,24,20,0.025) 14px 15px);
   }
   .shot-body img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .shot-mock { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 16px; }
-  .shot-mock .m-verdict { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; text-align: left; }
-  .shot-mock .m-eye { text-transform: uppercase; letter-spacing: 0.15em; font-size: 11px; font-weight: 700; color: var(--moss); margin-bottom: 6px; }
-  .shot-mock .m-head { font-family: var(--serif); font-size: clamp(14px, 2vw, 20px); color: var(--ink); line-height: 1.25; }
-  .shot-mock .m-chart { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 12px; position: relative; overflow: hidden; }
-  .shot-mock .m-chart svg { width: 100%; height: 100%; display: block; }
-  .shot-mock .m-bands { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .shot-mock .m-band { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; text-align: left; }
-  .shot-mock .m-band b { display: block; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: clamp(11px, 1.6vw, 15px); font-weight: 500; color: var(--ink-soft); }
-  .shot-mock .m-band span { font-size: 10px; color: var(--ink-mute); text-transform: uppercase; letter-spacing: 0.08em; }
-  .shot-label {
-    position: absolute; inset: auto 12px 12px auto;
-    background: var(--ink); color: var(--paper); font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 11px;
-    padding: 4px 8px; border-radius: 3px; letter-spacing: 0.02em;
-  }
   .shot-caption { font-size: 14px; color: var(--ink-faint); text-align: center; margin-top: 12px; }
 
   /* ========== WHAT-IF TILES ========== */
@@ -224,6 +207,9 @@
   /* ========== FOUNDER ========== */
   .founder .prose p { font-size: 18px; }
   .founder blockquote { border-left: 3px solid var(--rust); padding: 4px 0 4px 20px; }
+  .founder-more { margin-top: 14px; font-size: 15px; }
+  .founder-more a { color: var(--rust); text-decoration: none; }
+  .founder-more a:hover { text-decoration: underline; }
   .founder figcaption { margin-top: 18px; font-size: 14px; color: var(--ink-mute); font-style: italic; font-family: var(--serif); }
 
   /* ========== HOW IT WORKS ========== */
@@ -239,8 +225,11 @@
   .plan-head { font-family: var(--serif); font-size: 20px; font-weight: 500; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .plan-price { font-family: var(--sans, inherit); font-size: 14px; font-weight: 600; color: var(--rust); font-variant-numeric: tabular-nums; }
   .plan p { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin: 0; }
+  .plan-lead { font-size: 17px; color: var(--ink-mute); margin-top: 12px; line-height: 1.5; }
+  .plan-anchor { font-size: 13px; color: var(--ink-mute); margin-top: 10px; }
   .plan-fine { font-size: 14px; color: var(--ink-mute); margin-top: 16px; }
   @media (min-width: 700px) { .plans { grid-template-columns: 1fr 1fr; } }
+  .isnt .box p + p { margin-top: 12px; }
   .isnt .box {
     background: var(--bone-2); border: 1px solid var(--line); border-radius: 4px;
     padding: 18px 20px; font-size: 16px; line-height: 1.6; color: var(--ink-soft); max-width: var(--measure);
@@ -292,8 +281,6 @@
     .tiles { grid-template-columns: repeat(2, 1fr); }
     .benefits { grid-template-columns: repeat(3, 1fr); }
     .modes { grid-template-columns: repeat(3, 1fr); }
-    .shot-mock { grid-template-columns: 1fr; padding: 24px 28px; gap: 14px; }
-    .shot-mock .m-verdict { padding: 18px 22px; }
   }
   @media (min-width: 860px) {
     .shot-body { grid-template-columns: 1fr; }
@@ -318,51 +305,24 @@
   <section class="hero" id="top" aria-labelledby="headline">
     <div class="wrap">
       <p class="eyebrow">A scenario tool for life decisions</p>
-      <h1 id="headline">See what your life decisions do to your future, <em>before</em> you make them.</h1>
-      <p class="sub">Enter what you have now, change one decision, and see two futures side by side, including how much you could spend each year and still make it, and how sure you can be.</p>
+      <h1 id="headline">Are you spending enough to make the life you want?</h1>
+      <p class="sub">Or holding back because the future feels unknowable? Make it a bit more known. Enter what you have, change one decision, and see the range of where it leads next to the version where you didn't.</p>
       <div class="hero-actions">
         <a class="btn-primary" href="app.html">Try it free</a>
         <a class="btn-secondary" href="#how">How it works</a>
       </div>
-      <p class="hero-fine">Free to try. No account needed.</p>
+      <p class="hero-fine">Free to try. No account, nothing to link, your numbers stay on your device.</p>
     </div>
   </section>
 
   <!-- 4. Screenshot placeholder for the results screen -->
   <section class="shot" aria-label="Results screen preview">
     <div class="wrap">
-      <!--
-        TODO (Phase 5): replace the mock below with a real screenshot of the results screen.
-        Capture the dashboard at 1440x900 (8:5) after running a scenario in Historical mode, save as
-        results-screen.png (and a 2x version), then swap in:
-          <img src="results-screen.png" width="1440" height="900" loading="lazy"
-               alt="The results screen: a verdict card, a portfolio projection chart with a shaded
-                    range and a median line, and three confidence bands." />
-        and delete the .shot-mock div. Keep the alt text.
-      -->
       <figure class="shot-frame">
         <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="shot-body" role="img" aria-label="Placeholder for a screenshot of the results screen: a verdict card, a portfolio projection chart with a shaded range and a median line, and three confidence bands.">
-          <div class="shot-mock" aria-hidden="true">
-            <div class="m-verdict">
-              <div class="m-eye">Your plan held up</div>
-              <div class="m-head">Your money lasts in most of the market histories we tested.</div>
-            </div>
-            <div class="m-chart">
-              <svg viewBox="0 0 640 220" preserveAspectRatio="none" focusable="false">
-                <path d="M0 150 C 80 140, 120 120, 200 110 S 360 60, 460 40 S 600 10, 640 5 L 640 220 L 0 220 Z" fill="rgba(91,110,58,0.14)"/>
-                <path d="M0 150 C 80 155, 120 160, 200 168 S 360 190, 460 200 S 600 214, 640 218 L 640 220 L 0 220 Z" fill="#fbf8f1"/>
-                <path d="M0 150 C 80 148, 120 142, 200 138 S 360 120, 460 112 S 600 100, 640 96" fill="none" stroke="#5b6e3a" stroke-width="2.5"/>
-                <line x1="0" y1="219" x2="640" y2="219" stroke="#d4cab8" stroke-width="1"/>
-              </svg>
-            </div>
-            <div class="m-bands">
-              <div class="m-band"><span>Worst 10%</span><b>$0.4M</b></div>
-              <div class="m-band"><span>Median</span><b>$1.9M</b></div>
-              <div class="m-band"><span>Best 10%</span><b>$4.7M</b></div>
-            </div>
-          </div>
-          <span class="shot-label" aria-hidden="true">TODO: results screenshot</span>
+        <div class="shot-body">
+          <img src="results-screen.png" width="1440" height="900" loading="lazy"
+               alt="The results screen: a verdict card, a portfolio projection chart with a shaded range and a median line, and the ages where your plan changes." />
         </div>
       </figure>
       <p class="shot-caption">The results screen. The shaded band is every market history since 1926, and the line is the median.</p>
@@ -375,10 +335,10 @@
       <p class="eyebrow">Decisions, as you'd say them</p>
       <h2 id="whatif-h">Play out the what-ifs.</h2>
       <ul class="tiles">
+        <li class="tile"><a href="app.html?scenario=spendMore"><p class="q">What if we spend $10,000 more a year while the kids are small?</p></a></li>
         <li class="tile"><a href="app.html?scenario=careerBreak"><p class="q">What if I don't go back to work for two years?</p></a></li>
         <li class="tile"><a href="app.html?scenario=payoffHouse"><p class="q">What if we pay off the house instead of investing the money?</p></a></li>
-        <li class="tile"><a href="app.html?scenario=shockAtRetirement"><p class="q">What if the market has a bad run right when I stop working?</p></a></li>
-        <li class="tile"><a href="app.html?scenario=retire5early"><p class="q">What if I retire at 55 instead of 62?</p></a></li>
+        <li class="tile"><a href="app.html"><p class="q">What if I save everything and end up with more than I'll ever use?</p></a></li>
       </ul>
     </div>
   </section>
@@ -391,18 +351,18 @@
       <ol class="benefits">
         <li class="benefit">
           <div class="num">01</div>
+          <h3>What you can afford to live on.</h3>
+          <p>With what you have now, how much could you spend each year and still make it? The tool shows you the number and how sure you can be of it, so the money you've been careful with can turn into years you get to use.</p>
+        </li>
+        <li class="benefit">
+          <div class="num">02</div>
           <h3>Two futures on one chart.</h3>
           <p>Change one decision and see what it does to the whole picture, next to the version where you didn't. The gap between the two is the answer to "can we afford this?"</p>
         </li>
         <li class="benefit">
-          <div class="num">02</div>
+          <div class="num">03</div>
           <h3>Certainty as a range you can read.</h3>
           <p>You see how your plan held up across every market history since 1926 and 500 simulated ones, so you can tell "this works in most worlds" from "this only works if nothing goes wrong."</p>
-        </li>
-        <li class="benefit">
-          <div class="num">03</div>
-          <h3>The other question.</h3>
-          <p>It also answers how much you could spend per year and still make it, and whether you're saving more than you need to. The money you've been careful with can turn into years you get to use.</p>
         </li>
       </ol>
     </div>
@@ -412,12 +372,12 @@
   <section class="founder" aria-labelledby="founder-h">
     <div class="wrap">
       <p class="eyebrow">Why I built it</p>
-      <h2 id="founder-h">Can we afford for me not to go back to work?</h2>
+      <h2 id="founder-h">If we don't save every spare dollar, are we still okay?</h2>
       <figure class="prose">
         <blockquote>
-          <p>When I was on maternity leave I wanted to play out whether we could afford for me not to go back to work, and what that would mean for retirement. What if I took time off and then went back? What if I stopped contributing? What if we paid off the house early? What if the market had a bad run now, or later? I couldn't find a tool that let me manipulate all the variables and see the outcomes in a way I understood, at a price I'd pay, and I didn't want to hire a planner just to ask what-ifs. So I built one. It's free to try, you don't need an account, and your numbers aren't shared with anyone.</p>
+          <p>I've always been good at saving and bad at spending. Even when the numbers said we were fine, I didn't feel it. The future felt unknowable, and my habit was to throw up my hands, say we can never know, and keep saving out of fear. On maternity leave I wanted to play out whether we could afford for me not to go back to work, and I couldn't find a tool that showed me in a way I understood, at a price I'd pay. So I built one. It turns out, the certainty I was looking for was never going to come from a single number, because that number is unknowable. But now, I feel empowered to turn the dials in our finances and adjust as we go. I didn't stop working, but we spend more on a nanny, and I am less stressed about retirement savings. I'm grateful to my past self for setting us up this well. Using what she saved for the good life she was hoping for seems like the right way to thank her.</p>
         </blockquote>
-        <!-- TODO: founder name / sign-off, if wanted. -->
+        <p class="founder-more"><a href="why.html">Read the whole story</a></p>
         <figcaption>The founder of <span data-product-name>Spend Enough</span></figcaption>
       </figure>
     </div>
@@ -447,14 +407,16 @@
     <div class="wrap">
       <p class="eyebrow">Free and Pro</p>
       <h2 id="pricing-h">Try it free. Pay once if you want the comparison.</h2>
+      <p class="plan-lead">No accounts to link, no subscription to cancel, nothing sent to a server. Pay once and it's yours.</p>
       <div class="plans">
         <div class="plan">
           <div class="plan-head">Free</div>
-          <p>Your plan run through every market period since 1926 with the full range on the chart, the core inputs, the what-if presets, the spending explorer, and every assumption on screen and editable.</p>
+          <p>The spending number and the range are free. Your plan run through every market period since 1926 with the full range on the chart, the core inputs, the what-if presets, the spending explorer, and every assumption on screen and editable.</p>
         </div>
         <div class="plan pro">
           <div class="plan-head">Pro <span class="plan-price"><span id="pro-price">$39</span>, once</span></div>
           <p>Everything in Free, plus side-by-side scenario comparison with both futures on one chart, what it would take to get a plan over the line, a printable one-page report, the year-by-year table as a spreadsheet, stress tests, Simulated mode, and saved scenarios.</p>
+          <p class="plan-anchor">About a third of a year of the subscription planners.</p>
         </div>
       </div>
       <p class="plan-fine">Not for you? Full refund within 14 days, no questions asked.</p>
@@ -466,7 +428,10 @@
     <div class="wrap">
       <p class="eyebrow">What it isn't</p>
       <h2 id="isnt-h">Not advice. Not a planner.</h2>
-      <p class="box">It's not advice and it's not a planner. It doesn't know your taxes beyond a rough estimate, and it doesn't know your life. It's a way to see the shape of the outcomes so you can have a better conversation, with yourself or with a professional.</p>
+      <div class="box">
+        <p>It's not advice and it's not a planner. It doesn't know your taxes beyond a rough estimate, and it doesn't know your life. It's a way to see the shape of the outcomes so you can have a better conversation, with yourself or with a professional.</p>
+        <p>It doesn't model healthcare costs before Medicare, required minimum distributions, or Roth conversions. If you're optimizing those, you want a subscription planner. If you're deciding whether to take the year off, or whether you can spend a little more now, you want this.</p>
+      </div>
     </div>
   </section>
 
@@ -502,6 +467,7 @@
     <nav class="footer-links" aria-label="Legal">
       <a href="privacy.html">Privacy</a>
       <a href="terms.html">Terms</a>
+      <a href="why.html">Why I built it</a>
       <a href="app.html">Open the app</a>
     </nav>
     <p class="footer-meta">&copy; <span id="year">2026</span> <span data-product-name>Spend Enough</span>. Every data source is cited in the app.</p>
