@@ -22,7 +22,7 @@ window.SPENDENOUGH_CONFIG = {
   // modal is the fallback. https://<your-domain>/app.html?purchased=1 is accepted too
   // (asks for the key from the receipt). Keys are activated and re-checked against
   // https://api.lemonsqueezy.com/v1/licenses (not configurable).
-  checkoutUrl: '',
+  checkoutUrl: 'https://spendenough.lemonsqueezy.com/checkout/buy/1c7956b3-2dda-42d2-9d7c-5b78767664db',
 
   // Display price on the unlock screen. Founder lifetime: $39 one-time.
   price: '$39',
