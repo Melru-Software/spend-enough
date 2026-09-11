@@ -227,6 +227,8 @@
   .plan p { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin: 0; }
   .plan-lead { font-size: 17px; color: var(--ink-mute); margin-top: 12px; line-height: 1.5; }
   .plan-anchor { font-size: 13px; color: var(--ink-mute); margin-top: 10px; }
+  .plan-cta { margin-top: 16px; }
+  .plan-cta a { display: inline-block; }
   .plan-fine { font-size: 14px; color: var(--ink-mute); margin-top: 16px; }
   @media (min-width: 700px) { .plans { grid-template-columns: 1fr 1fr; } }
   .isnt .box p + p { margin-top: 12px; }
@@ -412,11 +414,13 @@
         <div class="plan">
           <div class="plan-head">Free</div>
           <p>The spending number and the range are free. Your plan run through every market period since 1926 with the full range on the chart, the core inputs, the what-if presets, the spending explorer, and every assumption on screen and editable.</p>
+          <p class="plan-cta"><a class="btn-secondary" href="app.html">Try it free</a></p>
         </div>
         <div class="plan pro">
           <div class="plan-head">Pro <span class="plan-price"><span id="pro-price">$39</span>, once</span></div>
           <p>Everything in Free, plus side-by-side scenario comparison with both futures on one chart, what it would take to get a plan over the line, a printable one-page report, the year-by-year table as a spreadsheet, stress tests, Simulated mode, and saved scenarios.</p>
           <p class="plan-anchor">About a third of a year of the subscription planners.</p>
+          <p class="plan-cta"><a class="btn-primary" id="pro-buy" href="app.html" target="_blank" rel="noopener" hidden>Get Pro &middot; <span data-pro-price>$39</span>, one payment</a></p>
         </div>
       </div>
       <p class="plan-fine">Not for you? Full refund within 14 days, no questions asked.</p>
@@ -489,7 +493,9 @@ window.track=function(n){try{if(window.plausible)window.plausible(n);else if(win
   }
 
   document.getElementById("year").textContent = String(new Date().getFullYear());
-  if (CFG.price) { var pp = document.getElementById("pro-price"); if (pp) pp.textContent = CFG.price; }
+  if (CFG.price) { document.querySelectorAll("#pro-price, [data-pro-price]").forEach(function (el) { el.textContent = CFG.price; }); }
+  var buy = document.getElementById("pro-buy");
+  if (buy && CFG.checkoutUrl) { buy.href = CFG.checkoutUrl; buy.hidden = false; }
 
   // ---------- Email capture ----------
   (function wireSignup() {
