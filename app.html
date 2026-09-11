@@ -102,7 +102,6 @@
     margin-right: 2px;
     transform: translateY(-2px);
   }
-  .tagline { color: var(--ink-mute); font-size: 14px; font-style: italic; font-family: 'Source Serif 4', serif; }
   .scenarios-bar { display: flex; gap: 8px; align-items: center; }
   .pro-pill { border-color: var(--ink) !important; color: var(--ink) !important; font-weight: 600; }
   .pro-pill:hover { background: var(--ink) !important; color: var(--paper) !important; }
@@ -138,6 +137,7 @@
   .btn-secondary { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); padding: 14px 22px; font-size: 14px; border-radius: 3px; cursor: pointer; font-family: inherit; }
   .btn-secondary:hover { border-color: var(--ink); }
   .validation-msg { color: var(--danger); font-size: 14px; text-align: center; margin-top: 14px; min-height: 18px; }
+
 </style>
 </head>
 <style>
@@ -560,7 +560,6 @@
     
     header { padding: 12px 16px; }
     .logo { font-size: 18px; }
-    .tagline { font-size: 14px; }
     
     .onboarding { padding: 32px 20px; max-width: 100%; }
     .onboard-hero { margin-bottom: 28px; }
@@ -617,6 +616,89 @@
     
     .toggle-btn { padding: 6px 8px; font-size: 14px; }
     input[type="number"], input[type="text"], select { padding: 8px 10px; font-size: 14px; }
+  }
+
+  /* ============================================================
+     Editorial pass: same rules as the landing page.
+     Serif for anything read; sans for labels, controls, and data.
+     Rules and spacing separate things; boxes only where a control needs one.
+     ============================================================ */
+  header { box-shadow: none; border-bottom: 1px solid var(--line); background: var(--paper); }
+  .top-nav { display: flex; gap: 22px; font-size: 14px; }
+  .top-nav a { color: var(--ink-mute); text-decoration: none; white-space: nowrap; }
+  .top-nav a:hover { color: var(--ink); }
+  .scenario-pill { box-shadow: none; }
+
+  /* onboarding */
+  .onboarding { max-width: 760px; padding: 56px 24px 72px; }
+  .onboard-hero { margin-bottom: 40px; }
+  .onboard-fine { font-size: 14px; }
+  .onboard-step { background: transparent; border: none; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none; padding: 28px 0 8px; margin: 0 auto 8px; max-width: 680px; }
+  .onboard-step:last-of-type { border-bottom: 1px solid var(--line); padding-bottom: 28px; }
+  .step-title { font-size: 26px; font-weight: 400; letter-spacing: -0.015em; }
+  .step-hint { font-family: 'Source Serif 4', serif; font-size: 17px; color: var(--ink-mute); margin-bottom: 20px; }
+  .field label { font-size: 12px; letter-spacing: 0.12em; font-weight: 600; color: var(--ink-mute); }
+  .field input, .field select { background: var(--paper); border: 1px solid var(--line); border-radius: 3px; padding: 12px 14px; font-size: 16px; }
+  .field-hint { font-size: 13.5px; }
+  .step-actions { margin-top: 32px; flex-direction: column; align-items: center; }
+
+  /* results: the column */
+  .main { padding: 28px 40px 40px; }
+  .verdict { background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 0 0 22px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
+  .verdict-head { font-size: 34px; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 12px; }
+  .verdict-body { font-family: 'Source Serif 4', serif; font-size: 18px; line-height: 1.5; }
+  .verdict-wedge { background: transparent; border-left: 2px solid var(--rust); border-radius: 0; padding: 4px 0 4px 16px; margin-top: 16px; font-family: 'Source Serif 4', serif; font-size: 17px; }
+  .verdict-wedge .wedge-amount { font-family: 'Source Serif 4', serif; font-weight: 500; }
+  .verdict-wedge .wedge-sub { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; }
+  .section-heading { font-size: 24px; font-weight: 400; letter-spacing: -0.015em; margin: 30px 0 4px; }
+  .section-sub { font-size: 14.5px; }
+  .chart-card { background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 6px 0 0; }
+  .impact-banner, .disclaimer-bar { background: transparent; border: none; border-top: 1px solid var(--line-soft); border-radius: 0; padding: 12px 0; }
+  .bands { gap: 0; border-top: 1px solid var(--line); }
+  .band { background: transparent; border: none; border-radius: 0; padding: 14px 18px 14px 0; }
+  .band + .band { border-left: 1px solid var(--line-soft); padding-left: 18px; }
+  .band-value { font-family: 'Source Serif 4', serif; font-weight: 500; font-size: 22px; }
+  .wwit { background: transparent; border: none; border-left: 2px solid var(--moss); border-radius: 0; padding: 4px 0 4px 16px; }
+  .wwit .wwit-title { font-size: 20px; }
+  .assumptions, .read-first, .deep { background: transparent; border: none; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; box-shadow: none; margin: 18px 0; }
+  .assumptions + .read-first, .read-first + .deep, .assumptions + .deep { border-top: none; margin-top: -18px; }
+  .assumptions summary, .read-first summary, .deep summary { padding: 16px 0; font-family: 'Source Serif 4', serif; font-weight: 500; font-size: 18px; color: var(--ink); }
+  .deep-body, .assumptions > div:not(summary), .read-first > div:not(summary) { padding-left: 0; padding-right: 0; }
+  .scenario-card { box-shadow: none; }
+  .data-table th { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .locked-note { background: transparent; border-left-color: var(--line); padding-left: 12px; }
+
+  /* results: the sidebar */
+  .sidebar { background: var(--bone); padding: 26px 24px; }
+  .sidebar-heading { font-size: 12px; letter-spacing: 0.14em; font-weight: 600; color: var(--ink-mute); margin-bottom: 10px; }
+  .preset-btn { background: transparent; border: none; border-bottom: 1px solid var(--line-soft); border-radius: 0; padding: 10px 0; font-family: 'Source Serif 4', serif; font-size: 16px; color: var(--ink); }
+  .preset-btn:first-of-type { border-top: 1px solid var(--line-soft); }
+  .preset-btn:hover { color: var(--rust); background: transparent; }
+  .more-toggle { background: transparent; border: none; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); border-radius: 0; padding: 10px 0; font-family: 'Source Serif 4', serif; font-size: 16px; }
+  .toggle-group { border-color: var(--line); border-radius: 3px; }
+  .toggle-btn { background: transparent; }
+  .toggle-btn.active { background: var(--ink); color: var(--paper); }
+
+  /* phones */
+  @media (max-width: 768px) {
+    body { font-size: 15px; }
+    .main { padding: 20px 20px 32px; }
+    .verdict-head { font-size: 26px; }
+    .section-heading { font-size: 21px; }
+    .bands { grid-template-columns: 1fr; }
+    .band { padding: 12px 0; border-left: none !important; border-top: 1px solid var(--line-soft); }
+    .bands > .band:first-child { border-top: none; }
+    .top-nav { gap: 14px; }
+    .preset-btn { text-align: left; }
+  }
+  @media (max-width: 480px) {
+    .onboarding { padding: 32px 20px 56px; }
+    .onboard-step { padding: 22px 0 6px; margin-bottom: 6px; }
+    .onboard-step:last-of-type { padding-bottom: 22px; }
+    .step-title { font-size: 22px; }
+    .step-hint { font-size: 16px; }
+    .field input, .field select { font-size: 16px; padding: 12px 14px; }
+    .top-nav a:not(:first-child) { display: none; }
   }
 </style>
 <body>
@@ -1132,7 +1214,7 @@ function renderOnboarding() {
   app.innerHTML = `
     <header>
       <a class="logo" href="index.html" style="text-decoration:none;color:inherit"><span class="logo-dot"></span>Spend Enough</a>
-      <div class="tagline">know enough to spend enough</div>
+      <nav class="top-nav"><a href="why.html">Why I built it</a><a href="index.html#price">Pricing</a></nav>
     </header>
     <div class="onboarding">
       <div class="onboard-hero">
@@ -1175,8 +1257,8 @@ function renderOnboarding() {
         <h2 class="step-title">Social Security</h2>
         <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number.</p>
         <div class="field-grid">
-          <div class="field"><label>Your SS at full age</label><input type="number" id="ob_yourSS" min="0" value="${state.yourSSAmount || ''}" placeholder="e.g. 30000" step="1000"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper()">estimate from income</button></span></div>
-          <div class="field"><label>Partner's SS at full age</label><input type="number" id="ob_partnerSS" min="0" value="${state.partnerSSAmount || ''}" placeholder="0 if none" step="1000"/><span class="field-hint">Annual \u00b7 in today's dollars</span></div>
+          <div class="field"><label>Your SS at full age</label><input type="number" id="ob_yourSS" min="0" value="${state.yourSSAmount || ''}" placeholder="e.g. 30000" step="1000"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper('ob_yourSS','ob_yourIncome')">estimate from income</button></span></div>
+          <div class="field"><label>Partner's SS at full age</label><input type="number" id="ob_partnerSS" min="0" value="${state.partnerSSAmount || ''}" placeholder="0 if none" step="1000"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper('ob_partnerSS','ob_partnerIncome')">estimate from income</button></span></div>
         </div>
       </div>
 
@@ -2819,17 +2901,32 @@ window.showScenarioDetail = function(id) {
 };
 
 // ===== SS HELPER (onboarding) =====
-window.openSSHelper = function() {
+// targetId: the Social Security field to fill; incomeId: the income field to start from.
+let ssHelperTarget = null;
+window.openSSHelper = function(targetId, incomeId) {
+  ssHelperTarget = targetId || 'ob_yourSS';
+  const startEl = incomeId ? document.getElementById(incomeId) : null;
+  const start = startEl && parseFloat(startEl.value) > 0 ? Math.round(parseFloat(startEl.value)) : '';
   openModal(`<h2>Estimate Social Security</h2>
-    <p>A rough estimate from your typical career income. Your ssa.gov statement is the official figure.</p>
-    <div class="field"><label>Typical annual income (today's $)</label><input type="number" id="ss_gross" placeholder="e.g. 90000"/></div>
+    <p>A rough estimate from a typical year's income. Your ssa.gov statement is the official figure.</p>
+    <div class="field"><label>Typical annual income (today's $)</label><input type="number" id="ss_gross" placeholder="e.g. 90000" value="${start}"/></div>
     <div style="margin-top:14px"><button class="btn-primary" onclick="runSSHelper()">Estimate</button></div>
-    <div id="ss_result" style="margin-top:14px;font-size:14px;color:var(--ink-soft)"></div>`);
+    <div id="ss_result" style="margin-top:14px;font-size:15px;color:var(--ink-soft)"></div>`);
+  const g = document.getElementById('ss_gross');
+  if (g) { g.focus(); if (start) runSSHelper(); }
 };
 window.runSSHelper = function() {
   const g = parseFloat(document.getElementById('ss_gross').value) || 0;
-  const b = estimateSSBenefit(g);
-  document.getElementById('ss_result').innerHTML = `Estimated benefit at full retirement age: <strong>${fmtMoney(b)}/yr</strong> (${fmtMoney(Math.round(b/12))}/mo).<br/><span style="font-size:14px;color:var(--ink-faint)">Approximate. Your ssa.gov statement is the official figure.</span>`;
+  const b = Math.round(estimateSSBenefit(g));
+  document.getElementById('ss_result').innerHTML = `Estimated benefit at full retirement age: <strong>${fmtMoney(b)}/yr</strong> (${fmtMoney(Math.round(b/12))}/mo).
+    <div style="margin-top:12px"><button class="btn-primary" onclick="useSSEstimate(${b})">Use this estimate</button></div>
+    <div style="margin-top:10px;font-size:14px;color:var(--ink-faint)">Approximate. Your ssa.gov statement is the official figure.</div>`;
+};
+window.useSSEstimate = function(amount) {
+  const el = document.getElementById(ssHelperTarget || 'ob_yourSS');
+  if (el) { el.value = amount; el.dispatchEvent(new Event('input')); }
+  closeModal();
+  if (el) el.focus();
 };
 
 // ============================================================================
