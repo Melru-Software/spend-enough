@@ -1457,7 +1457,7 @@ function renderDashboard() {
       </div>
 
       <h2 class="section-heading">Portfolio projection</h2>
-      <div class="section-sub">${state.simMode==='historical' ? 'Shaded: where the portfolio stood across all '+result.totalPeriods+' periods, worst 10% to best 10%. Line: the median.' : state.simMode==='montecarlo' ? 'Shaded: the range across '+result.mcSims+' simulated futures, worst 10% to best 10%. Line: the median.' : 'One steady-return path, so no range.'}${canCompare ? ' Dashed line and faint band: ' + baselineName + '.' : ''}</div>
+      <div class="section-sub">${state.simMode==='historical' ? 'The shaded area is where the portfolio stood across all '+result.totalPeriods+' starting years. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome.' : state.simMode==='montecarlo' ? 'The shaded area is where the portfolio stood across '+result.mcSims+' simulated futures. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome.' : 'One steady return every year, so a single line and no range.'}${canCompare ? ' The dashed line and the faint band are ' + baselineName + '.' : ''}</div>
       <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
       ${renderEventTimeline()}
       <div class="verdict-notes">
@@ -2413,12 +2413,13 @@ function drawMainChart(result, compare) {
       layout: { padding: { top: 34 } },
       interaction: { mode: 'index', intersect: false },
       plugins: { legend: { display: false }, tooltip: {
-        mode: 'index', intersect: false,
+        mode: 'index', intersect: false, displayColors: false,
+        itemSort: (a, b) => ({ p90: 0, Median: 1, 'Baseline median': 2, p10: 3 }[a.dataset.label] || 0) - ({ p90: 0, Median: 1, 'Baseline median': 2, p10: 3 }[b.dataset.label] || 0),
         callbacks: {
           title: (t) => 'Age ' + t[0].label,
           label: (c) => {
             if (!['Median','p10','p90','Baseline median'].includes(c.dataset.label)) return null;
-            const nice = { Median: 'Median', p10: 'Worst 10% edge', p90: 'Best 10% edge', 'Baseline median': baselineName + ' median' };
+            const nice = { Median: 'Middle outcome', p10: 'Worst tenth', p90: 'Best tenth', 'Baseline median': baselineName + ', middle outcome' };
             const lines = [nice[c.dataset.label] + ': ' + fmtMoneyShort(c.parsed.y)];
             if (c.dataset.label === 'Median' && medianRun && medianRun[c.dataIndex]) {
               const yr = medianRun[c.dataIndex];
