@@ -114,14 +114,12 @@
   /* ========== ONBOARDING ========== */
   .onboarding { max-width: 960px; margin: 0 auto; padding: 64px 40px; }
   .onboard-hero { margin-bottom: 48px; text-align: center; }
-  .onboard-eyebrow { text-transform: uppercase; letter-spacing: 0.18em; font-size: 14px; color: var(--rust); font-weight: 600; margin-bottom: 18px; }
   .onboard-title { font-family: 'Source Serif 4', serif; font-size: clamp(34px, 5vw, 52px); font-weight: 400; line-height: 1.1; letter-spacing: -0.025em; margin: 0 auto 22px; max-width: 14em; text-wrap: balance; }
   .onboard-title em { font-style: italic; color: var(--rust); font-weight: 500; }
-  .onboard-sub { font-size: 17px; color: var(--ink-mute); max-width: 520px; margin: 0 auto; line-height: 1.6; }
+  .onboard-sub { font-family: 'Source Serif 4', serif; font-size: 20px; color: var(--ink-soft); max-width: 30em; margin: 0 auto; line-height: 1.5; }
   .onboard-fine { font-size: 14px; color: var(--ink-faint); margin-top: 18px; }
   .onboard-fine a { color: var(--rust); }
   .onboard-step { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 32px; margin-bottom: 14px; box-shadow: var(--shadow-sm); max-width: 680px; margin-left: auto; margin-right: auto; }
-  .step-number { font-family: 'Source Serif 4', serif; font-size: 14px; color: var(--rust); font-style: italic; margin-bottom: 8px; }
   .step-title { font-family: 'Source Serif 4', serif; font-size: 24px; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.01em; }
   .step-hint { color: var(--ink-mute); font-size: 14px; margin-bottom: 22px; }
   .field-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
@@ -565,10 +563,9 @@
     .onboarding { padding: 32px 20px; max-width: 100%; }
     .onboard-hero { margin-bottom: 28px; }
     .onboard-title { font-size: 28px; line-height: 1.2; white-space: normal; }
-    .onboard-sub { font-size: 14px; }
+    .onboard-sub { font-size: 17px; }
     
     .onboard-step { margin-bottom: 24px; padding: 16px 0; }
-    .step-number { font-size: 14px; }
     .step-title { font-size: 16px; }
     .step-hint { font-size: 14px; }
     
@@ -611,7 +608,7 @@
   @media (max-width: 360px) {
     .onboarding { padding: 24px 16px; }
     .onboard-title { font-size: 24px; }
-    .onboard-sub { font-size: 14px; }
+    .onboard-sub { font-size: 17px; }
     
     .verdict-head { font-size: 16px; }
     .section-heading { font-size: 14px; }
@@ -1137,15 +1134,13 @@ function renderOnboarding() {
     </header>
     <div class="onboarding">
       <div class="onboard-hero">
-        <div class="onboard-eyebrow">A scenario tool for life decisions</div>
-        <h1 class="onboard-title">Are you spending enough to make the life you want?</h1>
+        <h1 class="onboard-title">Are you spending enough for the life you want?</h1>
         <p class="onboard-sub">Enter what you have and see what you could spend each year and still make it. Then change one decision and see what it does.</p>
         <p style="margin-top:16px"><a onclick="showAbout()" style="color:var(--rust);cursor:pointer;font-size:14px;font-family:'Source Serif 4',serif;font-style:italic">Why this matters \u2192</a></p>
         <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a></p>
       </div>
 
       <div class="onboard-step">
-        <div class="step-number">i. The basics</div>
         <h2 class="step-title">Your timeline</h2>
         <p class="step-hint">How old are you now, and when do you want to retire?</p>
         <div class="field-grid">
@@ -1155,7 +1150,6 @@ function renderOnboarding() {
       </div>
 
       <div class="onboard-step">
-        <div class="step-number">ii. What you have & spend</div>
         <h2 class="step-title">Your savings and spending</h2>
         <p class="step-hint">How much you've saved, and what you spend each year.</p>
         <div class="field-grid">
@@ -1165,7 +1159,6 @@ function renderOnboarding() {
       </div>
 
       <div class="onboard-step">
-        <div class="step-number">iii. Income & housing</div>
         <h2 class="step-title">Other income and housing</h2>
         <p class="step-hint">Work income, partner income, and the mortgage.</p>
         <div class="field-grid">
@@ -1177,7 +1170,6 @@ function renderOnboarding() {
       </div>
 
       <div class="onboard-step">
-        <div class="step-number">iv. The safety net</div>
         <h2 class="step-title">Social Security</h2>
         <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number.</p>
         <div class="field-grid">
@@ -2241,8 +2233,8 @@ function drawMainChart(result, compare) {
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: state.lateSpending < state.spending ? 'Spending drops' : 'Spending rises' });
 
   // Chart.js plugin for vertical annotation lines
-  const EV_FONT = '10px Inter Tight, sans-serif';
-  const EV_ROW_H = 12;
+  const EV_FONT = "italic 13px 'Source Serif 4', Georgia, serif";
+  const EV_ROW_H = 15;
   // Stagger labels into rows so labels that share an age (or sit close together) stack
   // vertically instead of overlapping, and keep every label inside the canvas.
   // `xFor(idx)` gives the pixel x for a label index; returns the positioned list.
@@ -2293,9 +2285,12 @@ function drawMainChart(result, compare) {
         ctx2.lineTo(ev.x, yScale.bottom);
         ctx2.stroke();
         ctx2.setLineDash([]);
-        ctx2.fillStyle = '#75695a';
         ctx2.font = EV_FONT;
         ctx2.textAlign = 'center';
+        // a halo in the card color keeps the note legible where it sits over the band
+        ctx2.lineJoin = 'round'; ctx2.lineWidth = 4; ctx2.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim() || '#fbf8f1';
+        ctx2.strokeText(ev.label, ev.tx, yScale.top - 4 - ev.row * EV_ROW_H);
+        ctx2.fillStyle = '#a04a28';
         ctx2.fillText(ev.label, ev.tx, yScale.top - 4 - ev.row * EV_ROW_H);
         ctx2.restore();
       });
