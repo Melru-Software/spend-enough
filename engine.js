@@ -766,14 +766,15 @@ const DEFAULT_STATE = {
 };
 
 const SAMPLE_STATE = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), {
-  age: 52, partnerAge: 50, hasPartner: true,
-  portfolio: 700000, spending: 80000, lateSpending: 65000, slowDownAge: 75,
-  housing: 24000, mortgagePayoffAge: 62,
-  yourIncome: 120000, yourStopWorkAge: 62,
-  partnerIncome: 0, partnerStopWorkAge: 60,
-  ssStartAge: 67, yourSSAmount: 30000, partnerSSAmount: 18000,
+  // A couple in their mid-forties on two ordinary incomes, with a mortgage that ends the year they retire.
+  age: 45, partnerAge: 44, hasPartner: true,
+  portfolio: 300000, spending: 62000, lateSpending: 52000, slowDownAge: 75,
+  housing: 18000, mortgagePayoffAge: 62,
+  yourIncome: 75000, yourStopWorkAge: 62,
+  partnerIncome: 45000, partnerStopWorkAge: 62,
+  ssStartAge: 67, yourSSAmount: 26000, partnerSSAmount: 18000,
   simMode: 'historical',
-  accountsEnabled: true, accounts: { traditional: 280000, roth: 150000, taxable: 270000 },
+  accountsEnabled: true, accounts: { traditional: 150000, roth: 60000, taxable: 90000 },
 });
 
   return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, SHOCK_YEARS, applyShock, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, findRetireAgeAtSuccess, findPortfolioAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };

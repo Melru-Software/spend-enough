@@ -215,9 +215,9 @@
       </div>
       <div class="control">
         <label for="sp">Spending, all in</label>
-        <input id="sp" type="range" min="60000" max="130000" step="2000" value="80000" aria-describedby="sp-hint">
+        <input id="sp" type="range" min="60000" max="120000" step="2000" value="80000" aria-describedby="sp-hint">
         <output id="spv">$80,000</output>
-        <div class="hint" id="sp-hint">An example: 52 years old, $700,000 saved, $120,000 a year coming in, retiring at 62. Move the spending to see a new chart.</div>
+        <div class="hint" id="sp-hint">An example: a couple, 45 and 44, with $300,000 saved, $120,000 a year coming in between them, and a mortgage they pay off at 62, the year they both retire. Move the spending to see a new chart.</div>
       </div>
     </div>
   </section>
@@ -366,7 +366,7 @@
 
   var chart = null;
   function run(spending) {
-    var s = Object.assign({}, base, { spending: spending });
+    var s = Object.assign({}, base, { spending: spending - base.housing });
     var r = runForState(s);
     var p = r.percentiles;
     var labels = p.map(function (x) { return x.age; });
