@@ -8,6 +8,18 @@ if ! command -v node >/dev/null 2>&1; then
   exit 0
 fi
 ROOT="$(git rev-parse --show-toplevel)"
+
+# Legal pages: when privacy.html or terms.html is in this commit, stamp today's date on
+# its "Last updated" line and re-stage it. The date only moves when the page's text does.
+TODAY="$(date '+%B %-d, %Y')"
+for page in privacy.html terms.html; do
+  if git diff --cached --name-only | grep -qx "$page"; then
+    sed -i '' -E "s|(Last updated: )[^<]*|\1$TODAY|" "$ROOT/$page"
+    git add "$ROOT/$page"
+    echo "pre-commit: stamped $page as last updated $TODAY"
+  fi
+done
+
 echo "pre-commit: running engine tests…"
 if node "$ROOT/tests.js"; then
   exit 0
