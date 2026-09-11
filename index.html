@@ -3,15 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 <!--
-  Landing page (Phase 4). Self-contained: inline CSS + JS, no frameworks, no Chart.js.
-  Only external request is the same Google Fonts stylesheet index.html already loads.
-
-  Routing: this file is served at / (index.html). The app is app.html; legal pages are privacy.html
-  and terms.html. Public deployment values (checkout URL, email endpoint) come from config.js.
+  Landing page. Plain HTML and CSS; the chart in the hero runs the real engine (engine.js) on the
+  sample household, with Chart.js from the CDN. Public deployment values come from config.js.
 -->
-
 <title>Spend Enough. Are you spending enough to make the life you want?</title>
 <meta name="description" content="Or holding back because the future feels unknowable? Make it a bit more known. Enter what you have, change one decision, and see the range of where it leads next to the version where you didn't. Free to try, no account, your numbers stay on your device." />
 
@@ -33,453 +28,430 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600;8..60,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,400;1,8..60,500&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* Palette and tokens copied from index.html so the two pages read as one product. */
   :root {
-    --bone: #f4efe6;
-    --bone-2: #ebe4d6;
+    --ground: #fbf8f1;
+    --ground-2: #f4efe6;
     --ink: #1a1814;
     --ink-soft: #3d3830;
-    --ink-mute: #6b6356;
-    --ink-faint: #75695a;
-    --rust: #a04a28;
-    --rust-deep: #8a4226;
-    --moss: #5b6e3a;
-    --moss-deep: #3e4d28;
-    --gold: #7d6420;
-    --paper: #fbf8f1;
+    --mute: #6b6356;
+    --faint: #8d8577;
     --line: #d4cab8;
-    --line-soft: #e2dac8;
+    --line-soft: #e6dfd0;
+    --rust: #a04a28;
+    --rust-soft: rgba(160,74,40,0.12);
+    --moss: #5b6e3a;
+    --band: rgba(91,110,58,0.16);
+    --band-2: rgba(91,110,58,0.30);
+    --gold: #7d6420;
     --danger: #a8331f;
-    --shadow-sm: 0 1px 0 rgba(26,24,20,0.04), 0 1px 2px rgba(26,24,20,0.06);
-    --shadow-md: 0 2px 4px rgba(26,24,20,0.06), 0 8px 24px rgba(26,24,20,0.08);
-    --serif: 'Source Serif 4', Georgia, serif;
-    --sans: 'Inter Tight', system-ui, sans-serif;
-    --mono: 'Inter Tight', system-ui, sans-serif;
-    --measure: 640px;
+    --grid: rgba(26,24,20,0.06);
+    --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --sans: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--ground); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--rust); outline-offset: 3px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 40px; }
 
-  body {
-    font-family: var(--sans);
-    background: var(--bone);
-    color: var(--ink);
-    font-size: 16px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-    background-image:
-      radial-gradient(circle at 20% 0%, rgba(184,92,56,0.04) 0%, transparent 50%),
-      radial-gradient(circle at 80% 100%, rgba(91,110,58,0.04) 0%, transparent 50%);
-  }
+  /* ---- header: one rule, nothing floating ---- */
+  .top { display: flex; align-items: baseline; justify-content: space-between; padding: 26px 0 18px; border-bottom: 1px solid var(--line); }
+  .logo { font-family: var(--serif); font-size: 22px; font-weight: 500; letter-spacing: -0.02em; text-decoration: none; display: inline-flex; align-items: baseline; gap: 7px; }
+  .logo i { width: 8px; height: 8px; border-radius: 50%; background: var(--rust); display: inline-block; transform: translateY(-2px); }
+  .top nav { display: flex; gap: 28px; font-size: 14px; }
+  .top nav a { text-decoration: none; color: var(--mute); white-space: nowrap; }
+  .top nav a:hover { color: var(--ink); }
+  .top nav a.strong { color: var(--ink); font-weight: 600; }
 
-  a { color: var(--rust); }
-  a:hover { color: var(--rust-deep); }
+  /* ---- hero: thesis on the left, the real chart on the right ---- */
+  .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: start; padding: 64px 0 56px; border-bottom: 1px solid var(--line); }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 4.8vw, 64px); line-height: 1.02; letter-spacing: -0.028em; text-wrap: balance; }
+  .sub { font-family: var(--serif); font-size: 21px; line-height: 1.5; color: var(--ink-soft); margin-top: 26px; max-width: 26em; }
+  .actions { display: flex; gap: 14px; align-items: center; margin-top: 30px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; border-radius: 3px; font-weight: 600; font-size: 15px; text-decoration: none; font-family: var(--sans); cursor: pointer; }
+  .btn-ink { background: var(--ink); color: var(--ground); border: 1px solid var(--ink); }
+  .btn-ink:hover { background: var(--rust); border-color: var(--rust); }
+  .btn-line { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn-line:hover { border-color: var(--ink); }
+  .fine { font-size: 14px; color: var(--faint); margin-top: 16px; }
 
-  /* One visible focus style for everything interactive. */
-  a:focus-visible, button:focus-visible, input:focus-visible {
-    outline: 2px solid var(--rust);
-    outline-offset: 3px;
-    border-radius: 3px;
-  }
+  .live { position: relative; }
+  .figure { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .figure .big { font-family: var(--serif); font-weight: 300; font-size: clamp(56px, 6vw, 84px); line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .figure .big em { font-style: italic; font-weight: 400; }
+  .figure .cap { font-size: 15px; color: var(--mute); max-width: 22em; line-height: 1.4; }
+  .verdict { font-family: var(--serif); font-size: 19px; line-height: 1.4; margin-top: 10px; min-height: 2.8em; }
+  .verdict b { font-weight: 500; color: var(--rust); }
+  .chartbox { position: relative; height: 340px; margin-top: 16px; }
+  .chartbox canvas { width: 100% !important; height: 100% !important; }
+  .note { position: absolute; font-family: var(--serif); font-style: italic; font-size: 15px; line-height: 1.25; color: var(--rust); max-width: 12em; pointer-events: none; }
+  .note svg { position: absolute; overflow: visible; }
+  .note path { fill: none; stroke: var(--rust); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+  .note polygon { fill: var(--rust); }
 
-  .skip-link {
-    position: absolute; left: 16px; top: -100px;
-    background: var(--ink); color: var(--paper);
-    padding: 10px 14px; border-radius: 3px; font-weight: 600; z-index: 10;
-  }
-  .skip-link:focus { top: 16px; }
+  .control { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-soft); font-size: 14px; }
+  .control label { color: var(--mute); white-space: nowrap; }
+  .control output { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 5.5em; text-align: right; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 2px; background: var(--line); border-radius: 1px; outline-offset: 6px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); border: 3px solid var(--ground); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--ink); border: 3px solid var(--ground); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+  .control .hint { grid-column: 1 / -1; color: var(--faint); font-size: 13px; }
 
-  .wrap { width: 100%; max-width: 960px; margin: 0 auto; padding: 0 20px; }
-
-  /* ========== HEADER ========== */
-  .site-header {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--line);
-    background: var(--paper);
-    display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  }
-  .logo {
-    font-family: var(--serif); font-size: 20px; font-weight: 600; letter-spacing: -0.02em;
-    display: flex; align-items: baseline; gap: 4px; color: var(--ink); text-decoration: none;
-  }
-  .logo-dot {
-    width: 8px; height: 8px; background: var(--rust); border-radius: 50%;
-    display: inline-block; margin-right: 2px; transform: translateY(-2px);
-  }
-  .header-cta {
-    padding: 8px 14px; border: 1px solid var(--line); background: var(--paper);
-    color: var(--ink-soft); font-size: 14px; border-radius: 100px; font-weight: 500;
-    text-decoration: none; white-space: nowrap; min-height: 44px; display: inline-flex; align-items: center;
-    transition: all 0.15s ease;
-  }
-  .header-cta:hover { border-color: var(--ink); background: var(--bone-2); color: var(--ink); }
-
-  /* ========== BUTTONS ========== */
-  .btn-primary {
-    background: var(--ink); color: var(--paper); border: none; padding: 14px 28px;
-    font-size: 15px; font-weight: 600; border-radius: 3px; cursor: pointer; font-family: inherit;
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px;
-    text-decoration: none; transition: background 0.15s ease;
-  }
-  .btn-primary:hover { background: var(--rust); color: var(--paper); }
-  .btn-secondary {
-    background: transparent; color: var(--ink-soft); border: 1px solid var(--line);
-    padding: 14px 22px; font-size: 14px; border-radius: 3px; cursor: pointer; font-family: inherit;
-    min-height: 44px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
-  }
-  .btn-secondary:hover { border-color: var(--ink); color: var(--ink); }
-
-  /* ========== SECTIONS ========== */
-  section { padding: 48px 0; }
-  section + section { border-top: 1px solid var(--line-soft); }
-  .eyebrow {
-    text-transform: uppercase; letter-spacing: 0.18em; font-size: 13px;
-    color: var(--rust); font-weight: 600; margin-bottom: 14px;
-  }
-  h2 {
-    font-family: var(--serif); font-size: clamp(26px, 4vw, 34px); font-weight: 500;
-    line-height: 1.15; letter-spacing: -0.015em; margin-bottom: 16px; color: var(--ink);
-  }
-  .prose { max-width: var(--measure); }
-  .prose p { font-size: 17px; line-height: 1.65; color: var(--ink-soft); }
+  /* ---- editorial sections: label in the margin, prose in the column ---- */
+  .sec { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 32px; padding: 56px 0; border-bottom: 1px solid var(--line); }
+  .sec:last-of-type { border-bottom: none; }
+  .label { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); padding-top: 8px; }
+  h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.12; letter-spacing: -0.02em; text-wrap: balance; max-width: 18em; }
+  .prose { max-width: 34em; font-family: var(--serif); font-size: 19px; line-height: 1.55; }
   .prose p + p { margin-top: 16px; }
-  .prose em { font-family: var(--serif); font-style: italic; color: var(--rust); }
+  .prose p { color: var(--ink-soft); }
+  .lead { font-family: var(--serif); font-size: 20px; color: var(--ink-soft); margin-top: 12px; max-width: 30em; }
 
-  /* ========== HERO ========== */
-  .hero { padding: 56px 0 40px; text-align: center; }
-  .hero h1 {
-    font-family: var(--serif); font-size: clamp(34px, 6vw, 60px); font-weight: 400;
-    line-height: 1.08; letter-spacing: -0.025em; margin: 0 auto 22px; max-width: 18ch;
-  }
-  .hero h1 em { font-style: italic; color: var(--rust); font-weight: 500; }
-  .hero .sub {
-    font-size: 17px; color: var(--ink-mute); max-width: 560px; margin: 0 auto; line-height: 1.6;
-  }
-  .hero-actions {
-    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin-top: 30px;
-  }
-  .hero-fine { font-size: 14px; color: var(--ink-faint); margin-top: 16px; }
+  .qs { list-style: none; margin-top: 26px; border-top: 1px solid var(--line-soft); max-width: 44em; }
+  .qs li { border-bottom: 1px solid var(--line-soft); }
+  .qs a { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; padding: 18px 0; text-decoration: none; font-family: var(--serif); font-size: clamp(21px, 2.2vw, 27px); line-height: 1.25; letter-spacing: -0.01em; }
+  .qs a:hover { color: var(--rust); }
 
-  /* ========== SCREENSHOT PLACEHOLDER ==========
-     Sized to the app's results area: the dashboard is a 360px sidebar + a main column
-     up to 1100px, at a typical 1440x900 laptop viewport. That is an 8:5 frame; the chart card
-     inside is 280px tall inside ~16px padding. */
-  .shot { padding-top: 0; }
-  .shot-frame {
-    background: var(--paper); border: 1px solid var(--line); border-radius: 6px;
-    box-shadow: var(--shadow-md); overflow: hidden; max-width: 960px; margin: 0 auto;
-  }
-  .shot-bar {
-    height: 32px; border-bottom: 1px solid var(--line); background: var(--bone-2);
-    display: flex; align-items: center; gap: 6px; padding: 0 12px;
-  }
-  .shot-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); display: block; }
-  .shot-body {
-    aspect-ratio: 8 / 5; position: relative; display: grid; grid-template-columns: 1fr;
-    background:
-      repeating-linear-gradient(-45deg, transparent 0 14px, rgba(26,24,20,0.025) 14px 15px);
-  }
-  .shot-body img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .shot-caption { font-size: 14px; color: var(--ink-faint); text-align: center; margin-top: 12px; }
+  .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 30px; }
+  .three h3 { font-family: var(--serif); font-weight: 500; font-size: 22px; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 10px; }
+  .three p { font-family: var(--serif); font-size: 17.5px; color: var(--ink-soft); line-height: 1.5; }
 
-  /* ========== WHAT-IF TILES ========== */
-  .tiles { display: grid; grid-template-columns: 1fr; gap: 10px; list-style: none; }
-  .tile {
-    background: var(--paper); border: 1px solid var(--line); border-radius: 4px;
-    padding: 18px 20px; box-shadow: var(--shadow-sm); border-left: 3px solid var(--rust);
-  }
-  .tile a { display: block; color: inherit; text-decoration: none; }
-  .tile a:hover .q { color: var(--rust); }
-  .tile .q { font-family: var(--serif); font-size: 20px; font-weight: 500; line-height: 1.3; letter-spacing: -0.01em; color: var(--ink); }
-  .tile .maps { font-size: 14px; color: var(--ink-mute); margin-top: 6px; }
-  .tile .maps code { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--ink-soft); background: var(--bone-2); padding: 1px 6px; border-radius: 2px; }
+  .essay { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 48px; margin-top: 8px; }
+  .essay .body { font-family: var(--serif); font-size: 20px; line-height: 1.55; max-width: 34em; }
+  .essay .body p + p { margin-top: 18px; }
+  .essay .body p::first-letter { font-size: 1.05em; }
+  .aside { align-self: start; border-top: 1px solid var(--line); padding-top: 12px; }
+  .photo-note { font-size: 13px; color: var(--faint); font-style: italic; margin-top: 6px; }
+  .more { margin-top: 20px; font-size: 15px; }
+  .more a { color: var(--rust); text-decoration: none; }
+  .more a:hover { text-decoration: underline; }
+  .by { font-family: var(--serif); font-style: italic; color: var(--mute); font-size: 15px; margin-top: 14px; }
 
-  /* ========== BENEFITS ========== */
-  .benefits { display: grid; grid-template-columns: 1fr; gap: 14px; list-style: none; }
-  .benefit { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 22px 24px; box-shadow: var(--shadow-sm); }
-  .benefit .num { font-family: var(--serif); font-style: italic; color: var(--rust); font-size: 14px; margin-bottom: 8px; }
-  .benefit h3 { font-family: var(--serif); font-size: 22px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 8px; line-height: 1.2; }
-  .benefit p { font-size: 15px; line-height: 1.6; color: var(--ink-soft); }
+  .modes { display: flex; gap: 0; margin-top: 26px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); max-width: 44em; }
+  .modes div { flex: 1; padding: 14px 0; font-size: 14px; color: var(--mute); }
+  .modes div + div { border-left: 1px solid var(--line-soft); padding-left: 18px; }
+  .modes b { display: block; font-family: var(--serif); font-weight: 500; font-size: 17px; color: var(--ink); margin-bottom: 2px; }
 
-  /* ========== FOUNDER ========== */
-  .founder .prose p { font-size: 18px; }
-  .founder blockquote { border-left: 3px solid var(--rust); padding: 4px 0 4px 20px; }
-  .founder-more { margin-top: 14px; font-size: 15px; }
-  .founder-more a { color: var(--rust); text-decoration: none; }
-  .founder-more a:hover { text-decoration: underline; }
-  .founder figcaption { margin-top: 18px; font-size: 14px; color: var(--ink-mute); font-style: italic; font-family: var(--serif); }
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 30px; max-width: 52em; }
+  .plan { padding: 8px 40px 8px 0; }
+  .plan + .plan { border-left: 1px solid var(--line); padding-left: 40px; padding-right: 0; }
+  .plan h3 { font-family: var(--serif); font-weight: 400; font-size: 32px; line-height: 1.1; letter-spacing: -0.02em; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .plan h3 span { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--rust); font-variant-numeric: tabular-nums; }
+  .plan p { font-family: var(--serif); font-size: 17.5px; color: var(--ink-soft); margin-top: 12px; line-height: 1.5; }
+  .plan ul { list-style: none; margin-top: 14px; font-family: var(--serif); font-size: 17.5px; line-height: 1.45; color: var(--ink-soft); }
+  .plan li { padding: 9px 0; border-top: 1px solid var(--line-soft); }
+  .plan li b { font-weight: 500; color: var(--ink); }
+  .plan .anchor { font-size: 13px; color: var(--faint); }
+  .plan .btn { margin-top: 18px; }
+  .refund { font-size: 14px; color: var(--mute); margin-top: 22px; }
 
-  /* ========== HOW IT WORKS ========== */
-  .modes { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 22px; }
-  .mode { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; }
-  .mode .label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
-  .mode .val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 15px; color: var(--ink-soft); }
+  .isnt p { max-width: 34em; }
 
-  /* ========== WHAT IT ISN'T ========== */
-  .plans { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 22px; }
-  .plan { border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; background: var(--paper); }
-  .plan.pro { border-color: var(--rust); }
-  .plan-head { font-family: var(--serif); font-size: 20px; font-weight: 500; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-  .plan-price { font-family: var(--sans, inherit); font-size: 14px; font-weight: 600; color: var(--rust); font-variant-numeric: tabular-nums; }
-  .plan p { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin: 0; }
-  .plan-lead { font-size: 17px; color: var(--ink-mute); margin-top: 12px; line-height: 1.5; }
-  .plan-anchor { font-size: 13px; color: var(--ink-mute); margin-top: 10px; }
-  .plan-cta { margin-top: 16px; }
-  .plan-cta a { display: inline-block; }
-  .plan-fine { font-size: 14px; color: var(--ink-mute); margin-top: 16px; }
-  @media (min-width: 700px) { .plans { grid-template-columns: 1fr 1fr; } }
-  .isnt .box p + p { margin-top: 12px; }
-  .isnt .box {
-    background: var(--bone-2); border: 1px solid var(--line); border-radius: 4px;
-    padding: 18px 20px; font-size: 16px; line-height: 1.6; color: var(--ink-soft); max-width: var(--measure);
-  }
-
-  /* ========== EMAIL CAPTURE ========== */
-  .capture .card {
-    background: var(--paper); border: 1px solid var(--line); border-radius: 4px;
-    padding: 28px 24px; box-shadow: var(--shadow-sm); max-width: 640px;
-  }
-  .capture h2 { font-size: clamp(22px, 3.5vw, 28px); }
-  .capture p { color: var(--ink-mute); font-size: 15px; margin-bottom: 18px; }
-  .capture form { display: flex; flex-direction: column; gap: 10px; }
-  .capture label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-mute); font-weight: 600; }
-  .capture input[type=email] {
-    width: 100%; background: var(--bone); border: 1px solid var(--line); padding: 12px 14px;
-    font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 16px; color: var(--ink); border-radius: 2px;
-    transition: border-color 0.15s ease; min-height: 44px;
-  }
-  .capture input[type=email]:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 2px rgba(184,92,56,0.1); }
+  .capture form { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; max-width: 34em; }
+  .capture label { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); }
+  .capture input[type=email] { font: inherit; font-size: 16px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 3px; background: var(--ground); color: var(--ink); width: 100%; }
+  .capture input[type=email]:focus { outline: none; border-color: var(--ink); }
   .capture .row { display: flex; flex-direction: column; gap: 10px; }
-  .capture .status { font-size: 14px; min-height: 20px; margin-top: 4px; }
+  .capture .status { font-size: 14px; min-height: 20px; }
   .capture .status.ok { color: var(--moss); }
   .capture .status.warn { color: var(--gold); }
   .capture .status.err { color: var(--danger); }
-  .capture .fine { font-size: 13px; color: var(--ink-faint); margin: 8px 0 0; }
+  .capture .fine { margin-top: 10px; }
+  .capture .lead { margin-top: 10px; }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  @media (min-width: 600px) { .capture .row { flex-direction: row; } .capture .row input[type=email] { flex: 1; } }
+  footer { padding: 36px 0 56px; font-size: 13px; color: var(--mute); display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 32px; }
+  footer nav { display: flex; gap: 20px; margin-top: 10px; }
+  footer a { color: var(--ink-soft); text-decoration: none; }
 
-  /* ========== FOOTER ========== */
-  .site-footer { border-top: 1px solid var(--line); padding: 28px 0 40px; background: var(--paper); }
-  .site-footer .disclaimer { font-size: 14px; color: var(--ink-mute); line-height: 1.6; max-width: 720px; }
-  .site-footer .disclaimer strong { color: var(--ink-soft); font-weight: 600; }
-  .footer-links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 16px; font-size: 14px; }
-  .footer-links a { color: var(--ink-soft); text-decoration: none; }
-  .footer-links a:hover { color: var(--rust); text-decoration: underline; }
-  .footer-meta { font-size: 13px; color: var(--ink-faint); margin-top: 12px; }
-
-  /* ========== BREAKPOINTS (match the app: 480 / 768 / 860) ========== */
-  @media (min-width: 480px) {
-    .capture .row { flex-direction: row; align-items: stretch; }
-    .capture .row input[type=email] { flex: 1; }
+  @media (max-width: 900px) {
+    .wrap { padding: 0 20px; }
+    .hero { grid-template-columns: 1fr; gap: 40px; padding: 40px 0; }
+    .sec, footer { grid-template-columns: 1fr; gap: 12px; padding: 40px 0; }
+    .three { grid-template-columns: 1fr; gap: 24px; }
+    .essay { grid-template-columns: 1fr; gap: 24px; }
+    .plans { grid-template-columns: 1fr; }
+    .plan + .plan { border-left: none; border-top: 1px solid var(--line); padding-left: 0; padding-top: 28px; margin-top: 20px; }
+    .plan { padding-right: 0; }
+    .chartbox { height: 280px; }
+    .note { font-size: 13.5px; }
   }
-  @media (min-width: 768px) {
-    .site-header { padding: 18px 32px; }
-    .logo { font-size: 24px; }
-    .wrap { padding: 0 32px; }
-    section { padding: 64px 0; }
-    .hero { padding: 80px 0 48px; }
-    .tiles { grid-template-columns: repeat(2, 1fr); }
-    .benefits { grid-template-columns: repeat(3, 1fr); }
-    .modes { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 520px) {
+    .top nav { gap: 16px; }
+    .top nav a:not(.strong) { display: none; } /* both are on the page and in the footer */
+    .qs a { flex-direction: column; gap: 4px; }
+    .control { grid-template-columns: 1fr auto; }
+    .control input { grid-column: 1 / -1; }
   }
-  @media (min-width: 860px) {
-    .shot-body { grid-template-columns: 1fr; }
-    .founder .grid { display: grid; grid-template-columns: 1fr; }
+  @media (prefers-reduced-motion: no-preference) {
+    .qs a, .btn { transition: color .15s ease, background .15s ease, border-color .15s ease; }
   }
 </style>
 </head>
 <body>
+<main>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="index.html"><i></i>Spend Enough</a>
+    <nav><a href="why.html">Why I built it</a><a href="#price">Pricing</a><a class="strong" href="app.html">Try it free</a></nav>
+  </header>
 
-<a class="skip-link" href="#main">Skip to content</a>
+  <section class="hero">
+    <div>
+      <h1>Are you spending enough for the life you want?</h1>
+      <p class="sub">Or holding back because the future feels unknowable? Make it a bit more known. Enter some numbers, move them around, and see where they lead.</p>
+      <div class="actions"><a class="btn btn-ink" href="app.html">Try it free</a><a class="btn btn-line" href="#how">How it works</a></div>
+      <p class="fine">Free to try. No account, nothing to link, your numbers stay on your device.</p>
+    </div>
 
-<header class="site-header">
-  <a class="logo" href="#top" aria-label="Spend Enough home">
-    <span class="logo-dot" aria-hidden="true"></span><span data-product-name>Spend Enough</span>
-  </a>
-  <a class="header-cta" href="app.html">Try it free</a>
-</header>
-
-<main id="main">
-
-  <!-- 1. Headline / 2. Subhead / 3. Primary CTA -->
-  <section class="hero" id="top" aria-labelledby="headline">
-    <div class="wrap">
-      <p class="eyebrow">A scenario tool for life decisions</p>
-      <h1 id="headline">Are you spending enough to make the life you want?</h1>
-      <p class="sub">Or holding back because the future feels unknowable? Make it a bit more known. Enter what you have, change one decision, and see the range of where it leads next to the version where you didn't.</p>
-      <div class="hero-actions">
-        <a class="btn-primary" href="app.html">Try it free</a>
-        <a class="btn-secondary" href="#how">How it works</a>
+    <div class="live" aria-label="A live example from the tool">
+      <div class="figure"><div class="big"><span id="ok">51</span> <em>of</em> <span id="tot">52</span></div><div class="cap">starting years since 1926 in which this plan lasts to age 100</div></div>
+      <p class="verdict" id="verdict"></p>
+      <div class="chartbox">
+        <canvas id="c"></canvas>
       </div>
-      <p class="hero-fine">Free to try. No account, nothing to link, your numbers stay on your device.</p>
+      <div class="control">
+        <label for="sp">Spending, all in</label>
+        <input id="sp" type="range" min="60000" max="130000" step="2000" value="80000" aria-describedby="sp-hint">
+        <output id="spv">$80,000</output>
+        <div class="hint" id="sp-hint">An example: 52 years old, $700,000 saved, $120,000 a year coming in, retiring at 62. Move the spending to see a new chart.</div>
+      </div>
     </div>
   </section>
 
-  <!-- 4. Screenshot placeholder for the results screen -->
-  <section class="shot" aria-label="Results screen preview">
-    <div class="wrap">
-      <figure class="shot-frame">
-        <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="shot-body">
-          <img src="results-screen.png" width="1440" height="900" loading="lazy"
-               alt="The results screen: a verdict card, a portfolio projection chart with a shaded range and a median line, and the ages where your plan changes." />
-        </div>
-      </figure>
-      <p class="shot-caption">The results screen. The shaded band is every market history since 1926, and the line is the median.</p>
-    </div>
-  </section>
-
-  <!-- 5. What-if tiles -->
-  <section aria-labelledby="whatif-h">
-    <div class="wrap">
-      <p class="eyebrow">Decisions, as you'd say them</p>
-      <h2 id="whatif-h">Play out the what-ifs.</h2>
-      <ul class="tiles">
-        <li class="tile"><a href="app.html?scenario=spendMore"><p class="q">What if we spend $10,000 more a year while the kids are small?</p></a></li>
-        <li class="tile"><a href="app.html?scenario=careerBreak"><p class="q">What if I don't go back to work for two years?</p></a></li>
-        <li class="tile"><a href="app.html?scenario=payoffHouse"><p class="q">What if we pay off the house instead of investing the money?</p></a></li>
-        <li class="tile"><a href="app.html"><p class="q">What if I save everything and end up with more than I'll ever use?</p></a></li>
+  <section class="sec" id="whatif">
+    <div class="label">Scenarios</div>
+    <div>
+      <h2>What if…</h2>
+      <ul class="qs">
+        <li><a href="app.html?scenario=spendMore"><span class="q">What if we spend $10,000 more a year while the kids are small?</span></a></li>
+        <li><a href="app.html?scenario=careerBreak"><span class="q">What if I don't go back to work for two years?</span></a></li>
+        <li><a href="app.html?scenario=payoffHouse"><span class="q">What if we pay off the house instead of investing the money?</span></a></li>
+        <li><a href="app.html"><span class="q">What if I save everything and end up with more than I'll ever use?</span></a></li>
       </ul>
     </div>
   </section>
 
-  <!-- 6. Three benefit bullets -->
-  <section aria-labelledby="benefits-h">
-    <div class="wrap">
-      <p class="eyebrow">Why this one</p>
-      <h2 id="benefits-h">What you can afford to live on, and how sure you can be.</h2>
-      <ol class="benefits">
-        <li class="benefit">
-          <div class="num">01</div>
-          <h3>What you can afford to live on.</h3>
-          <p>With what you have now, how much could you spend each year and still make it? The tool shows you the number and how sure you can be of it, so the money you've been careful with can turn into years you get to use.</p>
-        </li>
-        <li class="benefit">
-          <div class="num">02</div>
-          <h3>Two futures on one chart.</h3>
-          <p>Change one decision and see what it does to the whole picture, next to the version where you didn't. The gap between the two is the answer to "can we afford this?"</p>
-        </li>
-        <li class="benefit">
-          <div class="num">03</div>
-          <h3>Certainty as a range you can read.</h3>
-          <p>You see how your plan held up across every market history since 1926 and 500 simulated ones, so you can tell "this works in most worlds" from "this only works if nothing goes wrong."</p>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- 7. Founder story -->
-  <section class="founder" aria-labelledby="founder-h">
-    <div class="wrap">
-      <p class="eyebrow">Why I built it</p>
-      <h2 id="founder-h">If we don't save every spare dollar, are we still okay?</h2>
-      <figure class="prose">
-        <blockquote>
-          <p>I've always been good at saving and bad at spending. Even when the numbers said we were fine, I didn't feel it. The future felt unknowable, and my habit was to throw up my hands, say we can never know, and keep saving out of fear. On maternity leave I wanted to play out whether we could afford for me not to go back to work, and I couldn't find a tool that showed me in a way I understood, at a price I'd pay. So I built one. It turns out, the certainty I was looking for was never going to come from a single number, because that number is unknowable. But now, I feel empowered to turn the dials in our finances and adjust as we go. I didn't stop working, but I work from home with my kid here, and we spend more on a nanny so I can. I am less stressed about retirement savings. My past self already made sacrifices. Because she did, we can make these decisions now and be okay later. I'm grateful to her, and using what she saved for the good life she was hoping for seems like the right way to thank her.</p>
-        </blockquote>
-        <p class="founder-more"><a href="why.html">Read the whole story</a></p>
-        <figcaption>The founder of <span data-product-name>Spend Enough</span></figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <!-- 8. How it works -->
-  <section id="how" aria-labelledby="how-h">
-    <div class="wrap">
-      <p class="eyebrow">How it works</p>
-      <h2 id="how-h">Your numbers, run through every market since 1926.</h2>
-      <div class="prose">
-        <p>You enter what you have, what comes in, what goes out, and when you'd like to stop working, then pick a decision to test. Every assumption behind the result is on the screen and yours to change: the stock/bond mix, fees, tax rates, spending guardrails. The tool runs your numbers two ways. Historical mode replays your plan through every stretch of real US market returns since 1926, so you can see how it would have gone if you'd started in 1929, or 1966, or 2000. Simulated mode runs 500 randomized futures with the average return and volatility of your stock/bond mix, both of which you can change. Both give you a range instead of a single line. A plan that comes through 66 of 71 market histories is a different thing from one that squeaks through 40, and you can see which one you're looking at.</p>
-      </div>
-      <div class="modes" aria-label="The three modes">
-        <div class="mode"><div class="label">Fixed</div><div class="val">one steady real return</div></div>
-        <div class="mode"><div class="label">Historical</div><div class="val">every period, 1926&ndash;2025</div></div>
-        <div class="mode"><div class="label">Simulated</div><div class="val">500 randomized futures</div></div>
-      </div>
-      <div class="hero-actions" style="justify-content:flex-start;margin-top:28px">
-        <a class="btn-primary" href="app.html">Try it free</a>
+  <section class="sec">
+    <div class="label">What it shows</div>
+    <div>
+      <h2>What you can afford to live on, and how sure you can be of it.</h2>
+      <div class="three">
+        <div><h3>How much you can spend.</h3><p>Most calculators ask what you'll spend and check whether it lasts. This one starts from what you have and finds the most you could spend each year and still make it to the end.</p></div>
+        <div><h3>Both versions of a decision.</h3><p>Take the two years off, or don't. Pay off the house, or invest the money. The chart shows both paths at the same time, and the gap between them is what the decision costs.</p></div>
+        <div><h3>A range of outcomes.</h3><p>Your plan runs through every stretch of the market since 1926, and through 500 simulated futures if you want them. A plan that lasts in 51 of 52 starting years is a different thing from one that lasts in 30, and you can see which one you have.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- 8b. Pricing -->
-  <section class="pricing" id="pricing" aria-labelledby="pricing-h">
-    <div class="wrap">
-      <p class="eyebrow">Free and Pro</p>
-      <h2 id="pricing-h">Try it free. Pay once if you want the comparison.</h2>
-      <p class="plan-lead">No accounts to link, no subscription to cancel, nothing sent to a server. Pay once and it's yours.</p>
+  <section class="sec" id="why">
+    <div class="label">Why I built it</div>
+    <div>
+      <h2>If we don't save every spare dollar, are we still okay?</h2>
+      <div class="essay">
+        <div class="body">
+          <p>I've always been good at saving and bad at spending. Even when the numbers said we were fine, I didn't feel it. On maternity leave I wanted to know whether we could afford for me not to go back to work, and I couldn't find a tool that showed me in a way I understood, at a price I'd pay. So I built one. It told me we could live on one salary, but that stopping now would add about ten years of working at the end of my career. I finally understood what the decision could cost. Then my husband got laid off. I put the new numbers in and realized there was no need to panic.</p>
+          <p>I was looking for a number that is safe in every future, but I learned there isn't one. What I got instead was the range, and how much each choice moves it. I chose to keep working. I work from home with my kid here, and we spend more on a nanny so I can. It gave me a way to look at a decision and see what it would do, and that has helped me let go of needing to over save out of fear. It is giving me the confidence to spend enough on our life today instead of saving all of it for later. I hope it can do the same for you.</p>
+          <p class="more"><a href="why.html">Read the whole story</a></p>
+        </div>
+        <div class="aside"><p class="by">Hannah, the founder</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="how">
+    <div class="label">How it works</div>
+    <div>
+      <h2>It tests your plan against every market since 1926.</h2>
+      <div class="prose" style="margin-top:14px">
+        <p>You enter what you have, what comes in, what goes out, and when you'd like to stop working. Every assumption behind the result can be changed, the stock and bond mix, fees, tax rates, and the spending guardrails included.</p>
+        <p>The tool runs your numbers three ways. Historical mode replays your plan through every stretch of real US market returns since 1926, so you can see how it would have gone if you'd started in 1929, or 1966, or 2000. Simulated mode runs your plan through randomized futures, 500 unless you change it, with the average return and volatility of your mix, and you can change those too. Fixed mode uses one steady return every year, which is what most calculators do, so you can see the difference.</p>
+      </div>
+      <div class="modes"><div><b>Historical</b>every period, 1926 to 2025</div><div><b>Simulated</b>randomized futures, 500 by default</div><div><b>Fixed</b>one steady return</div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="price">
+    <div class="label">Free and Pro</div>
+    <div>
+      <h2>Try it free. Pay once if you want to go deeper.</h2>
+      <p class="lead">There's no account to create and no subscription to remember to cancel. Your numbers are safe since nothing you type is sent anywhere.</p>
       <div class="plans">
         <div class="plan">
-          <div class="plan-head">Free</div>
-          <p>The spending number and the range are free. Your plan run through every market period since 1926 with the full range on the chart, the core inputs, the what-if presets, the spending explorer, and every assumption on screen and editable.</p>
-          <p class="plan-cta"><a class="btn-secondary" href="app.html">Try it free</a></p>
+          <h3>Free</h3>
+          <ul>
+            <li>Historical mode, your plan run through every market period since 1926, with the chart and the historical analysis.</li>
+            <li>The core inputs and the what-if presets.</li>
+            <li>The spending explorer, which shows how that changes at each spending level.</li>
+            <li>The assumptions behind the result, open to change: stock and bond mix, fees, a tax rate, and the guardrails.</li>
+          </ul>
+          <a class="btn btn-line" href="app.html">Try it free</a>
         </div>
-        <div class="plan pro">
-          <div class="plan-head">Pro <span class="plan-price"><span id="pro-price">$39</span>, once</span></div>
-          <p>Everything in Free, plus side-by-side scenario comparison with both futures on one chart, what it would take to get a plan over the line, a printable one-page report, the year-by-year table as a spreadsheet, stress tests, Simulated mode, and saved scenarios.</p>
-          <p class="plan-anchor">About a third of a year of the subscription planners.</p>
-          <p class="plan-cta"><a class="btn-primary" id="pro-buy" href="app.html" target="_blank" rel="noopener" hidden>Get Pro &middot; <span data-pro-price>$39</span>, one payment</a></p>
+        <div class="plan">
+          <h3>Pro <span id="pro-price">$39</span></h3>
+          <p>Everything in Free, plus:</p>
+          <ul>
+            <li>Simulated mode, which runs your plan through randomized futures as well as the historical ones.</li>
+            <li>The spending, retirement age, or savings that would get a plan over the line.</li>
+            <li>Two decisions side by side on one chart.</li>
+            <li>Up to 8 saved scenarios, with notes.</li>
+            <li>Five stress tests that start your plan in a known bad stretch, 1929 and 1966 among them.</li>
+            <li>Filing status, your state, and traditional, Roth, and taxable accounts with the order you draw from them.</li>
+            <li>Add one-time financial events like an inheritance or a large purchase.</li>
+            <li>The age your plan runs to, a change in spending later in life, mortgage payoff, income growth, and Social Security timing.</li>
+            <li>A printable one-page report, and the year-by-year table as a spreadsheet.</li>
+          </ul>
+          <a class="btn btn-ink" id="pro-buy" href="app.html" target="_blank" rel="noopener" onclick="track('clicked_checkout')" hidden>Get Pro</a>
         </div>
       </div>
-      <p class="plan-fine">Not for you? Full refund within 14 days, no questions asked.</p>
+      <p class="refund">Not for you? Full refund within 14 days, no questions asked.</p>
     </div>
   </section>
 
-  <!-- 9. What it isn't -->
-  <section class="isnt" aria-labelledby="isnt-h">
-    <div class="wrap">
-      <p class="eyebrow">What it isn't</p>
-      <h2 id="isnt-h">Not advice. Not a planner.</h2>
-      <div class="box">
+  <section class="sec isnt" id="isnt">
+    <div class="label">Limits</div>
+    <div>
+      <h2>What it leaves out.</h2>
+      <div class="prose" style="margin-top:14px">
         <p>It's not advice and it's not a planner. It doesn't know your taxes beyond a rough estimate, and it doesn't know your life. It's a way to see the shape of the outcomes so you can have a better conversation, with yourself or with a professional.</p>
-        <p>It doesn't model healthcare costs before Medicare, required minimum distributions, or Roth conversions. If you're optimizing those, you want a subscription planner. If you're deciding whether to take the year off, or whether you can spend a little more now, you want this.</p>
+        <p>It doesn't model healthcare costs before Medicare, required minimum distributions, or Roth conversions. If you're optimizing those, you want a subscription planner. If you want to get a sense of how different scenarios could play out, this is built for that.</p>
       </div>
     </div>
   </section>
 
-  <!-- 10. Email capture -->
-  <section class="capture" id="capture" aria-labelledby="capture-h">
-    <div class="wrap">
-      <div class="card">
-        <p class="eyebrow">Updates</p>
-        <h2 id="capture-h">Get a note when something new ships.</h2>
-        <p>An email when something meaningful changes, and nothing else. No list-sharing, unsubscribe any time.</p>
-        <form id="signup" method="post" novalidate>
-          <label for="email">Email address</label>
-          <div class="row">
-            <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required placeholder="you@example.com" />
-            <button class="btn-primary" type="submit" id="signup-btn">Keep me posted</button>
-          </div>
-          <!-- Honeypot for bots; hidden from people and screen readers. -->
-          <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off" /></div>
-          <p class="status" id="signup-status" role="status" aria-live="polite"></p>
-          <noscript><p class="status warn">Signing up needs JavaScript turned on.</p></noscript>
-        </form>
-        <p class="fine">Your email is the only thing we collect, and only if you type it here. The app itself stores nothing on a server.</p>
-      </div>
+  <section class="sec capture" id="capture" aria-labelledby="capture-h" hidden>
+    <div class="label">Updates</div>
+    <div>
+      <h2 id="capture-h">Get a note when something new ships.</h2>
+      <p class="lead">An email when something meaningful changes, and nothing else. No list-sharing, unsubscribe any time.</p>
+      <form id="signup" method="post" novalidate>
+        <label for="email">Email address</label>
+        <div class="row">
+          <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required placeholder="you@example.com" />
+          <button class="btn btn-ink" type="submit" id="signup-btn">Keep me posted</button>
+        </div>
+        <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input type="text" id="website" name="website" tabindex="-1" autocomplete="off" /></div>
+        <p class="status" id="signup-status" role="status" aria-live="polite"></p>
+        <noscript><p class="status warn">Signing up needs JavaScript turned on.</p></noscript>
+      </form>
+      <p class="fine">Your email is the only thing we collect, and only if you type it here. The app itself stores nothing on a server.</p>
     </div>
   </section>
+
+  <footer>
+    <div class="label">Spend Enough</div>
+    <div>
+      <p>Educational modelling tool, not financial, tax, investment, or legal advice. Results are ranges under the assumptions shown. They are not predictions. Talk to a qualified professional before acting on them.</p>
+      <nav><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="why.html">Why I built it</a><a href="app.html">Open the app</a></nav>
+      <p style="margin-top:10px">&copy; <span id="year">2026</span> Spend Enough. Every data source is cited in the app.</p>
+    </div>
+  </footer>
+</div>
 
 </main>
 
-<!-- 11. Footer -->
-<footer class="site-footer">
-  <div class="wrap">
-    <p class="disclaimer">Educational modelling tool, not financial, tax, investment, or legal advice. Results are ranges under the assumptions shown. They are not predictions. Talk to a qualified professional before acting on them.</p>
-    <nav class="footer-links" aria-label="Legal">
-      <a href="privacy.html">Privacy</a>
-      <a href="terms.html">Terms</a>
-      <a href="why.html">Why I built it</a>
-      <a href="app.html">Open the app</a>
-    </nav>
-    <p class="footer-meta">&copy; <span id="year">2026</span> <span data-product-name>Spend Enough</span>. Every data source is cited in the app.</p>
-  </div>
-</footer>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="engine.js"></script>
+<script>
+(function () {
+  'use strict';
+  var base = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), SAMPLE_STATE);
+  var css = getComputedStyle(document.documentElement);
+  var tok = function (n) { return css.getPropertyValue(n).trim(); };
+  var money = function (v) { return v >= 1e6 ? '$' + (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + 'M' : v >= 1e3 ? '$' + Math.round(v / 1e3) + 'k' : '$' + Math.round(v); };
+  var full = function (v) { return '$' + Math.round(v).toLocaleString('en-US'); };
+
+  var chart = null;
+  function run(spending) {
+    var s = Object.assign({}, base, { spending: spending });
+    var r = runForState(s);
+    var p = r.percentiles;
+    var labels = p.map(function (x) { return x.age; });
+    document.getElementById('ok').textContent = r.successCount;
+    document.getElementById('tot').textContent = r.totalPeriods;
+    var last = p[p.length - 1];
+    var v = document.getElementById('verdict');
+    var leftover = last.p50 > 0 ? ' In the middle outcome, <b>' + money(last.p50) + '</b> is still there at 100.' : '';
+    if (r.failureCount === 0) v.innerHTML = 'It lasts no matter which year it starts in.' + leftover;
+    else if (r.failureCount === 1) v.innerHTML = 'Started in ' + r.failures[0].label.slice(0, 4) + ', it runs out at ' + r.failures[0].ranOutAge + '.' + leftover;
+    else if (r.successCount === 0) v.innerHTML = 'It runs out whichever year it starts in, half the time by age <b>' + r.medianRunOutAge + '</b>.';
+    else v.innerHTML = 'Started in ' + r.failureCount + ' of the years, it runs out before 100, half of those by age <b>' + r.medianRunOutAge + '</b>.' + leftover;
+
+    var data = {
+      labels: labels,
+      datasets: [
+        { data: p.map(function (x) { return x.p90; }), borderColor: 'transparent', backgroundColor: tok('--band'), pointRadius: 0, fill: '+1', tension: 0.15 },
+        { data: p.map(function (x) { return x.p10; }), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, tension: 0.15 },
+        { data: p.map(function (x) { return x.p75; }), borderColor: 'transparent', backgroundColor: tok('--band-2'), pointRadius: 0, fill: '+1', tension: 0.15 },
+        { data: p.map(function (x) { return x.p25; }), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, tension: 0.15 },
+        { data: p.map(function (x) { return x.p50; }), borderColor: tok('--rust'), borderWidth: 2, pointRadius: 0, fill: false, tension: 0.15 }
+      ]
+    };
+    if (chart) { chart.data = data; chart.update('none'); return; }
+    // Notes drawn from the data itself, so each arrow lands on the thing it names.
+    function arrow(c, x1, y1, x2, y2) {
+      var mx = (x1 + x2) / 2 + (y2 - y1) * 0.25, my = (y1 + y2) / 2 - (x2 - x1) * 0.25;
+      c.save(); c.lineWidth = 4; c.strokeStyle = tok('--ground'); c.beginPath(); c.moveTo(x1, y1); c.quadraticCurveTo(mx, my, x2, y2); c.stroke(); c.restore();
+      c.beginPath(); c.moveTo(x1, y1); c.quadraticCurveTo(mx, my, x2, y2); c.stroke();
+      var ang = Math.atan2(y2 - my, x2 - mx);
+      c.beginPath(); c.moveTo(x2, y2); c.lineTo(x2 - 7 * Math.cos(ang - 0.45), y2 - 7 * Math.sin(ang - 0.45)); c.lineTo(x2 - 7 * Math.cos(ang + 0.45), y2 - 7 * Math.sin(ang + 0.45)); c.closePath(); c.fill();
+    }
+    // Text gets a halo in the page color so it stays legible over the shaded band.
+    function note(c, lines, x, y, align) {
+      c.textAlign = align;
+      c.save(); c.lineJoin = 'round'; c.lineWidth = 5; c.strokeStyle = tok('--ground');
+      lines.forEach(function (l, i) { c.strokeText(l, x, y + i * 16); });
+      c.restore();
+      lines.forEach(function (l, i) { c.fillText(l, x, y + i * 16); });
+    }
+    var mark = { id: 'mark', afterDraw: function (ch) {
+      var xs = ch.scales.x, ys = ch.scales.y, c = ch.ctx, pr = ch.data.datasets;
+      var px = function (age) { return xs.getPixelForValue(labels.indexOf(age)); };
+      c.save();
+      c.font = 'italic 14px ' + tok('--serif'); c.fillStyle = tok('--rust'); c.strokeStyle = tok('--rust'); c.lineWidth = 1.3; c.lineCap = 'round';
+      // the dashed line at 62, with its note under the axis
+      var x62 = px(62);
+      if (x62 > 0) {
+        c.save(); c.strokeStyle = tok('--line'); c.setLineDash([4, 3]); c.beginPath(); c.moveTo(x62, ys.top); c.lineTo(x62, ys.bottom); c.stroke(); c.restore();
+        note(c, ['retire and pay off', 'the house at 62'], x62 + 46, ys.bottom - 34, 'left');
+        arrow(c, x62 + 42, ys.bottom - 30, x62 + 2, ys.bottom - 8);
+      }
+      // the band: point at the top edge of the shaded range around age 78
+      var i78 = labels.indexOf(78);
+      if (i78 > 0) {
+        var bx = px(78), by = ys.getPixelForValue(pr[0].data[i78]);
+        note(c, ['the shaded band is every', 'starting year since 1926,', 'worst tenth to best tenth'], bx - 60, ys.top - 22, 'right');
+        arrow(c, bx - 56, ys.top - 6, bx, by - 3);
+      }
+      // the median line, near the right end
+      var i92 = labels.indexOf(92);
+      if (i92 > 0) {
+        var mx2 = px(92), my2 = ys.getPixelForValue(pr[4].data[i92]);
+        note(c, ['the middle outcome'], mx2 - 18, my2 - 40, 'right');
+        arrow(c, mx2 - 22, my2 - 34, mx2 - 2, my2 - 4);
+      }
+      c.restore();
+    } };
+    chart = new Chart(document.getElementById('c'), {
+      type: 'line', data: data, plugins: [mark],
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        layout: { padding: { top: 58, right: 8 } },
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: {
+          x: { grid: { color: tok('--grid') }, ticks: { color: tok('--mute'), font: { family: tok('--sans'), size: 12 }, maxTicksLimit: 9 }, border: { color: tok('--line') } },
+          y: { grid: { color: tok('--grid') }, ticks: { color: tok('--mute'), font: { family: tok('--sans'), size: 12 }, callback: function (v) { return money(v); }, maxTicksLimit: 6 }, border: { display: false }, beginAtZero: true }
+        }
+      }
+    });
+  }
+  var sp = document.getElementById('sp'), out = document.getElementById('spv');
+  sp.addEventListener('input', function () { out.textContent = full(+sp.value); run(+sp.value); });
+  run(+sp.value);
+})();
+</script>
 
 <script src="config.js"></script>
 <script>/* Optional privacy-respecting analytics (Plausible/Fathom-style), only when config.js sets it. */
@@ -496,7 +468,7 @@ window.track=function(n){try{if(window.plausible)window.plausible(n);else if(win
   }
 
   document.getElementById("year").textContent = String(new Date().getFullYear());
-  if (CFG.price) { document.querySelectorAll("#pro-price, [data-pro-price]").forEach(function (el) { el.textContent = CFG.price; }); }
+  if (CFG.price) { var pp = document.getElementById("pro-price"); if (pp) pp.textContent = CFG.price; }
   var buy = document.getElementById("pro-buy");
   if (buy && CFG.checkoutUrl) { buy.href = CFG.checkoutUrl; buy.hidden = false; }
 
@@ -508,7 +480,8 @@ window.track=function(n){try{if(window.plausible)window.plausible(n);else if(win
     var status = document.getElementById("signup-status");
 
     // No provider configured yet: hide the whole section rather than show a form that cannot work.
-    if (!EMAIL_ENDPOINT) { document.getElementById("capture").hidden = true; return; }
+    if (!EMAIL_ENDPOINT) { return; }
+    document.getElementById("capture").hidden = false;
     form.setAttribute("action", EMAIL_ENDPOINT);
 
     function say(kind, text) {
