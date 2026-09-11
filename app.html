@@ -104,6 +104,8 @@
   }
   .tagline { color: var(--ink-mute); font-size: 14px; font-style: italic; font-family: 'Source Serif 4', serif; }
   .scenarios-bar { display: flex; gap: 8px; align-items: center; }
+  .pro-pill { border-color: var(--ink) !important; color: var(--ink) !important; font-weight: 600; }
+  .pro-pill:hover { background: var(--ink) !important; color: var(--paper) !important; }
   .scenario-pill {
     padding: 6px 14px; border: 1px solid var(--line); background: var(--paper);
     color: var(--ink-soft); font-size: 14px; border-radius: 100px; cursor: pointer;
@@ -1425,6 +1427,7 @@ function renderDashboard() {
         <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
         <button class="scenario-pill" onclick="printReport()">Print report${!isPaid() ? ' <span class="lock-icon">&#x1f512;</span>' : ''}</button>
+        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get Pro &middot; ${CONFIG.price}</button>` : ''}
       </div>
     </header>
     <div class="dashboard">${main}${sidebar}<div class="resources-row">${renderResources()}</div></div>`;
