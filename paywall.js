@@ -36,9 +36,9 @@
     limit: 'This key is already in use on ' + ACTIVATION_LIMIT + ' browsers. Free one up from your order page (link in your receipt email) and try again.',
     inactive: 'That key isn’t active. Check the receipt email, or reply to it and we’ll sort it out.',
     network: 'Couldn’t reach the license server. Check your connection and try again.',
-    purchased: 'Thanks for buying. Your license key is in the receipt email; paste it below to unlock Pro.',
+    purchased: 'Thanks for buying. Your license key is in the receipt email; paste it below to switch the full version on.',
     slots: 'A key works in up to ' + ACTIVATION_LIMIT + ' browsers.',
-    unlocking: 'Unlocking Pro…'
+    unlocking: 'Unlocking…'
   };
 
   // How many of the key's slots are in use after a successful /activate, for the toast.
@@ -50,10 +50,10 @@
   }
   function proOnMessage(res) {
     const s = activationSlots(res);
-    return 'Pro is on. This browser is ' + s.used + ' of ' + s.limit + ' for your key.';
+    return 'The full version is on. This browser is ' + s.used + ' of ' + s.limit + ' for your key.';
   }
 
-  // The one synchronous question the UI asks: is Pro unlocked, and is the stored
+  // The one synchronous question the UI asks: is the full version unlocked, and is the stored
   // answer old enough that the app should re-check with the provider in the background?
   function licenseDecision(blob, now) {
     if (!blob || typeof blob !== 'object' || !blob.key || !blob.instanceId) return { paid: false, needsCheck: false };
@@ -95,7 +95,7 @@
 
   // Fold a /validate response into the blob. `res === null` means the request failed
   // (offline, timeout, non-JSON): remember that and leave lastCheck alone so the next
-  // load retries. An explicit valid:false locks Pro until the key is activated again.
+  // load retries. An explicit valid:false locks it until the key is activated again.
   function applyValidation(blob, res, now) {
     const next = Object.assign({}, blob);
     if (!res) { next.lastResult = 'network'; return next; }

@@ -118,7 +118,7 @@
   .onboard-title { font-family: 'Source Serif 4', serif; font-size: clamp(34px, 5vw, 52px); font-weight: 400; line-height: 1.1; letter-spacing: -0.025em; margin: 0 auto 22px; max-width: 14em; text-wrap: balance; }
   .onboard-title em { font-style: italic; color: var(--rust); font-weight: 500; }
   .onboard-sub { font-family: 'Source Serif 4', serif; font-size: 20px; color: var(--ink-soft); max-width: 30em; margin: 0 auto; line-height: 1.5; }
-  .onboard-fine { font-size: 14px; color: var(--ink-faint); margin-top: 18px; }
+  .onboard-fine { font-size: 13px; color: var(--ink-faint); margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
   .onboard-fine a { color: var(--rust); }
   .onboard-step { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 32px; margin-bottom: 14px; box-shadow: var(--shadow-sm); max-width: 680px; margin-left: auto; margin-right: auto; }
   .step-title { font-family: 'Source Serif 4', serif; font-size: 24px; font-weight: 500; margin-bottom: 6px; letter-spacing: -0.01em; }
@@ -213,7 +213,7 @@
   .unlock-input-row button:hover { border-color: var(--ink); background: var(--bone); }
   .unlock-input-row button:disabled { opacity: 0.55; cursor: default; }
   .unlock-input-row button:hover { background: var(--rust-deep); }
-  /* Free vs Pro comparison (unlock modal) */
+  /* Free and full comparison (unlock modal) */
   .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
   .compare-col { border: 1px solid var(--line); border-radius: 5px; padding: 14px 16px; background: var(--bone); min-width: 0; }
   .compare-col.pro { border-color: var(--rust); background: rgba(184,92,56,0.05); }
@@ -847,7 +847,8 @@
   .step-actions .btn-primary { justify-self: start; }
   @media (max-width: 720px) {
     .onboard-step, .step-actions { grid-template-columns: 1fr; gap: 14px; }
-    .step-actions > * { grid-column: 1; justify-self: stretch; text-align: center; }
+    .step-actions > * { grid-column: 1; justify-self: stretch; text-align: left; }
+    .step-actions .btn-primary { justify-self: stretch; width: 100%; }
     .step-side { margin-bottom: 2px; }
   }
 
@@ -975,7 +976,8 @@
      figure. Order: answer, chart, notes, figure, what it means.
      ============================================================ */
   @media (max-width: 768px) {
-    .verdict { order: 1; padding-bottom: 14px; margin-bottom: 14px; border-bottom: none; }
+    .verdict { order: 1; padding: 18px 0 14px; margin-bottom: 14px; border-bottom: none; }
+    .verdict-body { display: none; }   /* the lead repeats what the chart and notes show */
     .chart-card { order: 2; margin-top: 0; }
     .event-line { order: 3; }
     .chart-sub { order: 4; }
@@ -1012,6 +1014,12 @@
   }
   .helper-trigger { background: none; border: none; color: var(--rust); cursor: pointer; font-size: inherit; font-family: inherit; text-decoration: underline; text-underline-offset: 2px; padding: 0; min-height: 0; line-height: inherit; }
   .helper-trigger:hover { color: var(--ink); }
+
+  /* a cost or money in, chosen rather than typed as a minus sign */
+  .ev-dir { grid-column: 1 / -1; display: flex; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; margin-top: 2px; }
+  .ev-dir button { flex: 1; background: transparent; border: none; padding: 8px 6px; font-family: inherit; font-size: 13px; color: var(--ink-mute); cursor: pointer; min-height: 0; }
+  .ev-dir button + button { border-left: 1px solid var(--line); }
+  .ev-dir button.active { background: var(--ink); color: var(--paper); font-weight: 600; }
 </style>
 <body>
 <div id="app"></div>
@@ -1043,7 +1051,7 @@ let baselineState = null, baselineResult = null, baselineName = 'Starting point'
 let compareOn = false;
 let maxSpendStale = true;
 let spendingLevelsCache = null, spendingLevelsStale = true;
-// Pro users see their details open unless they closed them; free users see the locked preview on request.
+// Paying users see their details open unless they closed them; free users see the locked preview on request.
 let showMoreOptions = (() => { try { return localStorage.getItem('spendenough_more') === 'closed' ? false : (localStorage.getItem('spendenough_more') === 'open'); } catch (e) { return false; } })();
 let moreDefaultApplied = false;
 let isFirstDashboard = true;
@@ -1074,7 +1082,7 @@ const pct = (x, d) => ((+x || 0) * 100).toFixed(d === undefined ? 1 : d) + '%';
 const LS_LICENSE_API = 'https://api.lemonsqueezy.com/v1/licenses';
 const LICENSE_STORE = 'spendenough_license';
 const LEGACY_KEY_STORE = 'spendenough_key';
-let licenseSessionGrace = false; // an old un-checked key could not be verified (offline): Pro for this session only
+let licenseSessionGrace = false; // an old un-checked key could not be verified (offline): unlocked for this session only
 
 // Small non-blocking status line at the bottom of the screen. ms = 0 keeps it until replaced.
 let toastTimer = null;
@@ -1124,7 +1132,7 @@ function licenseInstanceName() {
 
 // Activate a key in this browser. opts.onError(message) receives the user-facing text;
 // opts.onSuccess(res) runs after the modal is closed and the app re-rendered.
-// Resolves true when Pro was unlocked.
+// Resolves true when the full version was unlocked.
 async function activateLicense(key, opts) {
   opts = opts || {};
   const onError = opts.onError || (() => {});
@@ -1146,7 +1154,7 @@ async function activateLicense(key, opts) {
 }
 
 // About once a day, confirm the key is still good (refunds, disabled keys, a freed slot).
-// Runs after render, never blocks, and only an explicit "not valid" answer locks Pro.
+// Runs after render, never blocks, and only an explicit "not valid" answer locks it.
 async function revalidateLicense() {
   const L = readLicense();
   if (!licenseDecision(L, Date.now()).needsCheck) return;
@@ -1165,7 +1173,7 @@ async function revalidateLicense() {
 window.deactivateLicense = async function() {
   const L = readLicense();
   if (!L) return;
-  if (!confirm('Deactivate Pro in this browser? The key will then work in another browser, and you can paste it here again any time.')) return;
+  if (!confirm('Switch the full version off in this browser? The key will then work in another browser, and you can paste it here again any time.')) return;
   try { await lsLicenseCall('deactivate', { license_key: L.key, instance_id: L.instanceId }); }
   catch (e) { /* offline: the slot can also be freed from the order page */ }
   clearLicense();
@@ -1229,41 +1237,37 @@ window.showUnlockModal = function(opts) {
   opts = opts || {};
   if (!opts.silent) track('hit_paywall');
   const buy = CONFIG.checkoutUrl
-    ? `<a class="btn-primary" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" onclick="track('clicked_checkout')" style="width:100%;justify-content:center;text-decoration:none">Get Pro &middot; ${CONFIG.price}, one payment</a>`
-    : `<button class="btn-primary" disabled style="width:100%;justify-content:center;opacity:0.6;cursor:default">Get Pro &middot; ${CONFIG.price}, one payment &middot; checkout opens soon</button>`;
+    ? `<a class="btn-primary" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" onclick="track('clicked_checkout')" style="width:100%;justify-content:center;text-decoration:none">Get the full version &middot; ${CONFIG.price}</a>`
+    : `<button class="btn-primary" disabled style="width:100%;justify-content:center;opacity:0.6;cursor:default">Get the full version &middot; ${CONFIG.price} &middot; checkout opens soon</button>`;
   const keyAttr = opts.key && KEY_RE.test(opts.key) ? ` value="${opts.key}"` : '';
   const dis = opts.busy ? ' disabled' : '';
   const reveal = !!(opts.key || opts.hint || opts.message || opts.busy);
-  openModal(`<h2>Free vs. Pro</h2>
-    <p style="margin-bottom:16px">You're on the free version. Pro is a one-time purchase that adds scenario comparison and the deeper analysis.</p>
+  openModal(`<h2>Free and full</h2>
+    <p style="margin-bottom:16px">You're on the free version. The full version is a one-time purchase that adds scenario comparison and the deeper analysis.</p>
     <div class="compare-grid">
       <div class="compare-col">
         <div class="compare-head">Free</div>
         <div class="compare-sub">What you have now</div>
         <ul class="compare-list">
           <li>Historical mode: your plan run through every stretch of the market since 1926, with the full range on the chart</li>
-          <li>Core inputs: savings, spending, income, retirement age, and how long to plan for</li>
-          <li>What-if presets</li>
-          <li>Spending explorer</li>
-          <li>Every assumption on screen and editable (asset mix, fees, taxes, guardrails)</li>
+          <li>Your numbers: savings, spending, incomes, retirement ages, the mortgage, and how long to plan for</li>
+          <li>All seven what-if scenarios, from taking time off to a bad decade</li>
+          <li>The spending explorer</li>
+          <li>The assumptions behind the result, open to change: stock and bond mix, fees, tax rates, and the guardrails</li>
         </ul>
       </div>
       <div class="compare-col pro">
-        <div class="compare-head">Pro</div>
+        <div class="compare-head">Full version</div>
         <div class="compare-sub">One-time purchase</div>
         <div class="compare-plus">Everything in Free, plus:</div>
         <ul class="compare-list">
-          <li>Side-by-side scenario comparison, both futures on one chart</li>
+          <li>Simulated mode, which runs randomized futures, and Fixed mode, which uses one steady return</li>
+          <li>Side by side: two decisions on one chart</li>
           <li>What would it take: the spending, retirement age, or savings that gets a plan over the line</li>
-          <li>A printable one-page report to take to a partner or a planner</li>
-          <li>Year-by-year table, downloadable as a spreadsheet</li>
-          <li>Percentile bands and five named historical stress tests</li>
-          <li>Spending-flexibility comparison</li>
-          <li>Social Security claiming comparison</li>
-          <li>Cashflow chart</li>
-          <li>Simulated (Monte Carlo) mode</li>
-          <li>Planning options (late-life spending, housing payoff, income growth)</li>
-          <li>Account types, withdrawal order, life events</li>
+          <li>Best and worst outcomes, and five named historical stress tests</li>
+          <li>Spending flexibility, Social Security timing, and a cashflow chart</li>
+          <li>A printable one-page report, and the year-by-year table as a spreadsheet</li>
+          <li>More about you: spending later in life, income growth, the mortgage in detail, filing status and your state, account types and the order you draw from them, and one-time life events</li>
           <li>Save up to 8 scenarios, with notes</li>
         </ul>
       </div>
@@ -1564,14 +1568,13 @@ function renderOnboarding() {
   setTimeout(() => { if (typeof stepProgress === 'function') stepProgress(); }, 0);
   app.innerHTML = `
     <header>
-      <a class="logo" href="index.html" style="text-decoration:none;color:inherit"><span class="logo-dot"></span>Spend Enough</a>
+      <a class="logo" href="/" style="text-decoration:none;color:inherit"><span class="logo-dot"></span>Spend Enough</a>
       <nav class="top-nav"><a href="why.html">Why I built it</a><a href="index.html#price">Pricing</a></nav>
     </header>
     <div class="onboarding">
       <div class="onboard-hero">
         <h1 class="onboard-title">Are you spending enough for the life you want?</h1>
         <p class="onboard-sub">Rough figures are fine. The next screen shows what you could spend each year, and you can change any of the numbers from there.</p>
-        <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a></p>
       </div>
 
       <div class="onboard-step">
@@ -1616,6 +1619,7 @@ function renderOnboarding() {
         <button class="btn-primary" onclick="finishOnboarding()">See the picture <span>\u2192</span></button>
         <p class="blank-note">Blanks are fine. Social Security gets estimated from your income, blank spending makes the tool solve for what you could spend, and anything else blank counts as none. You can change all of it later.</p>
         <p style="margin-top:12px;font-size:14px"><a onclick="loadSample()" style="color:var(--rust);cursor:pointer;font-family:'Source Serif 4',serif;font-style:italic">or see a sample \u2192</a></p>
+        <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a></p>
       </div>
       <div class="validation-msg" id="ob_validation"></div>
     </div>
@@ -1741,14 +1745,14 @@ window.resetToDefaults = function() {
 // DASHBOARD
 // ============================================================================
 function renderDashboard() {
-  // Pro users find their settings already open, except on a phone, where seven more
+  // Paying users find their settings already open, except on a phone, where seven more
   // sections would bury the scenarios and the save box below them.
   if (!moreDefaultApplied && isPaid()) {
     moreDefaultApplied = true;
     const roomy = !window.matchMedia('(max-width: 768px)').matches;
     try { if (localStorage.getItem('spendenough_more') === null) showMoreOptions = roomy; } catch (e) { showMoreOptions = roomy; }
   }
-  // Free users see Historical only; Fixed and Simulated are Pro.
+  // Free users see Historical only; Fixed and Simulated need the full version.
   if (!isPaid() && state.simMode !== 'historical') { state.simMode = 'historical'; }
   const result = runForState(state);
   lastSimResult = result;
@@ -1830,7 +1834,7 @@ function renderDashboard() {
         ${!showMoreOptions ? `<div class="more-hint">${state.taxRate ? Math.round(state.taxRate*100) : 18}% tax &middot; ${(state.returnRate*100).toFixed(1)}% return</div>` : ''}
         ${showMoreOptions ? (isPaid()
           ? moreOptionsHTML()
-          : `<div class="locked-note">These settings are part of the paid plan. <button class="link-btn" onclick="showUnlockModal()">Get Pro to adjust \u2192</button></div>
+          : `<div class="locked-note">These settings are part of the full version. <button class="link-btn" onclick="showUnlockModal()">Get it to adjust \u2192</button></div>
         <fieldset class="locked-preview" disabled>${moreOptionsHTML()}</fieldset>`) : ''}
       </div>
 
@@ -1905,15 +1909,15 @@ function renderDashboard() {
   app.innerHTML = `
     <header role="banner">
       <a href="#main-content" style="position:absolute;left:-9999px;top:auto;padding:8px 16px;background:var(--ink);color:var(--paper);z-index:200;font-size:14px" onfocus="this.style.left='0';this.style.top='0'" onblur="this.style.left='-9999px'">Skip to content</a>
-      <a class="logo" href="index.html" style="text-decoration:none;color:inherit"><span class="logo-dot"></span>Spend Enough</a>
+      <a class="logo" href="/" style="text-decoration:none;color:inherit"><span class="logo-dot"></span>Spend Enough</a>
       <div class="scenarios-bar">
         <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
         <button class="scenario-pill" onclick="printReport()">Print report${!isPaid() ? ' <span class="lock-icon">&#x1f512;</span>' : ''}</button>
-        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get Pro &middot; ${CONFIG.price}</button>` : ''}
+        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get the full version &middot; ${CONFIG.price}</button>` : ''}
       </div>
       <div class="head-compact">
-        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get Pro</button>` : ''}
+        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Full version</button>` : ''}
         <details class="head-menu">
           <summary aria-label="Menu">\u22ef</summary>
           <div class="head-menu-items">
@@ -2058,7 +2062,7 @@ function moreOptionsHTML() {
       })() : ''}
 
       <h3 class="sub-heading">Life events</h3>
-      <div class="ev-hint">One-time money in or out at a given age. Use a minus sign for a cost.</div>
+      <div class="ev-hint">One-time money in or out at a given age.</div>
       ${(state.oneTimeEvents || []).length ? `<div class="ev-list">${(state.oneTimeEvents || []).map((ev, i) => `<div class="ev-row">
         <span class="ev-name">${ev.label || 'Event'}</span>
         <span class="ev-age">at ${ev.age}</span>
@@ -2068,7 +2072,11 @@ function moreOptionsHTML() {
       <div class="ev-form">
         <label>What<input type="text" id="ev_label" placeholder="Inheritance" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('ev_age').focus();}"/></label>
         <label>Age<input type="number" id="ev_age" placeholder="70" min="18" max="110" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('ev_amount').focus();}"/></label>
-        <label>Amount<input type="text" id="ev_amount" class="money" inputmode="numeric" placeholder="$150,000" oninput="moneyType(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();addEvent();}"/></label>
+        <label>Amount<input type="text" id="ev_amount" class="money" inputmode="numeric" placeholder="$50,000" oninput="moneyType(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();addEvent();}"/></label>
+        <div class="ev-dir" role="group" aria-label="Is this money out or money in?">
+          <button type="button" id="ev_out" class="active" onclick="setEventDir('out')">A cost</button>
+          <button type="button" id="ev_in" onclick="setEventDir('in')">Money in</button>
+        </div>
         <button class="compare-btn" onclick="addEvent()">Add</button>
       </div>
       <div class="ev-msg" id="ev_msg" role="status" aria-live="polite"></div>
@@ -2231,7 +2239,7 @@ function renderAssumptions(result) {
   rows.push(asmRow('Fees', `${asmInput('feeRate', ((state.feeRate || 0) * 100).toFixed(2), { min: 0, max: 3, step: 0.05, label: 'Annual fee percent' })} a year is subtracted from every year’s return. That covers fund expense ratios and any advisor fee. The default, 0.10%, is a typical low-cost index fund. Index funds run about 0.03 to 0.2%, and with an advisor the total is often near 1%.`));
   rows.push(asmRow('Inflation', `Everything is in today’s dollars. Spending and Social Security are held constant in real terms, and the return data is already inflation-adjusted. The mortgage payment is the exception, since it is fixed in nominal dollars: each year it is deflated by that year’s inflation in Historical mode, and by the long-run average in the other modes. Wages grow <strong>${pct(state.yourIncomeGrowth)}</strong> a year above inflation${isPaid() ? ' (change it under More options)' : ''}. A fixed mortgage payment is treated as if it rose with inflation, which slightly overstates housing cost in later years.`));
   const gr = state.guardrailsEnabled;
-  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending + state.housing)}</strong> a year${state.housing > 0 ? ', of which ' + fmtMoney(state.housing) + ' is the mortgage payment until it ends at ' + state.mortgagePayoffAge : ''}. From age ${state.slowDownAge}, <strong>${fmtMoney(state.lateSpending)}</strong> a year besides any housing${state.extraSpend > 0 && has(state.extraSpendStart) ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is a Pro setting)'}. Guardrails are <select class="asm-select" style="width:${gr ? '2.3ch' : '2.7ch'}" onchange="update('guardrailsEnabled', this.value === 'on')" aria-label="Guardrails on or off"><option value="on" ${gr ? 'selected' : ''}>on</option><option value="off" ${gr ? '' : 'selected'}>off</option></select>. ${gr
+  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending + state.housing)}</strong> a year${state.housing > 0 ? ', of which ' + fmtMoney(state.housing) + ' is the mortgage payment until it ends at ' + state.mortgagePayoffAge : ''}. From age ${state.slowDownAge}, <strong>${fmtMoney(state.lateSpending)}</strong> a year besides any housing${state.extraSpend > 0 && has(state.extraSpendStart) ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is part of the full version)'}. Guardrails are <select class="asm-select" style="width:${gr ? '2.3ch' : '2.7ch'}" onchange="update('guardrailsEnabled', this.value === 'on')" aria-label="Guardrails on or off"><option value="on" ${gr ? 'selected' : ''}>on</option><option value="off" ${gr ? '' : 'selected'}>off</option></select>. ${gr
     ? `Starting from the withdrawal rate in your first retired year, spending is cut <strong>${pct(state.guardrailCutPct, 0)}</strong> in any year the rate runs more than ${pct(state.guardrailBandPct, 0)} above it, and boosted <strong>${pct(state.guardrailBoostPct, 0)}</strong> when more than ${pct(state.guardrailBandPct, 0)} below. Cuts do not compound. The median path shown cut spending in <strong>${result.medianRunFlexCuts || 0}</strong> year${(result.medianRunFlexCuts || 0) === 1 ? '' : 's'}.${isPaid() ? ' Cut and boost sizes are under Spending flexibility below.' : ''}`
     : 'The same amount is withdrawn every year no matter what markets do.'}`));
   if (state.housing > 0 || has(state.homeSaleAge)) {
@@ -2573,13 +2581,13 @@ function renderTaxComparison() {
 let faqOpen = false;
 function renderResources() {
   return `
-    ${isPaid() && readLicense() ? `<p class="pro-status">Pro is active in this browser. <button class="link-btn" onclick="deactivateLicense()">Deactivate this browser</button> to use your key somewhere else.</p>` : ''}
+    ${isPaid() && readLicense() ? `<p class="pro-status">The full version is active in this browser. <button class="link-btn" onclick="deactivateLicense()">Deactivate this browser</button> to use your key somewhere else.</p>` : ''}
     <nav class="foot-nav" aria-label="About and legal">
       <button class="faq-toggle" onclick="toggleFaq()" aria-expanded="${faqOpen ? 'true' : 'false'}">Questions ${faqOpen ? '&#8722;' : '+'}</button>
       <a href="why.html">Why I built it</a>
       <a href="privacy.html">Privacy</a>
       <a href="terms.html">Terms</a>
-      <a href="index.html">Home</a>
+      <a href="/">Home</a>
     </nav>
     ${faqOpen ? `<div class="faq-inner"><div class="faq">
 
@@ -2676,7 +2684,7 @@ function renderResources() {
           <li>If it falls more than ${pct(state.guardrailBandPct, 0)} below, your portfolio is running ahead and that year's spending is boosted by ${pct(state.guardrailBoostPct, 0)}.</li>
         </ul>
         <p>Cuts apply to one year at a time and do not compound. A plan with guardrails on will tighten in bad market stretches and loosen in good ones, which raises the survival count versus rigid spending. The verdict tells you how many years the median path cut spending, so you can judge whether you would live that way. There is one known quirk. If Social Security starts years after you retire, the baseline is set in a bridge year with a high withdrawal rate, which makes boosts more likely once benefits begin.</p>
-        <p>Toggle guardrails on or off under Assumptions. The cut and boost percentages are in the Spending flexibility section (Pro).</p>
+        <p>Toggle guardrails on or off under Assumptions. The cut and boost percentages are in the Spending flexibility section, part of the full version.</p>
       </div>
     </details>
 
@@ -3024,9 +3032,10 @@ window.addEvent = function() {
   const ageEl = document.getElementById('ev_age');
   const amountEl = document.getElementById('ev_amount');
   const age = parseInt(ageEl.value);
-  const amount = moneyParse(amountEl.value);
+  const magnitude = Math.abs(moneyParse(amountEl.value));
+  const amount = eventDir === 'out' ? -magnitude : magnitude;
   const ageInvalid = !age;
-  const amountInvalid = isNaN(amount);
+  const amountInvalid = isNaN(magnitude) || magnitude === 0;
   ageEl.style.borderColor = ageInvalid ? 'var(--danger)' : '';
   amountEl.style.borderColor = amountInvalid ? 'var(--danger)' : '';
   const msg = document.getElementById('ev_msg');
@@ -3036,6 +3045,17 @@ window.addEvent = function() {
   if (!state.oneTimeEvents) state.oneTimeEvents = [];
   state.oneTimeEvents.push({ label, age, amount });
   invalidateCaches(); render();
+  const first = document.getElementById('ev_label');
+  if (first) first.focus();
+};
+let eventDir = 'out';   // most one-time events people add are costs
+window.setEventDir = function(dir) {
+  eventDir = dir;
+  const out = document.getElementById('ev_out'), inn = document.getElementById('ev_in');
+  if (out) out.classList.toggle('active', dir === 'out');
+  if (inn) inn.classList.toggle('active', dir === 'in');
+  const amt = document.getElementById('ev_amount');
+  if (amt) amt.focus();
 };
 window.removeEvent = function(i) {
   state.oneTimeEvents.splice(i, 1);

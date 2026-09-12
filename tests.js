@@ -608,8 +608,8 @@ test('paywall: the instance label names the browser and platform for the order p
   assert.strictEqual(P.instanceLabel(ios, 'iPhone', '000000'), 'Spend Enough web · Safari on iOS · 000000');
   assert.strictEqual(P.instanceLabel('', '', 'ff'), 'Spend Enough web · browser · ff');
 });
-test('paywall: the "Pro is on" toast reports the slot count from the activate reply', () => {
-  assert.strictEqual(P.proOnMessage({ activated: true, instance: { id: 'i' }, license_key: { activation_limit: 3, activation_usage: 1 } }), 'Pro is on. This browser is 1 of 3 for your key.');
+test('paywall: the unlocked toast reports the slot count from the activate reply', () => {
+  assert.strictEqual(P.proOnMessage({ activated: true, instance: { id: 'i' }, license_key: { activation_limit: 3, activation_usage: 1 } }), 'The full version is on. This browser is 1 of 3 for your key.');
   assert.deepStrictEqual(P.activationSlots({ license_key: { activation_limit: 5, activation_usage: 4 } }), { used: 4, limit: 5 });
   assert.deepStrictEqual(P.activationSlots({}), { used: 1, limit: P.ACTIVATION_LIMIT }, 'missing fields fall back sensibly');
   assert.deepStrictEqual(P.activationSlots({ license_key: { activation_limit: 3, activation_usage: 7 } }), { used: 3, limit: 3 }, 'never above the limit');

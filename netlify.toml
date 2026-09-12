@@ -6,3 +6,10 @@
 
 # Security and caching headers live in _headers (same folder) so they are easy
 # to read and diff without TOML quoting.
+
+# One URL per page: /index.html sends people to the bare domain.
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
