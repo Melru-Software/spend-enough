@@ -208,7 +208,7 @@
     </div>
 
     <div class="live" aria-label="A live example from the tool">
-      <div class="figure"><div class="big"><span id="ok">51</span> <em>of</em> <span id="tot">52</span></div><div class="cap">starting years since 1926 in which this plan lasts to age 100</div></div>
+      <div class="figure"><div class="big"><span id="ok">51</span> <em>of</em> <span id="tot">52</span></div><div class="cap">stretches of the market since 1926, one per starting year, that this plan lasts through to age 100</div></div>
       <p class="verdict" id="verdict"></p>
       <div class="chartbox">
         <canvas id="c"></canvas>
@@ -242,7 +242,7 @@
       <div class="three">
         <div><h3>How much you can spend.</h3><p>Most calculators ask what you'll spend and check whether it lasts. This one starts from what you have and finds the most you could spend each year and still make it to the end.</p></div>
         <div><h3>Both versions of a decision.</h3><p>Take the two years off, or don't. Pay off the house, or invest the money. The chart shows both paths at the same time, and the gap between them is what the decision costs.</p></div>
-        <div><h3>A range of outcomes.</h3><p>Your plan runs through every stretch of the market since 1926, and through 500 simulated futures if you want them. A plan that lasts in 51 of 52 starting years is a different thing from one that lasts in 30, and you can see which one you have.</p></div>
+        <div><h3>A range of outcomes.</h3><p>Your plan runs through every stretch of the market since 1926, and through 500 simulated futures if you want them. A plan that lasts through 51 of 52 stretches is a different thing from one that lasts through 30, and you can see which one you have.</p></div>
       </div>
     </div>
   </section>
@@ -301,7 +301,7 @@
             <li>Five stress tests that start your plan in a known bad stretch, 1929 and 1966 among them.</li>
             <li>Filing status, your state, and traditional, Roth, and taxable accounts with the order you draw from them.</li>
             <li>Add one-time financial events like an inheritance or a large purchase.</li>
-            <li>The age your plan runs to, a change in spending later in life, mortgage payoff, income growth, and Social Security timing.</li>
+            <li>A change in spending later in life, mortgage payoff, income growth, and Social Security timing.</li>
             <li>A printable one-page report, and the year-by-year table as a spreadsheet.</li>
           </ul>
           <a class="btn btn-ink" id="pro-buy" href="app.html" target="_blank" rel="noopener" onclick="track('clicked_checkout')" hidden>Get Pro</a>
@@ -375,10 +375,10 @@
     var last = p[p.length - 1];
     var v = document.getElementById('verdict');
     var leftover = last.p50 > 0 ? ' In the middle outcome, <b>' + money(last.p50) + '</b> is still there at 100.' : '';
-    if (r.failureCount === 0) v.innerHTML = 'It lasts no matter which year it starts in.' + leftover;
+    if (r.failureCount === 0) v.innerHTML = 'It lasts through every stretch, whichever year it starts in.' + leftover;
     else if (r.failureCount === 1) v.innerHTML = 'Started in ' + r.failures[0].label.slice(0, 4) + ', it runs out at ' + r.failures[0].ranOutAge + '.' + leftover;
     else if (r.successCount === 0) v.innerHTML = 'It runs out whichever year it starts in, half the time by age <b>' + r.medianRunOutAge + '</b>.';
-    else v.innerHTML = 'Started in ' + r.failureCount + ' of the years, it runs out before 100, half of those by age <b>' + r.medianRunOutAge + '</b>.' + leftover;
+    else v.innerHTML = 'In ' + r.failureCount + ' of the ' + r.totalPeriods + ' stretches it runs out before 100, half of those by age <b>' + r.medianRunOutAge + '</b>.' + leftover;
 
     var data = {
       labels: labels,
