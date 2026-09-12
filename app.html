@@ -51,7 +51,7 @@
   /* Data tables - horizontal scroll on mobile */
   .data-table { width: 100%; border-collapse: collapse; }
   /* Tables sit inside containers with different padding (main, deep-body, modal), so no bleed trick. */
-  .data-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+  .data-table-wrapper { overflow-x: auto; max-width: 100%; touch-action: pan-y; overscroll-behavior-x: contain; }
   @media print { .data-table-wrapper { overflow: visible; } }
   
   /* Improve touch targets */
@@ -720,7 +720,7 @@
   .faq-item summary { font-family: 'Source Serif 4', serif; font-weight: 500; font-size: 17px; color: var(--ink); }
   .faq-body { font-size: 15px; color: var(--ink-soft); }
   .pro-status { margin-bottom: 14px; }
-  .disclaimer-bar { font-size: 13.5px; color: var(--ink-mute); max-width: 72ch; }
+  .disclaimer-bar { font-size: 13.5px; color: var(--ink-mute); max-width: none; }
   @media (max-width: 768px) { .resources-row { padding: 20px 20px 36px !important; } }
 
   /* results: smaller pieces */
@@ -890,7 +890,7 @@
 
     /* a compact live result that follows you down the page */
     .mini-verdict {
-      display: flex; position: sticky; top: 0; z-index: 60;
+      display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: 60;
       align-items: baseline; justify-content: space-between; gap: 12px;
       padding: 10px 20px; cursor: pointer;
       background: var(--paper);
@@ -968,6 +968,50 @@
   .mp-hint { font-size: 13px; color: var(--ink-faint); margin-top: 10px; }
   .mp-warn { font-size: 15px; color: var(--danger); line-height: 1.5; }
   .field-hint.is-auto { color: var(--rust); }
+
+  /* ============================================================
+     Phones, between the chart and the table. Three voices only:
+     the answer in serif, two grey notes under the chart, and the
+     figure. Order: answer, chart, notes, figure, what it means.
+     ============================================================ */
+  @media (max-width: 768px) {
+    .verdict { order: 1; padding-bottom: 14px; margin-bottom: 14px; border-bottom: none; }
+    .chart-card { order: 2; margin-top: 0; }
+    .event-line { order: 3; }
+    .chart-sub { order: 4; }
+    .verdict-wedge { order: 5; }
+    .verdict-notes { order: 6; }
+    .wwit { order: 7; }
+    .main > .teaser-row { order: 8; }
+    .explore-h { order: 9; }
+    .explore-sub { order: 10; }
+    .main > .data-table-wrapper { order: 11; }
+    .sidebar { order: 12; }
+    .main > .read-first, .main > .assumptions, .main > .deep,
+    .main > .deep-teaser, .main > .disclaimer-bar { order: 13; }
+    .resources-row { order: 14; }
+
+    /* the two notes under the chart share one voice and sit together */
+    .event-line, .chart-sub {
+      font-family: 'Inter Tight', system-ui, sans-serif;
+      font-size: 13px; line-height: 1.5; color: var(--ink-faint);
+      margin: 0; padding: 0;
+    }
+    .event-line { margin-top: 10px; }
+    .chart-sub { margin-bottom: 20px; padding-top: 6px; }
+
+    /* the figure and what it means read as one thought */
+    .verdict-wedge { margin: 0 0 4px; }
+    .verdict-notes { font-family: 'Source Serif 4', serif; font-size: 16px; color: var(--ink-soft); margin: 0 0 22px; line-height: 1.5; }
+    .verdict-notes p { margin: 0; }
+    .verdict-head { margin-bottom: 8px; }
+    .verdict-body { font-size: 16px; }
+
+    /* the fixed bar sits over the page, so the header needs room beneath it */
+    .mini-verdict:not([hidden]) ~ .dashboard { padding-top: 0; }
+  }
+  .helper-trigger { background: none; border: none; color: var(--rust); cursor: pointer; font-size: inherit; font-family: inherit; text-decoration: underline; text-underline-offset: 2px; padding: 0; min-height: 0; line-height: inherit; }
+  .helper-trigger:hover { color: var(--ink); }
 </style>
 <body>
 <div id="app"></div>
@@ -1555,7 +1599,7 @@ function renderOnboarding() {
           <div class="field"><label>Your gross income</label><input type="text" id="ob_yourIncome" class="money" inputmode="numeric" value="${moneyText(state.yourIncome || '')}" placeholder="e.g. $110,000" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_yourIncome','ob_yourSS')"/><span class="field-hint">Before tax \u00b7 You can adjust tax settings later</span></div>
           <div class="field"><label>Partner's gross income</label><input type="text" id="ob_partnerIncome" class="money" inputmode="numeric" value="${moneyText(state.partnerIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_partnerIncome','ob_partnerSS')"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
           <div class="field"><label>Of that, your mortgage payment</label><input type="text" id="ob_housing" class="money" inputmode="numeric" value="${moneyText(state.housing || '')}" placeholder="e.g. $24,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Principal and interest per year, the part that ends when it is paid off. Taxes and insurance stay in spending.</span></div>
-          <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100" oninput="stepProgress()"/><span class="field-hint">When that payment stops \u00b7 <button type="button" class="helper-trigger" onclick="openPayoffHelper('ob_mortgagePayoff')">work it out</button></span></div>
+          <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100" oninput="stepProgress()"/><span class="field-hint">When that payment stops \u00b7 <button type="button" class="helper-trigger" onclick="openPayoffHelper('ob_mortgagePayoff')">help me calculate</button></span></div>
         </div>
       </div>
 
@@ -1811,8 +1855,8 @@ function renderDashboard() {
       <div class="verdict" aria-live="polite">
         <h1 class="verdict-head">${verdict.headline}</h1>
         <div class="verdict-body">${verdict.lead}</div>
-        ${verdict.wedge ? `<div class="verdict-wedge ${result.failureCount === 0 ? 'good' : ''}">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
       </div>
+      ${verdict.wedge ? `<div class="verdict-wedge ${result.failureCount === 0 ? 'good' : ''}">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
 
       <h2 class="section-heading chart-h">Portfolio projection</h2>
       <div class="section-sub chart-sub">${state.simMode==='historical' ? 'The shaded area is where the portfolio stood across all '+result.totalPeriods+' stretches of the market since 1926. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : state.simMode==='montecarlo' ? 'The shaded area is where the portfolio stood across '+result.mcSims+' simulated futures. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : 'One steady return every year, so a single line and no range.'}${canCompare ? ' The dashed line and the faint band are ' + baselineName + '.' : ''}</div>
@@ -1962,7 +2006,7 @@ function moreOptionsHTML() {
       </div>
 
       <h3 class="sub-heading">Mortgage</h3>
-      <p class="ev-hint">Not sure when it ends? <button type="button" class="helper-trigger" onclick="openPayoffHelper()">Work it out from the balance</button></p>
+      <p class="ev-hint">Not sure when it ends? <button type="button" class="helper-trigger" onclick="openPayoffHelper()">Help me calculate it.</button></p>
       <div class="control">
         <div class="control-row"><span class="control-label">Mortgage payment per year</span><span class="control-value">${fmtMoney(state.housing)}</span></div>
         <input type="range" min="0" max="120000" step="1000" value="${state.housing}" oninput="slideLive(this,'housing',this.value)" onchange="sliderCommit('housing',this.value)"/>
