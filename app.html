@@ -859,6 +859,42 @@
   .blank-note { font-size: 14px; color: var(--ink-faint); margin-top: 14px; max-width: 42ch; line-height: 1.45; }
   @media (prefers-reduced-motion: reduce) { .onboard-step.done .step-num::after { animation: none; opacity: 1; transform: rotate(-45deg) scale(1); } }
   input.money::placeholder { font-weight: 400; color: var(--ink-faint); letter-spacing: 0; }
+
+  /* ============================================================
+     Phones: answer, chart, then the controls. The deep reading
+     moves below them, so changing something is never a long scroll.
+     ============================================================ */
+  .mini-verdict { display: none; }
+  @media (max-width: 768px) {
+    .dashboard { display: flex; flex-direction: column; padding: 0 20px; }
+    .main { display: contents; }              /* its children become the page's blocks */
+    .main > * { order: 1; }                    /* results first */
+    .sidebar { order: 2; background: transparent; border: none; padding: 26px 0 8px; margin: 0; }
+    .main > .read-first, .main > .assumptions, .main > .deep,
+    .main > .deep-teaser, .main > .disclaimer-bar { order: 3; }
+    .resources-row { order: 4; padding: 18px 0 40px !important; }
+    /* the sidebar's own order: adjust what is there, then try a scenario */
+    .sidebar { display: flex; flex-direction: column; }
+    .sidebar-section:nth-child(1) { order: 2; }   /* Try a scenario */
+    .sidebar-section:nth-child(2) { order: 1; }   /* Your plan, first: adjust what is already there */
+    .sidebar-section:nth-child(3) { order: 3; }   /* Mode */
+    .sidebar-section:nth-child(4) { order: 4; }   /* More about you */
+    .sidebar-section:nth-child(5) { order: 5; }   /* Save and compare */
+    .main, .sidebar { padding-left: 0; padding-right: 0; }
+
+    /* a compact live result that follows you down the page */
+    .mini-verdict {
+      display: flex; position: sticky; top: 0; z-index: 60;
+      align-items: baseline; justify-content: space-between; gap: 12px;
+      padding: 10px 20px; cursor: pointer;
+      background: rgba(251,248,241,0.94); backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--line);
+      font-size: 14px; color: var(--ink-mute);
+    }
+    .mini-verdict[hidden] { display: none; }
+    .mini-count { font-family: 'Source Serif 4', serif; font-size: 18px; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .mini-left { font-variant-numeric: tabular-nums; }
+  }
 </style>
 <body>
 <div id="app"></div>
@@ -1599,22 +1635,22 @@ function renderDashboard() {
         <div class="control">
           <div class="control-row"><span class="control-label">Portfolio</span><span class="control-value">${fmtMoney(state.portfolio)}</span></div>
           <input type="range" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)" class="slider-input"/>
-          <input type="number" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)" placeholder="Amount" class="mobile-input"/>
+          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.portfolio)}" oninput="moneyType(this); slideLive(this,'portfolio',moneyValue(this))" onchange="sliderCommit('portfolio',moneyValue(this))" placeholder="Amount"/>
         </div>
         <div class="control">
           <div class="control-row"><span class="control-label">Spending, all in${state.housing > 0 ? '<span class="help-mark" tabindex="0" data-tip="Includes your ' + fmtMoney(state.housing) + ' a year mortgage payment until it is paid off at ' + state.mortgagePayoffAge + '.">i</span>' : ''}</span><span class="control-value">${fmtMoney(state.spending + state.housing)}</span></div>
           <input type="range" min="${10000 + state.housing}" max="${400000 + state.housing}" step="1000" value="${state.spending + state.housing}" oninput="slideLive(this,'totalSpending',this.value)" onchange="sliderCommit('totalSpending',this.value)" class="slider-input"/>
-          <input type="number" min="${10000 + state.housing}" max="${400000 + state.housing}" step="1000" value="${state.spending + state.housing}" oninput="slideLive(this,'totalSpending',this.value)" onchange="sliderCommit('totalSpending',this.value)" placeholder="Annual amount" class="mobile-input"/>
+          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.spending + state.housing)}" oninput="moneyType(this); slideLive(this,'totalSpending',moneyValue(this))" onchange="sliderCommit('totalSpending',moneyValue(this))" placeholder="Annual amount"/>
         </div>
         <div class="control">
           <div class="control-row"><span class="control-label">Your income</span><span class="control-value">${fmtMoney(state.yourIncome)}</span></div>
           <input type="range" min="0" max="500000" step="5000" value="${state.yourIncome}" oninput="slideLive(this,'yourIncome',this.value)" onchange="sliderCommit('yourIncome',this.value)" class="slider-input"/>
-          <input type="number" min="0" max="500000" step="5000" value="${state.yourIncome}" oninput="slideLive(this,'yourIncome',this.value)" onchange="sliderCommit('yourIncome',this.value)" placeholder="Annual income" class="mobile-input"/>
+          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.yourIncome)}" oninput="moneyType(this); slideLive(this,'yourIncome',moneyValue(this))" onchange="sliderCommit('yourIncome',moneyValue(this))" placeholder="Annual income"/>
         </div>
         ${state.hasPartner ? `<div class="control">
           <div class="control-row"><span class="control-label">Partner's income</span><span class="control-value">${fmtMoney(state.partnerIncome)}</span></div>
           <input type="range" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)" class="slider-input"/>
-          <input type="number" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)" placeholder="Annual income" class="mobile-input"/>
+          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.partnerIncome)}" oninput="moneyType(this); slideLive(this,'partnerIncome',moneyValue(this))" onchange="sliderCommit('partnerIncome',moneyValue(this))" placeholder="Annual income"/>
         </div>` : ''}
         ${state.yourIncome > 0 ? `<div class="control">
           <div class="control-row"><span class="control-label">${state.yourPartTimeAmount > 0 && state.yourStopWorkAge === state.yourPartTimeStart ? 'Full-time ends at' : 'Your retirement age'}</span><span class="control-value">${state.yourStopWorkAge}</span></div>
@@ -1718,7 +1754,7 @@ function renderDashboard() {
           ${notFixed && state.accountsEnabled ? renderTaxComparison() : ''}
           ${renderYearTable(result)}
         </div>
-      </details>` : `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()"><span class="sum-stack"><span class="sum-line"><span class="sum-title">More analysis</span><span class="lock-icon">&#x1f512;</span></span><span class="asm-hint">best and worst outcomes, stress tests, cashflow, Social Security timing</span></span></button>`}
+      </details>` : `<button class="more-toggle locked-row teaser-row deep-teaser" onclick="showUnlockModal()"><span class="sum-stack"><span class="sum-line"><span class="sum-title">More analysis</span><span class="lock-icon">&#x1f512;</span></span><span class="asm-hint">best and worst outcomes, stress tests, cashflow, Social Security timing</span></span></button>`}
 
       <div class="disclaimer-bar" style="margin-top:22px">These results are an educational model. They are not advice. The tool does not know your full situation, and it treats taxes, Social Security, and healthcare in simplified ways. What you see is a range of outcomes under the assumptions shown, built from past market returns and randomized simulations. Past performance does not predict future results. Before you make a decision based on these numbers, talk to a qualified financial, tax, or legal professional who can look at the whole picture. <a onclick="showFullDisclaimer()">Full disclaimer</a></div>
     </div>`;
@@ -1734,11 +1770,13 @@ function renderDashboard() {
         ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get Pro &middot; ${CONFIG.price}</button>` : ''}
       </div>
     </header>
+    <div class="mini-verdict" id="miniVerdict" hidden onclick="document.querySelector('.verdict').scrollIntoView({behavior:'smooth',block:'start'})" role="status" aria-live="polite"></div>
     <div class="dashboard">${main}${sidebar}<div class="resources-row">${renderResources()}</div></div>`;
 
   // Scroll to top only on first dashboard load
   if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
 
+  updateMiniVerdict(result);
   drawMainChart(result, canCompare ? baselineResult : null);
   if (isPaid() && deepOpen) drawCashflowChart(result);
 
@@ -1771,6 +1809,25 @@ function renderDashboard() {
     card.setAttribute('tabindex', '0');
     card.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } });
   });
+}
+
+// The compact bar that rides along on a phone: the count and what is left, so a change
+// made anywhere on the page shows its effect without scrolling back to the verdict.
+let miniObserver = null;
+function updateMiniVerdict(result) {
+  const el = document.getElementById('miniVerdict');
+  if (!el) return;
+  const last = result.percentiles[result.percentiles.length - 1];
+  const count = result.mode === 'historical'
+    ? result.successCount + ' of ' + result.totalPeriods
+    : Math.round(result.successRate * 100) + '%';
+  const left = last.p50 > 0 ? fmtMoneyShort(last.p50) + ' left' : 'ran out';
+  el.innerHTML = `<span class="mini-count">${count}</span><span class="mini-left">${left} at ${state.targetAge}</span>`;
+  const verdict = document.querySelector('.verdict');
+  if (miniObserver) miniObserver.disconnect();
+  if (!verdict || !('IntersectionObserver' in window)) return;
+  miniObserver = new IntersectionObserver(([entry]) => { el.hidden = entry.isIntersecting; }, { threshold: 0 });
+  miniObserver.observe(verdict);
 }
 
 function moreOptionsHTML() {
