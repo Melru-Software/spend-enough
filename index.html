@@ -120,6 +120,9 @@
   .three h3 { font-family: var(--serif); font-weight: 500; font-size: 22px; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 10px; }
   .three p { font-family: var(--serif); font-size: 17.5px; color: var(--ink-soft); line-height: 1.5; }
 
+  .photo { margin: 32px 0 0; max-width: 900px; }
+  .photo img { display: block; width: 100%; height: auto; border-radius: 3px; }
+  .photo figcaption { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--mute); margin-top: 10px; }
   .essay { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 48px; margin-top: 8px; }
   .essay .body { font-family: var(--serif); font-size: 20px; line-height: 1.55; max-width: 34em; }
   .essay .body p + p { margin-top: 18px; }
@@ -208,7 +211,7 @@
     </div>
 
     <div class="live" aria-label="A live example from the tool">
-      <div class="figure"><div class="big"><span id="ok">51</span> <em>of</em> <span id="tot">52</span></div><div class="cap">stretches of the market since 1926, one per starting year, that this plan lasts through to age 100</div></div>
+      <div class="figure"><div class="big"><span id="ok">51</span> <em>of</em> <span id="tot">52</span></div><div class="cap">stretches of the market since 1926 that this plan lasts through to age 100</div></div>
       <p class="verdict" id="verdict"></p>
       <div class="chartbox">
         <canvas id="c"></canvas>
@@ -259,6 +262,9 @@
         </div>
         <div class="aside"><p class="by">Hannah, the founder</p></div>
       </div>
+      <figure class="photo">
+        <img src="founder.jpg" width="1159" height="647" loading="lazy" alt="A laptop open on a bed, next to a baby asleep on their front with a pacifier and a stuffed animal." />
+      </figure>
     </div>
   </section>
 

@@ -446,13 +446,14 @@ test('freed mortgage payment can be spent after payoff; a home sale adds proceed
   const base = mk({ age: 50, targetAge: 90, portfolio: 1000000, spending: 30000, lateSpending: 30000, slowDownAge: 200,
                     housing: 24000, mortgagePayoffAge: 60, yourIncome: 0, hasPartner: false, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false });
   const flat = new Array(41).fill(0.03);
+  const noInfl = new Array(41).fill(0);
   const y = (yrs, a) => yrs.find(r => r.age === a);
-  const inv = E.simulateOnce(base, flat);
+  const inv = E.simulateOnce(base, flat, noInfl);
   assert.strictEqual(y(inv, 59).spending, 54000); assert.strictEqual(y(inv, 60).spending, 30000, 'housing drops to zero after payoff');
-  const spent = E.simulateOnce(Object.assign({}, base, { postPayoffSpend: 24000 }), flat);
+  const spent = E.simulateOnce(Object.assign({}, base, { postPayoffSpend: 24000 }), flat, noInfl);
   assert.strictEqual(y(spent, 60).spending, 54000, 'freed payment spent instead');
   assert.ok(y(spent, 89).portfolio < y(inv, 89).portfolio);
-  const sale = E.simulateOnce(Object.assign({}, base, { homeSaleAge: 70, homeSaleProceeds: 400000, postSaleHousing: 18000 }), flat);
+  const sale = E.simulateOnce(Object.assign({}, base, { homeSaleAge: 70, homeSaleProceeds: 400000, postSaleHousing: 18000 }), flat, noInfl);
   assert.strictEqual(y(sale, 69).spending, 30000); assert.strictEqual(y(sale, 70).spending, 48000, 'rent from the sale year');
   assert.ok(y(sale, 70).portfolio - y(inv, 70).portfolio > 300000, 'proceeds arrive in the sale year');
   assert.ok(Math.abs((y(sale, 70).portfolio) - (y(sale, 70).portfolioStart - y(sale, 70).withdrawal) * 1.03) < 1, 'sale-year balance grows normally');
@@ -498,6 +499,26 @@ test('a market shock splices the era sequence in at the shock age and lowers suc
   assert.ok(later.successRate >= hit.successRate, 'the same decade fifteen years in hurts less');
   assert.strictEqual(E.runForState(Object.assign({}, s, { shockEra: 'dotcom', shockAge: 200 })).successRate, base.successRate, 'a shock outside the horizon changes nothing');
   assert.strictEqual(E.runForState(Object.assign({}, s, { shockEra: 'nope', shockAge: 65 })).successRate, base.successRate, 'unknown era is ignored');
+});
+
+// ---- 14b. The mortgage payment is nominal ---------------------------------------
+test('a fixed mortgage payment shrinks in today\'s dollars with that year\'s inflation', () => {
+  const base = mk({ age: 50, targetAge: 90, portfolio: 1000000, spending: 30000, lateSpending: 30000, slowDownAge: 200,
+                    housing: 24000, mortgagePayoffAge: 60, yourIncome: 0, hasPartner: false, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false });
+  const flat = new Array(41).fill(0.03);
+  const y = (yrs, a) => yrs.find(r => r.age === a);
+  const steady = E.simulateOnce(base, flat, new Array(41).fill(0.03));
+  assert.strictEqual(Math.round(y(steady, 50).housing), 24000, 'first year is the full payment');
+  assert.ok(Math.abs(y(steady, 55).housing - 24000 / Math.pow(1.03, 5)) < 1, 'five years of 3% inflation');
+  assert.strictEqual(y(steady, 60).housing, 0, 'nothing after payoff');
+  const none = E.simulateOnce(base, flat, new Array(41).fill(0));
+  assert.strictEqual(y(none, 59).housing, 24000, 'zero inflation leaves it unchanged');
+  const defaulted = E.simulateOnce(base, flat);
+  assert.ok(Math.abs(y(defaulted, 51).housing - 24000 / (1 + E.LONG_RUN_INFLATION)) < 1, 'no series means the long-run average');
+  assert.strictEqual(E.INFLATION.length, E.STOCK_RETURNS.length, 'one inflation value per return year');
+  const seq = E.getInflationSequence(1979, 3);
+  assert.ok(seq[0] > 0.10 && seq[1] > 0.08, '1979 and 1980 were double-digit inflation years');
+  assert.ok(y(defaulted, 89).portfolio > y(none, 89).portfolio, 'a shrinking real payment leaves more in the portfolio');
 });
 
 // ---- 15. Paywall decisions (paywall.js) -------------------------------------

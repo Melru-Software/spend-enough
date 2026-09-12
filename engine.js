@@ -68,6 +68,20 @@ const BOND_RETURNS = [
   -0.001,0.0782,0.1342,-0.0898,0.0462,0.1173,0.0085,-0.07,0.11,-0.0118,
   -0.0305,-0.0081,0,0.0787,0.0608,-0.1118,-0.1701,-0.0339,-0.0297,0.0653
 ];
+// Annual inflation (CPI, January to January), same years as the return series. Used only to
+// deflate a fixed mortgage payment into today's dollars; everything else is already real.
+const INFLATION = [
+-0.0223,-0.0114,-0.0116,0,-0.0702,-0.1006,-0.0979,0.0233,0.0303,0.0147,
+  0.0217,0.0071,-0.0141,-0.0071,0.0144,0.1135,0.0764,0.0296,0.023,0.0225,
+  0.1813,0.1023,0.0127,-0.0208,0.0809,0.0433,0.0038,0.0113,-0.0074,0.0037,
+  0.0299,0.0362,0.014,0.0103,0.0171,0.0067,0.0133,0.0164,0.0097,0.0192,
+  0.0346,0.0365,0.044,0.0618,0.0529,0.0327,0.0365,0.0939,0.118,0.0672,
+  0.0522,0.0684,0.0928,0.1391,0.1183,0.0839,0.0371,0.0419,0.0353,0.0389,
+  0.0146,0.0405,0.0467,0.052,0.0565,0.026,0.0326,0.0252,0.028,0.0273,
+  0.0304,0.0157,0.0167,0.0274,0.0373,0.0114,0.026,0.0193,0.0297,0.0399,
+  0.0208,0.0428,0.0003,0.0263,0.0163,0.0293,0.0159,0.0158,-0.0009,0.0137,
+  0.025,0.0207,0.0155,0.0249,0.014,0.0748,0.0641,0.0309,0.03,0.0247
+];
 const HISTORICAL_RETURNS = STOCK_RETURNS; // back-compat alias (100% stocks)
 const HISTORICAL_END_YEAR = HISTORICAL_START_YEAR + STOCK_RETURNS.length - 1;
 const HISTORICAL_PARTIAL_YEARS = [2025];
@@ -94,6 +108,14 @@ function getHistoricalSequence(startYear, numYears, stockPct) {
   if (startIdx < 0 || startIdx + numYears > series.length) return null;
   return series.slice(startIdx, startIdx + numYears);
 }
+
+function getInflationSequence(startYear, numYears) {
+  const startIdx = startYear - HISTORICAL_START_YEAR;
+  if (startIdx < 0 || startIdx + numYears > INFLATION.length) return null;
+  return INFLATION.slice(startIdx, startIdx + numYears);
+}
+// Long-run compound inflation, for modes that have no calendar (Simulated, Fixed).
+const LONG_RUN_INFLATION = Math.exp(INFLATION.reduce((a, b) => a + Math.log(1 + b), 0) / INFLATION.length) - 1;
 
 // Arithmetic mean, sample standard deviation, geometric (compound) mean of a return series.
 function seriesStats(arr) {
@@ -205,8 +227,10 @@ function inWindow(age, start, end) {
 // crashes. Clamping to 1 yields a harmless single-year projection instead.
 function horizonYears(state) { return Math.max(1, state.targetAge - state.age + 1); }
 
-function simulateOnce(state, returnSeries) {
+// inflationSeries: one CPI change per year for this run, or null to use the long-run average.
+function simulateOnce(state, returnSeries, inflationSeries) {
   const years = [];
+  let deflator = 1; // today's dollars per nominal dollar, compounding each year
   let portfolio = state.portfolio;
   let yourSalary = state.yourIncome;
   let partnerSalary = state.partnerIncome;
@@ -255,7 +279,8 @@ function simulateOnce(state, returnSeries) {
     // Housing: the payment until the mortgage is paid off, then nothing; after a home
     // sale, whatever housing costs from then on (rent, or zero).
     const sold = state.homeSaleAge !== null && state.homeSaleAge !== undefined && age >= state.homeSaleAge;
-    const housing = sold ? (state.postSaleHousing || 0) : (age < mortgagePayoffAge ? state.housing : 0);
+    // A fixed mortgage payment is nominal, so in today's dollars it shrinks with inflation.
+    const housing = sold ? (state.postSaleHousing || 0) : (age < mortgagePayoffAge ? state.housing / deflator : 0);
 
     let spend = age >= state.slowDownAge ? state.lateSpending : state.spending;
     // Freed mortgage payment redirected to spending after payoff (owner's choice in the payoff dialog).
@@ -370,6 +395,7 @@ function simulateOnce(state, returnSeries) {
     // Real wage growth applies only in years actually worked (no raises during a break).
     if (!yourBreak) yourSalary *= (1 + (state.yourIncomeGrowth || 0));
     if (!partnerBreak) partnerSalary *= (1 + (state.partnerIncomeGrowth || 0));
+    deflator *= 1 + (inflationSeries ? inflationSeries[i] : LONG_RUN_INFLATION);
   }
   years.flexCutCount = flexCutCount;
   years.flexBoostCount = flexBoostCount;
@@ -469,26 +495,15 @@ function runHistorical(state) {
   const geo = seriesStats(series).geo;
   const maxStart = HISTORICAL_END_YEAR - yearCount + 1;
   const allRuns = []; const labels = [];
-  let paddedYears = 0;
+  const paddedYears = 0; // horizons never exceed the data (max age 110, min age 18), so no window is padded
   for (let sy = HISTORICAL_START_YEAR; sy <= maxStart; sy++) {
     const seq = getHistoricalSequence(sy, yearCount, state.stockPct);
     if (!seq) continue;
-    allRuns.push(simulateOnce(state, applyShock(seq, state)));
+    allRuns.push(simulateOnce(state, applyShock(seq, state), getInflationSequence(sy, yearCount)));
     labels.push(sy + '–' + (sy + yearCount - 1));
   }
-  // If the horizon is longer than the data, fall back to windows padded with the
-  // blend's long-run compound (geometric) return. Labelled with * so the UI can say so.
-  if (allRuns.length === 0) {
-    for (let sy = HISTORICAL_START_YEAR; sy <= HISTORICAL_END_YEAR - 10; sy++) {
-      const avail = getHistoricalSequence(sy, HISTORICAL_END_YEAR - sy + 1, state.stockPct);
-      const seq = [...avail]; while (seq.length < yearCount) seq.push(geo);
-      paddedYears = Math.max(paddedYears, yearCount - avail.length);
-      allRuns.push(simulateOnce(state, applyShock(seq, state)));
-      labels.push(sy + '–' + (sy + yearCount - 1) + '*');
-    }
-  }
   const firstStart = HISTORICAL_START_YEAR;
-  const lastStart = paddedYears ? HISTORICAL_END_YEAR - 10 : maxStart;
+  const lastStart = maxStart;
   return summarize(allRuns, yearCount, 'historical', labels, { windows: { count: allRuns.length, firstStart, lastStart, years: yearCount, paddedYears } });
 }
 
@@ -522,7 +537,7 @@ function runNamedScenario(state, scenario) {
     seq = [...avail]; while (seq.length < yearCount) seq.push(geo);
     padded = true; paddedYears = yearCount - avail.length;
   }
-  return { years: simulateOnce(state, seq), scenario, padded, paddedYears };
+  return { years: simulateOnce(state, seq, padded ? null : getInflationSequence(scenario.startYear, yearCount)), scenario, padded, paddedYears };
 }
 
 // Max spend at a STEADY return (Fixed mode): highest spend landing at the end-goal
@@ -777,5 +792,5 @@ const SAMPLE_STATE = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), {
   accountsEnabled: true, accounts: { traditional: 150000, roth: 60000, taxable: 90000 },
 });
 
-  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, SHOCK_YEARS, applyShock, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, findRetireAgeAtSuccess, findPortfolioAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE };
+  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, SHOCK_YEARS, applyShock, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, findRetireAgeAtSuccess, findPortfolioAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE, INFLATION, getInflationSequence, LONG_RUN_INFLATION };
 });

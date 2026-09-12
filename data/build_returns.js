@@ -38,12 +38,13 @@ function bondTotalReturn(y0, y1) {
   return P - 1 + y0;
 }
 const START = 1926, END = 2025;
-const stocks = [], bonds = [], partialYears = [];
+const stocks = [], bonds = [], infls = [], partialYears = [];
 for (let y = START; y <= END; y++) {
   const a = get(y, 1);
   let b = get(y + 1, 1);
   if (!b) { b = get(y, 12); partialYears.push(y); }
   const infl = b.cpi / a.cpi - 1;
+  infls.push(+infl.toFixed(4));
   let divSum = 0, cnt = 0;
   for (let m = 1; m <= 12; m++) { const r = get(y, m); if (r && r.divR) { divSum += r.divR / 12; cnt++; } }
   if (cnt && cnt < 12) divSum = divSum * 12 / cnt;
@@ -55,4 +56,6 @@ console.log('// STOCK_RETURNS (' + START + '-' + END + ', ' + stocks.length + ' 
 console.log(fmt(stocks));
 console.log('// BOND_RETURNS');
 console.log(fmt(bonds));
+console.log('// INFLATION (CPI, January to January; deflates the fixed mortgage payment)');
+console.log(fmt(infls));
 module.exports = { stocks, bonds, START, END, partialYears };
