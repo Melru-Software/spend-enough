@@ -521,6 +521,23 @@ test('a fixed mortgage payment shrinks in today\'s dollars with that year\'s inf
   assert.ok(y(defaulted, 89).portfolio > y(none, 89).portfolio, 'a shrinking real payment leaves more in the portfolio');
 });
 
+// ---- 14c. Mortgage payoff helper ------------------------------------------------
+test('mortgageYearsLeft inverts the payment formula and refuses impossible payments', () => {
+  // A payment built by the engine's own formula should come back as the same term.
+  for (const [bal, rate, yrs] of [[250000, 6.5, 15], [400000, 3.25, 22], [90000, 7.9, 5]]) {
+    const monthly = bal * (rate / 100 / 12) * Math.pow(1 + rate / 100 / 12, yrs * 12) / (Math.pow(1 + rate / 100 / 12, yrs * 12) - 1);
+    const back = E.mortgageYearsLeft(bal, rate, monthly * 12);
+    assert.ok(Math.abs(back - yrs) < 0.02, `${bal} at ${rate}% over ${yrs}y came back as ${back}`);
+  }
+  assert.strictEqual(E.mortgageYearsLeft(0, 6, 24000), 0, 'nothing left to pay');
+  assert.strictEqual(E.mortgageYearsLeft(250000, 6, 0), null, 'no payment');
+  assert.strictEqual(E.mortgageYearsLeft(250000, 6, 12000), null, 'payment below the interest never clears it');
+  assert.ok(Math.abs(E.mortgageYearsLeft(120000, 0, 12000) - 10) < 1e-9, 'zero interest is plain division');
+  const quicker = E.mortgageYearsLeft(250000, 6.5, 30000);
+  const slower = E.mortgageYearsLeft(250000, 6.5, 24000);
+  assert.ok(quicker < slower, 'paying more finishes sooner');
+});
+
 // ---- 15. Paywall decisions (paywall.js) -------------------------------------
 const P = require('./paywall.js');
 const HOUR = 60 * 60 * 1000, DAY = 24 * HOUR;

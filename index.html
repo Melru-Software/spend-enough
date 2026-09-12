@@ -448,7 +448,8 @@
     chart = new Chart(document.getElementById('c'), {
       type: 'line', data: data, plugins: [mark],
       options: {
-        responsive: true, maintainAspectRatio: false, animation: false,
+        responsive: true, maintainAspectRatio: false, animation: false, resizeDelay: 200,
+        events: [],
         layout: { padding: { top: 58, right: 8 } },
         plugins: { legend: { display: false }, tooltip: { enabled: false } },
         scales: {

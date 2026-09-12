@@ -713,6 +713,20 @@ function estimateNetIncome({ gross, filingStatus = 'mfj', stateCode = 'CA', pret
   const totalTax = federal + stateTax + fica;
   return { net: gross - totalTax - pretax, federal: Math.round(federal), state: Math.round(stateTax), fica: Math.round(fica), totalTax: Math.round(totalTax), effectiveRate: totalTax / gross, incomeTaxRate: (federal + stateTax) / gross };
 }
+// Years until a repayment mortgage is paid off, from what is left, the rate, and what is
+// paid each year. Returns null when the payment never clears the interest, so the caller
+// can say so instead of printing a nonsense number.
+function mortgageYearsLeft(balance, annualRatePercent, annualPayment) {
+  const bal = +balance, pay = +annualPayment;
+  if (!(bal > 0)) return 0;
+  if (!(pay > 0)) return null;
+  const r = (+annualRatePercent || 0) / 100 / 12;   // monthly rate
+  const m = pay / 12;                                // monthly payment
+  if (r === 0) return bal / pay;
+  if (m <= bal * r) return null;                     // interest alone is bigger than the payment
+  return -Math.log(1 - (r * bal) / m) / Math.log(1 + r) / 12;
+}
+
 function estimateSSBenefit(annualGross) {
   if (annualGross <= 0) return 0;
   // SIMPLIFICATION: real AIME is the average of the highest 35 years of wage-indexed
@@ -792,5 +806,5 @@ const SAMPLE_STATE = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), {
   accountsEnabled: true, accounts: { traditional: 150000, roth: 60000, taxable: 90000 },
 });
 
-  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, SHOCK_YEARS, applyShock, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, findRetireAgeAtSuccess, findPortfolioAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, DEFAULT_STATE, SAMPLE_STATE, INFLATION, getInflationSequence, LONG_RUN_INFLATION };
+  return { CURRENT_YEAR, HISTORICAL_START_YEAR, HISTORICAL_END_YEAR, HISTORICAL_PARTIAL_YEARS, STOCK_RETURNS, BOND_RETURNS, HISTORICAL_RETURNS, DATA_SOURCE, blendSeries, getHistoricalSequence, seriesStats, historicalStats, HISTORICAL_SCENARIOS, SHOCK_YEARS, applyShock, inWindow, retirementTaxRate, withdrawWithTax, simulateOnce, makeRng, randNormal, pctOf, buildPercentiles, summarize, mcParams, runMonteCarlo, runHistorical, runFixed, runForState, runNamedScenario, findMaxSpend, findMaxSpendAtSuccess, findRetireAgeAtSuccess, findPortfolioAtSuccess, FED_BRACKETS_2026, FED_STANDARD_DEDUCTION_2026, CA_BRACKETS_2025, CA_STANDARD_DEDUCTION_2025, CA_MENTAL_HEALTH_THRESHOLD, SS_WAGE_BASE_2026, MEDICARE_RATE, SS_RATE, ADD_MEDICARE_RATE, ADD_MEDICARE_THRESHOLD, STATE_CONFIG, taxFromBrackets, estimateNetIncome, estimateSSBenefit, mortgageYearsLeft, DEFAULT_STATE, SAMPLE_STATE, INFLATION, getInflationSequence, LONG_RUN_INFLATION };
 });

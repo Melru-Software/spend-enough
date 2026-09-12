@@ -209,7 +209,9 @@
   .locked-preview { border: none; padding: 0; margin: 0; min-width: 0; opacity: 0.5; pointer-events: none; }
   .unlock-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
   .unlock-input-row input { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: 3px; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-size: 14px; background: var(--paper); }
-  .unlock-input-row button { padding: 10px 16px; background: var(--rust); color: var(--paper); border: none; border-radius: 3px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
+  .unlock-input-row button { padding: 10px 16px; background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 3px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+  .unlock-input-row button:hover { border-color: var(--ink); background: var(--bone); }
+  .unlock-input-row button:disabled { opacity: 0.55; cursor: default; }
   .unlock-input-row button:hover { background: var(--rust-deep); }
   /* Free vs Pro comparison (unlock modal) */
   .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
@@ -255,7 +257,9 @@
   .data-table th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); color: var(--ink-mute); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.06em; }
   .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); color: var(--ink-soft); }
   .data-table tr.current-row { background: var(--bone-2); }
-  .data-table .tag-current { display: inline-block; background: var(--rust); color: var(--paper); font-size: 14px; padding: 1px 6px; border-radius: 2px; margin-left: 6px; vertical-align: 1px; font-weight: 600; }
+  .data-table .tag-current { display: inline; background: none; color: var(--rust); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; margin-left: 8px; padding: 0; vertical-align: baseline; white-space: nowrap; }
+  .data-table tr.current-row { background: rgba(160,74,40,0.05); }
+  .data-table tr.current-row td { border-bottom-color: var(--line); }
   .data-table .fail { color: var(--danger); font-weight: 600; }
   .data-table .clickable { cursor: pointer; }
   .data-table .clickable:hover { background: var(--bone-2); }
@@ -320,7 +324,7 @@
   .assumptions, .read-first { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }
   .assumptions summary, .read-first summary { cursor: pointer; padding: 14px 18px; font-weight: 600; font-size: 15px; color: var(--ink-soft); list-style: none; display: flex; align-items: center; gap: 10px; }
   .assumptions summary::-webkit-details-marker, .read-first summary::-webkit-details-marker { display: none; }
-  .assumptions summary::after, .read-first summary::after { content: '+'; color: var(--ink-mute); font-size: 18px; margin-left: auto; }
+  .assumptions summary::after, .read-first summary::after { content: '+'; color: var(--ink-mute); font-size: 18px; position: absolute; right: 0; top: 14px; }
   .assumptions[open] summary::after, .read-first[open] summary::after { content: '\2212'; }
   .asm-hint { font-weight: 400; color: var(--ink-mute); font-size: 14px; }
   .asm-body, .read-first-body { padding: 0 18px 16px; }
@@ -382,7 +386,7 @@
   .deep { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; margin: 4px 0 18px; box-shadow: var(--shadow-sm); }
   .deep summary { cursor: pointer; padding: 14px 18px; font-weight: 600; font-size: 15px; color: var(--ink-soft); list-style: none; display: flex; align-items: center; gap: 10px; }
   .deep summary::-webkit-details-marker { display: none; }
-  .deep summary::after { content: '+'; color: var(--ink-mute); font-size: 18px; margin-left: auto; }
+  .deep summary::after { content: '+'; color: var(--ink-mute); font-size: 18px; position: absolute; right: 0; top: 14px; }
   .deep[open] summary::after { content: '\2212'; }
   .deep-body { padding: 0 18px 18px; }
   .deep-body .section-heading:first-child { margin-top: 8px; }
@@ -765,7 +769,7 @@
   .saved-actions button:hover { text-decoration: underline; }
 
   /* expandable sections: title on its own line, the hint under it */
-  .assumptions summary, .read-first summary, .deep summary { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; row-gap: 2px; }
+  .assumptions summary, .read-first summary, .deep summary { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 12px; row-gap: 2px; position: relative; padding-right: 26px; }
   .sum-title { font-family: 'Source Serif 4', serif; font-weight: 500; font-size: 18px; color: var(--ink); flex: 1 1 auto; min-width: 0; }
   .asm-hint { flex: 1 1 100%; margin-left: 0; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 13.5px; color: var(--ink-mute); font-weight: 400; line-height: 1.4; }
   @media (min-width: 900px) { .sum-title { flex: 0 0 auto; } .asm-hint { flex: 1 1 auto; } }
@@ -786,6 +790,7 @@
   .acct-grid input:focus { outline: none; border-color: var(--ink); }
   .more-toggle .sum-stack { width: 100%; }
   .sum-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; }
+  .more-toggle.deep-teaser { position: relative; }
 
   /* ---- inputs: recessed into the page, not drawn on top of it ---- */
   .field input, .field select,
@@ -838,7 +843,8 @@
   .step-hint { font-size: 15px; margin-bottom: 0; line-height: 1.45; }
   .onboard-step .field-grid { gap: 20px 18px; }
   .step-actions { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; margin-top: 30px; align-items: start; }
-  .step-actions > * { grid-column: 2; justify-self: start; }
+  .step-actions > * { grid-column: 2; justify-self: stretch; }
+  .step-actions .btn-primary { justify-self: start; }
   @media (max-width: 720px) {
     .onboard-step, .step-actions { grid-template-columns: 1fr; gap: 14px; }
     .step-actions > * { grid-column: 1; justify-self: stretch; text-align: center; }
@@ -856,7 +862,7 @@
   }
   @keyframes tick { to { transform: rotate(-45deg) scale(1); opacity: 1; } }
   .onboard-step.done .step-title { color: var(--ink-mute); transition: color .2s ease; }
-  .blank-note { font-size: 14px; color: var(--ink-faint); margin-top: 14px; max-width: 42ch; line-height: 1.45; }
+  .blank-note { font-size: 14px; color: var(--ink-faint); margin-top: 14px; max-width: 70ch; line-height: 1.5; }
   @media (prefers-reduced-motion: reduce) { .onboard-step.done .step-num::after { animation: none; opacity: 1; transform: rotate(-45deg) scale(1); } }
   input.money::placeholder { font-weight: 400; color: var(--ink-faint); letter-spacing: 0; }
 
@@ -887,7 +893,7 @@
       display: flex; position: sticky; top: 0; z-index: 60;
       align-items: baseline; justify-content: space-between; gap: 12px;
       padding: 10px 20px; cursor: pointer;
-      background: rgba(251,248,241,0.94); backdrop-filter: blur(6px);
+      background: var(--paper);
       border-bottom: 1px solid var(--line);
       font-size: 14px; color: var(--ink-mute);
     }
@@ -895,6 +901,73 @@
     .mini-count { font-family: 'Source Serif 4', serif; font-size: 18px; color: var(--ink); font-variant-numeric: tabular-nums; }
     .mini-left { font-variant-numeric: tabular-nums; }
   }
+
+  /* ---- compact header for phones ---- */
+  .head-compact { display: none; }
+  @media (max-width: 768px) {
+    header { padding: 10px 20px; }
+    .logo { font-size: 18px; white-space: nowrap; }
+    .scenarios-bar { display: none; }
+    .head-compact { display: flex; align-items: center; gap: 8px; }
+    .head-compact .scenario-pill { padding: 6px 12px; font-size: 13px; min-height: 34px; }
+    .head-menu { position: relative; }
+    .head-menu summary { list-style: none; cursor: pointer; padding: 4px 10px; font-size: 20px; line-height: 1; color: var(--ink-mute); border: 1px solid var(--line); border-radius: 3px; min-height: 34px; display: flex; align-items: center; }
+    .head-menu summary::-webkit-details-marker { display: none; }
+    .head-menu[open] summary { border-color: var(--ink); color: var(--ink); }
+    .head-menu-items { position: absolute; right: 0; top: calc(100% + 6px); z-index: 70; background: var(--paper); border: 1px solid var(--line); border-radius: 4px; box-shadow: var(--shadow-md); min-width: 160px; padding: 4px; display: flex; flex-direction: column; }
+    .head-menu-items button { background: none; border: none; text-align: left; padding: 10px 12px; font-family: inherit; font-size: 14px; color: var(--ink-soft); cursor: pointer; border-radius: 3px; min-height: 0; }
+    .head-menu-items button:hover { background: var(--bone); color: var(--ink); }
+
+    /* ---- the chart leads; the words follow, smaller ---- */
+    .chart-h { display: none; }
+    .chart-card { order: 1; margin-top: 4px; }
+    .event-line { order: 2; font-size: 14px; color: var(--ink-faint); margin: 10px 0 0; }
+    .chart-sub { order: 3; font-size: 13px; color: var(--ink-faint); margin: 8px 0 18px; }
+    .verdict { order: 4; }
+    .verdict-head { font-size: 22px; }
+    .verdict-notes { order: 5; }
+    .wwit { order: 6; }
+    .main > .teaser-row { order: 6; }
+    .explore-h { order: 7; }
+    .explore-sub { order: 8; }
+    .main > .data-table-wrapper { order: 9; }
+    .sidebar { order: 10; }
+    .main > .read-first, .main > .assumptions, .main > .deep,
+    .main > .deep-teaser, .main > .disclaimer-bar { order: 11; }
+    .resources-row { order: 12; }
+
+    /* the spending table is the second thing worth acting on, so give it room */
+    .explore-h { font-size: 22px; margin-top: 26px; }
+    .main > .data-table-wrapper .data-table td { padding: 12px 8px; }
+    .main > .data-table-wrapper .clickable td:first-child { font-weight: 500; }
+
+    /* controls sit closer together on a phone */
+    .sidebar .control { margin-bottom: 9px; }
+    .sidebar .control input.mobile-input { padding: 8px 10px; }
+    .sidebar-section { margin-bottom: 14px; padding-bottom: 12px; }
+
+    /* scenarios read as things you can tap */
+    .preset-btn { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; }
+    .preset-btn::after { content: '\203a'; color: var(--rust); font-size: 20px; line-height: 1; }
+  }
+
+  /* the current row: a marker in the margin on phones, where the label cannot fit
+     on one line and pushed the row taller than its neighbours */
+  @media (max-width: 768px) {
+    .data-table .tag-current { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .data-table tr.current-row td:first-child { position: relative; padding-left: 12px; }
+    .data-table tr.current-row td:first-child::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; background: var(--rust); border-radius: 2px; }
+  }
+  @media (max-width: 600px) { #unlockKeyInput::placeholder { font-size: 14px; } #unlockKeyInput { padding: 10px; } }
+  .buy-fine { font-size: 14px; color: var(--ink-mute); text-align: center; margin: 0 0 6px; }
+  .btn-quiet { background: transparent; color: var(--ink); border: 1px solid var(--line); padding: 10px 16px; border-radius: 3px; font-weight: 600; cursor: pointer; font-size: 14px; font-family: inherit; transition: border-color .15s ease, background .15s ease; }
+  .btn-quiet:hover { border-color: var(--ink); background: var(--bone); }
+  .btn-quiet:disabled { opacity: 0.55; cursor: default; }
+  .mp-result { margin-top: 16px; }
+  .mp-answer { font-family: 'Source Serif 4', serif; font-size: 19px; color: var(--ink); line-height: 1.4; }
+  .mp-hint { font-size: 13px; color: var(--ink-faint); margin-top: 10px; }
+  .mp-warn { font-size: 15px; color: var(--danger); line-height: 1.5; }
+  .field-hint.is-auto { color: var(--rust); }
 </style>
 <body>
 <div id="app"></div>
@@ -1152,23 +1225,29 @@ window.showUnlockModal = function(opts) {
       </div>
     </div>
     <div style="margin:16px 0 4px">${buy}</div>
+    <p class="buy-fine">One-time payment. No account. Full refund within 14 days.</p>
     <p class="terms-line">By purchasing you agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of Service</a>.</p>
-    <p style="font-size:14px;color:var(--ink-mute);margin:0 0 14px;text-align:center">One-time payment. No subscription. No account. Your numbers stay on your device; only the license key is checked with our payment provider.<br/>14-day refund, no questions asked. Educational modelling tool, not financial advice.</p>
     <p class="unlock-already" id="unlockAlready"${reveal ? ' hidden' : ''}>Already bought? Open the button in your receipt email on this device, or <button type="button" class="link-btn" onclick="revealUnlockKey()">enter your key</button>.</p>
     <div id="unlockKeyRow"${reveal ? '' : ' hidden'}>
     ${opts.hint ? `<p class="unlock-hint">${opts.hint}</p>` : ''}
     <div class="unlock-input-row">
-      <input type="text" id="unlockKeyInput" placeholder="Already bought? Paste your license key" autocomplete="off" spellcheck="false" aria-label="License key" aria-describedby="unlockKeyMsg"${keyAttr}${dis}/>
-      <button id="unlockKeyBtn" onclick="submitUnlockKey()" style="background:var(--rust);color:var(--paper);border:none;padding:10px 16px;border-radius:3px;font-weight:600;cursor:pointer;font-size:14px"${dis}>${opts.busy ? 'Activating…' : 'Activate'}</button>
+      <input type="text" id="unlockKeyInput" placeholder="Paste your license key" autocomplete="off" spellcheck="false" aria-label="License key" aria-describedby="unlockKeyMsg"${keyAttr}${dis}/>
+      <button id="unlockKeyBtn" class="btn-quiet" onclick="submitUnlockKey()"${dis}>${opts.busy ? 'Activating\u2026' : 'Activate'}</button>
     </div>
     <p class="unlock-note">${LICENSE_MSG.slots}</p>
     <p id="unlockKeyMsg" class="unlock-msg" role="status" aria-live="polite">${opts.message || ''}</p>
     </div>
     <p style="margin-top:14px;font-size:14px;text-align:center"><a href="#" onclick="closeModal();return false" style="color:var(--rust);text-decoration:none;cursor:pointer">Continue with the free version</a></p>`, 'modal-wide');
+  fitKeyPlaceholder();
   if ((opts.hint || opts.message) && !opts.busy) { const i = document.getElementById('unlockKeyInput'); if (i) i.focus(); }
 };
 
 // Fallback for "deleted the email and cleared the browser": show the paste field.
+// Narrow phones cut the placeholder off, so shorten it there.
+function fitKeyPlaceholder() {
+  const i = document.getElementById('unlockKeyInput');
+  if (i) i.placeholder = window.matchMedia('(max-width: 420px)').matches ? 'License key' : 'Paste your license key';
+}
 window.revealUnlockKey = function() {
   const a = document.getElementById('unlockAlready'), r = document.getElementById('unlockKeyRow');
   if (a) a.hidden = true;
@@ -1407,6 +1486,8 @@ function shockSentence(unit) { return state.shockEra && has(state.shockAge) ? ' 
 function mixLabel() { return Math.round(state.stockPct * 100) + '/' + Math.round((1 - state.stockPct) * 100); }
 
 const app = document.getElementById('app');
+// Coarse pointer means a finger: used to keep the chart from redrawing mid-scroll.
+const TOUCH = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 const modalRoot = document.getElementById('modal-root');
 
 function render() { if (activeView === 'onboarding') renderOnboarding(); else renderDashboard(); wireTooltips(); }
@@ -1445,7 +1526,7 @@ function renderOnboarding() {
     <div class="onboarding">
       <div class="onboard-hero">
         <h1 class="onboard-title">Are you spending enough for the life you want?</h1>
-        <p class="onboard-sub">Enter what you have and see what you could spend each year and still make it. Then change one decision and see what it does.</p>
+        <p class="onboard-sub">Rough figures are fine. The next screen shows what you could spend each year, and you can change any of the numbers from there.</p>
         <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a></p>
       </div>
 
@@ -1471,10 +1552,10 @@ function renderOnboarding() {
         <div class="step-side"><span class="step-num">3</span><div><h2 class="step-title">Other income and housing</h2>
         <p class="step-hint">Work income, partner income, and the mortgage.</p></div></div>
         <div class="field-grid">
-          <div class="field"><label>Your gross income</label><input type="text" id="ob_yourIncome" class="money" inputmode="numeric" value="${moneyText(state.yourIncome || '')}" placeholder="e.g. $110,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Before tax \u00b7 You can adjust tax settings later</span></div>
-          <div class="field"><label>Partner's gross income</label><input type="text" id="ob_partnerIncome" class="money" inputmode="numeric" value="${moneyText(state.partnerIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
+          <div class="field"><label>Your gross income</label><input type="text" id="ob_yourIncome" class="money" inputmode="numeric" value="${moneyText(state.yourIncome || '')}" placeholder="e.g. $110,000" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_yourIncome','ob_yourSS')"/><span class="field-hint">Before tax \u00b7 You can adjust tax settings later</span></div>
+          <div class="field"><label>Partner's gross income</label><input type="text" id="ob_partnerIncome" class="money" inputmode="numeric" value="${moneyText(state.partnerIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_partnerIncome','ob_partnerSS')"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
           <div class="field"><label>Of that, your mortgage payment</label><input type="text" id="ob_housing" class="money" inputmode="numeric" value="${moneyText(state.housing || '')}" placeholder="e.g. $24,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Principal and interest per year, the part that ends when it is paid off. Taxes and insurance stay in spending.</span></div>
-          <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100" oninput="stepProgress()"/><span class="field-hint">When that payment stops</span></div>
+          <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100" oninput="stepProgress()"/><span class="field-hint">When that payment stops \u00b7 <button type="button" class="helper-trigger" onclick="openPayoffHelper('ob_mortgagePayoff')">work it out</button></span></div>
         </div>
       </div>
 
@@ -1482,8 +1563,8 @@ function renderOnboarding() {
         <div class="step-side"><span class="step-num">4</span><div><h2 class="step-title">Social Security</h2>
         <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number.</p></div></div>
         <div class="field-grid">
-          <div class="field"><label>Your SS at full age</label><input type="text" id="ob_yourSS" class="money" inputmode="numeric" value="${moneyText(state.yourSSAmount || '')}" placeholder="e.g. $30,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper('ob_yourSS','ob_yourIncome')">estimate from income</button></span></div>
-          <div class="field"><label>Partner's SS at full age</label><input type="text" id="ob_partnerSS" class="money" inputmode="numeric" value="${moneyText(state.partnerSSAmount || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper('ob_partnerSS','ob_partnerIncome')">estimate from income</button></span></div>
+          <div class="field"><label>Your SS at full age</label><input type="text" id="ob_yourSS" class="money" inputmode="numeric" value="${moneyText(state.yourSSAmount || '')}" placeholder="e.g. $30,000" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_yourSS')"/><span class="field-hint" id="ob_yourSS_hint">Annual, in today\u2019s dollars</span></div>
+          <div class="field"><label>Partner's SS at full age</label><input type="text" id="ob_partnerSS" class="money" inputmode="numeric" value="${moneyText(state.partnerSSAmount || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_partnerSS')"/><span class="field-hint" id="ob_partnerSS_hint">Annual, in today\u2019s dollars</span></div>
         </div>
       </div>
 
@@ -1504,6 +1585,16 @@ function num(id) { const el = document.getElementById(id); if (!el) return 0; co
 // optional fields never block it, so the ticks track real progress, not every box.
 const STEP_FIELDS = [['ob_age'], ['ob_portfolio'], ['ob_yourIncome', 'ob_housing'], ['ob_yourSS']];
 window.stepProgress = function() {
+  // Clear the "please enter your age" style message as soon as the field is filled,
+  // rather than making people press the button again to find out.
+  const msg = document.getElementById('ob_validation');
+  if (msg && msg.textContent) {
+    const ageOk = num('ob_age') >= 18;
+    const portfolioOk = num('ob_portfolio') > 0;
+    if (ageOk && portfolioOk) msg.textContent = '';
+    else if (msg.dataset.field === 'age' && ageOk) msg.textContent = portfolioOk ? '' : 'Enter your portfolio value to get started.';
+    else if (msg.dataset.field === 'portfolio' && portfolioOk) msg.textContent = ageOk ? '' : 'Please enter your age to continue.';
+  }
   const steps = document.querySelectorAll('.onboard-step');
   STEP_FIELDS.forEach((ids, i) => {
     const step = steps[i];
@@ -1519,8 +1610,10 @@ window.finishOnboarding = function() {
   const portfolio = num('ob_portfolio');
   const mortgage = num('ob_housing');
   const spending = num('ob_spending') > 0 ? Math.max(0, num('ob_spending') - mortgage) : 0; // spending excludes the mortgage payment internally
-  if (age < 18) { document.getElementById('ob_validation').textContent = 'Please enter your age to continue.'; return; }
-  if (portfolio <= 0) { document.getElementById('ob_validation').textContent = 'Enter your portfolio value to get started.'; return; }
+  const msgEl = document.getElementById('ob_validation');
+  if (age < 18) { msgEl.textContent = 'Please enter your age to continue.'; msgEl.dataset.field = 'age'; document.getElementById('ob_age').focus(); return; }
+  if (portfolio <= 0) { msgEl.textContent = 'Enter your portfolio value to get started.'; msgEl.dataset.field = 'portfolio'; document.getElementById('ob_portfolio').focus(); return; }
+  msgEl.textContent = ''; msgEl.dataset.field = '';
 
   state.age = age;
   const pAge = num('ob_partnerAge');
@@ -1604,7 +1697,13 @@ window.resetToDefaults = function() {
 // DASHBOARD
 // ============================================================================
 function renderDashboard() {
-  if (!moreDefaultApplied && isPaid()) { moreDefaultApplied = true; try { if (localStorage.getItem('spendenough_more') === null) showMoreOptions = true; } catch (e) { showMoreOptions = true; } }
+  // Pro users find their settings already open, except on a phone, where seven more
+  // sections would bury the scenarios and the save box below them.
+  if (!moreDefaultApplied && isPaid()) {
+    moreDefaultApplied = true;
+    const roomy = !window.matchMedia('(max-width: 768px)').matches;
+    try { if (localStorage.getItem('spendenough_more') === null) showMoreOptions = roomy; } catch (e) { showMoreOptions = roomy; }
+  }
   // Free users see Historical only; Fixed and Simulated are Pro.
   if (!isPaid() && state.simMode !== 'historical') { state.simMode = 'historical'; }
   const result = runForState(state);
@@ -1715,8 +1814,8 @@ function renderDashboard() {
         ${verdict.wedge ? `<div class="verdict-wedge ${result.failureCount === 0 ? 'good' : ''}">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
       </div>
 
-      <h2 class="section-heading">Portfolio projection</h2>
-      <div class="section-sub">${state.simMode==='historical' ? 'The shaded area is where the portfolio stood across all '+result.totalPeriods+' stretches of the market since 1926. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : state.simMode==='montecarlo' ? 'The shaded area is where the portfolio stood across '+result.mcSims+' simulated futures. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : 'One steady return every year, so a single line and no range.'}${canCompare ? ' The dashed line and the faint band are ' + baselineName + '.' : ''}</div>
+      <h2 class="section-heading chart-h">Portfolio projection</h2>
+      <div class="section-sub chart-sub">${state.simMode==='historical' ? 'The shaded area is where the portfolio stood across all '+result.totalPeriods+' stretches of the market since 1926. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : state.simMode==='montecarlo' ? 'The shaded area is where the portfolio stood across '+result.mcSims+' simulated futures. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : 'One steady return every year, so a single line and no range.'}${canCompare ? ' The dashed line and the faint band are ' + baselineName + '.' : ''}</div>
       <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
       ${renderEventTimeline()}
       <div class="verdict-notes">
@@ -1727,8 +1826,8 @@ function renderDashboard() {
 
       ${canCompare ? renderCompareSummary(baselineResult, result) : (!isPaid() && computeImpact() ? `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">See “${baselineName}” and “${currentName}” on one chart, with the counts side by side <span class="lock-icon">&#x1f512;</span></button>` : '')}
 
-      <h2 class="section-heading">Explore spending levels</h2>
-      <div class="section-sub">Click a row to apply that spending level and see how it changes the projection.${state.housing > 0 ? ' Figures include the ' + fmtMoneyShort(state.housing) + ' a year mortgage payment while it lasts.' : ''}</div>
+      <h2 class="section-heading explore-h">Explore spending levels</h2>
+      <div class="section-sub explore-sub">Click a row to apply that spending level and see how it changes the projection.${state.housing > 0 ? ' Figures include the ' + fmtMoneyShort(state.housing) + ' a year mortgage payment while it lasts.' : ''}</div>
       ${renderSpendingExplorer()}
 
       ${renderReadFirst(result)}
@@ -1768,6 +1867,17 @@ function renderDashboard() {
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
         <button class="scenario-pill" onclick="printReport()">Print report${!isPaid() ? ' <span class="lock-icon">&#x1f512;</span>' : ''}</button>
         ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get Pro &middot; ${CONFIG.price}</button>` : ''}
+      </div>
+      <div class="head-compact">
+        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get Pro</button>` : ''}
+        <details class="head-menu">
+          <summary aria-label="Menu">\u22ef</summary>
+          <div class="head-menu-items">
+            <button onclick="resetToDefaults()">Reset</button>
+            <button onclick="goToOnboarding()">Edit basics</button>
+            <button onclick="printReport()">Print report${!isPaid() ? ' \u{1f512}' : ''}</button>
+          </div>
+        </details>
       </div>
     </header>
     <div class="mini-verdict" id="miniVerdict" hidden onclick="document.querySelector('.verdict').scrollIntoView({behavior:'smooth',block:'start'})" role="status" aria-live="polite"></div>
@@ -1852,6 +1962,7 @@ function moreOptionsHTML() {
       </div>
 
       <h3 class="sub-heading">Mortgage</h3>
+      <p class="ev-hint">Not sure when it ends? <button type="button" class="helper-trigger" onclick="openPayoffHelper()">Work it out from the balance</button></p>
       <div class="control">
         <div class="control-row"><span class="control-label">Mortgage payment per year</span><span class="control-value">${fmtMoney(state.housing)}</span></div>
         <input type="range" min="0" max="120000" step="1000" value="${state.housing}" oninput="slideLive(this,'housing',this.value)" onchange="sliderCommit('housing',this.value)"/>
@@ -2420,7 +2531,7 @@ function renderResources() {
   return `
     ${isPaid() && readLicense() ? `<p class="pro-status">Pro is active in this browser. <button class="link-btn" onclick="deactivateLicense()">Deactivate this browser</button> to use your key somewhere else.</p>` : ''}
     <nav class="foot-nav" aria-label="About and legal">
-      <button class="faq-toggle" onclick="toggleFaq()" aria-expanded="${faqOpen ? 'true' : 'false'}">About this tool ${faqOpen ? '&#8722;' : '+'}</button>
+      <button class="faq-toggle" onclick="toggleFaq()" aria-expanded="${faqOpen ? 'true' : 'false'}">Questions ${faqOpen ? '&#8722;' : '+'}</button>
       <a href="why.html">Why I built it</a>
       <a href="privacy.html">Privacy</a>
       <a href="terms.html">Terms</a>
@@ -2652,9 +2763,10 @@ function drawMainChart(result, compare) {
       const plotW = Math.max(40, chart.width - 70);
       const n = Math.max(1, labels.length - 1);
       const { rows } = layoutEventLabels(chart, idx => 60 + idx / n * plotW);
-      chart.options.layout.padding.top = Math.max(34, 4 + rows * EV_ROW_H + 6);
+      const want = Math.max(34, 4 + rows * EV_ROW_H + 6);
+      if (chart.options.layout.padding.top !== want) chart.options.layout.padding.top = want;
     },
-    afterDraw(chart) {
+    afterDatasetsDraw(chart) { // before the tooltip, so the hover box sits on top
       const xScale = chart.scales.x;
       const yScale = chart.scales.y;
       const ctx2 = chart.ctx;
@@ -2684,7 +2796,7 @@ function drawMainChart(result, compare) {
   // Crosshair plugin: draws a vertical line at hover position
   const crosshairPlugin = {
     id: 'crosshair',
-    afterDraw(chart) {
+    afterDatasetsDraw(chart) { // before the tooltip, so the hover box sits on top
       if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
         const x = chart.tooltip._active[0].element.x;
         const yScale = chart.scales.y;
@@ -2708,7 +2820,10 @@ function drawMainChart(result, compare) {
     data: { labels, datasets },
     plugins: [annotationPlugin, crosshairPlugin],
     options: {
-      responsive: true, maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false, resizeDelay: 200,
+      // On a touch screen Chart.js redraws on every touchmove, which fights the page for
+      // the scroll. A tap still shows the numbers.
+      events: TOUCH ? ['click'] : ['mousemove', 'mouseout', 'click', 'touchstart'],
       layout: { padding: { top: 34 } },
       interaction: { mode: 'index', intersect: false },
       plugins: { legend: { display: false }, tooltip: {
@@ -2805,7 +2920,8 @@ function drawCashflowChart(result) {
       { label: d.d1.label, data: d.d1.data, backgroundColor: d.d1.bg, stack: 'in', borderRadius: 1 },
       { label: d.d2.label, data: d.d2.data, backgroundColor: d.d2.bg, stack: 'out', borderRadius: 1 },
     ] },
-    options: { responsive: true, maintainAspectRatio: false,
+    options: { responsive: true, maintainAspectRatio: false, resizeDelay: 200,
+      events: TOUCH ? ['click'] : ['mousemove', 'mouseout', 'click', 'touchstart'],
       animation: { duration: 700, easing: 'easeInOutQuart' },
       interaction: { mode: 'index', intersect: false },
       plugins: {
@@ -3207,31 +3323,79 @@ window.showScenarioDetail = function(id) {
 // ===== SS HELPER (onboarding) =====
 // targetId: the Social Security field to fill; incomeId: the income field to start from.
 let ssHelperTarget = null;
-window.openSSHelper = function(targetId, incomeId) {
-  ssHelperTarget = targetId || 'ob_yourSS';
-  const startEl = incomeId ? document.getElementById(incomeId) : null;
-  const start = startEl && parseFloat(startEl.value) > 0 ? Math.round(parseFloat(startEl.value)) : '';
-  openModal(`<h2>Estimate Social Security</h2>
-    <p>A rough estimate from a typical year's income. Your ssa.gov statement is the official figure.</p>
-    <div class="field"><label>Typical annual income (today's $)</label><input type="number" id="ss_gross" placeholder="e.g. 90000" value="${start}"/></div>
-    <div style="margin-top:14px"><button class="btn-primary" onclick="runSSHelper()">Estimate</button></div>
-    <div id="ss_result" style="margin-top:14px;font-size:15px;color:var(--ink-soft)"></div>`);
-  const g = document.getElementById('ss_gross');
-  if (g) { g.focus(); if (start) runSSHelper(); }
+// Works the payoff age out from what is left, the rate, and what is paid each year.
+// targetId is the onboarding field to fill; with no target it sets the plan directly.
+let payoffTarget = null;
+// Social Security is filled in from income as you type, so nobody has to go and find
+// the number. Typing in the box takes it over and the estimate stops.
+window.ssHint = function(ssId) {
+  const el = document.getElementById(ssId);
+  const hint = document.getElementById(ssId + '_hint');
+  if (!el || !hint) return;
+  hint.textContent = el.dataset.auto === '1'
+    ? 'Estimated from the income above. Type over it if you know the real figure.'
+    : 'Annual, in today\u2019s dollars';
+  hint.classList.toggle('is-auto', el.dataset.auto === '1');
 };
-window.runSSHelper = function() {
-  const g = parseFloat(document.getElementById('ss_gross').value) || 0;
-  const b = Math.round(estimateSSBenefit(g));
-  document.getElementById('ss_result').innerHTML = `Estimated benefit at full retirement age: <strong>${fmtMoney(b)}/yr</strong> (${fmtMoney(Math.round(b/12))}/mo).
-    <div style="margin-top:12px"><button class="btn-primary" onclick="useSSEstimate(${b})">Use this estimate</button></div>
-    <div style="margin-top:10px;font-size:14px;color:var(--ink-faint)">Approximate. Your ssa.gov statement is the official figure.</div>`;
+window.autoEstimateSS = function(incomeId, ssId) {
+  const ssEl = document.getElementById(ssId);
+  if (!ssEl || ssEl.dataset.auto === '0') return;      // they typed their own figure
+  const income = num(incomeId);
+  ssEl.value = income > 0 ? moneyText(Math.round(estimateSSBenefit(income))) : '';
+  ssEl.dataset.auto = income > 0 ? '1' : '';
+  ssHint(ssId);
+  stepProgress();
 };
-window.useSSEstimate = function(amount) {
-  const el = document.getElementById(ssHelperTarget || 'ob_yourSS');
-  if (el) { el.value = amount; el.dispatchEvent(new Event('input')); }
+
+window.openPayoffHelper = function(targetId) {
+  payoffTarget = targetId || null;
+  const pay = targetId ? num('ob_housing') : state.housing;
+  openModal(`<h2>When is the mortgage paid off?</h2>
+    <p>From what is left on it today, the rate, and what you pay in a year.</p>
+    <div class="field-grid">
+      <div class="field"><label>Balance left</label><input type="text" id="mp_balance" class="money" inputmode="numeric" value="${state.mortgageBalance ? moneyText(state.mortgageBalance) : ''}" placeholder="e.g. $250,000" oninput="moneyType(this); runPayoffHelper()"/></div>
+      <div class="field"><label>Interest rate</label><input type="number" id="mp_rate" step="0.05" min="0" max="20" value="${state.mortgageRate ? (state.mortgageRate * 100).toFixed(2) : ''}" placeholder="e.g. 6.5" oninput="runPayoffHelper()"/><span class="field-hint">Percent a year</span></div>
+      <div class="field"><label>You pay per year</label><input type="text" id="mp_payment" class="money" inputmode="numeric" value="${pay ? moneyText(pay) : ''}" placeholder="e.g. $24,000" oninput="moneyType(this); runPayoffHelper()"/><span class="field-hint">Principal and interest only</span></div>
+    </div>
+    <div id="mp_result" class="mp-result"></div>`);
+  runPayoffHelper();
+};
+window.runPayoffHelper = function() {
+  const out = document.getElementById('mp_result');
+  if (!out) return;
+  const bal = moneyValue(document.getElementById('mp_balance'));
+  const rate = parseFloat(document.getElementById('mp_rate').value);
+  const pay = moneyValue(document.getElementById('mp_payment'));
+  if (!bal || !pay || isNaN(rate)) { out.innerHTML = '<p class="mp-hint">Fill in the three boxes and the answer appears here.</p>'; return; }
+  const years = mortgageYearsLeft(bal, rate, pay);
+  if (years === null) {
+    const yearlyInterest = Math.round(bal * rate / 100);
+    out.innerHTML = `<p class="mp-warn">At ${fmtMoney(pay)} a year the balance never comes down: the interest alone is about ${fmtMoney(yearlyInterest)} in the first year. Check the rate, and that the payment is the yearly figure rather than the monthly one.</p>
+      <p class="mp-hint">${fmtMoney(pay)} a month would be ${fmtMoney(pay * 12)} a year.</p>`;
+    return;
+  }
+  const age = Math.round(state.age + years);
+  out.innerHTML = `<p class="mp-answer">About <strong>${years < 1 ? 'less than a year' : Math.round(years) + ' more year' + (Math.round(years) === 1 ? '' : 's')}</strong>, so it is paid off around age <strong>${age}</strong>.</p>
+    <div style="margin-top:12px"><button class="btn-primary" onclick="usePayoffAge(${age}, ${bal}, ${rate})">Use age ${age}</button></div>
+    <p class="mp-hint">Rounded to the nearest year. Extra payments would make it sooner.</p>`;
+};
+window.usePayoffAge = function(age, balance, ratePercent) {
+  state.mortgageBalance = balance;
+  state.mortgageRate = ratePercent / 100;
+  if (payoffTarget) {
+    const el = document.getElementById(payoffTarget);
+    if (el) { el.value = age; el.dispatchEvent(new Event('input')); }
+    closeModal();
+    if (el) el.focus();
+    return;
+  }
+  state.mortgagePayoffAge = age;
+  invalidateCaches();
   closeModal();
-  if (el) el.focus();
+  render();
+  showResultChanged();
 };
+
 
 // ============================================================================
 // INIT
