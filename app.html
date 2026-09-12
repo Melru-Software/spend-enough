@@ -655,7 +655,8 @@
   .section-heading { font-size: 24px; font-weight: 400; letter-spacing: -0.015em; margin: 30px 0 4px; }
   .section-sub { font-size: 14.5px; }
   .chart-card { background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 6px 0 0; }
-  .impact-banner, .disclaimer-bar { background: transparent; border: none; border-top: 1px solid var(--line-soft); border-radius: 0; padding: 12px 0; }
+  .impact-banner { background: transparent; border: none; border-top: 1px solid var(--line-soft); border-radius: 0; padding: 12px 0; }
+  .disclaimer-bar { background: transparent; border: none; border-radius: 0; padding: 14px 0 0; }
   .bands { gap: 0; border-top: 1px solid var(--line); }
   .band { background: transparent; border: none; border-radius: 0; padding: 14px 18px 14px 0; }
   .band + .band { border-left: 1px solid var(--line-soft); padding-left: 18px; }
@@ -677,7 +678,7 @@
   .preset-btn:first-of-type { border-top: 1px solid var(--line-soft); }
   .preset-btn:last-of-type { border-bottom: none; } /* the section's own rule follows */
   .preset-btn:hover { color: var(--rust); background: transparent; }
-  .more-toggle { background: transparent; border: none; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); border-radius: 0; padding: 10px 0; font-family: 'Source Serif 4', serif; font-size: 16px; }
+  .more-toggle { background: transparent; border: none; border-top: none; border-bottom: 1px solid var(--line-soft); border-radius: 0; padding: 10px 0; font-family: 'Source Serif 4', serif; font-size: 16px; }
   .toggle-group { border-color: var(--line); border-radius: 3px; }
   .toggle-btn { background: transparent; }
   .toggle-btn.active { background: var(--ink); color: var(--paper); }
@@ -719,7 +720,7 @@
   @media (max-width: 768px) { .resources-row { padding: 20px 20px 36px !important; } }
 
   /* results: smaller pieces */
-  .event-line { font-family: 'Source Serif 4', serif; font-size: 15.5px; color: var(--ink-mute); line-height: 1.5; margin: 0 0 18px; max-width: 62ch; }
+  .event-line { font-family: 'Source Serif 4', serif; font-size: 15.5px; color: var(--ink-mute); line-height: 1.5; margin: 0 0 18px; max-width: none; }
   .impact { margin: 12px 0 0; padding: 10px 0 12px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); font-size: 13px; color: var(--ink-mute); }
   .impact-title { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
   .compare-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--ink); border-radius: 3px; background: transparent; color: var(--ink); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s ease, color .15s ease; }
@@ -785,6 +786,79 @@
   .acct-grid input:focus { outline: none; border-color: var(--ink); }
   .more-toggle .sum-stack { width: 100%; }
   .sum-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; }
+
+  /* ---- inputs: recessed into the page, not drawn on top of it ---- */
+  .field input, .field select,
+  .acct-grid input, .ev-form input, .save-form input,
+  .control input[type=number], .scenario-save-row input,
+  #unlockKeyInput, #scenarioName, #scenarioNote {
+    background: var(--bone);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    box-shadow: inset 0 1px 2px rgba(26,24,20,0.07), inset 0 0 0 1px rgba(255,255,255,0.4);
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .field input:focus, .field select:focus,
+  .acct-grid input:focus, .ev-form input:focus, .save-form input:focus,
+  .control input[type=number]:focus, .scenario-save-row input:focus,
+  #unlockKeyInput:focus, #scenarioName:focus, #scenarioNote:focus {
+    outline: none;
+    background: var(--paper);
+    border-color: var(--ink);
+    box-shadow: inset 0 1px 2px rgba(26,24,20,0.05), 0 0 0 3px rgba(160,74,40,0.13);
+  }
+  .field select, .ev-form select, .save-form select { box-shadow: none; }
+  /* money reads as money: tabular figures, right aligned, a touch heavier */
+  input.money { font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; text-align: right; font-weight: 500; letter-spacing: 0.01em; }
+  .acct-grid input { text-align: right; }
+  /* the sidebar's own select boxes match the fields */
+  .sidebar select { background: var(--bone); border: 1px solid var(--line); border-radius: 3px; padding: 8px 10px; font: inherit; font-size: 14px; color: var(--ink); width: 100%; }
+  .sidebar select:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px rgba(160,74,40,0.13); }
+
+  /* ---- sidebar hierarchy ----
+     Top-level groups (Your plan, Mode, Save and compare) keep the tracked label.
+     Everything inside "More about you" is nested behind a rule with its own
+     quieter heading, so it is obvious which settings belong to it. */
+  .more-body { margin: 10px 0 0 0; padding: 2px 0 2px 14px; border-left: 2px solid var(--line); }
+  .sub-heading { font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 500; color: var(--ink); letter-spacing: -0.01em; margin: 20px 0 8px; text-transform: none; }
+  .more-body > .sub-heading:first-child { margin-top: 2px; }
+  .more-body .control { margin-bottom: 14px; }
+  /* one label voice for every field in the sidebar */
+  .acct-grid label, .checkbox-row label, .ev-form label, .save-form label, .sidebar .field label { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--ink-mute); }
+  .ev-form label, .save-form label { gap: 5px; }
+  .sidebar select { font-size: 14px; }
+  .more-body .ev-hint, .more-body .acct-total { font-size: 12.5px; color: var(--ink-faint); }
+
+  /* ---- onboarding: the landing page's margin-column grid, so a form reads as a sequence ---- */
+  .onboarding { max-width: 880px; }
+  .onboard-step { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; align-items: start; max-width: none; }
+  .step-side { display: flex; gap: 10px; align-items: baseline; }
+  .step-num { font-family: 'Source Serif 4', serif; font-size: 15px; font-weight: 400; color: var(--rust); font-variant-numeric: tabular-nums; line-height: 1.5; flex-shrink: 0; }
+  .step-title { font-size: 21px; line-height: 1.25; margin-bottom: 4px; }
+  .step-hint { font-size: 15px; margin-bottom: 0; line-height: 1.45; }
+  .onboard-step .field-grid { gap: 20px 18px; }
+  .step-actions { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; margin-top: 30px; align-items: start; }
+  .step-actions > * { grid-column: 2; justify-self: start; }
+  @media (max-width: 720px) {
+    .onboard-step, .step-actions { grid-template-columns: 1fr; gap: 14px; }
+    .step-actions > * { grid-column: 1; justify-self: stretch; text-align: center; }
+    .step-side { margin-bottom: 2px; }
+  }
+
+  /* a step ticks off as you fill it, so the page shows progress without extra screens */
+  .step-num { position: relative; display: inline-block; min-width: 1.1em; transition: color .2s ease; }
+  .onboard-step.done .step-num { color: transparent; }
+  .onboard-step.done .step-num::after {
+    content: ''; position: absolute; left: 0; top: 0.45em;
+    width: 0.62em; height: 0.34em; border-left: 2px solid var(--moss); border-bottom: 2px solid var(--moss);
+    transform: rotate(-45deg) scale(0.6); transform-origin: center; opacity: 0;
+    animation: tick .28s cubic-bezier(.2,.9,.3,1.3) forwards;
+  }
+  @keyframes tick { to { transform: rotate(-45deg) scale(1); opacity: 1; } }
+  .onboard-step.done .step-title { color: var(--ink-mute); transition: color .2s ease; }
+  .blank-note { font-size: 14px; color: var(--ink-faint); margin-top: 14px; max-width: 42ch; line-height: 1.45; }
+  @media (prefers-reduced-motion: reduce) { .onboard-step.done .step-num::after { animation: none; opacity: 1; transform: rotate(-45deg) scale(1); } }
+  input.money::placeholder { font-weight: 400; color: var(--ink-faint); letter-spacing: 0; }
 </style>
 <body>
 <div id="app"></div>
@@ -811,6 +885,7 @@ let activeView = 'onboarding';
 let savedScenarios = JSON.parse(localStorage.getItem('zeroline_scenarios') || '[]');
 let chart = null, cashflowChart = null;
 let lastSimResult = null;
+let lastVerdict = null; // so the expandable section can carry the method note and caveat
 let baselineState = null, baselineResult = null, baselineName = 'Starting point';
 let compareOn = false;
 let maxSpendStale = true;
@@ -1242,6 +1317,32 @@ function presetLabel(id) { const p = generatePresets(state).find(x => x.id === i
 // ============================================================================
 // FORMATTING
 // ============================================================================
+// Money fields are text inputs so they can show "$1,250". Digits and a leading
+// minus are all that survives; the caret keeps its place by counting digits.
+function moneyParse(v) {
+  const s = String(v == null ? '' : v).replace(/[^\d-]/g, '');
+  const neg = s.indexOf('-') === 0;
+  const digits = s.replace(/-/g, '');
+  if (digits === '') return NaN;
+  const n = parseInt(digits, 10);
+  return neg ? -n : n;
+}
+window.moneyValue = function(el) { const n = moneyParse(el.value); return isNaN(n) ? 0 : n; };
+function moneyText(n) {
+  if (n === null || n === undefined || isNaN(n) || n === '') return '';
+  return (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US');
+}
+window.moneyType = function(el) {
+  const caret = el.selectionStart || 0;
+  const digitsBefore = (el.value.slice(0, caret).match(/\d/g) || []).length;
+  const neg = el.value.replace(/[^\d-]/g, '').indexOf('-') === 0;
+  const n = moneyParse(el.value);
+  el.value = isNaN(n) ? (neg ? '-' : '') : moneyText(n);
+  let pos = 0, seen = 0;
+  while (pos < el.value.length && seen < digitsBefore) { if (/\d/.test(el.value[pos])) seen++; pos++; }
+  try { el.setSelectionRange(pos, pos); } catch (e) { /* not a text input */ }
+};
+
 function fmtMoney(n) {
   if (n === null || n === undefined || isNaN(n)) return '\u2014';
   const r = Math.round(n);
@@ -1299,6 +1400,7 @@ function positionTip(e) {
 // ONBOARDING
 // ============================================================================
 function renderOnboarding() {
+  setTimeout(() => { if (typeof stepProgress === 'function') stepProgress(); }, 0);
   app.innerHTML = `
     <header>
       <a class="logo" href="index.html" style="text-decoration:none;color:inherit"><span class="logo-dot"></span>Spend Enough</a>
@@ -1312,53 +1414,69 @@ function renderOnboarding() {
       </div>
 
       <div class="onboard-step">
-        <h2 class="step-title">Your timeline</h2>
-        <p class="step-hint">How old are you now? If you have a partner, add their age too.</p>
+        <div class="step-side"><span class="step-num">1</span><div><h2 class="step-title">Your timeline</h2>
+        <p class="step-hint">How old are you now? If you have a partner, add their age too.</p></div></div>
         <div class="field-grid">
-          <div class="field"><label>Your age</label><input type="number" id="ob_age" value="${state.age || ''}" placeholder="e.g. 45" min="18" max="90"/></div>
-          <div class="field"><label>Partner's age <span style="text-transform:none;font-weight:400;color:var(--ink-mute);">(blank if none)</span></label><input type="number" id="ob_partnerAge" value="${state.partnerAge || ''}" placeholder="optional" min="0" max="90"/></div>
+          <div class="field"><label>Your age</label><input type="number" id="ob_age" value="${state.age || ''}" placeholder="e.g. 45" min="18" max="90" oninput="stepProgress()"/></div>
+          <div class="field"><label>Partner's age <span style="text-transform:none;font-weight:400;color:var(--ink-mute);">(blank if none)</span></label><input type="number" id="ob_partnerAge" value="${state.partnerAge || ''}" placeholder="optional" min="0" max="90" oninput="stepProgress()"/></div>
         </div>
       </div>
 
       <div class="onboard-step">
-        <h2 class="step-title">Your savings and spending</h2>
-        <p class="step-hint">How much you've saved, and what you spend each year.</p>
+        <div class="step-side"><span class="step-num">2</span><div><h2 class="step-title">Your savings and spending</h2>
+        <p class="step-hint">How much you've saved, and what you spend each year.</p></div></div>
         <div class="field-grid">
-          <div class="field"><label>Investment portfolio</label><input type="number" id="ob_portfolio" min="0" value="${state.portfolio || ''}" placeholder="e.g. 600000" step="10000"/><span class="field-hint">401k, IRA, brokerage, combined</span></div>
-          <div class="field"><label>Annual spending, all in</label><input type="number" id="ob_spending" min="0" value="${state.spending ? state.spending + state.housing : ''}" placeholder="e.g. 90000" step="5000"/><span class="field-hint">Everything, housing included. Leave blank to find your "enough" number.</span></div>
+          <div class="field"><label>Investment portfolio</label><input type="text" id="ob_portfolio" class="money" inputmode="numeric" value="${moneyText(state.portfolio || '')}" placeholder="e.g. $600,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">401k, IRA, brokerage, combined</span></div>
+          <div class="field"><label>Annual spending, all in</label><input type="text" id="ob_spending" class="money" inputmode="numeric" value="${moneyText(state.spending ? state.spending + state.housing : '')}" placeholder="e.g. $90,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Everything, housing included. Leave blank to find your "enough" number.</span></div>
         </div>
       </div>
 
       <div class="onboard-step">
-        <h2 class="step-title">Other income and housing</h2>
-        <p class="step-hint">Work income, partner income, and the mortgage.</p>
+        <div class="step-side"><span class="step-num">3</span><div><h2 class="step-title">Other income and housing</h2>
+        <p class="step-hint">Work income, partner income, and the mortgage.</p></div></div>
         <div class="field-grid">
-          <div class="field"><label>Your gross income</label><input type="number" id="ob_yourIncome" min="0" value="${state.yourIncome || ''}" placeholder="e.g. 110000" step="5000"/><span class="field-hint">Before tax \u00b7 You can adjust tax settings later</span></div>
-          <div class="field"><label>Partner's gross income</label><input type="number" id="ob_partnerIncome" min="0" value="${state.partnerIncome || ''}" placeholder="0 if none" step="5000"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
-          <div class="field"><label>Of that, your mortgage payment</label><input type="number" id="ob_housing" min="0" value="${state.housing || ''}" placeholder="e.g. 24000" step="1000"/><span class="field-hint">Principal and interest per year, the part that ends when it is paid off. Taxes and insurance stay in spending.</span></div>
-          <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100"/><span class="field-hint">When that payment stops</span></div>
+          <div class="field"><label>Your gross income</label><input type="text" id="ob_yourIncome" class="money" inputmode="numeric" value="${moneyText(state.yourIncome || '')}" placeholder="e.g. $110,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Before tax \u00b7 You can adjust tax settings later</span></div>
+          <div class="field"><label>Partner's gross income</label><input type="text" id="ob_partnerIncome" class="money" inputmode="numeric" value="${moneyText(state.partnerIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
+          <div class="field"><label>Of that, your mortgage payment</label><input type="text" id="ob_housing" class="money" inputmode="numeric" value="${moneyText(state.housing || '')}" placeholder="e.g. $24,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Principal and interest per year, the part that ends when it is paid off. Taxes and insurance stay in spending.</span></div>
+          <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100" oninput="stepProgress()"/><span class="field-hint">When that payment stops</span></div>
         </div>
       </div>
 
       <div class="onboard-step">
-        <h2 class="step-title">Social Security</h2>
-        <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number.</p>
+        <div class="step-side"><span class="step-num">4</span><div><h2 class="step-title">Social Security</h2>
+        <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number.</p></div></div>
         <div class="field-grid">
-          <div class="field"><label>Your SS at full age</label><input type="number" id="ob_yourSS" min="0" value="${state.yourSSAmount || ''}" placeholder="e.g. 30000" step="1000"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper('ob_yourSS','ob_yourIncome')">estimate from income</button></span></div>
-          <div class="field"><label>Partner's SS at full age</label><input type="number" id="ob_partnerSS" min="0" value="${state.partnerSSAmount || ''}" placeholder="0 if none" step="1000"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper('ob_partnerSS','ob_partnerIncome')">estimate from income</button></span></div>
+          <div class="field"><label>Your SS at full age</label><input type="text" id="ob_yourSS" class="money" inputmode="numeric" value="${moneyText(state.yourSSAmount || '')}" placeholder="e.g. $30,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper('ob_yourSS','ob_yourIncome')">estimate from income</button></span></div>
+          <div class="field"><label>Partner's SS at full age</label><input type="text" id="ob_partnerSS" class="money" inputmode="numeric" value="${moneyText(state.partnerSSAmount || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Annual \u00b7 <button type="button" class="helper-trigger" onclick="openSSHelper('ob_partnerSS','ob_partnerIncome')">estimate from income</button></span></div>
         </div>
       </div>
 
       <div class="step-actions">
         <button class="btn-primary" onclick="finishOnboarding()">See the picture <span>\u2192</span></button>
-        <p style="margin-top:12px;font-size:14px;text-align:center"><a onclick="loadSample()" style="color:var(--rust);cursor:pointer;font-family:'Source Serif 4',serif;font-style:italic">or see a sample \u2192</a></p>
+        <p class="blank-note">Blanks are fine. Social Security gets estimated from your income, blank spending makes the tool solve for what you could spend, and anything else blank counts as none. You can change all of it later.</p>
+        <p style="margin-top:12px;font-size:14px"><a onclick="loadSample()" style="color:var(--rust);cursor:pointer;font-family:'Source Serif 4',serif;font-style:italic">or see a sample \u2192</a></p>
       </div>
       <div class="validation-msg" id="ob_validation"></div>
     </div>
   `;
 }
 
-function num(id) { const el = document.getElementById(id); const v = parseFloat(el && el.value); return isNaN(v) ? 0 : v; }
+// Reads a field whether it holds a plain number or formatted money.
+function num(id) { const el = document.getElementById(id); if (!el) return 0; const v = moneyParse(el.value); return isNaN(v) ? 0 : v; }
+
+// A step counts as done when the fields that matter to it are filled. Partner and
+// optional fields never block it, so the ticks track real progress, not every box.
+const STEP_FIELDS = [['ob_age'], ['ob_portfolio'], ['ob_yourIncome', 'ob_housing'], ['ob_yourSS']];
+window.stepProgress = function() {
+  const steps = document.querySelectorAll('.onboard-step');
+  STEP_FIELDS.forEach((ids, i) => {
+    const step = steps[i];
+    if (!step) return;
+    const done = ids.some(id => { const el = document.getElementById(id); return el && moneyParse(el.value) > 0; });
+    if (done === step.classList.contains('done')) return;
+    step.classList.toggle('done', done);
+  });
+};
 
 window.finishOnboarding = function() {
   const age = num('ob_age');
@@ -1380,8 +1498,16 @@ window.finishOnboarding = function() {
   state.partnerIncome = num('ob_partnerIncome');
   state.housing = mortgage;
   state.mortgagePayoffAge = num('ob_mortgagePayoff') || 60;
-  state.yourSSAmount = num('ob_yourSS');
-  state.partnerSSAmount = num('ob_partnerSS');
+  // A blank Social Security box would otherwise mean "none", which is both wrong for
+  // most workers and the most pessimistic thing the model could assume. Estimate it from
+  // income instead, and remember that we did so the Assumptions panel can say so.
+  const ssTyped = num('ob_yourSS'), partnerSsTyped = num('ob_partnerSS');
+  const ssBlank = (id) => { const el = document.getElementById(id); return !el || String(el.value).trim() === ''; };
+  state.yourSSAmount = ssTyped;
+  state.partnerSSAmount = partnerSsTyped;
+  state.ssEstimated = false;
+  if (ssBlank('ob_yourSS') && state.yourIncome > 0) { state.yourSSAmount = Math.round(estimateSSBenefit(state.yourIncome)); state.ssEstimated = true; }
+  if (ssBlank('ob_partnerSS') && state.hasPartner && state.partnerIncome > 0) { state.partnerSSAmount = Math.round(estimateSSBenefit(state.partnerIncome)); state.ssEstimated = true; }
   state.yourBreakStart = state.yourBreakEnd = state.partnerBreakStart = state.partnerBreakEnd = null;
   state.contribPauseStart = state.contribPauseEnd = null;
   state.extraSpend = 0; state.extraSpendStart = state.extraSpendEnd = null;
@@ -1452,6 +1578,7 @@ function renderDashboard() {
   baselineResult = baselineState ? runForState({ ...baselineState, simMode: state.simMode }) : result;
   const canCompare = compareOn && isPaid() && !!baselineState;
   const verdict = getVerdict(result);
+  lastVerdict = verdict;
   const presets = generatePresets(state);
 
   const sidebar = `
@@ -1557,8 +1684,7 @@ function renderDashboard() {
       <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
       ${renderEventTimeline()}
       <div class="verdict-notes">
-        <p>${verdict.detail}</p>
-        ${verdict.caveat ? `<p class="verdict-caveat">${verdict.caveat}</p>` : ''}
+        <p>${verdict.detail.trim()}</p>
       </div>
 
       ${renderWhatItTakes(result)}
@@ -1650,8 +1776,8 @@ function renderDashboard() {
 function moreOptionsHTML() {
   const effRate = state.taxRate ? (state.taxRate * 100).toFixed(0) : '18';
   return `
-    <div style="margin-top:12px">
-      <h3 class="sidebar-heading" style="margin-top:0">Late-life spending</h3>
+    <div class="more-body">
+      <h3 class="sub-heading" style="margin-top:0">Late-life spending</h3>
       <div class="control">
         <div class="control-row"><span class="control-label">After age ${state.slowDownAge}</span><span class="control-value">${fmtMoney(state.lateSpending)}</span></div>
         <input type="range" min="10000" max="400000" step="1000" value="${state.lateSpending}" oninput="slideLive(this,'lateSpending',this.value)" onchange="sliderCommit('lateSpending',this.value)"/>
@@ -1662,13 +1788,13 @@ function moreOptionsHTML() {
       </div>
 
 
-      <h3 class="sidebar-heading" style="margin-top:14px">Income growth</h3>
+      <h3 class="sub-heading">Income growth</h3>
       <div class="control">
         <div class="control-row"><span class="control-label">Real income growth</span><span class="control-value">${(state.yourIncomeGrowth*100).toFixed(1)}%</span></div>
         <input type="range" min="0" max="5" step="0.25" value="${state.yourIncomeGrowth*100}" oninput="updateLive2(this,'yourIncomeGrowth','partnerIncomeGrowth',this.value/100)" onchange="state.partnerIncomeGrowth=this.value/100;sliderCommit('yourIncomeGrowth',this.value/100)"/>
       </div>
 
-      <h3 class="sidebar-heading" style="margin-top:14px">Mortgage</h3>
+      <h3 class="sub-heading">Mortgage</h3>
       <div class="control">
         <div class="control-row"><span class="control-label">Mortgage payment per year</span><span class="control-value">${fmtMoney(state.housing)}</span></div>
         <input type="range" min="0" max="120000" step="1000" value="${state.housing}" oninput="slideLive(this,'housing',this.value)" onchange="sliderCommit('housing',this.value)"/>
@@ -1679,7 +1805,7 @@ function moreOptionsHTML() {
       </div>
       ${state.housing > 0 && state.mortgagePayoffAge > state.age + 2 ? `<button onclick="showPayoffModal()" style="margin-top:6px;font-size:14px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">+ Model accelerated payoff \u2192</button>` : ''}
 
-      <h3 class="sidebar-heading" style="margin-top:14px">Taxes</h3>
+      <h3 class="sub-heading">Taxes</h3>
       <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">Used to estimate the tax rates shown under Assumptions, where you can also edit them directly.</div>
       <div class="control">
         <div class="control-row"><span class="control-label">Filing status</span></div>
@@ -1696,16 +1822,16 @@ function moreOptionsHTML() {
       </div>
       <div style="font-size:14px;color:var(--ink-mute);margin-top:8px">Estimated rate on wages: <strong style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums">${effRate}%</strong> &middot; in retirement: <strong style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums">${Math.round(retirementTaxRate(state)*100)}%</strong></div>
 
-      <h3 class="sidebar-heading" style="margin-top:14px">Account types</h3>
+      <h3 class="sub-heading">Account types</h3>
       <div class="checkbox-row"><input type="checkbox" id="cb_accts" ${state.accountsEnabled?'checked':''} onchange="toggleAccounts(this.checked)"/><label for="cb_accts">Separate account types</label></div>
       ${state.accountsEnabled ? (() => {
         const acctTotal = state.accounts.traditional + state.accounts.roth + state.accounts.taxable;
         const mismatch = Math.abs(acctTotal - state.portfolio) > 100;
         return `
         <div class="acct-grid" style="margin-bottom:6px">
-          <label>Traditional</label><input type="number" value="${state.accounts.traditional}" min="0" onchange="updateAccount('traditional', +this.value)"/>
-          <label>Roth</label><input type="number" value="${state.accounts.roth}" onchange="updateAccount('roth', +this.value)"/>
-          <label>Taxable</label><input type="number" value="${state.accounts.taxable}" onchange="updateAccount('taxable', +this.value)"/>
+          <label for="acct_trad">Traditional</label><input type="text" id="acct_trad" class="money" inputmode="numeric" value="${moneyText(state.accounts.traditional)}" oninput="moneyType(this)" onchange="updateAccount('traditional', moneyValue(this))"/>
+          <label for="acct_roth">Roth</label><input type="text" id="acct_roth" class="money" inputmode="numeric" value="${moneyText(state.accounts.roth)}" oninput="moneyType(this)" onchange="updateAccount('roth', moneyValue(this))"/>
+          <label for="acct_tax">Taxable</label><input type="text" id="acct_tax" class="money" inputmode="numeric" value="${moneyText(state.accounts.taxable)}" oninput="moneyType(this)" onchange="updateAccount('taxable', moneyValue(this))"/>
         </div>
         <div style="font-size:13px;margin-bottom:10px;${mismatch?'color:var(--danger)':'color:var(--ink-mute)'}">
           Total: ${fmtMoneyShort(acctTotal)}${mismatch?' (portfolio updated to match)':''}
@@ -1719,7 +1845,7 @@ function moreOptionsHTML() {
         </div>`;
       })() : ''}
 
-      <h3 class="sidebar-heading" style="margin-top:14px">Life events</h3>
+      <h3 class="sub-heading">Life events</h3>
       <div class="ev-hint">One-time money in or out at a given age. Use a minus sign for a cost.</div>
       ${(state.oneTimeEvents || []).length ? `<div class="ev-list">${(state.oneTimeEvents || []).map((ev, i) => `<div class="ev-row">
         <span class="ev-name">${ev.label || 'Event'}</span>
@@ -1730,7 +1856,7 @@ function moreOptionsHTML() {
       <div class="ev-form">
         <label>What<input type="text" id="ev_label" placeholder="Inheritance" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('ev_age').focus();}"/></label>
         <label>Age<input type="number" id="ev_age" placeholder="70" min="18" max="110" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('ev_amount').focus();}"/></label>
-        <label>Amount<input type="number" id="ev_amount" placeholder="150000" step="1000" onkeydown="if(event.key==='Enter'){event.preventDefault();addEvent();}"/></label>
+        <label>Amount<input type="text" id="ev_amount" class="money" inputmode="numeric" placeholder="$150,000" oninput="moneyType(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();addEvent();}"/></label>
         <button class="compare-btn" onclick="addEvent()">Add</button>
       </div>
       <div class="ev-msg" id="ev_msg" role="status" aria-live="polite"></div>
@@ -1748,7 +1874,10 @@ function getVerdict(result) {
   if (result.mode === 'historical') {
     const { successCount, totalPeriods, failures, windows } = result;
     const rate = successCount / totalPeriods;
-    const tested = 'We ran your plan through every rolling ' + yc + '-year stretch of real U.S. market returns since 1926 for a ' + mixLabel() + ' stock/bond mix: ' + totalPeriods + ' stretches, starting ' + windows.firstStart + ' through ' + windows.lastStart + '.' + shockSentence('stretch');
+    // The method sentence now lives under "How to read the results", so the line under the
+    // chart stays short; only the interpretation remains there.
+    v.method = 'We ran your plan through every rolling ' + yc + '-year stretch of real U.S. market returns since 1926 for a ' + mixLabel() + ' stock/bond mix: ' + totalPeriods + ' stretches, starting ' + windows.firstStart + ' through ' + windows.lastStart + '.' + shockSentence('stretch');
+    const tested = '';
     if (maxSpendView) {
       v.headline = 'You could spend about ' + fmtMoney(state.spending + state.housing) + ' a year and still make it through ' + successCount + ' of ' + totalPeriods + ' stretches';
       v.lead = 'This is the highest spending level that lasted to age ' + state.targetAge + ' in at least ' + threshold + '% of history, with steady spending and no cuts' + (state.housing > 0 ? ', including the mortgage payment while it lasts' : '') + '.';
@@ -1853,10 +1982,13 @@ function renderReadFirst(result) {
   const bandLine = result.mode === 'fixed'
     ? `Everything here is in today’s dollars. Fixed mode draws one line at a steady ${pct(state.returnRate)} return, so there is no band. Historical mode shows the spread.`
     : `Everything here is in today’s dollars. ${result.mode === 'historical' ? 'A stretch is your plan run through the real market from one starting year, so 1926 to ' + (1926 + yrs - 1) + ' is one stretch, 1927 to ' + (1927 + yrs - 1) + ' the next, and so on. There are ' + n + ' of them, each its own path' : 'Each of the ' + n + ' simulated futures is its own path'}, and at every age the chart shows where those paths sit. The lighter band runs from the worst tenth to the best tenth, so eight in ten ${unit} fall inside it. The darker band is the middle half. The line is the middle outcome at each age, with as many paths above it as below. The count says how the plan would have done in every past you could have started in, and the future is not obliged to look like any of them. A wide band means ${result.mode === 'historical' ? 'the starting year' : 'the draw'} mattered a lot at that age, and a narrow one means it didn’t. If the bottom edge touches zero, the plan ran out in at least some ${unit}, and the spending explorer below shows how much less you would need to spend to change that.`;
+  const v = lastVerdict || {};
   return `<details class="read-first" ${readFirstOpen ? 'open' : ''} ontoggle="readFirstOpen=this.open">
     <summary><span class="sum-title">How to read the results, and how the model works</span></summary>
     <div class="read-first-body">
+      ${v.method ? `<p>${v.method}</p>` : ''}
       <p>${bandLine}</p>
+      ${v.caveat ? `<p class="verdict-caveat">${v.caveat}</p>` : ''}
       <p>Running out here means the balance hits zero before age ${state.targetAge} in that ${result.mode === 'historical' ? 'stretch' : 'run'}. It usually happens in the last few years, after decades of the plan working. We’re assuming most people would notice a bad run and adjust long before then. The guardrails setting under Assumptions is a rough version of that adjustment.</p>
       <p>The model covers your portfolio, wages until the age you stop, Social Security from the age you set, housing until the payoff age, one-time events you add, and taxes as one flat rate on wages and one on withdrawals, both of which you can change under Assumptions. Healthcare is not a separate line, so it belongs in your spending number. It does not model tax brackets, required minimum distributions, or Medicare surcharges. The portfolio is your stock/bond mix rebalanced once a year, minus the fee you set. The market history is U.S. returns since 1926, and ${yrs}-year stretches overlap, so ${result.mode === 'historical' ? n + ' stretches are not ' + n + ' separate tests' : 'the historical count is not a count of separate tests'}.</p>
       <p>If you are about to make a decision based on this, take the scenario to a planner or tax professional first.</p>
@@ -1908,7 +2040,7 @@ function renderAssumptions(result) {
     ? 'Account types are on. Roth withdrawals are tax-free, taxable-account withdrawals assume half is gain taxed at ' + asmInput('capGainsTax', Math.round(state.capGainsTax * 100), { min: 0, max: 50, step: 1, label: 'Capital gains rate percent' }) + ', and anything drawn before 59½ pays a 10% penalty.'
     : 'Every portfolio withdrawal is grossed up by ' + asmInput('capGainsTax', Math.round(state.capGainsTax * 100), { min: 0, max: 50, step: 1, label: 'Withdrawal tax rate percent' }) + ' for tax. Set it to 0 if your savings are mostly Roth' + (isPaid() ? ', or turn on account types under More options for per-account treatment.' : '.')} Brackets, RMDs, and Medicare surcharges are not modelled.`));
   rows.push(asmRow('Horizon', `The plan runs from age ${state.age} through age <strong>${state.targetAge}</strong> (${state.targetAge - state.age + 1} years), set in the sidebar under Your plan. A stretch counts as failed if the balance hits $0 before age ${state.targetAge}, even if that happens in the last year, and a stretch that ends with $1 still counts as a success. Once the balance is gone, the model does not let it come back.`));
-  if (state.yourSSAmount > 0 || state.partnerSSAmount > 0) rows.push(asmRow('Social Security', `Starts at age <strong>${state.ssStartAge}</strong> at ${fmtMoney(state.yourSSAmount)}${state.hasPartner && state.partnerSSAmount ? ' for you and ' + fmtMoney(state.partnerSSAmount) + ' for your partner' : ''} a year in today’s dollars, from your inputs. Claiming at 62 pays 70% of the full-age amount and at 70 pays 124%. Survivor and spousal benefits are not worked out for you.`));
+  if (state.yourSSAmount > 0 || state.partnerSSAmount > 0) rows.push(asmRow('Social Security', `Starts at age <strong>${state.ssStartAge}</strong> at ${fmtMoney(state.yourSSAmount)}${state.hasPartner && state.partnerSSAmount ? ' for you and ' + fmtMoney(state.partnerSSAmount) + ' for your partner' : ''} a year in today’s dollars, ${state.ssEstimated ? 'estimated from your income because you left it blank. Change it in the sidebar or from your ssa.gov statement' : 'from your inputs'}. Claiming at 62 pays 70% of the full-age amount and at 70 pays 124%. Survivor and spousal benefits are not worked out for you.`));
   if (isMC) rows.push(asmRow('Randomness', `The ${result.mcSims} random futures are the same set every time you look, so the result does not jump around as you change things. <button class="link-btn" onclick="rerollSeed()">Try a different random set</button>. If the count barely moves, ${result.mcSims} futures is plenty; if it jumps a few points, that is how much luck is in the number. Average ${asmInput('mcMean', (result.mcMean * 100).toFixed(1), { min: -5, max: 15, step: 0.1, label: 'Simulated average real return percent' })} &middot; volatility ${asmInput('mcSd', (result.mcSd * 100).toFixed(1), { min: 1, max: 40, step: 0.5, label: 'Simulated volatility percent' })}${mcParams(state).fromHistory ? '' : ' &middot; <button class="link-btn" onclick="resetMcToHistory()">match history for this mix</button>'} &middot; futures <input type="number" class="asm-input" style="width:${String(result.mcSims).length + 0.15}ch" min="100" max="5000" step="100" value="${result.mcSims}" oninput="this.style.width=(this.value.length+0.15)+'ch'" onchange="update('mcSims', Math.max(100, Math.min(5000, +this.value)))" aria-label="Number of simulated futures"/>`));
   return `<details class="assumptions" ${assumptionsOpen ? 'open' : ''} ontoggle="assumptionsOpen=this.open">
     <summary><span class="sum-title">Assumptions behind this result</span><span class="asm-hint">every default, and where to change it</span></summary>
@@ -2675,7 +2807,7 @@ window.addEvent = function() {
   const ageEl = document.getElementById('ev_age');
   const amountEl = document.getElementById('ev_amount');
   const age = parseInt(ageEl.value);
-  const amount = parseFloat(amountEl.value);
+  const amount = moneyParse(amountEl.value);
   const ageInvalid = !age;
   const amountInvalid = isNaN(amount);
   ageEl.style.borderColor = ageInvalid ? 'var(--danger)' : '';
