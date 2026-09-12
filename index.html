@@ -51,6 +51,7 @@
     --sans: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; } /* sections are display:grid, which would otherwise beat the hidden attribute */
   body { background: var(--ground); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
   a { color: inherit; }
   a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--rust); outline-offset: 3px; }
@@ -149,6 +150,8 @@
   .plan li b { font-weight: 500; color: var(--ink); }
   .plan .anchor { font-size: 13px; color: var(--faint); }
   .plan .btn { margin-top: 18px; }
+  .terms-line { font-size: 12.5px; color: var(--faint); margin-top: 8px; }
+  .terms-line a { color: var(--mute); }
   .refund { font-size: 14px; color: var(--mute); margin-top: 22px; }
 
   .isnt p { max-width: 34em; }
@@ -311,6 +314,7 @@
             <li>A printable one-page report, and the year-by-year table as a spreadsheet.</li>
           </ul>
           <a class="btn btn-ink" id="pro-buy" href="app.html" target="_blank" rel="noopener" onclick="track('clicked_checkout')" hidden>Get Pro</a>
+          <p class="terms-line" id="pro-terms" hidden>By purchasing you agree to the <a href="terms.html">Terms of Service</a>.</p>
         </div>
       </div>
       <p class="refund">Not for you? Full refund within 14 days, no questions asked.</p>
@@ -477,7 +481,7 @@ window.track=function(n){try{if(window.plausible)window.plausible(n);else if(win
   document.getElementById("year").textContent = String(new Date().getFullYear());
   if (CFG.price) { var pp = document.getElementById("pro-price"); if (pp) pp.textContent = CFG.price; }
   var buy = document.getElementById("pro-buy");
-  if (buy && CFG.checkoutUrl) { buy.href = CFG.checkoutUrl; buy.hidden = false; }
+  if (buy && CFG.checkoutUrl) { buy.href = CFG.checkoutUrl; buy.hidden = false; var pt = document.getElementById("pro-terms"); if (pt) pt.hidden = false; }
 
   // ---------- Email capture ----------
   (function wireSignup() {
