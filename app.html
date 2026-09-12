@@ -1020,6 +1020,11 @@
   .ev-dir button { flex: 1; background: transparent; border: none; padding: 8px 6px; font-family: inherit; font-size: 13px; color: var(--ink-mute); cursor: pointer; min-height: 0; }
   .ev-dir button + button { border-left: 1px solid var(--line); }
   .ev-dir button.active { background: var(--ink); color: var(--paper); font-weight: 600; }
+  .buy-fine, .terms-line, .unlock-note, .unlock-already { text-wrap: pretty; }
+  .terms-line a { white-space: nowrap; }
+  /* .modal p sets 14px, so these need the same weight of selector to win */
+  .modal .buy-fine, .modal .terms-line { font-size: 13px; }
+  @media (max-width: 600px) { .modal { padding: 18px 16px; } }
 </style>
 <body>
 <div id="app"></div>
@@ -1276,9 +1281,9 @@ window.showUnlockModal = function(opts) {
       </div>
     </div>
     <div style="margin:16px 0 4px">${buy}</div>
-    <p class="buy-fine">One-time payment. No account. Full refund within 14 days.</p>
+    <p class="buy-fine">One payment, refundable for 14 days.</p>
     <p class="terms-line">By purchasing you agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of Service</a>.</p>
-    <p class="unlock-already" id="unlockAlready"${reveal ? ' hidden' : ''}>Already bought? Open the button in your receipt email on this device, or <button type="button" class="link-btn" onclick="revealUnlockKey()">enter your key</button>.</p>
+    <p class="unlock-already" id="unlockAlready"${reveal ? ' hidden' : ''}>Already bought? Click the button in your receipt email on this device, or <button type="button" class="link-btn" onclick="revealUnlockKey()">enter your key</button>.</p>
     <div id="unlockKeyRow"${reveal ? '' : ' hidden'}>
     ${opts.hint ? `<p class="unlock-hint">${opts.hint}</p>` : ''}
     <div class="unlock-input-row">
@@ -3465,9 +3470,11 @@ window.autoEstimateSS = function(incomeId, ssId) {
 window.openPayoffHelper = function(targetId) {
   payoffTarget = targetId || null;
   const pay = targetId ? num('ob_housing') : state.housing;
+  const knownAge = (targetId ? num('ob_age') : 0) || state.age || 0;
   openModal(`<h2>When is the mortgage paid off?</h2>
     <p>From what is left on it today, the rate, and what you pay in a year.</p>
     <div class="field-grid">
+      ${knownAge >= 18 ? '' : `<div class="field"><label>Your age</label><input type="number" id="mp_age" min="18" max="90" placeholder="e.g. 45" oninput="runPayoffHelper()"/></div>`}
       <div class="field"><label>Balance left</label><input type="text" id="mp_balance" class="money" inputmode="numeric" value="${state.mortgageBalance ? moneyText(state.mortgageBalance) : ''}" placeholder="e.g. $250,000" oninput="moneyType(this); runPayoffHelper()"/></div>
       <div class="field"><label>Interest rate</label><input type="number" id="mp_rate" step="0.05" min="0" max="20" value="${state.mortgageRate ? (state.mortgageRate * 100).toFixed(2) : ''}" placeholder="e.g. 6.5" oninput="runPayoffHelper()"/><span class="field-hint">Percent a year</span></div>
       <div class="field"><label>You pay per year</label><input type="text" id="mp_payment" class="money" inputmode="numeric" value="${pay ? moneyText(pay) : ''}" placeholder="e.g. $24,000" oninput="moneyType(this); runPayoffHelper()"/><span class="field-hint">Principal and interest only</span></div>
@@ -3482,6 +3489,7 @@ window.runPayoffHelper = function() {
   const rate = parseFloat(document.getElementById('mp_rate').value);
   const pay = moneyValue(document.getElementById('mp_payment'));
   if (!bal || !pay || isNaN(rate)) { out.innerHTML = '<p class="mp-hint">Fill in the three boxes and the answer appears here.</p>'; return; }
+  const baseAge = (payoffTarget ? num('ob_age') : 0) || state.age || num('mp_age') || 0;
   const years = mortgageYearsLeft(bal, rate, pay);
   if (years === null) {
     const yearlyInterest = Math.round(bal * rate / 100);
@@ -3489,10 +3497,13 @@ window.runPayoffHelper = function() {
       <p class="mp-hint">${fmtMoney(pay)} a month would be ${fmtMoney(pay * 12)} a year.</p>`;
     return;
   }
-  const age = Math.round(state.age + years);
-  out.innerHTML = `<p class="mp-answer">About <strong>${years < 1 ? 'less than a year' : Math.round(years) + ' more year' + (Math.round(years) === 1 ? '' : 's')}</strong>, so it is paid off around age <strong>${age}</strong>.</p>
-    <div style="margin-top:12px"><button class="btn-primary" onclick="usePayoffAge(${age}, ${bal}, ${rate})">Use age ${age}</button></div>
-    <p class="mp-hint">Rounded to the nearest year. Extra payments would make it sooner.</p>`;
+  const yearsText = years < 1 ? 'less than a year' : Math.round(years) + ' more year' + (Math.round(years) === 1 ? '' : 's');
+  const age = baseAge >= 18 ? Math.round(baseAge + years) : null;
+  out.innerHTML = `<p class="mp-answer">About <strong>${yearsText}</strong>${age ? `, so it is paid off around age <strong>${age}</strong>` : ''}.</p>
+    ${age
+      ? `<div style="margin-top:12px"><button class="btn-primary" onclick="usePayoffAge(${age}, ${bal}, ${rate})">Use age ${age}</button></div>`
+      : '<p class="mp-hint">Add your age and this will give the payoff age too.</p>'}
+    <p class="mp-hint">Rounded to the nearest year.</p>`;
 };
 window.usePayoffAge = function(age, balance, ratePercent) {
   state.mortgageBalance = balance;
