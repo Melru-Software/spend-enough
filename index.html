@@ -114,6 +114,7 @@
 
   .qs { list-style: none; margin-top: 26px; border-top: 1px solid var(--line-soft); max-width: 44em; }
   .qs li { border-bottom: 1px solid var(--line-soft); }
+  .qs li:last-child { border-bottom: none; }   /* the section's own rule closes the list */
   .qs a { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; padding: 18px 0; text-decoration: none; font-family: var(--serif); font-size: clamp(21px, 2.2vw, 27px); line-height: 1.25; letter-spacing: -0.01em; }
   .qs a:hover { color: var(--rust); }
 
@@ -125,6 +126,8 @@
   .photo img { display: block; width: 100%; height: auto; border-radius: 3px; }
   .photo figcaption { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--mute); margin-top: 10px; }
   .essay { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 48px; margin-top: 8px; }
+  .essay .body { grid-column: 1; grid-row: 1; }
+  .essay .aside { grid-column: 2; grid-row: 1; }
   .essay .body { font-family: var(--serif); font-size: 20px; line-height: 1.55; max-width: 34em; }
   .essay .body p + p { margin-top: 18px; }
   .essay .body p::first-letter { font-size: 1.05em; }
@@ -179,6 +182,8 @@
     .sec, footer { grid-template-columns: 1fr; gap: 12px; padding: 40px 0; }
     .three { grid-template-columns: 1fr; gap: 24px; }
     .essay { grid-template-columns: 1fr; gap: 24px; }
+    .essay .aside { grid-column: 1; grid-row: 1; border-top: none; padding-top: 0; }
+    .essay .body { grid-column: 1; grid-row: 2; }
     .plans { grid-template-columns: 1fr; }
     .plan + .plan { border-left: none; border-top: 1px solid var(--line); padding-left: 0; padding-top: 28px; margin-top: 20px; }
     .plan { padding-right: 0; }
@@ -221,9 +226,9 @@
       </div>
       <div class="control">
         <label for="sp">Spending, all in</label>
-        <input id="sp" type="range" min="60000" max="120000" step="2000" value="80000" aria-describedby="sp-hint">
+        <input id="sp" type="range" min="66000" max="126000" step="2000" value="86000" aria-describedby="sp-hint">
         <output id="spv">$80,000</output>
-        <div class="hint" id="sp-hint">An example: a couple, 45 and 44, with $300,000 saved, $120,000 a year coming in between them, and a mortgage they pay off at 62, the year they both retire. Move the spending to see a new chart.</div>
+        <div class="hint" id="sp-hint">An example: a couple, 45 and 44, with $300,000 saved, $120,000 a year coming in between them, and a $2,000 a month mortgage they pay off at 62, the year they both retire. Move the spending to see a new chart.</div>
       </div>
     </div>
   </section>
@@ -258,12 +263,12 @@
     <div>
       <h2>If we don't save every spare dollar, are we still okay?</h2>
       <div class="essay">
+        <div class="aside"><p class="by">Hannah, the founder</p></div>
         <div class="body">
           <p>I've always been good at saving and bad at spending. Even when the numbers said we were fine, I didn't feel it. On maternity leave I wanted to know whether we could afford for me not to go back to work, and I couldn't find a tool that showed me in a way I understood, at a price I'd pay. So I built one. It told me we could live on one salary, but that stopping now would add about ten years of working at the end of my career. I finally understood what the decision could cost. Then my husband got laid off. I put the new numbers in and realized there was no need to panic.</p>
           <p>I was looking for a number that is safe in every future, but I learned there isn't one. What I got instead was the range, and how much each choice moves it. I chose to keep working. I work from home with my kid here, and we spend more on a nanny so I can. It gave me a way to look at a decision and see what it would do, and that has helped me let go of needing to over save out of fear. It is giving me the confidence to spend enough on our life today instead of saving all of it for later. I hope it can do the same for you.</p>
           <p class="more"><a href="why.html">Read the whole story</a></p>
         </div>
-        <div class="aside"><p class="by">Hannah, the founder</p></div>
       </div>
       <figure class="photo">
         <img src="founder.jpg" width="1159" height="647" loading="lazy" alt="A laptop open on a bed, next to a baby asleep on their front with a pacifier and a stuffed animal." />

@@ -848,7 +848,7 @@
   @media (max-width: 720px) {
     .onboard-step, .step-actions { grid-template-columns: 1fr; gap: 14px; }
     .step-actions > * { grid-column: 1; justify-self: stretch; text-align: left; }
-    .step-actions .btn-primary { justify-self: stretch; width: 100%; }
+    .step-actions .btn-primary { justify-self: stretch; width: 100%; justify-content: center; }
     .step-side { margin-bottom: 2px; }
   }
 
@@ -1052,7 +1052,10 @@ let compareOn = false;
 let maxSpendStale = true;
 let spendingLevelsCache = null, spendingLevelsStale = true;
 // Paying users see their details open unless they closed them; free users see the locked preview on request.
-let showMoreOptions = (() => { try { return localStorage.getItem('spendenough_more') === 'closed' ? false : (localStorage.getItem('spendenough_more') === 'open'); } catch (e) { return false; } })();
+const narrowNow = () => !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+const MORE_KEY = () => narrowNow() ? 'spendenough_more_phone' : 'spendenough_more';
+const morePref = () => { try { return localStorage.getItem(MORE_KEY()); } catch (e) { return null; } };
+let showMoreOptions = morePref() === 'open';
 let moreDefaultApplied = false;
 let isFirstDashboard = true;
 let maxSpendView = false;
@@ -1495,16 +1498,65 @@ function moneyText(n) {
   if (n === null || n === undefined || isNaN(n) || n === '') return '';
   return (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US');
 }
+// While you are typing, the digits you typed are grouped as they stand, rather than
+// being run back through a number. Reparsing mid-edit collapsed "$300,000" to "$0" the
+// moment you deleted the leading 3, because "00,000" is zero. Leading zeros are tidied
+// up on blur instead.
+function groupDigits(d) { return d.replace(/\B(?=(\d{3})+$)/g, ','); }
 window.moneyType = function(el) {
-  const caret = el.selectionStart || 0;
+  const caret = el.selectionStart === null ? el.value.length : el.selectionStart;
   const digitsBefore = (el.value.slice(0, caret).match(/\d/g) || []).length;
-  const neg = el.value.replace(/[^\d-]/g, '').indexOf('-') === 0;
-  const n = moneyParse(el.value);
-  el.value = isNaN(n) ? (neg ? '-' : '') : moneyText(n);
+  const raw = el.value.replace(/[^\d-]/g, '');
+  const neg = raw.indexOf('-') === 0;
+  const digits = raw.replace(/-/g, '');
+  el.value = digits === '' ? (neg ? '-' : '') : (neg ? '-$' : '$') + groupDigits(digits);
+  // Put the caret back after the same count of digits, not the same character index.
   let pos = 0, seen = 0;
-  while (pos < el.value.length && seen < digitsBefore) { if (/\d/.test(el.value[pos])) seen++; pos++; }
+  if (digitsBefore === 0) {
+    const first = el.value.search(/\d/);
+    pos = first === -1 ? el.value.length : first;      // just after the $, ready to type
+  } else {
+    while (pos < el.value.length && seen < digitsBefore) { if (/\d/.test(el.value[pos])) seen++; pos++; }
+  }
   try { el.setSelectionRange(pos, pos); } catch (e) { /* not a text input */ }
 };
+
+// Backspace over a comma or the $ should take the digit next to it, not the separator
+// that the formatter will immediately put back.
+window.moneyKey = function(el, e) {
+  if (e.key !== 'Backspace' && e.key !== 'Delete') return;
+  if (el.selectionStart !== el.selectionEnd) return;   // a selection: let the browser do it
+  const v = el.value;
+  let i;
+  if (e.key === 'Backspace') {
+    i = el.selectionStart - 1;
+    while (i >= 0 && !/\d/.test(v[i])) i--;
+    if (i < 0) return;
+  } else {
+    i = el.selectionStart;
+    while (i < v.length && !/\d/.test(v[i])) i++;
+    if (i >= v.length) return;
+  }
+  e.preventDefault();
+  el.value = v.slice(0, i) + v.slice(i + 1);
+  el.setSelectionRange(i, i);
+  el.dispatchEvent(new Event('input', { bubbles: true }));   // runs the field's own handlers
+};
+
+// On the way out, settle on the canonical figure: no leading zeros, no lone minus.
+window.moneyBlur = function(el) {
+  const n = moneyParse(el.value);
+  el.value = isNaN(n) ? '' : moneyText(n);
+};
+
+document.addEventListener('keydown', function (e) {
+  const el = e.target;
+  if (el && el.classList && el.classList.contains('money')) moneyKey(el, e);
+}, true);
+document.addEventListener('blur', function (e) {
+  const el = e.target;
+  if (el && el.classList && el.classList.contains('money')) moneyBlur(el);
+}, true);
 
 function fmtMoney(n) {
   if (n === null || n === undefined || isNaN(n)) return '\u2014';
@@ -1749,8 +1801,7 @@ function renderDashboard() {
   // sections would bury the scenarios and the save box below them.
   if (!moreDefaultApplied && isPaid()) {
     moreDefaultApplied = true;
-    const roomy = !window.matchMedia('(max-width: 768px)').matches;
-    try { if (localStorage.getItem('spendenough_more') === null) showMoreOptions = roomy; } catch (e) { showMoreOptions = roomy; }
+    if (morePref() === null) showMoreOptions = !narrowNow();   // open where there is room
   }
   // Free users see Historical only; Fixed and Simulated need the full version.
   if (!isPaid() && state.simMode !== 'historical') { state.simMode = 'historical'; }
@@ -1827,12 +1878,12 @@ function renderDashboard() {
       </div>
 
       <div class="sidebar-section">
-        <button class="more-toggle" onclick="toggleMore()">
+        <button class="more-toggle" onclick="${!isPaid() && narrowNow() ? 'showUnlockModal()' : 'toggleMore()'}">
           <span>More about you${!isPaid()?' <span class="lock-icon">&#x1f512;</span>':''}</span>
           <span class="more-toggle-chevron">${showMoreOptions ? '▾' : '▸'}</span>
         </button>
         ${!showMoreOptions ? `<div class="more-hint">${state.taxRate ? Math.round(state.taxRate*100) : 18}% tax &middot; ${(state.returnRate*100).toFixed(1)}% return</div>` : ''}
-        ${showMoreOptions ? (isPaid()
+        ${showMoreOptions && (isPaid() || !narrowNow()) ? (isPaid()
           ? moreOptionsHTML()
           : `<div class="locked-note">These settings are part of the full version. <button class="link-btn" onclick="showUnlockModal()">Get it to adjust \u2192</button></div>
         <fieldset class="locked-preview" disabled>${moreOptionsHTML()}</fieldset>`) : ''}
@@ -2464,7 +2515,7 @@ function computeSpendingLevels() {
 function renderSpendingExplorer() {
   const rows = computeSpendingLevels();
   const isHist = state.simMode === 'historical';
-  return `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Spending, all in</th><th>${isHist?'Lasted in':'Lasted in'}</th><th>Median ending</th><th>Worst 10%</th></tr></thead><tbody>
+  return `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Spending</th><th>Lasted in</th><th>Median ending</th><th>Worst 10%</th></tr></thead><tbody>
     ${rows.map(r => `<tr class="${r.isCurrent?'current-row':''} clickable" onclick="applySpending(${r.spending})" title="Click to set spending to ${fmtMoney(r.spending)}/yr"><td>${fmtMoney(r.spending + state.housing)}/yr ${r.isCurrent?'<span class="tag-current">current</span>':''}</td><td>${isHist ? r.successCount+' of '+r.totalPeriods : Math.round(r.successRate*100)+'%'}</td><td>${fmtMoneyShort(r.medianFinal)}</td><td>${r.p10<=0?'<span class="fail">Ran out</span>':fmtMoneyShort(r.p10)}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
@@ -3116,7 +3167,7 @@ window.setCashflowMode = function(m) {
   const desc = document.getElementById('cf-desc');
   if (desc) desc.textContent = m === 'net' ? "Green bars mean you're adding to the portfolio. Red means you're drawing from it." : "Income sources stacked against spending. The gap is what comes from or goes to the portfolio.";
 };
-window.toggleMore = function() { showMoreOptions = !showMoreOptions; try { localStorage.setItem('spendenough_more', showMoreOptions ? 'open' : 'closed'); } catch (e) {} render(); };
+window.toggleMore = function() { showMoreOptions = !showMoreOptions; try { localStorage.setItem(MORE_KEY(), showMoreOptions ? 'open' : 'closed'); } catch (e) {} render(); };
 
 // Live updates: immediate label + debounced chart, full render on release
 let liveChartTimer = null;

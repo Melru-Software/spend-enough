@@ -798,7 +798,9 @@ const SAMPLE_STATE = Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), {
   // A couple in their mid-forties on two ordinary incomes, with a mortgage that ends the year they retire.
   age: 45, partnerAge: 44, hasPartner: true,
   portfolio: 300000, spending: 62000, lateSpending: 52000, slowDownAge: 75,
-  housing: 18000, mortgagePayoffAge: 62,
+  // $2,000 a month of principal and interest, which is about $255,000 left at 6% over
+  // the 17 years to payoff. Taxes and insurance are not in here; they sit in spending.
+  housing: 24000, mortgagePayoffAge: 62,
   yourIncome: 75000, yourStopWorkAge: 62,
   partnerIncome: 45000, partnerStopWorkAge: 62,
   ssStartAge: 67, yourSSAmount: 26000, partnerSSAmount: 18000,

@@ -31,13 +31,19 @@
   .todo { background: rgba(160,74,40,0.08); border-left: 3px solid var(--rust); padding: 8px 12px; font-size: 14px; color: var(--ink-soft); margin: 12px 0; }
   footer { border-top: 1px solid var(--line); padding: 24px 32px; text-align: center; font-size: 13px; color: var(--ink-mute); }
   footer a { color: var(--rust); text-decoration: none; margin: 0 6px; }
-  @media (max-width: 600px) { header { padding: 14px 20px; } main { padding: 32px 20px 60px; } h1 { font-size: 30px; } }
+  @media (max-width: 600px) {
+    header { padding: 12px 20px; }
+    .logo { font-size: 18px; white-space: nowrap; }
+    header nav { flex-wrap: nowrap; gap: 14px; }
+    header nav a:not(.keep) { display: none; }   /* they are all in the footer */
+    main { padding: 28px 20px 56px; } h1 { font-size: 28px; }
+  }
 </style>
 </head>
 <body>
 <header>
   <a class="logo" href="/"><span class="logo-dot"></span>Spend Enough</a>
-  <nav><a href="app.html">Open the app</a><a href="why.html">Why I built it</a><a href="privacy.html">Privacy</a></nav>
+  <nav><a class="keep" href="app.html">Open the app</a><a href="why.html">Why I built it</a><a href="privacy.html">Privacy</a></nav>
 </header>
 <main>
   <h1>Terms of service</h1>
