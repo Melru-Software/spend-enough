@@ -635,6 +635,48 @@ test('postPayoffSpend adds to spending from the payoff age on, and is not capped
   }
 });
 
+// ---- pension or other income after work --------------------------------------------
+test('other income: nothing before its start age, taxed at the retirement rate after, and not wages', () => {
+  const base = mk({ age: 55, targetAge: 80, portfolio: 3000000, spending: 60000, lateSpending: 60000, slowDownAge: 95,
+                    yourIncome: 0, yourStopWorkAge: 55, guardrailsEnabled: false, taxRate: 0.25, retirementTaxRate: 0.20, capGainsTax: 0 });
+  const withP = Object.assign({}, base, { otherIncome: 30000, otherIncomeStart: 65 });
+  const zeros = new Array(base.targetAge - base.age + 1).fill(0);
+  const a = E.simulateOnce(base, zeros), b = E.simulateOnce(withP, zeros);
+  for (let i = 0; i < a.length; i++) {
+    const age = a[i].age;
+    if (age < 65) {
+      assert.strictEqual(b[i].otherIncome, 0, `age ${age}: no other income yet`);
+      assert.strictEqual(b[i].withdrawal, a[i].withdrawal, `age ${age}: withdrawal unchanged before the start age`);
+    } else {
+      assert.strictEqual(b[i].otherIncome, 30000, `age ${age}: other income paid`);
+      assert.strictEqual(b[i].yourIncome, 0, `age ${age}: it is not wages`);
+      // net of the retirement rate, 30k * (1 - 0.20) = 24k less has to come from the portfolio
+      assert.ok(Math.abs((a[i].withdrawal - b[i].withdrawal) - 24000) < 1e-6, `age ${age}: withdrawal should fall by 24k, fell by ${a[i].withdrawal - b[i].withdrawal}`);
+    }
+  }
+});
+test('other income: an end age stops it, and fixed dollars shrink with inflation', () => {
+  const s = mk({ age: 60, targetAge: 75, portfolio: 2000000, spending: 50000, lateSpending: 50000, slowDownAge: 95,
+                 yourIncome: 0, yourStopWorkAge: 60, guardrailsEnabled: false, otherIncome: 20000, otherIncomeStart: 62, otherIncomeEnd: 66 });
+  const zeros = new Array(s.targetAge - s.age + 1).fill(0);
+  const y = E.simulateOnce(s, zeros);
+  const at = (age) => y.find(r => r.age === age);
+  assert.strictEqual(at(61).otherIncome, 0); assert.strictEqual(at(62).otherIncome, 20000);
+  assert.strictEqual(at(66).otherIncome, 20000); assert.strictEqual(at(67).otherIncome, 0);
+  const fixed = E.simulateOnce(Object.assign({}, s, { otherIncomeEnd: null, otherIncomeFixed: true }), zeros);
+  const f = (age) => fixed.find(r => r.age === age).otherIncome;
+  assert.ok(f(62) <= 20000 && f(62) > 15000, 'first year is close to the stated amount');
+  assert.ok(f(70) < f(62), 'a fixed line buys less over time in today\'s dollars');
+  assert.ok(f(75) > 0, 'with no end age it runs to the plan end');
+});
+test('other income: the second line adds to the first', () => {
+  const s = mk({ age: 60, targetAge: 70, portfolio: 2000000, spending: 50000, lateSpending: 50000, slowDownAge: 95, yourIncome: 0, yourStopWorkAge: 60,
+                 guardrailsEnabled: false, otherIncome: 10000, otherIncomeStart: 60, otherIncome2: 5000, otherIncome2Start: 65 });
+  const y = E.simulateOnce(s, new Array(11).fill(0));
+  assert.strictEqual(y.find(r => r.age === 64).otherIncome, 10000);
+  assert.strictEqual(y.find(r => r.age === 65).otherIncome, 15000);
+});
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed) { console.error(`\nFAILED: ${failures.length} test(s) above.`); process.exit(1); }
 console.log('All engine and paywall tests passed.');

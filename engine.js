@@ -257,7 +257,7 @@ function simulateOnce(state, returnSeries, inflationSeries) {
     const year = CURRENT_YEAR + i;
 
     if (broken) {
-      years.push({ year, age, partnerAge, portfolioStart: 0, portfolio: 0, yourIncome: 0, partnerIncome: 0, ssIncome: 0, spending: 0, withdrawal: 0, housing: 0, tax: 0, marketReturn: 0, flexed: false, ranOut: true });
+      years.push({ year, age, partnerAge, portfolioStart: 0, portfolio: 0, yourIncome: 0, partnerIncome: 0, ssIncome: 0, otherIncome: 0, spending: 0, withdrawal: 0, housing: 0, tax: 0, marketReturn: 0, flexed: false, ranOut: true });
       continue;
     }
 
@@ -276,6 +276,17 @@ function simulateOnce(state, returnSeries, inflationSeries) {
     if (age >= state.ssStartAge) ssIncome += state.yourSSAmount;
     if (state.hasPartner && partnerAge >= state.ssStartAge) ssIncome += state.partnerSSAmount;
 
+    // Pension or other income after work. Runs from its start age through its end age
+    // (no end = the rest of the plan). A fixed line is nominal, so it is deflated.
+    let otherIncome = 0;
+    const otherLines = [[state.otherIncome, state.otherIncomeStart, state.otherIncomeEnd, state.otherIncomeFixed],
+                        [state.otherIncome2, state.otherIncome2Start, state.otherIncome2End, state.otherIncome2Fixed]];
+    for (const [amt, start, end, fixed] of otherLines) {
+      if (!(amt > 0) || start === null || start === undefined || age < start) continue;
+      if (end !== null && end !== undefined && age > end) continue;
+      otherIncome += fixed ? amt / deflator : amt;
+    }
+
     // Housing: the payment until the mortgage is paid off, then nothing; after a home
     // sale, whatever housing costs from then on (rent, or zero).
     const sold = state.homeSaleAge !== null && state.homeSaleAge !== undefined && age >= state.homeSaleAge;
@@ -290,8 +301,8 @@ function simulateOnce(state, returnSeries, inflationSeries) {
     // Compute income first (independent of spend). Wages carry the wage rate (which
     // includes payroll tax); Social Security is taxed at half the retirement rate as a
     // stand-in for the 0/50/85% inclusion rules.
-    const grossIncome = yourIncomeThisYear + partnerIncomeThisYear + ssIncome;
-    const taxedIncome = (yourIncomeThisYear + partnerIncomeThisYear) * state.taxRate + ssIncome * (retRate * 0.5);
+    const grossIncome = yourIncomeThisYear + partnerIncomeThisYear + ssIncome + otherIncome;
+    const taxedIncome = (yourIncomeThisYear + partnerIncomeThisYear) * state.taxRate + ssIncome * (retRate * 0.5) + otherIncome * retRate;
     const netIncome = grossIncome - taxedIncome;
 
     // How much of a working year's surplus gets invested. Blank contributions (0) means
@@ -390,7 +401,7 @@ function simulateOnce(state, returnSeries, inflationSeries) {
     let ranOutThisYear = false;
     if (portfolio <= 0) { portfolio = 0; ranOutThisYear = true; broken = true; if (useAccts) { accts.traditional = accts.roth = accts.taxable = 0; } }
 
-    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, onBreak: yourBreak || partnerBreak, contribPaused, unallocated, extraSpend: extra, ranOut: ranOutThisYear || broken });
+    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, otherIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, onBreak: yourBreak || partnerBreak, contribPaused, unallocated, extraSpend: extra, ranOut: ranOutThisYear || broken });
 
     // Real wage growth applies only in years actually worked (no raises during a break).
     if (!yourBreak) yourSalary *= (1 + (state.yourIncomeGrowth || 0));
@@ -768,6 +779,12 @@ const DEFAULT_STATE = {
   // Extra spending per year for a window (null ages = none).
   extraSpend: 0, extraSpendStart: null, extraSpendEnd: null,
   ssStartAge: 67, yourSSAmount: 0, partnerSSAmount: 0,
+  // Pension or other income after work: two lines, each an amount per year in today's
+  // dollars from a start age to an end age (null = the plan's end). fixed = no cost of
+  // living rise, so in today's dollars it shrinks with inflation like the mortgage payment.
+  // Taxed as retirement income, never as wages, and never counted as working.
+  otherIncome: 0, otherIncomeStart: 65, otherIncomeEnd: null, otherIncomeFixed: false,
+  otherIncome2: 0, otherIncome2Start: 65, otherIncome2End: null, otherIncome2Fixed: false,
   oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0, postSaleHousing: 0,
   // After an accelerated payoff, the old payment can be spent instead of invested.
   postPayoffSpend: 0,
