@@ -620,6 +620,21 @@ test('paywall: KEY_RE accepts UUID-shaped keys only', () => {
 });
 
 // ---- summary ----------------------------------------------------------------
+// ---- spending after the mortgage is paid off --------------------------------------
+test('postPayoffSpend adds to spending from the payoff age on, and is not capped at the payment', () => {
+  const base = mk({ age: 50, targetAge: 70, portfolio: 3000000, spending: 50000, lateSpending: 50000, slowDownAge: 95,
+                    yourIncome: 0, housing: 24000, mortgagePayoffAge: 55, guardrailsEnabled: false, postPayoffSpend: 0 });
+  const more = Object.assign({}, base, { postPayoffSpend: 40000 });   // more than the payment
+  const zeros = new Array(base.targetAge - base.age + 1).fill(0);
+  const a = E.simulateOnce(base, zeros), b = E.simulateOnce(more, zeros);
+  assert.strictEqual(a.length, b.length);
+  for (let i = 0; i < a.length; i++) {
+    const age = a[i].age;
+    if (age < 55) assert.strictEqual(b[i].spending, a[i].spending, `age ${age}: before payoff, spending must not change`);
+    else assert.ok(b[i].spending - a[i].spending >= 40000 - 1e-6, `age ${age}: after payoff, spending should rise by at least the full 40k (got ${b[i].spending - a[i].spending})`);
+  }
+});
+
 console.log(`\n${passed} passed, ${failed} failed`);
 if (failed) { console.error(`\nFAILED: ${failures.length} test(s) above.`); process.exit(1); }
 console.log('All engine and paywall tests passed.');

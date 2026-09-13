@@ -1048,7 +1048,46 @@ window.track=function(n){try{if(window.plausible)window.plausible(n);else if(win
 
 let state = withDefaults(null);
 let activeView = 'onboarding';
-let savedScenarios = JSON.parse(localStorage.getItem('zeroline_scenarios') || '[]');
+
+// The plan lives in local storage so a refresh, or a phone reloading the tab, brings
+// people back to where they were. Only "Start over" clears it. The onboarding form
+// keeps a draft of what has been typed so far, for the same reason.
+const PLAN_STORE = 'spendenough_plan';
+const DRAFT_STORE = 'spendenough_draft';
+function savePlan() {
+  try { localStorage.setItem(PLAN_STORE, JSON.stringify({ v: 1, savedAt: Date.now(), activeView, state, baselineState, baselineName, currentName })); }
+  catch (e) { /* private mode or storage full */ }
+}
+function loadPlan() {
+  try {
+    const raw = localStorage.getItem(PLAN_STORE); if (!raw) return false;
+    const p = JSON.parse(raw); if (!p || p.v !== 1 || !p.state || typeof p.state !== 'object') return false;
+    state = withDefaults(p.state);
+    baselineState = p.baselineState ? withDefaults(p.baselineState) : JSON.parse(JSON.stringify(state));
+    baselineName = p.baselineName || 'Starting point'; currentName = p.currentName || 'Current';
+    activeView = p.activeView === 'dashboard' ? 'dashboard' : 'onboarding';
+    return true;
+  } catch (e) { return false; }
+}
+function clearPlan() { try { localStorage.removeItem(PLAN_STORE); } catch (e) { /* private mode */ } clearDraft(); }
+function saveDraft() {
+  try {
+    const d = {};
+    document.querySelectorAll('.onboarding input[id^="ob_"], .onboarding select[id^="ob_"]').forEach(el => { d[el.id] = el.value; });
+    localStorage.setItem(DRAFT_STORE, JSON.stringify(d));
+  } catch (e) { /* private mode or storage full */ }
+}
+function restoreDraft() {
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem(DRAFT_STORE) || 'null'); } catch (e) { d = null; }
+  if (!d || typeof d !== 'object') return;
+  // Only fill boxes that are still blank: values that come from the plan itself win.
+  Object.keys(d).forEach(id => { const el = document.getElementById(id); if (el && String(el.value).trim() === '' && String(d[id]).trim() !== '') el.value = d[id]; });
+}
+function clearDraft() { try { localStorage.removeItem(DRAFT_STORE); } catch (e) { /* private mode */ } }
+let savedScenarios = (() => { try { const v = JSON.parse(localStorage.getItem('zeroline_scenarios') || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } })();
+function persistScenarios() { try { localStorage.setItem('zeroline_scenarios', JSON.stringify(savedScenarios)); } catch (e) { /* private mode or storage full */ } }
+const escHtml = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let chart = null, cashflowChart = null;
 let lastSimResult = null;
 let lastVerdict = null; // so the expandable section can carry the method note and caveat
@@ -1362,7 +1401,7 @@ window.showPayoffModal = function(fromPreset) {
         </label>
       </div>
       <div id="po_preview" style="margin-top:12px;font-size:14px;color:var(--ink-mute);min-height:18px"></div>
-      <div class="field" style="margin-top:12px"><label>Once it is paid off, how much of the freed ${fmtMoney(state.housing)} a year do you spend?</label><input type="number" id="po_spend" min="0" max="${state.housing}" step="1000" value="${Math.min(state.housing, state.postPayoffSpend || 0)}" style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;background:var(--bone)"/><span class="field-hint">The rest goes into the portfolio, or is not drawn from it. 0 means all of it is invested.</span></div>
+      <div class="field" style="margin-top:12px"><label>Once it is paid off, how much more do you spend each year? The payment frees ${fmtMoney(state.housing)}. Enter more if the plan is to spend more.</label><input type="number" id="po_spend" min="0" step="1000" value="${Math.min(state.housing, state.postPayoffSpend || 0)}" style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;background:var(--bone)"/><span class="field-hint">The rest goes into the portfolio, or is not drawn from it. 0 means all of it is invested.</span></div>
       <div style="display:flex;gap:8px;margin-top:16px">
         <button onclick="applyPayoffModal()" style="flex:1;padding:10px;background:var(--rust);color:var(--paper);border:none;border-radius:3px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit">Apply to plan</button>
         <button onclick="closeModal()" style="padding:10px 16px;background:none;border:1px solid var(--line);border-radius:3px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink-soft)">Cancel</button>
@@ -1399,7 +1438,7 @@ window.applyPayoffModal = function() {
   }
   if (payoffFromPreset) { startComparison('Pay off the house early'); payoffFromPreset = false; }
   const spendPart = parseFloat((document.getElementById('po_spend') || {}).value) || 0;
-  state.postPayoffSpend = Math.max(0, Math.min(state.housing, spendPart));
+  state.postPayoffSpend = Math.max(0, spendPart);
   const annual = calcAnnualMortgagePayment(balance, rate, years);
   state.housing = Math.round(annual / 100) * 100;
   state.mortgagePayoffAge = state.age + years;
@@ -1595,7 +1634,7 @@ const app = document.getElementById('app');
 const TOUCH = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 const modalRoot = document.getElementById('modal-root');
 
-function render() { if (activeView === 'onboarding') renderOnboarding(); else renderDashboard(); wireTooltips(); }
+function render() { if (activeView === 'onboarding') renderOnboarding(); else renderDashboard(); wireTooltips(); savePlan(); }
 
 const tipEl = document.getElementById('tip-popup');
 function wireTooltips() {
@@ -1622,7 +1661,7 @@ function positionTip(e) {
 // ONBOARDING
 // ============================================================================
 function renderOnboarding() {
-  setTimeout(() => { if (typeof stepProgress === 'function') stepProgress(); }, 0);
+  setTimeout(() => { restoreDraft(); if (typeof stepProgress === 'function') stepProgress(); }, 0);
   app.innerHTML = `
     <header>
       <a class="logo" href="/" style="text-decoration:none;color:inherit"><span class="logo-dot"></span>Spend Enough</a>
@@ -1708,6 +1747,7 @@ window.stepProgress = function() {
     if (done === step.classList.contains('done')) return;
     step.classList.toggle('done', done);
   });
+  saveDraft();
 };
 
 window.finishOnboarding = function() {
@@ -1773,6 +1813,7 @@ window.finishOnboarding = function() {
   maxSpendStale = true; spendingLevelsStale = true;
   baselineState = JSON.parse(JSON.stringify(state));
   baselineResult = null; baselineName = 'Starting point'; currentName = 'Current'; compareOn = false;
+  clearDraft();
   track('ran_model');
   render();
   runPendingScenario();
@@ -1796,6 +1837,15 @@ function runPendingScenario() {
 window.goToOnboarding = function() { activeView = 'onboarding'; render(); };
 window.resetToDefaults = function() {
   if (confirm('Reset to your starting values?')) { state = withDefaults(baselineState); maxSpendStale = true; spendingLevelsStale = true; render(); }
+};
+window.startOver = function() {
+  if (!confirm('Clear your numbers and start from a blank plan? Saved scenarios are kept.')) return;
+  clearPlan();
+  state = withDefaults(null);
+  baselineState = null; baselineResult = null; baselineName = 'Starting point'; currentName = 'Current'; compareOn = false;
+  maxSpendView = false; invalidateCaches();
+  activeView = 'onboarding';
+  render();
 };
 
 // ============================================================================
@@ -1903,7 +1953,7 @@ function renderDashboard() {
           <label>Note, optional<input type="text" id="scenarioNote" placeholder="What this one assumes" onkeydown="if(event.key==='Enter'){event.preventDefault();saveScenario();}"/></label>
           <button class="compare-btn" onclick="saveScenario()">Save this scenario</button>
         </div>
-        ${savedScenarios.length ? `<div class="saved-list">${savedScenarios.map((sc, i) => `<div class="saved-item"><div><span class="saved-name">${sc.name}</span>${sc.note ? `<div class="saved-note">${sc.note}</div>` : ''}</div><span class="saved-actions"><button onclick="loadScenario(${i})">load</button><button onclick="compareWith(${i})" title="Show this scenario next to your current settings">compare</button><button onclick="deleteScenario(${i})" aria-label="Delete ${sc.name}">\u00d7</button></span></div>`).join('')}</div>` : '<div class="ev-hint" style="margin-top:10px">Save what you have now, change something, then use \u201ccompare\u201d to see both on one chart.</div>'}`
+        ${savedScenarios.length ? `<div class="saved-list">${savedScenarios.map((sc, i) => `<div class="saved-item"><div><span class="saved-name">${escHtml(sc.name)}</span>${sc.note ? `<div class="saved-note">${escHtml(sc.note)}</div>` : ''}</div><span class="saved-actions"><button onclick="loadScenario(${i})">load</button><button onclick="compareWith(${i})" title="Show this scenario next to your current settings">compare</button><button onclick="deleteScenario(${i})" aria-label="Delete ${escHtml(sc.name)}">\u00d7</button></span></div>`).join('')}</div>` : '<div class="ev-hint" style="margin-top:10px">Save what you have now, change something, then use \u201ccompare\u201d to see both on one chart.</div>'}`
           : `<button class="more-toggle locked-row" onclick="showUnlockModal()">Save &amp; compare scenarios <span class="lock-icon">&#x1f512;</span></button>`}
       </div>
     </aside>`;
@@ -1969,6 +2019,7 @@ function renderDashboard() {
       <div class="scenarios-bar">
         <button class="scenario-pill" onclick="resetToDefaults()">\u21ba Reset</button>
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
+        <button class="scenario-pill" onclick="startOver()">Start over</button>
         <button class="scenario-pill" onclick="printReport()">Print report${!isPaid() ? ' <span class="lock-icon">&#x1f512;</span>' : ''}</button>
         ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get the full version &middot; ${CONFIG.price}</button>` : ''}
       </div>
@@ -1979,6 +2030,7 @@ function renderDashboard() {
           <div class="head-menu-items">
             <button onclick="resetToDefaults()">Reset</button>
             <button onclick="goToOnboarding()">Edit basics</button>
+            <button onclick="startOver()">Start over</button>
             <button onclick="printReport()">Print report${!isPaid() ? ' \u{1f512}' : ''}</button>
           </div>
         </details>
@@ -2075,6 +2127,11 @@ function moreOptionsHTML() {
         <div class="control-row"><span class="control-label">Mortgage paid off at age</span><span class="control-value">${state.mortgagePayoffAge}</span></div>
         <input type="range" min="${state.age}" max="90" step="1" value="${state.mortgagePayoffAge}" oninput="slideLive(this,'mortgagePayoffAge',this.value)" onchange="sliderCommit('mortgagePayoffAge',this.value)"/>
       </div>
+      ${state.housing > 0 ? `<div class="control">
+        <div class="control-row"><span class="control-label">Spent once it is paid off</span><span class="control-value">${state.postPayoffSpend > 0 ? fmtMoney(state.postPayoffSpend) : 'none'}</span></div>
+        <input type="range" min="0" max="${Math.max(120000, Math.ceil((state.postPayoffSpend || 0) / 1000) * 1000)}" step="1000" value="${state.postPayoffSpend || 0}" oninput="slideLive(this,'postPayoffSpend',this.value)" onchange="sliderCommit('postPayoffSpend',this.value)"/>
+        <div class="ev-hint">Extra spending each year after the payment ends. Set it to the payment (${fmtMoney(state.housing)}) to spend all of the freed money, or higher if the plan is to spend more. At none, it stays in the portfolio.</div>
+      </div>` : ''}
       ${state.housing > 0 && state.mortgagePayoffAge > state.age + 2 ? `<button onclick="showPayoffModal()" style="margin-top:6px;font-size:14px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">+ Model accelerated payoff \u2192</button>` : ''}
 
       <h3 class="sub-heading">Taxes</h3>
@@ -2300,7 +2357,7 @@ function renderAssumptions(result) {
     : 'The same amount is withdrawn every year no matter what markets do.'}`));
   if (state.housing > 0 || has(state.homeSaleAge)) {
     const h = [];
-    if (state.housing > 0) h.push('The mortgage payment is <strong>' + fmtMoney(state.housing) + '</strong> a year until it is paid off at ' + state.mortgagePayoffAge + (state.postPayoffSpend > 0 ? (state.postPayoffSpend >= state.housing ? ', after which that money is spent' : ', after which ' + fmtMoney(state.postPayoffSpend) + ' of it is spent and the rest stays in the portfolio') : ', after which it stays in the portfolio') + '. Property tax and insurance are part of your spending and continue.');
+    if (state.housing > 0) h.push('The mortgage payment is <strong>' + fmtMoney(state.housing) + '</strong> a year until it is paid off at ' + state.mortgagePayoffAge + (state.postPayoffSpend > 0 ? (state.postPayoffSpend > state.housing ? ', after which that money is spent along with ' + fmtMoney(state.postPayoffSpend - state.housing) + ' more a year' : state.postPayoffSpend === state.housing ? ', after which that money is spent' : ', after which ' + fmtMoney(state.postPayoffSpend) + ' of it is spent and the rest stays in the portfolio') : ', after which it stays in the portfolio') + '. Property tax and insurance are part of your spending and continue.');
     if (has(state.homeSaleAge)) h.push('At ' + state.homeSaleAge + ' the house is sold: <strong>' + fmtMoney(state.homeSaleProceeds) + '</strong> goes into the portfolio and housing costs ' + fmtMoney(state.postSaleHousing || 0) + ' a year from then on.');
     h.push('The mortgage payment is fixed in nominal dollars, so in today’s dollars it shrinks a little every year with inflation. Rent after a sale is held in today’s dollars.');
     rows.push(asmRow('Housing', h.join(' ')));
@@ -2471,7 +2528,7 @@ function renderEventTimeline() {
   }
   else if (state.yourStopWorkAge > state.age && state.yourIncome > 0) events.push({ age: state.yourStopWorkAge, label: 'You retire', detail: 'Income drops from ' + fmtMoneyShort(state.yourIncome) + ' to $0' });
   if (state.hasPartner && state.partnerStopWorkAge > state.partnerAge && state.partnerIncome > 0) events.push({ age: state.partnerStopWorkAge, label: 'Partner retires', detail: 'Partner income drops to $0' });
-  if (state.housing > 0 && state.mortgagePayoffAge > state.age && (!has(state.homeSaleAge) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr payment ends' + (state.postPayoffSpend > 0 ? '; ' + fmtMoneyShort(state.postPayoffSpend) + '/yr of it goes to spending' : '') });
+  if (state.housing > 0 && state.mortgagePayoffAge > state.age && (!has(state.homeSaleAge) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr payment ends' + (state.postPayoffSpend > 0 ? (state.postPayoffSpend < state.housing ? '; ' + fmtMoneyShort(state.postPayoffSpend) + '/yr of it goes to spending' : state.postPayoffSpend === state.housing ? '; all of it goes to spending' : '; spending rises by ' + fmtMoneyShort(state.postPayoffSpend) + '/yr') : '') });
   if (has(state.homeSaleAge)) events.push({ age: state.homeSaleAge, label: 'House sold', detail: fmtMoneyShort(state.homeSaleProceeds) + ' into the portfolio; housing ' + fmtMoneyShort(state.postSaleHousing || 0) + '/yr after' });
   if (has(state.yourBreakStart) && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Career break', detail: 'No wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd }); events.push({ age: state.yourBreakEnd, label: 'Back to work', detail: 'Wages resume' }); }
   if (state.hasPartner && has(state.partnerBreakStart)) { events.push({ age: state.age + (state.partnerBreakStart - state.partnerAge), label: 'Partner’s break', detail: 'Partner has no wages for ' + (state.partnerBreakEnd - state.partnerBreakStart) + ' years' }); }
@@ -3390,11 +3447,11 @@ window.saveScenario = function() {
   if (savedScenarios.length >= 8) { alert('Max 8 saved scenarios. Delete one first.'); return; }
   const noteEl = document.getElementById('scenarioNote'); const note = noteEl ? (noteEl.value || '').trim().slice(0, 200) : '';
   savedScenarios.push({ name, note, state: JSON.parse(JSON.stringify(state)) });
-  localStorage.setItem('zeroline_scenarios', JSON.stringify(savedScenarios));
+  persistScenarios();
   render();
 };
 window.loadScenario = function(i) { state = withDefaults(savedScenarios[i].state); invalidateCaches(); render(); };
-window.deleteScenario = function(i) { savedScenarios.splice(i, 1); localStorage.setItem('zeroline_scenarios', JSON.stringify(savedScenarios)); render(); };
+window.deleteScenario = function(i) { savedScenarios.splice(i, 1); persistScenarios(); render(); };
 
 // ============================================================================
 // MODALS
@@ -3526,6 +3583,7 @@ window.usePayoffAge = function(age, balance, ratePercent) {
 // ============================================================================
 // INIT
 // ============================================================================
+loadPlan();     // the saved plan, if there is one, before the first paint
 render();
 startLicense(); // URL key / old key / daily re-check, all after the first paint
 </script>
