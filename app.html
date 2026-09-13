@@ -1133,6 +1133,21 @@ let licenseSessionGrace = false; // an old un-checked key could not be verified 
 
 // Small non-blocking status line at the bottom of the screen. ms = 0 keeps it until replaced.
 let toastTimer = null;
+// On a phone the results sit above the settings, so a change made further down the page
+// happens out of sight and looks like nothing happened. Say so, and offer the way back up.
+// On desktop the chart is beside the controls, so this stays quiet.
+function noteChanged() {
+  if (!narrowNow()) return;
+  const v = document.querySelector('.verdict'); if (!v) return;
+  const r = v.getBoundingClientRect();
+  if (r.top >= 0 && r.bottom <= innerHeight) return;   // already looking at it
+  showToast('Updated \u00b7 See results \u2191', 2600);
+  const el = document.getElementById('toast');
+  if (el) {
+    el.style.cursor = 'pointer';
+    el.onclick = () => { hideToast(); v.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); };
+  }
+}
 function showToast(text, ms) {
   let el = document.getElementById('toast');
   if (!el) { el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); document.body.appendChild(el); }
@@ -3125,7 +3140,7 @@ function drawCashflowChart(result) {
 // UPDATES & HANDLERS
 // ============================================================================
 function invalidateCaches() { maxSpendStale = true; spendingLevelsStale = true; wwitStale = true; }
-window.update = function(key, val) { state[key] = val; maxSpendView = false; invalidateCaches(); render(); };
+window.update = function(key, val) { state[key] = val; maxSpendView = false; invalidateCaches(); render(); noteChanged(); };
 window.updateAccount = function(key, val) { state.accounts[key] = val; state.portfolio = state.accounts.traditional + state.accounts.roth + state.accounts.taxable; invalidateCaches(); render(); };
 window.toggleAccounts = function(enabled) {
   state.accountsEnabled = enabled;
@@ -3186,11 +3201,11 @@ function applyEstimatedTaxRates() {
 window.updateTax = function(key, val) {
   state[key] = val;
   applyEstimatedTaxRates();
-  invalidateCaches(); render();
+  invalidateCaches(); render(); noteChanged();
 };
 window.setMode = function(m) {
   if (m !== 'historical' && !isPaid()) { showUnlockModal(); return; }
-  state.simMode = m; invalidateCaches(); render();
+  state.simMode = m; invalidateCaches(); render(); noteChanged();
 };
 window.rerollSeed = function() { state.mcSeed = Math.floor(Math.random() * 1e9); invalidateCaches(); render(); };
 window.resetMcToHistory = function() { state.mcMean = null; state.mcSd = null; invalidateCaches(); render(); };
@@ -3288,6 +3303,7 @@ window.sliderCommit = function(key, rawVal) {
   const scrollY = window.scrollY;
   render();
   window.scrollTo(0, scrollY);
+  noteChanged();
 };
 
 window.updateLive2 = function(el, k1, k2, rawVal) {
