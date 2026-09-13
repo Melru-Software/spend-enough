@@ -882,11 +882,12 @@
     .resources-row { order: 4; padding: 18px 0 40px !important; }
     /* the sidebar's own order: adjust what is there, then try a scenario */
     .sidebar { display: flex; flex-direction: column; }
-    .sidebar-section:nth-child(1) { order: 2; }   /* Try a scenario */
-    .sidebar-section:nth-child(2) { order: 1; }   /* Your plan, first: adjust what is already there */
-    .sidebar-section:nth-child(3) { order: 3; }   /* Mode */
-    .sidebar-section:nth-child(4) { order: 4; }   /* More about you */
-    .sidebar-section:nth-child(5) { order: 5; }   /* Save and compare */
+    .sidebar-section.sec-plan { order: 1; }       /* Your plan, first: adjust what is already there */
+    .sidebar-section.sec-impact { order: 2; }     /* then what the change did, right under it */
+    .sidebar-section.sec-scenarios { order: 3; }  /* Try a scenario */
+    .sidebar-section.sec-mode { order: 4; }       /* Mode */
+    .sidebar-section.sec-more { order: 5; }       /* More about you */
+    .sidebar-section.sec-save { order: 6; }       /* Save and compare */
     .main, .sidebar { padding-left: 0; padding-right: 0; }
 
     /* a compact live result that follows you down the page */
@@ -1885,15 +1886,16 @@ function renderDashboard() {
   lastVerdict = verdict;
   const presets = generatePresets(state);
 
+  const impactHtml = renderSidebarImpact();
   const sidebar = `
     <aside class="sidebar" role="complementary" aria-label="Planning controls">
-      <div class="sidebar-section">
+      <div class="sidebar-section sec-scenarios">
         <h2 class="sidebar-heading">Try a scenario</h2>
         ${presets.map(p => `<button class="preset-btn" onclick="applyPreset('${p.id}')">${p.label}</button>`).join('')}
-        ${renderSidebarImpact()}
       </div>
+      ${impactHtml ? `<div class="sidebar-section sec-impact">${impactHtml}</div>` : ''}
 
-      <div class="sidebar-section">
+      <div class="sidebar-section sec-plan">
         <h2 class="sidebar-heading">Your plan</h2>
         ${state.simMode==='fixed' ? `<div class="control">
           <div class="control-row"><span class="control-label">Real return<span class="help-mark" tabindex="0" data-tip="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
@@ -1937,7 +1939,7 @@ function renderDashboard() {
         </div>
       </div>
 
-      <div class="sidebar-section">
+      <div class="sidebar-section sec-mode">
         <h2 class="sidebar-heading">Mode</h2>
         <div class="toggle-group">
           <button class="toggle-btn ${state.simMode==='historical'?'active':''}" onclick="setMode('historical')">Historical</button>
@@ -1947,7 +1949,7 @@ function renderDashboard() {
         <div style="font-size:14px;color:var(--ink-faint);margin-top:6px;line-height:1.5">${state.simMode==='historical'?'Every stretch of real U.S. market returns since 1926, for your '+mixLabel()+' stock/bond mix.':state.simMode==='montecarlo'?state.mcSims+' randomized futures drawn from a bell curve matched to your mix’s history. Change it under Assumptions.':'One steady real return every year. No range.'}</div>
       </div>
 
-      <div class="sidebar-section">
+      <div class="sidebar-section sec-more">
         <button class="more-toggle" onclick="${!isPaid() && narrowNow() ? 'showUnlockModal()' : 'toggleMore()'}">
           <span>More about you${!isPaid()?' <span class="lock-icon">&#x1f512;</span>':''}</span>
           <span class="more-toggle-chevron">${showMoreOptions ? '▾' : '▸'}</span>
@@ -1960,7 +1962,7 @@ function renderDashboard() {
       </div>
 
 
-      <div class="sidebar-section">
+      <div class="sidebar-section sec-save">
         <h2 class="sidebar-heading">Save and compare</h2>
         ${isPaid()
           ? `<div class="save-form">
