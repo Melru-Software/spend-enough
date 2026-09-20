@@ -501,7 +501,8 @@ window.track=function(n){try{if(window.plausible)window.plausible(n);else if(win
     var owned = false;
     try { owned = typeof licenseDecision === "function" && licenseDecision(JSON.parse(localStorage.getItem("spendenough_license") || "null"), Date.now()).paid; } catch (e) { owned = false; }
     if (!owned) return;
-    document.querySelectorAll('a[href="app.html"]').forEach(function (a) { if (/^Try it free$/.test(a.textContent.trim())) a.textContent = "Open the app"; });
+    // By text, not href: Netlify serves the links as "/app", not "app.html".
+    document.querySelectorAll("a").forEach(function (a) { if (/^Try it free$/.test(a.textContent.trim())) a.textContent = "Open the app"; });
     var ft = document.getElementById("free-try"); if (ft) ft.hidden = true;
     var fh = document.getElementById("free-have"); if (fh) fh.hidden = false;
     if (buy) buy.hidden = true;
