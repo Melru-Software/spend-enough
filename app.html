@@ -844,6 +844,25 @@
   .onboard-step .field-grid { gap: 20px 18px; }
   .field.span-2 { grid-column: 1 / -1; }
   .partner-field[hidden] { display: none !important; }   /* .field is display:flex, which would otherwise win */
+  /* Your plan: Money and Timeline groups, filled slider tracks, age steppers */
+  .plan-sub { font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 500; color: var(--ink); margin: 4px 0 10px; }
+  .control + .plan-sub { margin-top: 20px; }
+  .control input[type=range] { height: 5px; border-radius: 3px; background: linear-gradient(to right, var(--ink) 0, var(--ink) var(--pct, 0%), var(--line-soft) var(--pct, 0%), var(--line-soft) 100%); }
+  .control input[type=range]::-webkit-slider-thumb { width: 13px; height: 13px; border: 2px solid var(--bone); box-sizing: border-box; }
+  .control input[type=range]::-moz-range-thumb { width: 13px; height: 13px; border: 2px solid var(--bone); box-sizing: border-box; }
+  .control-step { margin-bottom: 9px; }
+  .control-step .control-row { margin-bottom: 0; }
+  .stepper { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); overflow: hidden; flex: none; }
+  .stepper .step-btn { width: 26px; height: 26px; border: none; background: none; color: var(--ink-mute); font: inherit; font-size: 15px; line-height: 1; cursor: pointer; padding: 0; }
+  .stepper .step-btn:hover { background: var(--bone-2); color: var(--ink); }
+  .stepper input[type=number] { width: 40px; height: 26px; margin: 0; padding: 0; text-align: center; border: none; border-left: 1px solid var(--line-soft); border-right: 1px solid var(--line-soft); border-radius: 0; background: transparent; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); -moz-appearance: textfield; appearance: textfield; }
+  .stepper input[type=number]:focus { outline: none; background: var(--bone); }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  @media (max-width: 860px) {
+    .control-step { display: block; }
+    .stepper .step-btn { width: 32px; height: 36px; font-size: 17px; }
+    .stepper input[type=number] { width: 36px; height: 36px; font-size: 15px; }
+  }
   .plan-for { display: inline-flex; align-self: flex-start; margin-top: 6px; }   /* .field stretches children; keep the frame on the buttons */
   .plan-for .toggle-btn { flex: 0 0 auto; padding: 8px 18px; }
   .step-actions { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; margin-top: 30px; align-items: start; }
@@ -1944,68 +1963,23 @@ function renderDashboard() {
         <h2 class="sidebar-heading">Your plan</h2>
         ${state.simMode==='fixed' ? `<div class="control">
           <div class="control-row"><span class="control-label">Real return<span class="help-mark" tabindex="0" data-tip="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
-          <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
+          <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" style="--pct:${trackPct(state.returnRate*100, 0, 10)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
           <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" placeholder="%" class="mobile-input"/>
         </div>` : ''}
-        <div class="control">
-          <div class="control-row"><span class="control-label">Portfolio</span><span class="control-value">${fmtMoney(state.portfolio)}</span></div>
-          <input type="range" min="0" max="5000000" step="10000" value="${state.portfolio}" oninput="slideLive(this,'portfolio',this.value)" onchange="sliderCommit('portfolio',this.value)" class="slider-input"/>
-          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.portfolio)}" oninput="moneyType(this); slideLive(this,'portfolio',moneyValue(this))" onchange="sliderCommit('portfolio',moneyValue(this))" placeholder="Amount"/>
-        </div>
-        <div class="control">
-          <div class="control-row"><span class="control-label">Spending, all in${state.housing > 0 ? '<span class="help-mark" tabindex="0" data-tip="Includes your ' + fmtMoney(state.housing) + ' a year mortgage payment until it is paid off at ' + state.mortgagePayoffAge + '.">i</span>' : ''}</span><span class="control-value">${fmtMoney(state.spending + state.housing)}</span></div>
-          <input type="range" min="${10000 + state.housing}" max="${400000 + state.housing}" step="1000" value="${state.spending + state.housing}" oninput="slideLive(this,'totalSpending',this.value)" onchange="sliderCommit('totalSpending',this.value)" class="slider-input"/>
-          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.spending + state.housing)}" oninput="moneyType(this); slideLive(this,'totalSpending',moneyValue(this))" onchange="sliderCommit('totalSpending',moneyValue(this))" placeholder="Annual amount"/>
-        </div>
-        <div class="control">
-          <div class="control-row"><span class="control-label">Spending from age ${state.slowDownAge}<span class="help-mark" tabindex="0" data-tip="Spending usually falls later in retirement, so the plan starts this at 85% of today's number. Set it equal to the amount above for no change.">i</span></span><span class="control-value">${fmtMoney(state.lateSpending + lateHousingPart())}</span></div>
-          <input type="range" min="${10000 + lateHousingPart()}" max="${400000 + lateHousingPart()}" step="1000" value="${state.lateSpending + lateHousingPart()}" oninput="slideLive(this,'totalLateSpending',this.value)" onchange="sliderCommit('totalLateSpending',this.value)" class="slider-input"/>
-          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.lateSpending + lateHousingPart())}" oninput="moneyType(this); slideLive(this,'totalLateSpending',moneyValue(this))" onchange="sliderCommit('totalLateSpending',moneyValue(this))" placeholder="Annual amount"/>
-        </div>
-        <div class="control">
-          <div class="control-row"><span class="control-label">Changes at age</span><span class="control-value">${state.slowDownAge}</span></div>
-          <input type="range" min="55" max="95" step="1" value="${state.slowDownAge}" oninput="slideLive(this,'slowDownAge',this.value)" onchange="sliderCommit('slowDownAge',this.value)" class="slider-input"/>
-          <input type="number" min="55" max="95" step="1" value="${state.slowDownAge}" oninput="slideLive(this,'slowDownAge',this.value)" onchange="sliderCommit('slowDownAge',this.value)" class="mobile-input"/>
-        </div>
-        <div class="control">
-          <div class="control-row"><span class="control-label">Your income</span><span class="control-value">${fmtMoney(state.yourIncome)}</span></div>
-          <input type="range" min="0" max="500000" step="5000" value="${state.yourIncome}" oninput="slideLive(this,'yourIncome',this.value)" onchange="sliderCommit('yourIncome',this.value)" class="slider-input"/>
-          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.yourIncome)}" oninput="moneyType(this); slideLive(this,'yourIncome',moneyValue(this))" onchange="sliderCommit('yourIncome',moneyValue(this))" placeholder="Annual income"/>
-        </div>
-        ${state.hasPartner ? `<div class="control">
-          <div class="control-row"><span class="control-label">Partner's income</span><span class="control-value">${fmtMoney(state.partnerIncome)}</span></div>
-          <input type="range" min="0" max="500000" step="5000" value="${state.partnerIncome}" oninput="slideLive(this,'partnerIncome',this.value)" onchange="sliderCommit('partnerIncome',this.value)" class="slider-input"/>
-          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.partnerIncome)}" oninput="moneyType(this); slideLive(this,'partnerIncome',moneyValue(this))" onchange="sliderCommit('partnerIncome',moneyValue(this))" placeholder="Annual income"/>
-        </div>` : ''}
-        ${state.yourIncome > 0 ? `<div class="control">
-          <div class="control-row"><span class="control-label">${state.yourPartTimeAmount > 0 && state.yourStopWorkAge === state.yourPartTimeStart ? 'Full-time ends at' : 'Your retirement age'}</span><span class="control-value">${state.yourStopWorkAge}</span></div>
-          <input type="range" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)" class="slider-input"/>
-          <input type="number" min="${Math.max(state.age,40)}" max="80" step="1" value="${state.yourStopWorkAge}" oninput="slideLive(this,'yourStopWorkAge',this.value)" onchange="sliderCommit('yourStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
-        </div>` : ''}
-        ${(state.hasPartner && state.partnerIncome > 0) ? `<div class="control">
-          <div class="control-row"><span class="control-label">Partner's retirement age</span><span class="control-value">${state.partnerStopWorkAge}</span></div>
-          <input type="range" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" class="slider-input"/>
-          <input type="number" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
-        </div>` : ''}
-        <div class="control">
-          <div class="control-row"><span class="control-label">Plan to age<span class="help-mark" tabindex="0" data-tip="The plan has to last to this age. 100 is cautious; the tool counts it as lasting if the money is still there.">i</span></span><span class="control-value">${state.targetAge}</span></div>
-          <input type="range" min="70" max="110" step="1" value="${state.targetAge}" oninput="slideLive(this,'targetAge',this.value)" onchange="sliderCommit('targetAge',this.value)" class="slider-input"/>
-          <input type="number" min="70" max="110" step="1" value="${state.targetAge}" oninput="slideLive(this,'targetAge',this.value)" onchange="sliderCommit('targetAge',this.value)" placeholder="Age" class="mobile-input"/>
-        </div>
-        <div class="control">
-          <div class="control-row"><span class="control-label">Pension or other income after work<span class="help-mark" tabindex="0" data-tip="Money that keeps coming after you stop working, besides Social Security. A pension, an annuity, rent from a property. Per year, before tax.">i</span></span><span class="control-value">${state.otherIncome > 0 ? fmtMoney(state.otherIncome) : 'none'}</span></div>
-          <input type="range" min="0" max="${Math.max(120000, Math.ceil((state.otherIncome || 0) / 1000) * 1000)}" step="1000" value="${state.otherIncome || 0}" oninput="slideLive(this,'otherIncome',this.value)" onchange="sliderCommit('otherIncome',this.value)" class="slider-input"/>
-        </div>
-        ${state.otherIncome > 0 ? `<div class="control">
-          <div class="control-row"><span class="control-label">Pension starts at age</span><span class="control-value">${state.otherIncomeStart}</span></div>
-          <input type="range" min="${state.age}" max="${state.targetAge}" step="1" value="${state.otherIncomeStart}" oninput="slideLive(this,'otherIncomeStart',this.value)" onchange="sliderCommit('otherIncomeStart',this.value)" class="slider-input"/>
-          <input type="number" min="${state.age}" max="${state.targetAge}" step="1" value="${state.otherIncomeStart}" oninput="slideLive(this,'otherIncomeStart',this.value)" onchange="sliderCommit('otherIncomeStart',this.value)" placeholder="Age" class="mobile-input"/>
-        </div>
-        <div class="control">
-          <div class="control-row"><span class="control-label">Pension ends at age<span class="help-mark" tabindex="0" data-tip="Slide to the plan’s end age and it never stops.">i</span></span><span class="control-value">${has(state.otherIncomeEnd) ? state.otherIncomeEnd : 'plan end'}</span></div>
-          <input type="range" min="${state.otherIncomeStart + 1}" max="${state.targetAge}" step="1" value="${has(state.otherIncomeEnd) ? state.otherIncomeEnd : state.targetAge}" oninput="slideLive(this,'otherIncomeEnd',this.value)" onchange="sliderCommit('otherIncomeEnd',this.value)" class="slider-input"/>
-          <input type="number" min="${state.otherIncomeStart + 1}" max="${state.targetAge}" step="1" value="${has(state.otherIncomeEnd) ? state.otherIncomeEnd : state.targetAge}" oninput="slideLive(this,'otherIncomeEnd',this.value)" onchange="sliderCommit('otherIncomeEnd',this.value)" placeholder="Age" class="mobile-input"/>
-        </div>` : ''}
+        <h3 class="plan-sub">Money</h3>
+        ${moneyControl({ key: 'portfolio', label: 'Portfolio', value: state.portfolio, floor: 1000000, times: 3, step: 10000, placeholder: 'Amount' })}
+        ${moneyControl({ key: 'totalSpending', label: 'Spending, all in', tip: state.housing > 0 ? 'Includes your ' + fmtMoney(state.housing) + ' a year mortgage payment until it is paid off at ' + state.mortgagePayoffAge + '.' : '', value: state.spending + state.housing, min: 10000 + state.housing, floor: 200000, times: 2.5, step: 1000, placeholder: 'Annual amount' })}
+        ${moneyControl({ key: 'totalLateSpending', label: 'Spending from age ' + state.slowDownAge, tip: "Spending usually falls later in retirement, so the plan starts this at 85% of today's number. Set it equal to the amount above for no change.", value: state.lateSpending + lateHousingPart(), min: 10000 + lateHousingPart(), floor: 200000, times: 2.5, step: 1000, placeholder: 'Annual amount' })}
+        ${moneyControl({ key: 'yourIncome', label: 'Your income', value: state.yourIncome, floor: 200000, times: 2.5, step: 5000, placeholder: 'Annual income' })}
+        ${state.hasPartner ? moneyControl({ key: 'partnerIncome', label: "Partner's income", value: state.partnerIncome, floor: 200000, times: 2.5, step: 5000, placeholder: 'Annual income' }) : ''}
+        ${moneyControl({ key: 'otherIncome', label: 'Pension or other income after work', tip: 'Money that keeps coming after you stop working, besides Social Security. A pension, an annuity, rent from a property. Per year, before tax.', value: state.otherIncome || 0, floor: 60000, times: 3, step: 1000, placeholder: 'none', none: true })}
+        ${state.otherIncome > 0 ? stepperControl({ key: 'otherIncomeStart', label: 'Pension starts at age', value: state.otherIncomeStart, min: state.age, max: state.targetAge })
+          + stepperControl({ key: 'otherIncomeEnd', label: 'Pension ends at age', tip: 'Set it to the plan’s end age and it never stops.', value: has(state.otherIncomeEnd) ? state.otherIncomeEnd : state.targetAge, min: state.otherIncomeStart + 1, max: state.targetAge }) : ''}
+        <h3 class="plan-sub">Timeline</h3>
+        ${stepperControl({ key: 'slowDownAge', label: 'Spending changes at', value: state.slowDownAge, min: 55, max: 95 })}
+        ${state.yourIncome > 0 ? stepperControl({ key: 'yourStopWorkAge', label: state.yourPartTimeAmount > 0 && state.yourStopWorkAge === state.yourPartTimeStart ? 'Full-time ends at' : 'Your retirement age', value: state.yourStopWorkAge, min: Math.max(state.age, 40), max: 80 }) : ''}
+        ${(state.hasPartner && state.partnerIncome > 0) ? stepperControl({ key: 'partnerStopWorkAge', label: "Partner's retirement age", value: state.partnerStopWorkAge, min: Math.max(state.partnerAge, 40), max: 80 }) : ''}
+        ${stepperControl({ key: 'targetAge', label: 'Plan to age', tip: 'The plan has to last to this age. 100 is cautious; the tool counts it as lasting if the money is still there.', value: state.targetAge, min: 70, max: 110 })}
       </div>
 
       <div class="sidebar-section sec-mode">
@@ -2142,6 +2116,7 @@ function renderDashboard() {
     c.querySelectorAll('input[type=range], input[type=number]').forEach(input => {
       if (name && !input.getAttribute('aria-label')) input.setAttribute('aria-label', name);
     });
+    c.querySelectorAll('.step-btn').forEach((b, i) => { if (name) b.setAttribute('aria-label', name + (i === 0 ? ', one less' : ', one more')); });
   });
   // Label clickable table rows
   document.querySelectorAll('.data-table .clickable').forEach(row => {
@@ -2193,7 +2168,7 @@ function moreOptionsHTML() {
       </div>
 
       <h3 class="sub-heading">Pension or other income</h3>
-      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">If you have a pension, add it under Your plan. Here you can change whether it keeps up with prices and add a second source, such as a partner’s pension.</div>
+      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">If you have a pension, add it under Your plan. Here you can change whether it keeps up with prices and add a second source, such as ${state.hasPartner ? 'a partner’s pension' : 'an annuity or rent'}.</div>
       ${state.otherIncome > 0 ? `<div class="control">
         <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-soft);cursor:pointer"><input type="checkbox" ${state.otherIncomeFixed ? 'checked' : ''} onchange="update('otherIncomeFixed', this.checked)"> Fixed dollars, no cost of living increase</label>
         <div class="ev-hint">Most pensions and annuities do not rise with prices, so in today’s dollars they buy a little less each year. Rent usually keeps up.</div>
@@ -3352,8 +3327,41 @@ function fmtSliderVal(key, val) {
 }
 
 // Called on every oninput (during drag) — updates label + debounced chart
+// ---- Your plan controls ----
+// Money sliders scale to the number, so the thumb sits in the middle third rather than at
+// the left edge of a range built for the biggest possible plan. Slide to the end and the
+// range grows on the next render. The track is filled to the thumb (--pct) so each row
+// reads as an amount.
+function trackPct(v, lo, hi) { return (hi > lo ? Math.max(0, Math.min(100, (v - lo) / (hi - lo) * 100)) : 0).toFixed(1) + '%'; }
+function sliderMax(value, floor, times, step) { return Math.max(floor, Math.ceil(value * times / step) * step); }
+function helpMark(tip) { return tip ? `<span class="help-mark" tabindex="0" data-tip="${tip}">i</span>` : ''; }
+function moneyControl(o) {
+  const min = o.min || 0, max = Math.max(sliderMax(o.value, o.floor, o.times, o.step), min + o.step);
+  const shown = o.none && !(o.value > 0) ? 'none' : fmtMoney(o.value);
+  return `<div class="control">
+          <div class="control-row"><span class="control-label">${o.label}${helpMark(o.tip)}</span><span class="control-value">${shown}</span></div>
+          <input type="range" min="${min}" max="${max}" step="${o.step}" value="${o.value}" style="--pct:${trackPct(o.value, min, max)}" oninput="slideLive(this,'${o.key}',this.value)" onchange="sliderCommit('${o.key}',this.value)" class="slider-input"/>
+          <input type="text" inputmode="numeric" class="mobile-input money" value="${o.value > 0 || !o.none ? moneyText(o.value) : ''}" oninput="moneyType(this); slideLive(this,'${o.key}',moneyValue(this))" onchange="sliderCommit('${o.key}',moneyValue(this))" placeholder="${o.placeholder || ''}"/>
+        </div>`;
+}
+// Ages are steppers: one year per tap, or type the number.
+function stepperControl(o) {
+  return `<div class="control control-step">
+          <div class="control-row"><span class="control-label">${o.label}${helpMark(o.tip)}</span>
+            <span class="stepper"><button type="button" class="step-btn" onclick="stepValue(this,'${o.key}',-1)">\u2212</button><input type="number" min="${o.min}" max="${o.max}" step="1" value="${o.value}" onchange="sliderCommit('${o.key}',this.value)"/><button type="button" class="step-btn" onclick="stepValue(this,'${o.key}',1)">+</button></span>
+          </div>
+        </div>`;
+}
+window.stepValue = function(btn, key, delta) {
+  const inp = btn.parentElement.querySelector('input');
+  const v = Math.min(+inp.max, Math.max(+inp.min, (+inp.value || +inp.min) + delta));
+  inp.value = v;
+  sliderCommit(key, v);
+};
+
 window.slideLive = function(el, key, rawVal) {
   let val = +rawVal;
+  if (el.type === 'range') el.style.setProperty('--pct', trackPct(+el.value, +el.min, +el.max));
   if (key === 'totalSpending') { key = 'spending'; val = Math.max(0, val - state.housing); }
   if (key === 'totalLateSpending') { key = 'lateSpending'; val = Math.max(0, val - lateHousingPart()); }
   state[key] = val;
