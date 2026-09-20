@@ -5,18 +5,20 @@
 #   style-src    inline styles, Google Fonts stylesheet
 #   font-src     Google Fonts files
 #   connect-src  Lemon Squeezy License API (activate / validate / deactivate)
+#   frame-src    the Lemon Squeezy checkout overlay (an iframe of our store)
 #   img-src      local images and data: URIs
 # When you turn on analytics or the email form in config.js, add that provider's host to
 # script-src and connect-src (analytics), or connect-src / form-action (email endpoint).
-# The optional Lemon.js overlay checkout would need https://app.lemonsqueezy.com in
-# script-src and frame-src.
+# checkout.js opens the store checkout in an iframe with allow="payment", so Permissions-Policy
+# has to let the store use the Payment Request API (Apple Pay / Google Pay), and COOP allows
+# popups so a PayPal window can report back.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.lemonsqueezy.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.lemonsqueezy.com; frame-src https://spendenough.lemonsqueezy.com https://app.lemonsqueezy.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
-  Cross-Origin-Opener-Policy: same-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self "https://spendenough.lemonsqueezy.com" "https://app.lemonsqueezy.com" "https://js.stripe.com")
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
   # PRE-LAUNCH: keeps search engines from indexing the site while it is in progress. Delete this line at launch.
   X-Robots-Tag: noindex, nofollow
 

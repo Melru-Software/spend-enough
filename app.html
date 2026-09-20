@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,500;8..60,600;8..60,700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
 <style>
   :root {
     --bone: #f4efe6;
@@ -1032,6 +1032,7 @@
 <div id="modal-root"></div>
 <div id="tip-popup"></div>
 <script src="config.js"></script>
+<script src="checkout.js" defer></script>
 <script>/* Optional privacy-respecting analytics (Plausible/Fathom-style), only when config.js sets it. */
 (function(){var c=window.SPENDENOUGH_CONFIG||{};if(!c.analyticsScript)return;var s=document.createElement('script');s.defer=true;s.src=c.analyticsScript;if(c.analyticsSite){s.setAttribute('data-domain',c.analyticsSite);s.setAttribute('data-site',c.analyticsSite);}document.head.appendChild(s);})();
 window.track=function(n){try{if(window.plausible)window.plausible(n);else if(window.fathom&&window.fathom.trackEvent)window.fathom.trackEvent(n);}catch(e){}};</script>
@@ -1300,7 +1301,7 @@ window.showUnlockModal = function(opts) {
   opts = opts || {};
   if (!opts.silent) track('hit_paywall');
   const buy = CONFIG.checkoutUrl
-    ? `<a class="btn-primary" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" onclick="track('clicked_checkout')" style="width:100%;justify-content:center;text-decoration:none">Get the full version &middot; ${CONFIG.price}</a>`
+    ? `<a class="btn-primary checkout-button" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" onclick="track('clicked_checkout')" style="width:100%;justify-content:center;text-decoration:none">Get the full version &middot; ${CONFIG.price}</a>`
     : `<button class="btn-primary" disabled style="width:100%;justify-content:center;opacity:0.6;cursor:default">Get the full version &middot; ${CONFIG.price} &middot; checkout opens soon</button>`;
   const keyAttr = opts.key && KEY_RE.test(opts.key) ? ` value="${opts.key}"` : '';
   const dis = opts.busy ? ' disabled' : '';

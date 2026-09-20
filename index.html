@@ -253,7 +253,7 @@
       <div class="three">
         <div><h3>How much you can spend.</h3><p>Most calculators ask what you'll spend and check whether it lasts. This one starts from what you have and finds the most you could spend each year and still make it to the end.</p></div>
         <div><h3>Both versions of a decision.</h3><p>Take the two years off, or don't. Pay off the house, or invest the money. The chart shows both paths at the same time, and the gap between them is what the decision costs.</p></div>
-        <div><h3>A range of outcomes.</h3><p>Your plan runs through every stretch of the market since 1926, and through 500 simulated futures if you want them. A plan that lasts through 51 of 52 stretches is a different thing from one that lasts through 30, and you can see which one you have.</p></div>
+        <div><h3>A range of outcomes.</h3><p>Your plan runs through every stretch of the market since 1926, and through 500 simulated futures if you want them. A plan that lasts through 45 of 45 stretches is a different thing from one that lasts through 30, and you can see which one you have.</p></div>
       </div>
     </div>
   </section>
@@ -319,7 +319,7 @@
             <li>A change in spending later in life, mortgage payoff, income growth, and Social Security timing.</li>
             <li>A printable one-page report, and the year-by-year table as a spreadsheet.</li>
           </ul>
-          <a class="btn btn-ink" id="pro-buy" href="app.html" target="_blank" rel="noopener" onclick="track('clicked_checkout')" hidden>Get the full version</a>
+          <a class="btn btn-ink checkout-button" id="pro-buy" href="app.html" target="_blank" rel="noopener" onclick="track('clicked_checkout')" hidden>Get the full version</a>
           <p class="terms-line" id="pro-terms" hidden>By purchasing you agree to the <a href="terms.html">Terms of Service</a>.</p>
         </div>
       </div>
@@ -369,7 +369,7 @@
 
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
 <script src="engine.js"></script>
 <script>
 (function () {
@@ -472,6 +472,7 @@
 </script>
 
 <script src="config.js"></script>
+<script src="checkout.js" defer></script>
 <script>/* Optional privacy-respecting analytics (Plausible/Fathom-style), only when config.js sets it. */
 (function(){var c=window.SPENDENOUGH_CONFIG||{};if(!c.analyticsScript)return;var s=document.createElement('script');s.defer=true;s.src=c.analyticsScript;if(c.analyticsSite){s.setAttribute('data-domain',c.analyticsSite);s.setAttribute('data-site',c.analyticsSite);}document.head.appendChild(s);})();
 window.track=function(n){try{if(window.plausible)window.plausible(n);else if(window.fathom&&window.fathom.trackEvent)window.fathom.trackEvent(n);}catch(e){}};</script>
