@@ -2188,7 +2188,7 @@ function moreOptionsHTML() {
       </div>
 
       <h3 class="sub-heading">Pension or other income</h3>
-      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">The amount and start age are under Your plan. Here: when it ends, whether it rises with prices, and a second line for a partner’s pension or another source.</div>
+      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">${state.otherIncome > 0 ? 'The pension’s amount and the age it starts are under Your plan. Here you can set the age it ends, whether it keeps up with prices, and add a second source, such as a partner’s pension.' : 'No pension yet. Add its amount and the age it starts under Your plan, and the age it ends and whether it keeps up with prices appear here. A second source, such as a partner’s pension, can be added below.'}</div>
       ${state.otherIncome > 0 ? `<div class="control">
         <div class="control-row"><span class="control-label">It ends at age</span><span class="control-value">${has(state.otherIncomeEnd) ? state.otherIncomeEnd : 'plan end'}</span></div>
         <input type="range" min="${state.otherIncomeStart + 1}" max="${state.targetAge}" step="1" value="${has(state.otherIncomeEnd) ? state.otherIncomeEnd : state.targetAge}" oninput="slideLive(this,'otherIncomeEnd',this.value)" onchange="sliderCommit('otherIncomeEnd',this.value)"/>
@@ -2199,15 +2199,15 @@ function moreOptionsHTML() {
         <div class="ev-hint">Most pensions and annuities do not rise with prices, so in today’s dollars they buy a little less each year. Rent usually keeps up.</div>
       </div>` : ''}
       <div class="control">
-        <div class="control-row"><span class="control-label">Second line, per year</span><span class="control-value">${state.otherIncome2 > 0 ? fmtMoney(state.otherIncome2) : 'none'}</span></div>
+        <div class="control-row"><span class="control-label">A second source, per year</span><span class="control-value">${state.otherIncome2 > 0 ? fmtMoney(state.otherIncome2) : 'none'}</span></div>
         <input type="range" min="0" max="${Math.max(120000, Math.ceil((state.otherIncome2 || 0) / 1000) * 1000)}" step="1000" value="${state.otherIncome2 || 0}" oninput="slideLive(this,'otherIncome2',this.value)" onchange="sliderCommit('otherIncome2',this.value)"/>
       </div>
       ${state.otherIncome2 > 0 ? `<div class="control">
-        <div class="control-row"><span class="control-label">Second line starts at age</span><span class="control-value">${state.otherIncome2Start}</span></div>
+        <div class="control-row"><span class="control-label">Second source starts at age</span><span class="control-value">${state.otherIncome2Start}</span></div>
         <input type="range" min="${state.age}" max="${state.targetAge}" step="1" value="${state.otherIncome2Start}" oninput="slideLive(this,'otherIncome2Start',this.value)" onchange="sliderCommit('otherIncome2Start',this.value)"/>
       </div>` : ''}
       ${state.otherIncome2 > 0 ? `<div class="control">
-        <div class="control-row"><span class="control-label">Second line ends at age</span><span class="control-value">${has(state.otherIncome2End) ? state.otherIncome2End : 'plan end'}</span></div>
+        <div class="control-row"><span class="control-label">Second source ends at age</span><span class="control-value">${has(state.otherIncome2End) ? state.otherIncome2End : 'plan end'}</span></div>
         <input type="range" min="${state.otherIncome2Start + 1}" max="${state.targetAge}" step="1" value="${has(state.otherIncome2End) ? state.otherIncome2End : state.targetAge}" oninput="slideLive(this,'otherIncome2End',this.value)" onchange="sliderCommit('otherIncome2End',this.value)"/>
         <div class="ev-hint">Slide to the plan’s end age and it never stops.</div>
       </div>
@@ -2359,7 +2359,7 @@ function getVerdict(result) {
   return v;
 }
 
-const IMPACT_FIELDS = () => ({ spending: 'Spending (besides the mortgage)', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Mortgage payment', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', extraSpend: 'Extra spending', extraSpendStart: 'Extra spending from', extraSpendEnd: 'Extra spending until', otherIncome: 'Pension or other income', otherIncomeStart: 'Other income from', otherIncomeEnd: 'Other income until', otherIncomeFixed: 'Other income in fixed dollars', otherIncome2: 'Second other income', otherIncome2Start: 'Second other income from', otherIncome2End: 'Second other income until', otherIncome2Fixed: 'Second other income in fixed dollars', postPayoffSpend: 'Freed payment spent', homeSaleAge: 'House sold at', homeSaleProceeds: 'Sale proceeds', postSaleHousing: 'Housing after sale', shockEra: 'Bad decade', shockAge: 'Bad decade starts', yourPartTimeAmount: 'Part-time income', yourPartTimeStart: 'Part-time from', yourPartTimeEnd: 'Part-time until' });
+const IMPACT_FIELDS = () => ({ spending: 'Spending (besides the mortgage)', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Mortgage payment', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', extraSpend: 'Extra spending', extraSpendStart: 'Extra spending from', extraSpendEnd: 'Extra spending until', otherIncome: 'Pension or other income', otherIncomeStart: 'Other income from', otherIncomeEnd: 'Other income until', otherIncomeFixed: 'Other income in fixed dollars', otherIncome2: 'Second income source', otherIncome2Start: 'Second income source from', otherIncome2End: 'Second income source until', otherIncome2Fixed: 'Second income source in fixed dollars', postPayoffSpend: 'Freed payment spent', homeSaleAge: 'House sold at', homeSaleProceeds: 'Sale proceeds', postSaleHousing: 'Housing after sale', shockEra: 'Bad decade', shockAge: 'Bad decade starts', yourPartTimeAmount: 'Part-time income', yourPartTimeStart: 'Part-time from', yourPartTimeEnd: 'Part-time until' });
 function fmtField(k, v) {
   if ((k === 'otherIncomeEnd' || k === 'otherIncome2End') && (v === null || v === undefined)) return 'plan end';
   if (v === null || v === undefined) return 'none';
@@ -2641,7 +2641,7 @@ function renderEventTimeline() {
   if (state.extraSpend > 0 && has(state.extraSpendStart)) { events.push({ age: state.extraSpendStart, label: 'Extra spending', detail: '+' + fmtMoneyShort(state.extraSpend) + '/yr until ' + state.extraSpendEnd }); events.push({ age: state.extraSpendEnd, label: 'Extra spending ends', detail: '' }); }
   if (state.ssStartAge > state.age && (state.yourSSAmount > 0 || state.partnerSSAmount > 0)) events.push({ age: state.ssStartAge, label: 'Social Security begins', detail: fmtMoneyShort(state.yourSSAmount + state.partnerSSAmount) + '/yr starts' });
   if (state.otherIncome > 0 && state.otherIncomeStart > state.age) events.push({ age: state.otherIncomeStart, label: 'Other income begins', detail: fmtMoneyShort(state.otherIncome) + '/yr' + (has(state.otherIncomeEnd) ? ' until ' + state.otherIncomeEnd : '') });
-  if (state.otherIncome2 > 0 && state.otherIncome2Start > state.age) events.push({ age: state.otherIncome2Start, label: 'Second income begins', detail: fmtMoneyShort(state.otherIncome2) + '/yr' + (has(state.otherIncome2End) ? ' until ' + state.otherIncome2End : '') });
+  if (state.otherIncome2 > 0 && state.otherIncome2Start > state.age) events.push({ age: state.otherIncome2Start, label: 'Second source begins', detail: fmtMoneyShort(state.otherIncome2) + '/yr' + (has(state.otherIncome2End) ? ' until ' + state.otherIncome2End : '') });
   if (state.slowDownAge > state.age && state.lateSpending !== state.spending) events.push({ age: state.slowDownAge, label: 'Spending changes', detail: fmtMoneyShort(state.spending) + ' \u2192 ' + fmtMoneyShort(state.lateSpending) + '/yr' });
   if (state.oneTimeEvents) state.oneTimeEvents.forEach(ev => events.push({ age: ev.age, label: ev.label, detail: fmtMoneyShort(ev.amount) }));
   events.sort((a, b) => a.age - b.age);
@@ -2651,7 +2651,7 @@ function renderEventTimeline() {
   events.sort((a, b) => a.age - b.age).forEach(ev => { if (!byAge.has(ev.age)) byAge.set(ev.age, []); byAge.get(ev.age).push(ev); });
   const clause = {
     'You retire': 'you retire', 'Partner retires': 'your partner retires', 'Mortgage paid off': 'the mortgage is paid off',
-    'Social Security begins': 'Social Security begins', 'Other income begins': 'your pension or other income begins', 'Second income begins': 'the second income line begins', 'Spending changes': 'spending changes', 'Career break': 'your career break starts',
+    'Social Security begins': 'Social Security begins', 'Other income begins': 'your pension or other income begins', 'Second source begins': 'your second income source begins', 'Spending changes': 'spending changes', 'Career break': 'your career break starts',
     'Back to work': 'you go back to work', 'Partner\u2019s break': 'your partner\u2019s break starts', 'Part-time': 'you go part-time',
     'You stop working': 'you stop working', 'Back to full time': 'you go back to full time', 'House sold': 'the house is sold',
     'Bad decade starts': 'the bad decade starts', 'Extra spending': 'the extra spending starts', 'Extra spending ends': 'the extra spending ends'
