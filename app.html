@@ -1988,19 +1988,24 @@ function renderDashboard() {
           <input type="number" min="${Math.max(state.partnerAge,40)}" max="80" step="1" value="${state.partnerStopWorkAge}" oninput="slideLive(this,'partnerStopWorkAge',this.value)" onchange="sliderCommit('partnerStopWorkAge',this.value)" placeholder="Age" class="mobile-input"/>
         </div>` : ''}
         <div class="control">
-          <div class="control-row"><span class="control-label">Pension or other income after work<span class="help-mark" tabindex="0" data-tip="Money that keeps coming after you stop working, besides Social Security. A pension, an annuity, rent from a property. Per year, before tax.">i</span></span><span class="control-value">${state.otherIncome > 0 ? fmtMoney(state.otherIncome) : 'none'}</span></div>
-          <input type="range" min="0" max="${Math.max(120000, Math.ceil((state.otherIncome || 0) / 1000) * 1000)}" step="1000" value="${state.otherIncome || 0}" oninput="slideLive(this,'otherIncome',this.value)" onchange="sliderCommit('otherIncome',this.value)" class="slider-input"/>
-        </div>
-        ${state.otherIncome > 0 ? `<div class="control">
-          <div class="control-row"><span class="control-label">It starts at age</span><span class="control-value">${state.otherIncomeStart}</span></div>
-          <input type="range" min="${state.age}" max="${state.targetAge}" step="1" value="${state.otherIncomeStart}" oninput="slideLive(this,'otherIncomeStart',this.value)" onchange="sliderCommit('otherIncomeStart',this.value)" class="slider-input"/>
-          <input type="number" min="${state.age}" max="${state.targetAge}" step="1" value="${state.otherIncomeStart}" oninput="slideLive(this,'otherIncomeStart',this.value)" onchange="sliderCommit('otherIncomeStart',this.value)" placeholder="Age" class="mobile-input"/>
-        </div>` : ''}
-        <div class="control">
           <div class="control-row"><span class="control-label">Plan to age<span class="help-mark" tabindex="0" data-tip="The plan has to last to this age. 100 is cautious; the tool counts it as lasting if the money is still there.">i</span></span><span class="control-value">${state.targetAge}</span></div>
           <input type="range" min="70" max="110" step="1" value="${state.targetAge}" oninput="slideLive(this,'targetAge',this.value)" onchange="sliderCommit('targetAge',this.value)" class="slider-input"/>
           <input type="number" min="70" max="110" step="1" value="${state.targetAge}" oninput="slideLive(this,'targetAge',this.value)" onchange="sliderCommit('targetAge',this.value)" placeholder="Age" class="mobile-input"/>
         </div>
+        <div class="control">
+          <div class="control-row"><span class="control-label">Pension or other income after work<span class="help-mark" tabindex="0" data-tip="Money that keeps coming after you stop working, besides Social Security. A pension, an annuity, rent from a property. Per year, before tax.">i</span></span><span class="control-value">${state.otherIncome > 0 ? fmtMoney(state.otherIncome) : 'none'}</span></div>
+          <input type="range" min="0" max="${Math.max(120000, Math.ceil((state.otherIncome || 0) / 1000) * 1000)}" step="1000" value="${state.otherIncome || 0}" oninput="slideLive(this,'otherIncome',this.value)" onchange="sliderCommit('otherIncome',this.value)" class="slider-input"/>
+        </div>
+        ${state.otherIncome > 0 ? `<div class="control">
+          <div class="control-row"><span class="control-label">Pension starts at age</span><span class="control-value">${state.otherIncomeStart}</span></div>
+          <input type="range" min="${state.age}" max="${state.targetAge}" step="1" value="${state.otherIncomeStart}" oninput="slideLive(this,'otherIncomeStart',this.value)" onchange="sliderCommit('otherIncomeStart',this.value)" class="slider-input"/>
+          <input type="number" min="${state.age}" max="${state.targetAge}" step="1" value="${state.otherIncomeStart}" oninput="slideLive(this,'otherIncomeStart',this.value)" onchange="sliderCommit('otherIncomeStart',this.value)" placeholder="Age" class="mobile-input"/>
+        </div>
+        <div class="control">
+          <div class="control-row"><span class="control-label">Pension ends at age<span class="help-mark" tabindex="0" data-tip="Slide to the plan’s end age and it never stops.">i</span></span><span class="control-value">${has(state.otherIncomeEnd) ? state.otherIncomeEnd : 'plan end'}</span></div>
+          <input type="range" min="${state.otherIncomeStart + 1}" max="${state.targetAge}" step="1" value="${has(state.otherIncomeEnd) ? state.otherIncomeEnd : state.targetAge}" oninput="slideLive(this,'otherIncomeEnd',this.value)" onchange="sliderCommit('otherIncomeEnd',this.value)" class="slider-input"/>
+          <input type="number" min="${state.otherIncomeStart + 1}" max="${state.targetAge}" step="1" value="${has(state.otherIncomeEnd) ? state.otherIncomeEnd : state.targetAge}" oninput="slideLive(this,'otherIncomeEnd',this.value)" onchange="sliderCommit('otherIncomeEnd',this.value)" placeholder="Age" class="mobile-input"/>
+        </div>` : ''}
       </div>
 
       <div class="sidebar-section sec-mode">
@@ -2190,11 +2195,6 @@ function moreOptionsHTML() {
       <h3 class="sub-heading">Pension or other income</h3>
       <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">If you have a pension, add it under Your plan. Here you can change whether it keeps up with prices and add a second source, such as a partner’s pension.</div>
       ${state.otherIncome > 0 ? `<div class="control">
-        <div class="control-row"><span class="control-label">It ends at age</span><span class="control-value">${has(state.otherIncomeEnd) ? state.otherIncomeEnd : 'plan end'}</span></div>
-        <input type="range" min="${state.otherIncomeStart + 1}" max="${state.targetAge}" step="1" value="${has(state.otherIncomeEnd) ? state.otherIncomeEnd : state.targetAge}" oninput="slideLive(this,'otherIncomeEnd',this.value)" onchange="sliderCommit('otherIncomeEnd',this.value)"/>
-        <div class="ev-hint">Slide to the plan’s end age and it never stops.</div>
-      </div>
-      <div class="control">
         <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-soft);cursor:pointer"><input type="checkbox" ${state.otherIncomeFixed ? 'checked' : ''} onchange="update('otherIncomeFixed', this.checked)"> Fixed dollars, no cost of living increase</label>
         <div class="ev-hint">Most pensions and annuities do not rise with prices, so in today’s dollars they buy a little less each year. Rent usually keeps up.</div>
       </div>` : ''}
