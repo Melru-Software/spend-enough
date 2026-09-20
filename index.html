@@ -154,6 +154,7 @@
   .plan .anchor { font-size: 13px; color: var(--faint); }
   .plan .btn { margin-top: 18px; }
   .terms-line { font-size: 12.5px; color: var(--faint); margin-top: 8px; }
+  .plan .have-it { font-family: inherit; font-size: 14px; line-height: 1.5; color: var(--mute); margin: 18px 0 10px; }
   .terms-line a { color: var(--mute); }
   .refund { font-size: 14px; color: var(--mute); margin-top: 22px; }
 
@@ -215,7 +216,7 @@
       <h1>Are you spending enough for the life you want?</h1>
       <p class="sub">Or holding back because the future feels unknowable? Make it a bit more known. Enter some numbers, move them around, and see where they lead.</p>
       <div class="actions"><a class="btn btn-ink" href="app.html">Try it free</a><a class="btn btn-line" href="#how">How it works</a></div>
-      <p class="fine">Free to try. No account, nothing to link, your numbers stay on your device. <a href="#price">The full version is $39</a> if you want to go deeper.</p>
+      <p class="fine">Free to try. No account, nothing to link, your numbers stay on your device. <span id="hero-price"><a href="#price">The full version is $39</a> if you want to go deeper.</span></p>
     </div>
 
     <div class="live" aria-label="A live example from the tool">
@@ -302,7 +303,8 @@
             <li>The spending explorer, which shows how that changes at each spending level.</li>
             <li>The assumptions behind the result, open to change: stock and bond mix, fees, tax rates, and the guardrails.</li>
           </ul>
-          <a class="btn btn-line" href="app.html">Try it free</a>
+          <a class="btn btn-line" id="free-try" href="app.html">Try it free</a>
+          <p class="have-it" id="free-have" hidden>This browser already has the full version. To use your key on another device, choose <em>Deactivate this browser</em> at the bottom of the app first.</p>
         </div>
         <div class="plan">
           <h3>Full version <span id="pro-price">$39</span></h3>
@@ -321,6 +323,7 @@
           </ul>
           <a class="btn btn-ink checkout-button" id="pro-buy" href="app.html" target="_blank" rel="noopener" onclick="track('clicked_checkout')" hidden>Get the full version</a>
           <p class="terms-line" id="pro-terms" hidden>By purchasing you agree to the <a href="terms.html">Terms of Service</a>.</p>
+          <div id="pro-have" hidden><p class="have-it">You already have this. This browser is unlocked.</p><a class="btn btn-ink" href="app.html">Open the app</a></div>
         </div>
       </div>
       <p class="refund">Not for you? Full refund within 14 days, no questions asked.</p>
@@ -472,6 +475,7 @@
 </script>
 
 <script src="config.js"></script>
+<script src="paywall.js"></script>
 <script src="checkout.js" defer></script>
 <script>/* Optional privacy-respecting analytics (Plausible/Fathom-style), only when config.js sets it. */
 (function(){var c=window.SPENDENOUGH_CONFIG||{};if(!c.analyticsScript)return;var s=document.createElement('script');s.defer=true;s.src=c.analyticsScript;if(c.analyticsSite){s.setAttribute('data-domain',c.analyticsSite);s.setAttribute('data-site',c.analyticsSite);}document.head.appendChild(s);})();
@@ -490,6 +494,22 @@ window.track=function(n){try{if(window.plausible)window.plausible(n);else if(win
   if (CFG.price) { var pp = document.getElementById("pro-price"); if (pp) pp.textContent = CFG.price; }
   var buy = document.getElementById("pro-buy");
   if (buy && CFG.checkoutUrl) { buy.href = CFG.checkoutUrl; buy.hidden = false; var pt = document.getElementById("pro-terms"); if (pt) pt.hidden = false; }
+
+  // Already bought on this browser (the app keeps the license in localStorage on this
+  // same origin): say so, and make every "Try it free" open the full version instead.
+  (function alreadyOwned() {
+    var owned = false;
+    try { owned = typeof licenseDecision === "function" && licenseDecision(JSON.parse(localStorage.getItem("spendenough_license") || "null"), Date.now()).paid; } catch (e) { owned = false; }
+    if (!owned) return;
+    document.querySelectorAll('a[href="app.html"]').forEach(function (a) { if (/^Try it free$/.test(a.textContent.trim())) a.textContent = "Open the app"; });
+    var ft = document.getElementById("free-try"); if (ft) ft.hidden = true;
+    var fh = document.getElementById("free-have"); if (fh) fh.hidden = false;
+    if (buy) buy.hidden = true;
+    var terms = document.getElementById("pro-terms"); if (terms) terms.hidden = true;
+    var have = document.getElementById("pro-have"); if (have) have.hidden = false;
+    var hp = document.getElementById("hero-price"); if (hp) hp.hidden = true;
+    var rf = document.querySelector(".refund"); if (rf) rf.hidden = true;
+  })();
 
   // ---------- Email capture ----------
   (function wireSignup() {
