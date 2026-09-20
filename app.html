@@ -2188,7 +2188,7 @@ function moreOptionsHTML() {
       </div>
 
       <h3 class="sub-heading">Pension or other income</h3>
-      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">${state.otherIncome > 0 ? 'The pension’s amount and the age it starts are under Your plan. Here you can set the age it ends, whether it keeps up with prices, and add a second source, such as a partner’s pension.' : 'No pension under Your plan yet. Once you add one there, its end age and whether it keeps up with prices will show up here. A second source, such as a partner’s pension, can be added below.'}</div>
+      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">If you have a pension, add it under Your plan. Here you can change whether it keeps up with prices and add a second source, such as a partner’s pension.</div>
       ${state.otherIncome > 0 ? `<div class="control">
         <div class="control-row"><span class="control-label">It ends at age</span><span class="control-value">${has(state.otherIncomeEnd) ? state.otherIncomeEnd : 'plan end'}</span></div>
         <input type="range" min="${state.otherIncomeStart + 1}" max="${state.targetAge}" step="1" value="${has(state.otherIncomeEnd) ? state.otherIncomeEnd : state.targetAge}" oninput="slideLive(this,'otherIncomeEnd',this.value)" onchange="sliderCommit('otherIncomeEnd',this.value)"/>
