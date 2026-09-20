@@ -842,6 +842,10 @@
   .step-title { font-size: 21px; line-height: 1.25; margin-bottom: 4px; }
   .step-hint { font-size: 15px; margin-bottom: 0; line-height: 1.45; }
   .onboard-step .field-grid { gap: 20px 18px; }
+  .field.span-2 { grid-column: 1 / -1; }
+  .partner-field[hidden] { display: none !important; }   /* .field is display:flex, which would otherwise win */
+  .plan-for { display: inline-flex; align-self: flex-start; margin-top: 6px; }   /* .field stretches children; keep the frame on the buttons */
+  .plan-for .toggle-btn { flex: 0 0 auto; padding: 8px 18px; }
   .step-actions { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; margin-top: 30px; align-items: start; }
   .step-actions > * { grid-column: 2; justify-self: stretch; }
   .step-actions .btn-primary { justify-self: start; }
@@ -1314,7 +1318,7 @@ window.showUnlockModal = function(opts) {
         <div class="compare-sub">What you have now</div>
         <ul class="compare-list">
           <li>Historical mode: your plan run through every stretch of the market since 1926, with the full range on the chart</li>
-          <li>Your numbers: savings, spending, incomes, retirement ages, the mortgage, and how long to plan for</li>
+          <li>Your numbers: savings, spending now and later in life, incomes, a pension, retirement ages, the mortgage, and how long to plan for</li>
           <li>All seven what-if scenarios, from taking time off to a bad decade</li>
           <li>The spending explorer</li>
           <li>The assumptions behind the result, open to change: stock and bond mix, fees, tax rates, and the guardrails</li>
@@ -1331,7 +1335,7 @@ window.showUnlockModal = function(opts) {
           <li>Best and worst outcomes, and five named historical stress tests</li>
           <li>Spending flexibility, Social Security timing, and a cashflow chart</li>
           <li>A printable one-page report, and the year-by-year table as a spreadsheet</li>
-          <li>More about you: spending later in life, income growth, the mortgage in detail, filing status and your state, account types and the order you draw from them, and one-time life events</li>
+          <li>More about you: income growth, the mortgage and a pension in detail, filing status and your state, account types and the order you draw from them, and one-time life events</li>
           <li>Save up to 8 scenarios, with notes</li>
         </ul>
       </div>
@@ -1399,17 +1403,20 @@ let payoffFromPreset = false;
 window.showPayoffModal = function(fromPreset) {
   payoffFromPreset = !!fromPreset;
   const currentYearsLeft = Math.max(1, state.mortgagePayoffAge - state.age);
+  // Start from what the payoff helper already learned, if it was used.
+  const knownBalance = state.mortgageBalance > 0 ? Math.round(state.mortgageBalance) : '';
+  const knownRate = state.mortgageRate > 0 ? +(state.mortgageRate * 100).toFixed(2) : 6.5;
   openModal(`
     <div style="max-width:380px">
       <div style="font-size:16px;font-weight:700;margin-bottom:4px;font-family:'Source Serif 4',serif">Accelerated mortgage payoff</div>
       <p style="font-size:14px;color:var(--ink-mute);margin-bottom:16px">Tell it what is left on the mortgage and how fast you want it gone. It works out the new yearly payment, raises your mortgage payment to match until the payoff year, then the payment ends.</p>
       <div style="display:grid;gap:10px">
         <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Remaining mortgage balance
-          <input type="number" id="po_balance" placeholder="e.g. 280000" step="10000" min="0"
+          <input type="number" id="po_balance" placeholder="e.g. 280000" step="10000" min="0" value="${knownBalance}"
             style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:var(--bone)"/>
         </label>
         <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Interest rate (%)
-          <input type="number" id="po_rate" placeholder="e.g. 6.5" step="0.1" min="0" max="20" value="6.5"
+          <input type="number" id="po_rate" placeholder="e.g. 6.5" step="0.1" min="0" max="20" value="${knownRate}"
             style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:var(--bone)"/>
         </label>
         <label style="font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-soft)">Pay off in how many years?
@@ -1692,10 +1699,16 @@ function renderOnboarding() {
 
       <div class="onboard-step">
         <div class="step-side"><span class="step-num">1</span><div><h2 class="step-title">Your timeline</h2>
-        <p class="step-hint">How old are you now? If you have a partner, add their age too.</p></div></div>
+        <p class="step-hint">Who this plan is for, and how old you are now.</p></div></div>
         <div class="field-grid">
+          <div class="field span-2"><label id="ob_planForLabel">Who is this plan for?</label>
+            <div class="toggle-group plan-for" role="group" aria-labelledby="ob_planForLabel">
+              <button type="button" class="toggle-btn${state.hasPartner ? '' : ' active'}" aria-pressed="${!state.hasPartner}" onclick="setPlanFor(false)">Just me</button>
+              <button type="button" class="toggle-btn${state.hasPartner ? ' active' : ''}" aria-pressed="${!!state.hasPartner}" onclick="setPlanFor(true)">Me and a partner</button>
+            </div>
+            <input type="hidden" id="ob_hasPartner" value="${state.hasPartner ? '1' : ''}"/></div>
           <div class="field"><label>Your age</label><input type="number" id="ob_age" value="${state.age || ''}" placeholder="e.g. 45" min="18" max="90" oninput="stepProgress()"/></div>
-          <div class="field"><label>Partner's age <span style="text-transform:none;font-weight:400;color:var(--ink-mute);">(blank if none)</span></label><input type="number" id="ob_partnerAge" value="${state.partnerAge || ''}" placeholder="optional" min="0" max="90" oninput="stepProgress()"/></div>
+          <div class="field partner-field"><label>Partner's age</label><input type="number" id="ob_partnerAge" value="${state.partnerAge || ''}" placeholder="e.g. 44" min="18" max="90" oninput="stepProgress()"/></div>
         </div>
       </div>
 
@@ -1710,10 +1723,10 @@ function renderOnboarding() {
 
       <div class="onboard-step">
         <div class="step-side"><span class="step-num">3</span><div><h2 class="step-title">Other income and housing</h2>
-        <p class="step-hint">Work income, partner income, and the mortgage.</p></div></div>
+        <p class="step-hint" id="ob_hint3">Work income, partner income, and the mortgage.</p></div></div>
         <div class="field-grid">
           <div class="field"><label>Your gross income</label><input type="text" id="ob_yourIncome" class="money" inputmode="numeric" value="${moneyText(state.yourIncome || '')}" placeholder="e.g. $110,000" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_yourIncome','ob_yourSS')"/><span class="field-hint">From work, before tax \u00b7 It stops at your retirement age</span></div>
-          <div class="field"><label>Partner's gross income</label><input type="text" id="ob_partnerIncome" class="money" inputmode="numeric" value="${moneyText(state.partnerIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_partnerIncome','ob_partnerSS')"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
+          <div class="field partner-field"><label>Partner's gross income</label><input type="text" id="ob_partnerIncome" class="money" inputmode="numeric" value="${moneyText(state.partnerIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_partnerIncome','ob_partnerSS')"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
           <div class="field"><label>Of that, your mortgage payment</label><input type="text" id="ob_housing" class="money" inputmode="numeric" value="${moneyText(state.housing || '')}" placeholder="e.g. $24,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Principal and interest per year, the part that ends when it is paid off. Taxes and insurance stay in spending.</span></div>
           <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100" oninput="stepProgress()"/><span class="field-hint">When that payment stops \u00b7 <button type="button" class="helper-trigger" onclick="openPayoffHelper('ob_mortgagePayoff')">help me calculate</button></span></div>
         </div>
@@ -1721,10 +1734,10 @@ function renderOnboarding() {
 
       <div class="onboard-step">
         <div class="step-side"><span class="step-num">4</span><div><h2 class="step-title">Social Security and other income</h2>
-        <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number. A pension, an annuity, or rent goes in the third box.</p></div></div>
+        <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number. A pension, an annuity, or rent has its own box.</p></div></div>
         <div class="field-grid">
           <div class="field"><label>Your SS at full age</label><input type="text" id="ob_yourSS" class="money" inputmode="numeric" value="${moneyText(state.yourSSAmount || '')}" placeholder="e.g. $30,000" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_yourSS')"/><span class="field-hint" id="ob_yourSS_hint">Annual, in today\u2019s dollars</span></div>
-          <div class="field"><label>Partner's SS at full age</label><input type="text" id="ob_partnerSS" class="money" inputmode="numeric" value="${moneyText(state.partnerSSAmount || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_partnerSS')"/><span class="field-hint" id="ob_partnerSS_hint">Annual, in today\u2019s dollars</span></div>
+          <div class="field partner-field"><label>Partner's SS at full age</label><input type="text" id="ob_partnerSS" class="money" inputmode="numeric" value="${moneyText(state.partnerSSAmount || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_partnerSS')"/><span class="field-hint" id="ob_partnerSS_hint">Annual, in today\u2019s dollars</span></div>
           <div class="field"><label>Pension or other income after work</label><input type="text" id="ob_otherIncome" class="money" inputmode="numeric" value="${moneyText(state.otherIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Money that keeps coming after you stop working, besides Social Security. Per year, before tax.</span></div>
           <div class="field"><label>It starts at age</label><input type="number" id="ob_otherIncomeStart" value="${state.otherIncome > 0 ? state.otherIncomeStart : ''}" placeholder="e.g. 65" min="18" max="100" oninput="stepProgress()"/><span class="field-hint">Blank means your retirement age.</span></div>
         </div>
@@ -1747,7 +1760,26 @@ function num(id) { const el = document.getElementById(id); if (!el) return 0; co
 // A step counts as done when the fields that matter to it are filled. Partner and
 // optional fields never block it, so the ticks track real progress, not every box.
 const STEP_FIELDS = [['ob_age'], ['ob_portfolio'], ['ob_yourIncome', 'ob_housing'], ['ob_yourSS']];
+// "Just me" or "Me and a partner". The answer lives in a hidden ob_ input so the draft
+// remembers it like any other box; every partner field follows it.
+function planHasPartner() { const el = document.getElementById('ob_hasPartner'); return !!el && el.value === '1'; }
+function syncPartnerFields() {
+  const on = planHasPartner();
+  document.querySelectorAll('.onboarding .partner-field').forEach(el => { el.hidden = !on; });
+  document.querySelectorAll('.onboarding .plan-for .toggle-btn').forEach((b, i) => { const active = (i === 1) === on; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)); });
+  const hint = document.getElementById('ob_hint3');
+  if (hint) hint.textContent = on ? 'Work income, partner income, and the mortgage.' : 'Work income and the mortgage.';
+}
+window.setPlanFor = function(withPartner) {
+  const el = document.getElementById('ob_hasPartner');
+  if (el) el.value = withPartner ? '1' : '';
+  syncPartnerFields();
+  stepProgress();
+  if (withPartner) { const a = document.getElementById('ob_partnerAge'); if (a && !a.value) a.focus(); }
+};
+
 window.stepProgress = function() {
+  syncPartnerFields();
   // Clear the "please enter your age" style message as soon as the field is filled,
   // rather than making people press the button again to find out.
   const msg = document.getElementById('ob_validation');
@@ -1757,6 +1789,7 @@ window.stepProgress = function() {
     if (ageOk && portfolioOk) msg.textContent = '';
     else if (msg.dataset.field === 'age' && ageOk) msg.textContent = portfolioOk ? '' : 'Enter your portfolio value to get started.';
     else if (msg.dataset.field === 'portfolio' && portfolioOk) msg.textContent = ageOk ? '' : 'Please enter your age to continue.';
+    else if (msg.dataset.field === 'partnerAge' && (!planHasPartner() || num('ob_partnerAge') >= 18)) msg.textContent = '';
   }
   const steps = document.querySelectorAll('.onboard-step');
   STEP_FIELDS.forEach((ids, i) => {
@@ -1777,18 +1810,24 @@ window.finishOnboarding = function() {
   const msgEl = document.getElementById('ob_validation');
   if (age < 18) { msgEl.textContent = 'Please enter your age to continue.'; msgEl.dataset.field = 'age'; document.getElementById('ob_age').focus(); return; }
   if (portfolio <= 0) { msgEl.textContent = 'Enter your portfolio value to get started.'; msgEl.dataset.field = 'portfolio'; document.getElementById('ob_portfolio').focus(); return; }
+  const withPartner = planHasPartner();
+  const pAge = withPartner ? num('ob_partnerAge') : 0;
+  if (withPartner && pAge < 18) { msgEl.textContent = "Enter your partner's age, or choose Just me."; msgEl.dataset.field = 'partnerAge'; document.getElementById('ob_partnerAge').focus(); return; }
   msgEl.textContent = ''; msgEl.dataset.field = '';
 
   state.age = age;
-  const pAge = num('ob_partnerAge');
+  const hadPartner = !!state.hasPartner, firstPlan = !baselineState;
   state.partnerAge = pAge;
-  state.hasPartner = pAge >= 18;
+  state.hasPartner = withPartner;
+  // Taxes follow the answer: a couple files jointly, one person files single. Someone who
+  // changed it under More about you keeps their choice unless the answer itself changes.
+  if (firstPlan || hadPartner !== withPartner) state.filingStatus = withPartner ? 'mfj' : 'single';
   state.portfolio = portfolio;
   state.spending = spending;
   state.lateSpending = spending > 0 ? Math.round(spending * 0.85) : 0;
   state.slowDownAge = 75;
   state.yourIncome = num('ob_yourIncome');
-  state.partnerIncome = num('ob_partnerIncome');
+  state.partnerIncome = withPartner ? num('ob_partnerIncome') : 0;
   state.housing = mortgage;
   state.mortgagePayoffAge = num('ob_mortgagePayoff') || 60;
   state.otherIncome = num('ob_otherIncome');
@@ -1797,7 +1836,7 @@ window.finishOnboarding = function() {
   // A blank Social Security box would otherwise mean "none", which is both wrong for
   // most workers and the most pessimistic thing the model could assume. Estimate it from
   // income instead, and remember that we did so the Assumptions panel can say so.
-  const ssTyped = num('ob_yourSS'), partnerSsTyped = num('ob_partnerSS');
+  const ssTyped = num('ob_yourSS'), partnerSsTyped = withPartner ? num('ob_partnerSS') : 0;
   const ssBlank = (id) => { const el = document.getElementById(id); return !el || String(el.value).trim() === ''; };
   state.yourSSAmount = ssTyped;
   state.partnerSSAmount = partnerSsTyped;
@@ -1919,6 +1958,16 @@ function renderDashboard() {
           <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.spending + state.housing)}" oninput="moneyType(this); slideLive(this,'totalSpending',moneyValue(this))" onchange="sliderCommit('totalSpending',moneyValue(this))" placeholder="Annual amount"/>
         </div>
         <div class="control">
+          <div class="control-row"><span class="control-label">Spending from age ${state.slowDownAge}<span class="help-mark" tabindex="0" data-tip="Spending usually falls later in retirement, so the plan starts this at 85% of today's number. Set it equal to the amount above for no change.">i</span></span><span class="control-value">${fmtMoney(state.lateSpending + lateHousingPart())}</span></div>
+          <input type="range" min="${10000 + lateHousingPart()}" max="${400000 + lateHousingPart()}" step="1000" value="${state.lateSpending + lateHousingPart()}" oninput="slideLive(this,'totalLateSpending',this.value)" onchange="sliderCommit('totalLateSpending',this.value)" class="slider-input"/>
+          <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.lateSpending + lateHousingPart())}" oninput="moneyType(this); slideLive(this,'totalLateSpending',moneyValue(this))" onchange="sliderCommit('totalLateSpending',moneyValue(this))" placeholder="Annual amount"/>
+        </div>
+        <div class="control">
+          <div class="control-row"><span class="control-label">Changes at age</span><span class="control-value">${state.slowDownAge}</span></div>
+          <input type="range" min="55" max="95" step="1" value="${state.slowDownAge}" oninput="slideLive(this,'slowDownAge',this.value)" onchange="sliderCommit('slowDownAge',this.value)" class="slider-input"/>
+          <input type="number" min="55" max="95" step="1" value="${state.slowDownAge}" oninput="slideLive(this,'slowDownAge',this.value)" onchange="sliderCommit('slowDownAge',this.value)" class="mobile-input"/>
+        </div>
+        <div class="control">
           <div class="control-row"><span class="control-label">Your income</span><span class="control-value">${fmtMoney(state.yourIncome)}</span></div>
           <input type="range" min="0" max="500000" step="5000" value="${state.yourIncome}" oninput="slideLive(this,'yourIncome',this.value)" onchange="sliderCommit('yourIncome',this.value)" class="slider-input"/>
           <input type="text" inputmode="numeric" class="mobile-input money" value="${moneyText(state.yourIncome)}" oninput="moneyType(this); slideLive(this,'yourIncome',moneyValue(this))" onchange="sliderCommit('yourIncome',moneyValue(this))" placeholder="Annual income"/>
@@ -2013,7 +2062,7 @@ function renderDashboard() {
       ${canCompare ? renderCompareSummary(baselineResult, result) : (!isPaid() && computeImpact() ? `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">See “${baselineName}” and “${currentName}” on one chart, with the counts side by side <span class="lock-icon">&#x1f512;</span></button>` : '')}
 
       <h2 class="section-heading explore-h">Explore spending levels</h2>
-      <div class="section-sub explore-sub">Click a row to apply that spending level and see how it changes the projection.${state.housing > 0 ? ' Figures include the ' + fmtMoneyShort(state.housing) + ' a year mortgage payment while it lasts.' : ''}</div>
+      <div class="section-sub explore-sub">Click a row to apply that spending level and see how it changes the projection. Each level runs until age ${state.slowDownAge}; from then on the plan spends ${fmtMoney(state.lateSpending + lateHousingPart())} a year, which you can change under Your plan.${state.housing > 0 ? ' Figures include the ' + fmtMoneyShort(state.housing) + ' a year mortgage payment while it lasts.' : ''}</div>
       ${renderSpendingExplorer()}
 
       ${renderReadFirst(result)}
@@ -2132,18 +2181,7 @@ function moreOptionsHTML() {
   const effRate = state.taxRate ? (state.taxRate * 100).toFixed(0) : '18';
   return `
     <div class="more-body">
-      <h3 class="sub-heading" style="margin-top:0">Late-life spending</h3>
-      <div class="control">
-        <div class="control-row"><span class="control-label">After age ${state.slowDownAge}</span><span class="control-value">${fmtMoney(state.lateSpending)}</span></div>
-        <input type="range" min="10000" max="400000" step="1000" value="${state.lateSpending}" oninput="slideLive(this,'lateSpending',this.value)" onchange="sliderCommit('lateSpending',this.value)"/>
-      </div>
-      <div class="control">
-        <div class="control-row"><span class="control-label">Changes at age</span><span class="control-value">${state.slowDownAge}</span></div>
-        <input type="range" min="55" max="95" step="1" value="${state.slowDownAge}" oninput="slideLive(this,'slowDownAge',this.value)" onchange="sliderCommit('slowDownAge',this.value)"/>
-      </div>
-
-
-      <h3 class="sub-heading">Income growth</h3>
+      <h3 class="sub-heading" style="margin-top:0">Income growth</h3>
       <div class="control">
         <div class="control-row"><span class="control-label">Real income growth</span><span class="control-value">${(state.yourIncomeGrowth*100).toFixed(1)}%</span></div>
         <input type="range" min="0" max="5" step="0.25" value="${state.yourIncomeGrowth*100}" oninput="updateLive2(this,'yourIncomeGrowth','partnerIncomeGrowth',this.value/100)" onchange="state.partnerIncomeGrowth=this.value/100;sliderCommit('yourIncomeGrowth',this.value/100)"/>
@@ -2628,14 +2666,16 @@ function renderEventTimeline() {
 }
 
 // ===== SPENDING EXPLORER =====
+// The mortgage payment is still part of spending after the change age if it is not paid off yet.
+function lateHousingPart() { return state.housing > 0 && state.mortgagePayoffAge > state.slowDownAge ? state.housing : 0; }
 function computeSpendingLevels() {
   if (!spendingLevelsStale && spendingLevelsCache) return spendingLevelsCache;
   const base = state.spending || 50000;
-  const ratio = state.spending > 0 ? state.lateSpending / state.spending : 0.85;
   const mults = [0.8, 0.9, 1.0, 1.1, 1.2];
   const rows = mults.map(m => {
     const spend = Math.round(base * m / 1000) * 1000;
-    const ts = { ...state, spending: spend, lateSpending: Math.round(spend * ratio) };
+    // Only the amount until the change age varies; late-life spending is the person's own number.
+    const ts = { ...state, spending: spend };
     const r = runForState(ts);
     const last = r.percentiles[r.percentiles.length - 1];
     return { spending: spend, successRate: r.successRate, successCount: r.successCount, totalPeriods: r.totalPeriods, medianFinal: r.medianFinal, p10: last.p10, isCurrent: spend === (Math.round(base/1000)*1000) && m === 1.0 };
@@ -3102,8 +3142,13 @@ function computeCashflowData(rows, mode) {
   if (mode === 'breakdown') {
     return {
       d0: { data: rows.map(y => y.yourIncome + y.partnerIncome), bg: 'rgba(91,110,58,0.6)', label: 'Work income' },
-      d1: { data: rows.map(y => y.ssIncome + (y.otherIncome || 0)), bg: 'rgba(201,164,73,0.7)', label: 'Social Security and other income' },
+      d1: { data: rows.map(y => y.ssIncome), bg: 'rgba(201,164,73,0.7)', label: 'Social Security' },
       d2: { data: rows.map(y => -(y.spending)), bg: 'rgba(184,92,56,0.5)', label: 'Spending' },
+      // A pension or other income gets its own band only when there is one; an empty
+      // label keeps it out of the legend and the tooltip.
+      d3: rows.some(y => y.otherIncome > 0)
+        ? { data: rows.map(y => y.otherIncome || 0), bg: 'rgba(84,120,138,0.7)', label: 'Pension or other income' }
+        : { data: rows.map(() => 0), bg: 'transparent', label: '' },
     };
   }
   const netData = rows.map(y => {
@@ -3115,7 +3160,14 @@ function computeCashflowData(rows, mode) {
     d0: { data: netData.map(v => Math.max(0, v)), bg: 'rgba(91,110,58,0.7)', label: 'Surplus' },
     d1: { data: netData.map(() => 0), bg: 'transparent', label: '' },
     d2: { data: netData.map(v => Math.min(0, v)), bg: 'rgba(184,92,56,0.6)', label: 'Deficit' },
+    d3: { data: netData.map(() => 0), bg: 'transparent', label: '' },
   };
+}
+function applyCashflowData(d) {
+  ['d0', 'd1', 'd3', 'd2'].forEach((k, i) => {   // income sources first, then spending
+    const ds = cashflowChart.data.datasets[i];
+    ds.data = d[k].data; ds.backgroundColor = d[k].bg; ds.label = d[k].label;
+  });
 }
 
 function drawCashflowChart(result) {
@@ -3135,15 +3187,7 @@ function drawCashflowChart(result) {
   if (cashflowChart) {
     // Update existing chart for animation
     cashflowChart.data.labels = labels;
-    cashflowChart.data.datasets[0].data = d.d0.data;
-    cashflowChart.data.datasets[0].backgroundColor = d.d0.bg;
-    cashflowChart.data.datasets[0].label = d.d0.label;
-    cashflowChart.data.datasets[1].data = d.d1.data;
-    cashflowChart.data.datasets[1].backgroundColor = d.d1.bg;
-    cashflowChart.data.datasets[1].label = d.d1.label;
-    cashflowChart.data.datasets[2].data = d.d2.data;
-    cashflowChart.data.datasets[2].backgroundColor = d.d2.bg;
-    cashflowChart.data.datasets[2].label = d.d2.label;
+    applyCashflowData(d);
     cashflowChart.options.plugins.legend.display = (cashflowMode === 'breakdown');
     cashflowChart.update();
     return;
@@ -3154,6 +3198,7 @@ function drawCashflowChart(result) {
     data: { labels, datasets: [
       { label: d.d0.label, data: d.d0.data, backgroundColor: d.d0.bg, stack: 'in', borderRadius: 1 },
       { label: d.d1.label, data: d.d1.data, backgroundColor: d.d1.bg, stack: 'in', borderRadius: 1 },
+      { label: d.d3.label, data: d.d3.data, backgroundColor: d.d3.bg, stack: 'in', borderRadius: 1 },
       { label: d.d2.label, data: d.d2.data, backgroundColor: d.d2.bg, stack: 'out', borderRadius: 1 },
     ] },
     options: { responsive: true, maintainAspectRatio: false, resizeDelay: 200,
@@ -3171,7 +3216,7 @@ function drawCashflowChart(result) {
               return c.dataset.label + ': ' + fmtMoneyShort(Math.abs(c.parsed.y));
             }
             const net = yr ? Math.round((yr.yourIncome + yr.partnerIncome + yr.ssIncome + (yr.otherIncome || 0)) - ((yr.yourIncome + yr.partnerIncome) * state.taxRate + yr.ssIncome * state.taxRate * 0.5 + (yr.otherIncome || 0) * state.taxRate) - yr.spending) : c.parsed.y;
-            if (c.datasetIndex === 1) return null;
+            if (c.datasetIndex !== 0 && c.datasetIndex !== 3) return null;   // surplus and deficit bars only
             const lines = [(net >= 0 ? 'Surplus: +' : 'Deficit: ') + fmtMoneyShort(net) + '/yr'];
             if (yr) {
               if (yr.yourIncome + yr.partnerIncome > 0) lines.push('Income: ' + fmtMoneyShort(yr.yourIncome + yr.partnerIncome));
@@ -3281,15 +3326,7 @@ window.setCashflowMode = function(m) {
   cashflowMode = m;
   if (cashflowChart && cashflowRows) {
     const d = computeCashflowData(cashflowRows, m);
-    cashflowChart.data.datasets[0].data = d.d0.data;
-    cashflowChart.data.datasets[0].backgroundColor = d.d0.bg;
-    cashflowChart.data.datasets[0].label = d.d0.label;
-    cashflowChart.data.datasets[1].data = d.d1.data;
-    cashflowChart.data.datasets[1].backgroundColor = d.d1.bg;
-    cashflowChart.data.datasets[1].label = d.d1.label;
-    cashflowChart.data.datasets[2].data = d.d2.data;
-    cashflowChart.data.datasets[2].backgroundColor = d.d2.bg;
-    cashflowChart.data.datasets[2].label = d.d2.label;
+    applyCashflowData(d);
     cashflowChart.options.plugins.legend.display = (m === 'breakdown');
     cashflowChart.update();
   }
@@ -3318,6 +3355,7 @@ function fmtSliderVal(key, val) {
 window.slideLive = function(el, key, rawVal) {
   let val = +rawVal;
   if (key === 'totalSpending') { key = 'spending'; val = Math.max(0, val - state.housing); }
+  if (key === 'totalLateSpending') { key = 'lateSpending'; val = Math.max(0, val - lateHousingPart()); }
   state[key] = val;
   // Recalculate mortgage payment when payoff age changes
   if (key === 'mortgagePayoffAge' && state.mortgageBalance > 0 && state.mortgageRate > 0) {
@@ -3339,6 +3377,7 @@ window.slideLive = function(el, key, rawVal) {
 // Called on onchange (slider release) — full render with all sections
 window.sliderCommit = function(key, rawVal) {
   if (key === 'totalSpending') { key = 'spending'; rawVal = Math.max(0, +rawVal - state.housing); }
+  if (key === 'totalLateSpending') { key = 'lateSpending'; rawVal = Math.max(0, +rawVal - lateHousingPart()); }
   state[key] = +rawVal;
   // An other-income line slid to the plan's end age never stops, whatever the end age becomes later.
   if ((key === 'otherIncomeEnd' || key === 'otherIncome2End') && +rawVal >= state.targetAge) state[key] = null;
@@ -3389,9 +3428,7 @@ window.applySSAge = function(age) {
 };
 
 window.applySpending = function(spend) {
-  const ratio = state.spending > 0 ? state.lateSpending / state.spending : 0.85;
-  state.spending = spend;
-  state.lateSpending = Math.round(spend * ratio);
+  state.spending = spend;   // late-life spending stays what the person set
   invalidateCaches(); render();
   showResultChanged();
 };
