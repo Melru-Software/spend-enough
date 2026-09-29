@@ -36,6 +36,7 @@
     limit: 'This key is already in use on ' + ACTIVATION_LIMIT + ' browsers. Free one up from your order page (link in your receipt email) and try again.',
     inactive: 'That key isn’t active. Check the receipt email, or reply to it and we’ll sort it out.',
     network: 'Couldn’t reach the license server. Check your connection and try again.',
+    storage: 'This browser won’t let the app save your key (private browsing?). Try a normal window.',
     purchased: 'Thanks for buying. Your license key is in the receipt email; paste it below to switch the full version on.',
     slots: 'A key works in up to ' + ACTIVATION_LIMIT + ' browsers.',
     unlocking: 'Unlocking…'
@@ -69,6 +70,14 @@
     if (blob && blob.key) return { needsActivate: false, key: null };
     const k = (legacyKey || '').trim();
     return KEY_RE.test(k) ? { needsActivate: true, key: k } : { needsActivate: false, key: null };
+  }
+
+  // HTTP statuses that mean the server, not the key, is the problem (rate limit, outage).
+  // Their bodies are never read as a verdict on the key: the caller treats them as a
+  // network failure, so a Lemon Squeezy outage cannot lock a paying customer out.
+  function isRetryableStatus(status) {
+    const s = +status;
+    return s === 429 || s >= 500;
   }
 
   // Classify a /activate response body: 'activated' | 'limit' | 'inactive'.
@@ -121,5 +130,5 @@
     return 'Spend Enough web · ' + (os ? browser + ' on ' + os : browser) + ' · ' + String(hex || '');
   }
 
-  return { KEY_RE, LICENSE_RECHECK_MS, ACTIVATION_LIMIT, LICENSE_MSG, licenseDecision, legacyKeyDecision, activationOutcome, licenseFromActivation, applyValidation, instanceLabel, activationSlots, proOnMessage };
+  return { KEY_RE, LICENSE_RECHECK_MS, ACTIVATION_LIMIT, LICENSE_MSG, licenseDecision, legacyKeyDecision, isRetryableStatus, activationOutcome, licenseFromActivation, applyValidation, instanceLabel, activationSlots, proOnMessage };
 });

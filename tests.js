@@ -614,6 +614,12 @@ test('paywall: the unlocked toast reports the slot count from the activate reply
   assert.deepStrictEqual(P.activationSlots({}), { used: 1, limit: P.ACTIVATION_LIMIT }, 'missing fields fall back sensibly');
   assert.deepStrictEqual(P.activationSlots({ license_key: { activation_limit: 3, activation_usage: 7 } }), { used: 3, limit: 3 }, 'never above the limit');
 });
+test('paywall: 429 and 5xx replies are retried later, never read as a verdict', () => {
+  for (const s of [429, 500, 502, 503, 504, '503']) assert.strictEqual(P.isRetryableStatus(s), true, String(s));
+  for (const s of [200, 201, 400, 401, 403, 404, 422, 0, undefined, null, NaN]) assert.strictEqual(P.isRetryableStatus(s), false, String(s));
+  assert.strictEqual(typeof P.LICENSE_MSG.storage, 'string', 'private-mode message exists');
+  assert.ok(/private/i.test(P.LICENSE_MSG.storage));
+});
 test('paywall: KEY_RE accepts UUID-shaped keys only', () => {
   assert.ok(P.KEY_RE.test(KEY)); assert.ok(P.KEY_RE.test(KEY.toUpperCase()));
   assert.ok(!P.KEY_RE.test('abc')); assert.ok(!P.KEY_RE.test(KEY + 'x')); assert.ok(!P.KEY_RE.test(''));
