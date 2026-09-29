@@ -459,6 +459,72 @@ test('freed mortgage payment can be spent after payoff; a home sale adds proceed
   assert.ok(Math.abs((y(sale, 70).portfolio) - (y(sale, 70).portfolioStart - y(sale, 70).withdrawal) * 1.03) < 1, 'sale-year balance grows normally');
 });
 
+// ---- 14a. Rent, owned outright, and buying later ---------------------------------
+test('renters pay rent for the whole plan, level in today\'s dollars; owned outright has no housing line', () => {
+  const owner = mk({ age: 50, targetAge: 90, portfolio: 3000000, spending: 30000, lateSpending: 30000, slowDownAge: 200,
+                     housing: 24000, mortgagePayoffAge: 60, yourIncome: 0, hasPartner: false, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false });
+  const flat = new Array(41).fill(0.03), infl = new Array(41).fill(0.03);
+  const y = (yrs, a) => yrs.find(r => r.age === a);
+  const rent = Object.assign({}, owner, { housingType: 'rent' });
+  const r = E.simulateOnce(rent, flat, infl);
+  assert.strictEqual(y(r, 60).housing, 24000, 'rent does not end at the mortgage payoff age');
+  assert.strictEqual(y(r, 89).housing, 24000, 'rent rises with inflation, so it is level in today\'s dollars');
+  assert.strictEqual(y(E.simulateOnce(Object.assign({}, rent, { postPayoffSpend: 24000 }), flat, infl), 60).spending, 54000, 'freed-payment spending is mortgage-only');
+  const legacy = E.simulateOnce(Object.assign({}, owner, { housingType: undefined }), flat, infl);
+  assert.strictEqual(y(legacy, 60).housing, 0, 'a plan saved before the choice existed is a mortgage');
+  const outright = E.simulateOnce(Object.assign({}, owner, { housingType: 'none' }), flat, infl);
+  assert.strictEqual(y(outright, 50).housing, 0, 'owned outright: no housing line even with a stale payment stored');
+});
+
+test('buying later: down payment that year, then a fixed new payment to its payoff age, plus the cost of owning', () => {
+  const rent = mk({ age: 50, targetAge: 90, portfolio: 3000000, spending: 30000, lateSpending: 30000, slowDownAge: 200, housingType: 'rent',
+                    housing: 24000, yourIncome: 0, hasPartner: false, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false });
+  const flat = new Array(41).fill(0.03), noInfl = new Array(41).fill(0), infl = new Array(41).fill(0.03);
+  const y = (yrs, a) => yrs.find(r => r.age === a);
+  const buy = { homeBuyAge: 55, homeBuyDownPayment: 200000, homeBuyPayment: 36000, homeBuyPayoffAge: 75, homeBuyUpkeep: 6000 };
+  const b = E.simulateOnce(Object.assign({}, rent, buy), flat, noInfl);
+  assert.strictEqual(y(b, 54).housing, 24000, 'rent until the purchase');
+  assert.strictEqual(y(b, 55).housing, 42000, 'payment plus the cost of owning from the purchase year');
+  assert.strictEqual(y(b, 55).downPayment, 200000);
+  assert.strictEqual(y(b, 75).housing, 6000, 'the new mortgage ends at its own payoff age; owning costs continue');
+  const plain = E.simulateOnce(rent, flat, noInfl);
+  assert.ok(Math.abs((y(plain, 55).portfolio - y(b, 55).portfolio) - (200000 + 18000) * 1.03) < 1, 'down payment and the extra housing leave the portfolio that year');
+  const inflated = E.simulateOnce(Object.assign({}, rent, buy), flat, infl);
+  assert.ok(Math.abs(y(inflated, 55).housing - 42000) < 1, 'the new payment is fixed from the purchase year, not from today');
+  assert.ok(Math.abs(y(inflated, 60).housing - (36000 / Math.pow(1.03, 5) + 6000)) < 1, 'then it shrinks with inflation; owning costs stay level');
+  for (const m of MODES) assert.ok(inUnit(E.runForState(Object.assign({}, rent, buy, { simMode: m })).successRate), m);
+});
+
+test('a renter cannot sell a home they never bought, or sell it before buying it', () => {
+  const rent = mk({ age: 50, targetAge: 90, portfolio: 3000000, spending: 30000, lateSpending: 30000, slowDownAge: 200, housingType: 'rent',
+                    housing: 24000, yourIncome: 0, hasPartner: false, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: false });
+  const flat = new Array(41).fill(0.03), noInfl = new Array(41).fill(0);
+  const y = (yrs, a) => yrs.find(r => r.age === a);
+  const sale = { homeSaleAge: 80, homeSaleProceeds: 400000, postSaleHousing: 20000 };
+  const plain = E.simulateOnce(rent, flat, noInfl);
+  const orphan = E.simulateOnce(Object.assign({}, rent, sale), flat, noInfl);
+  assert.strictEqual(y(orphan, 80).housing, 24000, 'no purchase: rent continues');
+  assert.strictEqual(y(orphan, 80).portfolio, y(plain, 80).portfolio, 'no purchase: no sale proceeds');
+  const backwards = E.simulateOnce(Object.assign({}, rent, sale, { homeBuyAge: 85, homeBuyDownPayment: 100000 }), flat, noInfl);
+  assert.strictEqual(y(backwards, 80).housing, 24000, 'a sale before the purchase is ignored');
+  const after = E.simulateOnce(Object.assign({}, rent, sale, { homeBuyAge: 60, homeBuyDownPayment: 100000, homeBuyUpkeep: 5000 }), flat, noInfl);
+  assert.strictEqual(y(after, 80).housing, 20000, 'selling the bought home switches to post-sale housing');
+});
+
+test('the down payment does not inflate the guardrail reference or cut the purchase year', () => {
+  const base = mk({ age: 60, targetAge: 95, portfolio: 1500000, spending: 60000, lateSpending: 60000, slowDownAge: 200, housingType: 'rent',
+                    housing: 20000, yourIncome: 0, hasPartner: false, taxRate: 0, capGainsTax: 0, feeRate: 0, guardrailsEnabled: true });
+  const flat = new Array(36).fill(0.04), noInfl = new Array(36).fill(0);
+  const buyNow = E.simulateOnce(Object.assign({}, base, { homeBuyAge: 60, homeBuyDownPayment: 300000, homeBuyUpkeep: 20000 }), flat, noInfl);
+  // Folded into the guardrail check, the $380k purchase year would set the reference rate and
+  // make every later year look flush (boosts). Cuts are fine: the portfolio really is smaller.
+  assert.ok(buyNow.slice(1, 20).every(r => r.withdrawal <= 80000 + 1), 'no boosts from a reference inflated by the down payment');
+  const later = E.simulateOnce(Object.assign({}, base, { homeBuyAge: 65, homeBuyDownPayment: 300000, homeBuyUpkeep: 20000 }), flat, noInfl);
+  const yr = later.find(r => r.age === 65);
+  assert.ok(!yr.flexed, 'no spending cut in the purchase year');
+  assert.ok(Math.abs(yr.withdrawal - 380000) < 1, 'the purchase year draws spending plus the down payment: ' + yr.withdrawal);
+});
+
 // ---- 15. What would it take ------------------------------------------------------
 test('findRetireAgeAtSuccess finds the first stop-work age that clears the threshold', () => {
   const s = mk({ age: 45, targetAge: 90, portfolio: 400000, spending: 60000, lateSpending: 60000, slowDownAge: 200,

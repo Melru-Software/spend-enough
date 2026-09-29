@@ -241,6 +241,13 @@ function simulateOnce(state, returnSeries, inflationSeries) {
   let broken = false;
   let flexCutCount = 0, flexBoostCount = 0;
   let refWithdrawRate = null; // set on first withdrawal year; guardrails compare against this
+  // Housing type: 'mortgage' (the default, and every plan saved before the choice existed),
+  // 'rent', or 'none' (owned outright). A renter can only sell a home bought earlier in the
+  // plan; any other stored sale is ignored rather than paying out for a house never owned.
+  const has = (v) => v !== null && v !== undefined;
+  const renting = state.housingType === 'rent';
+  const saleValid = has(state.homeSaleAge) && (!renting || (has(state.homeBuyAge) && state.homeSaleAge > state.homeBuyAge));
+  let buyDeflator = 1; // the deflator in the purchase year: the new mortgage payment is fixed from then
 
   // Per-account tracking (only if enabled)
   const useAccts = state.accountsEnabled;
@@ -287,15 +294,26 @@ function simulateOnce(state, returnSeries, inflationSeries) {
       otherIncome += fixed ? amt / deflator : amt;
     }
 
-    // Housing: the payment until the mortgage is paid off, then nothing; after a home
-    // sale, whatever housing costs from then on (rent, or zero).
-    const sold = state.homeSaleAge !== null && state.homeSaleAge !== undefined && age >= state.homeSaleAge;
-    // A fixed mortgage payment is nominal, so in today's dollars it shrinks with inflation.
-    const housing = sold ? (state.postSaleHousing || 0) : (age < mortgagePayoffAge ? state.housing / deflator : 0);
+    // Housing. Mortgage: the payment until the payoff age, then nothing. A fixed mortgage
+    // payment is nominal, so in today's dollars it shrinks with inflation. Rent rises with
+    // inflation, so it stays level in today's dollars, for the whole plan unless the renter
+    // buys: the down payment leaves the portfolio that year, then a new fixed payment runs to
+    // its own payoff age, plus property tax, insurance and upkeep (level in today's dollars)
+    // for as long as the home is owned. Owned outright: no housing line. After a sale,
+    // whatever housing costs from then on (rent, or zero).
+    const bought = renting && has(state.homeBuyAge) && age >= state.homeBuyAge;
+    if (bought && age === state.homeBuyAge) buyDeflator = deflator;
+    const sold = saleValid && age >= state.homeSaleAge;
+    let housing;
+    if (sold) housing = state.postSaleHousing || 0;
+    else if (bought) housing = ((!has(state.homeBuyPayoffAge) || age < state.homeBuyPayoffAge) ? (state.homeBuyPayment || 0) * buyDeflator / deflator : 0) + (state.homeBuyUpkeep || 0);
+    else if (renting) housing = state.housing;
+    else if (state.housingType === 'none') housing = 0;
+    else housing = age < mortgagePayoffAge ? state.housing / deflator : 0;
 
     let spend = age >= state.slowDownAge ? state.lateSpending : state.spending;
     // Freed mortgage payment redirected to spending after payoff (owner's choice in the payoff dialog).
-    if (state.postPayoffSpend > 0 && age >= mortgagePayoffAge && !sold) spend += state.postPayoffSpend;
+    if (!renting && state.housingType !== 'none' && state.postPayoffSpend > 0 && age >= mortgagePayoffAge && !sold) spend += state.postPayoffSpend;
     const contribPaused = state.contributions > 0 && inWindow(age, state.contribPauseStart, state.contribPauseEnd);
 
     // Compute income first (independent of spend). Wages carry the wage rate (which
@@ -322,7 +340,11 @@ function simulateOnce(state, returnSeries, inflationSeries) {
     if (state.oneTimeEvents && state.oneTimeEvents.length) {
       for (const ev of state.oneTimeEvents) { if (ev.age === age && ev.amount) eventAdj += ev.amount; }
     }
-    if (state.homeSaleAge && age === state.homeSaleAge) eventAdj += state.homeSaleProceeds;
+    if (saleValid && age === state.homeSaleAge) eventAdj += state.homeSaleProceeds;
+    // The down payment is committed money, like extra spending: it stays out of the
+    // guardrail check below, so a purchase year neither sets the reference withdrawal rate
+    // nor gets cut, and is added to what the portfolio pays afterwards.
+    const downPayment = (bought && age === state.homeBuyAge) ? (state.homeBuyDownPayment || 0) : 0;
 
     // Provisional portfolio withdrawal need at base spend
     let provisionalNeed = (spend + housing) - netIncome - eventAdj;
@@ -360,7 +382,7 @@ function simulateOnce(state, returnSeries, inflationSeries) {
     // so it is added after the guardrails rather than flexed with the rest.
     const extra = state.extraSpend > 0 && inWindow(age, state.extraSpendStart, state.extraSpendEnd) ? state.extraSpend : 0;
     const totalSpend = spend + housing + extra;
-    let netNeed = totalSpend - netIncome - eventAdj;
+    let netNeed = totalSpend - netIncome - eventAdj + downPayment;
 
     let withdrawal = 0;
     let taxThisYear = 0;
@@ -401,7 +423,7 @@ function simulateOnce(state, returnSeries, inflationSeries) {
     let ranOutThisYear = false;
     if (portfolio <= 0) { portfolio = 0; ranOutThisYear = true; broken = true; if (useAccts) { accts.traditional = accts.roth = accts.taxable = 0; } }
 
-    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, otherIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, onBreak: yourBreak || partnerBreak, contribPaused, unallocated, extraSpend: extra, ranOut: ranOutThisYear || broken });
+    years.push({ year, age, partnerAge, portfolioStart, portfolio, yourIncome: yourIncomeThisYear, partnerIncome: partnerIncomeThisYear, ssIncome, otherIncome, spending: totalSpend, withdrawal, housing, tax: taxThisYear, marketReturn, flexed, onBreak: yourBreak || partnerBreak, contribPaused, unallocated, extraSpend: extra, downPayment, ranOut: ranOutThisYear || broken });
 
     // Real wage growth applies only in years actually worked (no raises during a break).
     if (!yourBreak) yourSalary *= (1 + (state.yourIncomeGrowth || 0));
@@ -763,6 +785,9 @@ const DEFAULT_STATE = {
   age: 0, partnerAge: 0, hasPartner: false,
   portfolio: 0,
   spending: 0, lateSpending: 0, slowDownAge: 75,
+  // housingType 'mortgage': `housing` is the yearly payment until mortgagePayoffAge.
+  // 'rent': `housing` is yearly rent for the whole plan. 'none': owned outright, no payment.
+  housingType: 'mortgage',
   housing: 0, mortgagePayoffAge: 60, mortgageBalance: 0, mortgageRate: 0,
   yourIncome: 0, yourStopWorkAge: 65, yourIncomeGrowth: 0.01,
   partnerIncome: 0, partnerStopWorkAge: 65, partnerIncomeGrowth: 0.01,
@@ -786,6 +811,10 @@ const DEFAULT_STATE = {
   otherIncome: 0, otherIncomeStart: 65, otherIncomeEnd: null, otherIncomeFixed: false,
   otherIncome2: 0, otherIncome2Start: 65, otherIncome2End: null, otherIncome2Fixed: false,
   oneTimeEvents: [], homeSaleAge: null, homeSaleProceeds: 0, postSaleHousing: 0,
+  // A renter buys a home later (null age = none): the down payment leaves the portfolio that
+  // year, rent stops, homeBuyPayment (fixed, from the purchase year) runs until
+  // homeBuyPayoffAge, and homeBuyUpkeep (property tax, insurance, upkeep) runs while owned.
+  homeBuyAge: null, homeBuyDownPayment: 0, homeBuyPayment: 0, homeBuyPayoffAge: null, homeBuyUpkeep: 0,
   // After an accelerated payoff, the old payment can be spent instead of invested.
   postPayoffSpend: 0,
   // Portfolio: share in stocks (rest in 10-year Treasuries), annual fee drag

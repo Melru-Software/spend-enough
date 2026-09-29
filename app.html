@@ -105,6 +105,12 @@
   .scenarios-bar { display: flex; gap: 8px; align-items: center; }
   .pro-pill { border-color: var(--ink) !important; color: var(--ink) !important; font-weight: 600; }
   .pro-pill:hover { background: var(--ink) !important; color: var(--paper) !important; }
+  /* Paid: a filled badge in the header, so it is obvious the full version is on. */
+  .paid-pill { background: var(--moss) !important; border-color: var(--moss) !important; color: var(--paper) !important; font-weight: 600; }
+  .paid-pill:hover { background: var(--moss-deep) !important; border-color: var(--moss-deep) !important; }
+  .unlock-more { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .unlock-more > summary { cursor: pointer; color: var(--rust); font-size: 14px; font-weight: 600; }
+  .unlock-more[open] > summary { margin-bottom: 12px; }
   .scenario-pill {
     padding: 6px 14px; border: 1px solid var(--line); background: var(--paper);
     color: var(--ink-soft); font-size: 14px; border-radius: 100px; cursor: pointer;
@@ -843,7 +849,7 @@
   .step-hint { font-size: 15px; margin-bottom: 0; line-height: 1.45; }
   .onboard-step .field-grid { gap: 20px 18px; }
   .field.span-2 { grid-column: 1 / -1; }
-  .partner-field[hidden] { display: none !important; }   /* .field is display:flex, which would otherwise win */
+  .partner-field[hidden], .housing-field[hidden], .mortgage-field[hidden] { display: none !important; }   /* .field is display:flex, which would otherwise win */
   /* Your plan: Money and Timeline groups, filled slider tracks, age steppers */
   .plan-sub { font-family: 'Source Serif 4', serif; font-size: 16px; font-weight: 500; color: var(--ink); margin: 4px 0 10px; }
   .control + .plan-sub { margin-top: 20px; }
@@ -1143,6 +1149,37 @@ const FLAGS = { hardcodedPresets: false };
 const has = (v) => v !== null && v !== undefined;
 // Fill any field a saved or older state lacks, so 'not set' is always null rather than undefined.
 function withDefaults(s) { return Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)), s || {}); }
+// Housing is 'mortgage' (a payment until the payoff age), 'rent' (for the whole plan, unless
+// a home is bought later), or 'none' (owned outright). Plans saved before the choice existed
+// have no housingType and are mortgages. engine.js applies the same rules.
+const housingKind = (s) => s.housingType === 'rent' ? 'rent' : s.housingType === 'none' ? 'none' : 'mortgage';
+const hasMortgage = (s) => housingKind(s) === 'mortgage' && s.housing > 0;
+const hasBuy = (s) => housingKind(s) === 'rent' && has(s.homeBuyAge);
+// A renter can only sell a home bought earlier in the plan.
+const hasSale = (s) => has(s.homeSaleAge) && (housingKind(s) !== 'rent' || (hasBuy(s) && s.homeSaleAge > s.homeBuyAge));
+function clearHomeBuy(s) { s.homeBuyAge = null; s.homeBuyDownPayment = 0; s.homeBuyPayment = 0; s.homeBuyPayoffAge = null; s.homeBuyUpkeep = 0; }
+function clearHomeSale(s) { s.homeSaleAge = null; s.homeSaleProceeds = 0; s.postSaleHousing = 0; }
+// Keeps the housing fields consistent with the housing type after any change: a switch, a
+// removed what-if, or an undo. Owned outright has no payment, only renters buy later, and a
+// sale needs a home to sell.
+function normalizeHousing(s) {
+  const k = housingKind(s);
+  if (k !== 'mortgage') { s.mortgageBalance = 0; s.mortgageRate = 0; s.postPayoffSpend = 0; }
+  if (k !== 'rent') clearHomeBuy(s);
+  if (k === 'none') s.housing = 0;
+  if (has(s.homeSaleAge) && !hasSale(s)) clearHomeSale(s);
+}
+// The housing part of the spending total, for sentences like "Figures include ...".
+function housingPhrase(s) {
+  if (hasMortgage(s)) return 'the ' + fmtMoneyShort(s.housing) + ' a year mortgage payment while it lasts';
+  if (housingKind(s) === 'rent' && s.housing > 0) return 'your ' + fmtMoneyShort(s.housing) + ' a year rent' + (hasBuy(s) ? ' until you buy' : '');
+  return '';
+}
+function spendingTip(s) {
+  const h = hasMortgage(s) ? ' It includes your ' + fmtMoney(s.housing) + ' a year mortgage payment until it is paid off at ' + s.mortgagePayoffAge + '.'
+    : (housingKind(s) === 'rent' && s.housing > 0) ? ' It includes your ' + fmtMoney(s.housing) + ' a year rent.' : '';
+  return 'Everything you spend in a year.' + h;
+}
 const pct = (x, d) => ((+x || 0) * 100).toFixed(d === undefined ? 1 : d) + '%';
 
 // ============================================================================
@@ -1299,7 +1336,7 @@ function startLicense() {
     const k = urlLicenseKey; urlLicenseKey = '';
     showToast(LICENSE_MSG.unlocking, 0);
     activateLicense(k, {
-      onSuccess: res => showToast(proOnMessage(res), 6000),
+      onSuccess: res => { hideToast(); showPaidInfo({ welcome: true, res }); },
       onError: msg => { hideToast(); showUnlockModal({ silent: true, message: msg, key: k }); }
     });
     return;
@@ -1326,6 +1363,18 @@ function startLicense() {
 // opts: silent (no paywall analytics event), message (error under the key field),
 // hint (note above it), key (prefill), busy (activation in flight). Any of those reveals
 // the key field; otherwise it stays behind the "enter your key" link.
+// What the full version adds. Shown in the unlock screen and again, once paid, behind the
+// "Full version" badge in the header.
+const FULL_VERSION_ITEMS = [
+  'Simulated mode, which runs randomized futures, and Fixed mode, which uses one steady return',
+  'Side by side: two decisions on one chart',
+  'What would it take: the spending, retirement age, or savings that gets a plan over the line',
+  'Best and worst outcomes, and five named historical stress tests',
+  'Spending flexibility, Social Security timing, and a cashflow chart',
+  'A printable one-page report, and the year-by-year table as a spreadsheet',
+  'More about you: income growth, housing and a pension in detail, filing status and your state, account types and the order you draw from them, and one-time life events',
+  'Save up to 8 scenarios, with notes'
+];
 window.showUnlockModal = function(opts) {
   opts = opts || {};
   if (!opts.silent) track('hit_paywall');
@@ -1335,15 +1384,17 @@ window.showUnlockModal = function(opts) {
   const keyAttr = opts.key && KEY_RE.test(opts.key) ? ` value="${opts.key}"` : '';
   const dis = opts.busy ? ' disabled' : '';
   const reveal = !!(opts.key || opts.hint || opts.message || opts.busy);
-  openModal(`<h2>Free and full</h2>
-    <p style="margin-bottom:16px">You're on the free version. The full version is a one-time purchase that adds scenario comparison and the deeper analysis.</p>
+  // Someone who has just paid (or whose key needs attention) sees the key field first; the
+  // comparison and the buy button fold away under "What the full version includes". On a
+  // phone the comparison is a long scroll, so leading with it buried the field they came for.
+  const pitch = `
     <div class="compare-grid">
       <div class="compare-col">
         <div class="compare-head">Free</div>
         <div class="compare-sub">What you have now</div>
         <ul class="compare-list">
           <li>Historical mode: your plan run through every stretch of the market since 1926, with the full range on the chart</li>
-          <li>Your numbers: savings, spending now and later in life, incomes, a pension, retirement ages, the mortgage, and how long to plan for</li>
+          <li>Your numbers: savings, spending now and later in life, incomes, a pension, retirement ages, your mortgage or rent, and how long the money needs to last</li>
           <li>All seven what-if scenarios, from taking time off to a bad decade</li>
           <li>The spending explorer</li>
           <li>The assumptions behind the result, open to change: stock and bond mix, fees, tax rates, and the guardrails</li>
@@ -1354,21 +1405,14 @@ window.showUnlockModal = function(opts) {
         <div class="compare-sub">One-time purchase</div>
         <div class="compare-plus">Everything in Free, plus:</div>
         <ul class="compare-list">
-          <li>Simulated mode, which runs randomized futures, and Fixed mode, which uses one steady return</li>
-          <li>Side by side: two decisions on one chart</li>
-          <li>What would it take: the spending, retirement age, or savings that gets a plan over the line</li>
-          <li>Best and worst outcomes, and five named historical stress tests</li>
-          <li>Spending flexibility, Social Security timing, and a cashflow chart</li>
-          <li>A printable one-page report, and the year-by-year table as a spreadsheet</li>
-          <li>More about you: income growth, the mortgage and a pension in detail, filing status and your state, account types and the order you draw from them, and one-time life events</li>
-          <li>Save up to 8 scenarios, with notes</li>
+${FULL_VERSION_ITEMS.map(i => '<li>' + i + '</li>').join('')}
         </ul>
       </div>
     </div>
     <div style="margin:16px 0 4px">${buy}</div>
     <p class="buy-fine">One payment, refundable for 14 days.</p>
-    <p class="terms-line">By purchasing you agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of Service</a>.</p>
-    <p class="unlock-already" id="unlockAlready"${reveal ? ' hidden' : ''}>Already bought? Click the button in your receipt email on this device, or <button type="button" class="link-btn" onclick="revealUnlockKey()">enter your key</button>.</p>
+    <p class="terms-line">By purchasing you agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of Service</a>.</p>`;
+  const keyRow = `
     <div id="unlockKeyRow"${reveal ? '' : ' hidden'}>
     ${opts.hint ? `<p class="unlock-hint">${opts.hint}</p>` : ''}
     <div class="unlock-input-row">
@@ -1377,10 +1421,29 @@ window.showUnlockModal = function(opts) {
     </div>
     <p class="unlock-note">${LICENSE_MSG.slots}</p>
     <p id="unlockKeyMsg" class="unlock-msg" role="status" aria-live="polite">${opts.message || ''}</p>
-    </div>
-    <p style="margin-top:14px;font-size:14px;text-align:center"><a href="#" onclick="closeModal();return false" style="color:var(--rust);text-decoration:none;cursor:pointer">Continue with the free version</a></p>`, 'modal-wide');
+    </div>`;
+  const cont = `<p style="margin-top:14px;font-size:14px;text-align:center"><a href="#" onclick="closeModal();return false" style="color:var(--rust);text-decoration:none;cursor:pointer">Continue with the free version</a></p>`;
+  openModal(reveal
+    ? `<h2>Unlock the full version</h2>${keyRow}<details class="unlock-more"><summary>What the full version includes</summary>${pitch}</details>${cont}`
+    : `<h2>Free and full</h2>
+    <p style="margin-bottom:16px">You're on the free version. The full version is a one-time purchase that adds scenario comparison and the deeper analysis.</p>${pitch}
+    <p class="unlock-already" id="unlockAlready"${reveal ? ' hidden' : ''}>Already bought? Click the button in your receipt email on this device, or <button type="button" class="link-btn" onclick="revealUnlockKey()">enter your key</button>.</p>${keyRow}${cont}`, 'modal-wide');
   fitKeyPlaceholder();
-  if ((opts.hint || opts.message) && !opts.busy) { const i = document.getElementById('unlockKeyInput'); if (i) i.focus(); }
+  // On a phone, focusing opens the keyboard over the screen; the field is already at the top.
+  if ((opts.hint || opts.message) && !opts.busy && !TOUCH) { const i = document.getElementById('unlockKeyInput'); if (i) i.focus(); }
+};
+
+// The paid state, spelled out: opened from the header badge, and straight after a key is
+// activated so a buyer sees at once what they now have.
+window.showPaidInfo = function(opts) {
+  opts = opts || {};
+  const L = readLicense();
+  const slots = opts.res ? activationSlots(opts.res) : null;
+  openModal(`<h2>${opts.welcome ? 'Welcome to the full version' : 'You have the full version'}</h2>
+    <p>${opts.welcome ? 'Thanks for buying. Everything is unlocked in this browser.' : 'Everything is unlocked in this browser.'} Here is what it adds to the free version:</p>
+    <ul class="compare-list">${FULL_VERSION_ITEMS.map(i => '<li>' + i + '</li>').join('')}</ul>
+    ${L ? `<p class="pro-status" style="margin-top:14px">${slots ? 'This browser is ' + slots.used + ' of ' + slots.limit + ' for your key. ' : ''}<button class="link-btn" onclick="deactivateLicense()">Deactivate this browser</button> to use your key somewhere else.</p>` : ''}
+    <div style="margin-top:16px"><button class="btn-primary" onclick="closeModal()">${opts.welcome ? 'Start using it' : 'Close'}</button></div>`);
 };
 
 // Fallback for "deleted the email and cleared the browser": show the paste field.
@@ -1407,7 +1470,7 @@ window.submitUnlockKey = async function() {
   if (msg) msg.textContent = '';
   if (input) input.style.borderColor = '';
   setBusy(true);
-  await activateLicense(key, { onError: m => {
+  await activateLicense(key, { onSuccess: res => showPaidInfo({ welcome: true, res }), onError: m => {
     if (msg) msg.textContent = m;
     if (input) input.style.borderColor = 'var(--danger)';
   } });
@@ -1501,7 +1564,7 @@ window.applyPayoffModal = function() {
 // ============================================================================
 // DYNAMIC PRESETS
 // ============================================================================
-function generatePresets(s) {
+function generatePresets(s, all) {
   const presets = [];
   const yearsToRetire = s.yourStopWorkAge - s.age;
 
@@ -1513,8 +1576,9 @@ function generatePresets(s) {
     presets.push({ id: 'partnerBreak', label: has(s.partnerBreakStart) ? 'Change my partner’s time off' : 'Partner takes time off' });
   }
   presets.push({ id: 'spendMore', label: has(s.extraSpendStart) ? 'Change the extra spending' : 'Spend more for a while' });
-  if (s.housing > 0 || has(s.homeSaleAge)) presets.push({ id: 'sellHouse', label: has(s.homeSaleAge) ? 'Change the house sale' : 'Sell the house later' });
-  if (s.housing > 0 && s.mortgagePayoffAge > s.age + 2 && !(s.mortgageBalance > 0)) {
+  if (housingKind(s) === 'rent') presets.push({ id: 'buyHome', label: hasBuy(s) ? 'Change the home purchase' : 'Buy a home later' });
+  if (hasMortgage(s) || housingKind(s) === 'none' || hasBuy(s) || hasSale(s)) presets.push({ id: 'sellHouse', label: hasSale(s) ? 'Change the house sale' : 'Sell the house later' });
+  if (hasMortgage(s) && s.mortgagePayoffAge > s.age + 2 && !(s.mortgageBalance > 0)) {
     presets.push({ id: 'payoffHouse', label: 'Pay off the house early' });
   }
   presets.push({ id: 'shockAtRetirement', label: s.shockEra ? 'Change the bad decade' : ((s.yourIncome > 0 && s.yourStopWorkAge > s.age) ? 'A bad decade starts when I stop working' : 'A bad decade starts now') });
@@ -1565,13 +1629,16 @@ function generatePresets(s) {
 
   // ---- Presets with invented dollar amounts (flag-gated, see FLAGS) ----
   if (FLAGS.hardcodedPresets) {
-    if (s.housing > 0 && s.age < 72) presets.push({ id: 'sellHome', label: 'Sell the home at 70' });
+    if (hasMortgage(s) && s.age < 72) presets.push({ id: 'sellHome', label: 'Sell the home at 70' });
     if (s.age > 45) presets.push({ id: 'ltc', label: 'Add long-term care at 85' });
   }
 
-  return presets.slice(0, 7);
+  // Seven fit the sidebar. "What can I spend?" always stays, so a long list drops a
+  // contextual one instead. `all` returns the full list, for labels and ?scenario= links.
+  if (all || presets.length <= 7) return presets;
+  return presets.filter(p => p.id !== 'maxSpend').slice(0, 6).concat(presets.filter(p => p.id === 'maxSpend'));
 }
-function presetLabel(id) { const p = generatePresets(state).find(x => x.id === id); return p ? p.label : id; }
+function presetLabel(id) { const p = generatePresets(state, true).find(x => x.id === id); return p ? p.label : id; }
 
 // ============================================================================
 // FORMATTING
@@ -1683,7 +1750,63 @@ const app = document.getElementById('app');
 const TOUCH = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 const modalRoot = document.getElementById('modal-root');
 
-function render() { if (activeView === 'onboarding') renderOnboarding(); else renderDashboard(); wireTooltips(); savePlan(); }
+// Every render rebuilds the page, and sections above whatever was just touched (the verdict,
+// the "versus" box, the side-by-side table) change height. So render() notes the element in
+// use and where it sat on screen, then puts it back in the same spot and gives focus back.
+// Switching views starts at the top instead.
+let lastRenderedView = null;
+let lastPointer = null;
+document.addEventListener('pointerdown', e => { lastPointer = { el: e.target.closest ? e.target.closest('button, input, select, tr, a, [onclick]') : null, t: Date.now() }; }, true);
+function elKey(el) { return [el.tagName, el.type || '', el.id || '', el.getAttribute('onchange') || '', el.getAttribute('onclick') || '', el.getAttribute('aria-label') || ''].join('|'); }
+function captureAnchor() {
+  let el = document.activeElement, focused = true;
+  if (!el || el === document.body || !app.contains(el)) {
+    // Safari does not focus buttons on click, so fall back to what was just pressed.
+    focused = false;
+    el = lastPointer && lastPointer.el && Date.now() - lastPointer.t < 3000 && app.contains(lastPointer.el) ? lastPointer.el : null;
+  }
+  const a = { y: window.scrollY };
+  if (el) Object.assign(a, { key: elKey(el), tag: el.tagName, top: el.getBoundingClientRect().top, focused });
+  return a;
+}
+function restoreAnchor(a) {
+  window.scrollTo(0, a.y);
+  if (!a.key) return;
+  const again = [...app.querySelectorAll(a.tag)].find(el => el.offsetParent !== null && elKey(el) === a.key);
+  if (!again) return;
+  const drift = again.getBoundingClientRect().top - a.top;
+  if (Math.abs(drift) > 1) window.scrollBy(0, drift);
+  if (a.focused) again.focus({ preventScroll: true });
+}
+function render() {
+  const anchor = lastRenderedView === activeView ? captureAnchor() : null;
+  if (activeView === 'onboarding') renderOnboarding(); else renderDashboard();
+  wireTooltips(); savePlan();
+  lastRenderedView = activeView;
+  if (anchor) restoreAnchor(anchor); else window.scrollTo(0, 0);
+}
+// Typed-value handlers render one tick later. When Tab or a tap on another field caused the
+// change, focus has moved by then, so the page keeps the user on the field they went to.
+let renderTimer = null, renderAfter = [];
+function renderSoon(after) {
+  if (after) renderAfter.push(after);
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(() => { renderTimer = null; const fns = renderAfter; renderAfter = []; render(); fns.forEach(f => f()); }, 0);
+}
+// Typed numbers are held to the control's own min and max, so a slip like 6663 for a
+// retirement age never reaches the model.
+function clampIn(el) {
+  const raw = parseFloat(el.value);
+  const lo = el.min !== '' ? +el.min : -Infinity, hi = el.max !== '' ? +el.max : Infinity;
+  const v = Math.min(hi, Math.max(lo, isNaN(raw) ? (lo > -Infinity ? lo : 0) : raw));
+  if (v !== raw) el.value = v;
+  return v;
+}
+function outOfRange(el) {
+  if (el.type !== 'number') return false;
+  const v = parseFloat(el.value);
+  return isNaN(v) || (el.min !== '' && v < +el.min) || (el.max !== '' && v > +el.max);
+}
 
 const tipEl = document.getElementById('tip-popup');
 function wireTooltips() {
@@ -1742,24 +1865,31 @@ function renderOnboarding() {
         <p class="step-hint">How much you've saved, and what you spend each year.</p></div></div>
         <div class="field-grid">
           <div class="field"><label>Investment portfolio</label><input type="text" id="ob_portfolio" class="money" inputmode="numeric" value="${moneyText(state.portfolio || '')}" placeholder="e.g. $600,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">401k, IRA, brokerage, combined</span></div>
-          <div class="field"><label>Annual spending, all in</label><input type="text" id="ob_spending" class="money" inputmode="numeric" value="${moneyText(state.spending ? state.spending + state.housing : '')}" placeholder="e.g. $90,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Everything, housing included. Leave blank to find your "enough" number.</span></div>
+          <div class="field"><label>Total yearly spending</label><input type="text" id="ob_spending" class="money" inputmode="numeric" value="${moneyText(state.spending ? state.spending + state.housing : '')}" placeholder="e.g. $90,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Everything you spend in a year, including rent or mortgage. Leave blank to find your "enough" number.</span></div>
         </div>
       </div>
 
       <div class="onboard-step">
         <div class="step-side"><span class="step-num">3</span><div><h2 class="step-title">Other income and housing</h2>
-        <p class="step-hint" id="ob_hint3">Work income, partner income, and the mortgage.</p></div></div>
+        <p class="step-hint" id="ob_hint3">Work income, partner income, and what you pay for housing.</p></div></div>
         <div class="field-grid">
           <div class="field"><label>Your gross income</label><input type="text" id="ob_yourIncome" class="money" inputmode="numeric" value="${moneyText(state.yourIncome || '')}" placeholder="e.g. $110,000" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_yourIncome','ob_yourSS')"/><span class="field-hint">From work, before tax \u00b7 It stops at your retirement age</span></div>
           <div class="field partner-field"><label>Partner's gross income</label><input type="text" id="ob_partnerIncome" class="money" inputmode="numeric" value="${moneyText(state.partnerIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_partnerIncome','ob_partnerSS')"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
-          <div class="field"><label>Of that, your mortgage payment</label><input type="text" id="ob_housing" class="money" inputmode="numeric" value="${moneyText(state.housing || '')}" placeholder="e.g. $24,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Principal and interest per year, the part that ends when it is paid off. Taxes and insurance stay in spending.</span></div>
-          <div class="field"><label>Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100" oninput="stepProgress()"/><span class="field-hint">When that payment stops \u00b7 <button type="button" class="helper-trigger" onclick="openPayoffHelper('ob_mortgagePayoff')">help me calculate</button></span></div>
+          <div class="field span-2"><label id="ob_homeLabel">Your home</label>
+            <div class="toggle-group home-type" role="group" aria-labelledby="ob_homeLabel">
+              <button type="button" class="toggle-btn" data-ht="mortgage" onclick="setHousingChoice('mortgage')">Mortgage</button>
+              <button type="button" class="toggle-btn" data-ht="rent" onclick="setHousingChoice('rent')">Rent</button>
+              <button type="button" class="toggle-btn" data-ht="none" onclick="setHousingChoice('none')">Own it outright</button>
+            </div>
+            <input type="hidden" id="ob_housingType" value="${state.age ? housingKind(state) : ''}"/></div>
+          <div class="field housing-field"><label id="ob_housingLabel" for="ob_housing">Of that, your mortgage payment</label><input type="text" id="ob_housing" class="money" inputmode="numeric" value="${moneyText(state.housing || '')}" placeholder="e.g. $24,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint" id="ob_housingHint">Principal and interest per year, the part that ends when it is paid off. Taxes and insurance stay in spending.</span></div>
+          <div class="field mortgage-field"><label for="ob_mortgagePayoff">Mortgage paid off at age</label><input type="number" id="ob_mortgagePayoff" value="${state.mortgagePayoffAge || ''}" placeholder="e.g. 62" min="0" max="100" oninput="stepProgress()"/><span class="field-hint">When that payment stops \u00b7 <button type="button" class="helper-trigger" onclick="openPayoffHelper('ob_mortgagePayoff')">help me calculate</button></span></div>
         </div>
       </div>
 
       <div class="onboard-step">
         <div class="step-side"><span class="step-num">4</span><div><h2 class="step-title">Social Security and other income</h2>
-        <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number. A pension, an annuity, or rent has its own box.</p></div></div>
+        <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number, and the benefit is federal, so it is the same in every state. A pension, an annuity, or rental income has its own box.</p></div></div>
         <div class="field-grid">
           <div class="field"><label>Your SS at full age</label><input type="text" id="ob_yourSS" class="money" inputmode="numeric" value="${moneyText(state.yourSSAmount || '')}" placeholder="e.g. $30,000" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_yourSS')"/><span class="field-hint" id="ob_yourSS_hint">Annual, in today\u2019s dollars</span></div>
           <div class="field partner-field"><label>Partner's SS at full age</label><input type="text" id="ob_partnerSS" class="money" inputmode="numeric" value="${moneyText(state.partnerSSAmount || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_partnerSS')"/><span class="field-hint" id="ob_partnerSS_hint">Annual, in today\u2019s dollars</span></div>
@@ -1793,8 +1923,31 @@ function syncPartnerFields() {
   document.querySelectorAll('.onboarding .partner-field').forEach(el => { el.hidden = !on; });
   document.querySelectorAll('.onboarding .plan-for .toggle-btn').forEach((b, i) => { const active = (i === 1) === on; b.classList.toggle('active', active); b.setAttribute('aria-pressed', String(active)); });
   const hint = document.getElementById('ob_hint3');
-  if (hint) hint.textContent = on ? 'Work income, partner income, and the mortgage.' : 'Work income and the mortgage.';
+  if (hint) hint.textContent = on ? 'Work income, partner income, and what you pay for housing.' : 'Work income and what you pay for housing.';
 }
+// Mortgage, rent, or owned outright. Like the partner answer, it lives in a hidden ob_ input
+// so the draft remembers it; blank (a new plan) means mortgage.
+const OB_HOUSING_COPY = {
+  mortgage: { label: 'Of that, your mortgage payment', hint: 'Principal and interest per year, the part that ends when it is paid off. Taxes and insurance stay in spending.' },
+  rent: { label: 'Of that, your rent', hint: 'Per year. Rent continues for the whole plan. You can try buying a home later from the what-ifs.' }
+};
+function obHousingType() { const el = document.getElementById('ob_housingType'); const v = el ? el.value : ''; return v === 'rent' || v === 'none' ? v : 'mortgage'; }
+function syncHousingFields() {
+  const t = obHousingType();
+  document.querySelectorAll('.onboarding .home-type .toggle-btn').forEach(b => { const on = b.dataset.ht === t; b.classList.toggle('active', on); b.setAttribute('aria-pressed', String(on)); });
+  document.querySelectorAll('.onboarding .housing-field').forEach(el => { el.hidden = t === 'none'; });
+  document.querySelectorAll('.onboarding .mortgage-field').forEach(el => { el.hidden = t !== 'mortgage'; });
+  const c = OB_HOUSING_COPY[t];
+  const l = document.getElementById('ob_housingLabel'), h = document.getElementById('ob_housingHint');
+  if (c && l) l.textContent = c.label;
+  if (c && h) h.textContent = c.hint;
+}
+window.setHousingChoice = function(t) {
+  const el = document.getElementById('ob_housingType');
+  if (el) el.value = t;
+  syncHousingFields();
+  stepProgress();
+};
 window.setPlanFor = function(withPartner) {
   const el = document.getElementById('ob_hasPartner');
   if (el) el.value = withPartner ? '1' : '';
@@ -1805,6 +1958,7 @@ window.setPlanFor = function(withPartner) {
 
 window.stepProgress = function() {
   syncPartnerFields();
+  syncHousingFields();
   // Clear the "please enter your age" style message as soon as the field is filled,
   // rather than making people press the button again to find out.
   const msg = document.getElementById('ob_validation');
@@ -1830,14 +1984,17 @@ window.stepProgress = function() {
 window.finishOnboarding = function() {
   const age = num('ob_age');
   const portfolio = num('ob_portfolio');
-  const mortgage = num('ob_housing');
-  const spending = num('ob_spending') > 0 ? Math.max(0, num('ob_spending') - mortgage) : 0; // spending excludes the mortgage payment internally
+  const housingType = obHousingType();
+  const mortgage = housingType === 'none' ? 0 : num('ob_housing');
+  const spending = num('ob_spending') > 0 ? Math.max(0, num('ob_spending') - mortgage) : 0; // spending excludes the housing payment internally
   const msgEl = document.getElementById('ob_validation');
   if (age < 18) { msgEl.textContent = 'Please enter your age to continue.'; msgEl.dataset.field = 'age'; document.getElementById('ob_age').focus(); return; }
   if (portfolio <= 0) { msgEl.textContent = 'Enter your portfolio value to get started.'; msgEl.dataset.field = 'portfolio'; document.getElementById('ob_portfolio').focus(); return; }
   const withPartner = planHasPartner();
   const pAge = withPartner ? num('ob_partnerAge') : 0;
   if (withPartner && pAge < 18) { msgEl.textContent = "Enter your partner's age, or choose Just me."; msgEl.dataset.field = 'partnerAge'; document.getElementById('ob_partnerAge').focus(); return; }
+  if (age > 100 || pAge > 100) { msgEl.textContent = 'Check the ages. They should be between 18 and 100.'; msgEl.dataset.field = ''; document.getElementById(age > 100 ? 'ob_age' : 'ob_partnerAge').focus(); return; }
+  if (housingType === 'mortgage' && mortgage > 0 && num('ob_mortgagePayoff') > 0 && num('ob_mortgagePayoff') <= age) { msgEl.textContent = 'The mortgage payoff age should be after your current age. If it is already paid off, choose Own it outright.'; msgEl.dataset.field = ''; document.getElementById('ob_mortgagePayoff').focus(); return; }
   msgEl.textContent = ''; msgEl.dataset.field = '';
 
   state.age = age;
@@ -1853,8 +2010,10 @@ window.finishOnboarding = function() {
   state.slowDownAge = 75;
   state.yourIncome = num('ob_yourIncome');
   state.partnerIncome = withPartner ? num('ob_partnerIncome') : 0;
+  state.housingType = housingType;
   state.housing = mortgage;
-  state.mortgagePayoffAge = num('ob_mortgagePayoff') || 60;
+  state.mortgagePayoffAge = (housingType === 'mortgage' && num('ob_mortgagePayoff')) || 60;
+  clearHomeBuy(state);
   state.otherIncome = num('ob_otherIncome');
   const oiStart = num('ob_otherIncomeStart');
   state.otherIncomeStart = oiStart >= 18 ? oiStart : Math.max(state.age, state.yourIncome > 0 ? state.yourStopWorkAge : state.age);
@@ -1877,6 +2036,7 @@ window.finishOnboarding = function() {
   state.homeSaleAge = null;
   state.homeSaleProceeds = 0; state.postSaleHousing = 0; state.postPayoffSpend = 0;
   state.oneTimeEvents = [];
+  normalizeHousing(state);
   // Auto-estimate tax rates from income: the wage rate includes payroll tax, the
   // retirement rate (traditional withdrawals, half of SS) is federal + state only.
   applyEstimatedTaxRates();
@@ -1917,7 +2077,7 @@ window.loadSample = function() {
 function runPendingScenario() {
   if (!pendingScenario) return;
   const id = pendingScenario; pendingScenario = null;
-  if (generatePresets(state).some(p => p.id === id)) applyPreset(id);
+  if (generatePresets(state, true).some(p => p.id === id)) applyPreset(id);
 }
 
 window.goToOnboarding = function() { activeView = 'onboarding'; render(); };
@@ -1970,11 +2130,11 @@ function renderDashboard() {
         ${state.simMode==='fixed' ? `<div class="control">
           <div class="control-row"><span class="control-label">Real return<span class="help-mark" tabindex="0" data-tip="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
           <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" style="--pct:${trackPct(state.returnRate*100, 0, 10)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
-          <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" placeholder="%" class="mobile-input"/>
+          <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',clampIn(this)/100)" placeholder="%" class="mobile-input"/>
         </div>` : ''}
         <h3 class="plan-sub">Money</h3>
         ${moneyControl({ key: 'portfolio', label: 'Portfolio', value: state.portfolio, floor: 1000000, times: 3, step: 10000, placeholder: 'Amount' })}
-        ${moneyControl({ key: 'totalSpending', label: 'Spending, all in', tip: state.housing > 0 ? 'Includes your ' + fmtMoney(state.housing) + ' a year mortgage payment until it is paid off at ' + state.mortgagePayoffAge + '.' : '', value: state.spending + state.housing, min: 10000 + state.housing, floor: 200000, times: 2.5, step: 1000, placeholder: 'Annual amount' })}
+        ${moneyControl({ key: 'totalSpending', label: 'Total yearly spending', tip: spendingTip(state), value: state.spending + state.housing, min: 10000 + state.housing, floor: 200000, times: 2.5, step: 1000, placeholder: 'Annual amount' })}
         ${moneyControl({ key: 'totalLateSpending', label: 'Spending from age ' + state.slowDownAge, tip: "Spending usually falls later in retirement, so the plan starts this at 85% of today's number. Set it equal to the amount above for no change.", value: state.lateSpending + lateHousingPart(), min: 10000 + lateHousingPart(), floor: 200000, times: 2.5, step: 1000, placeholder: 'Annual amount' })}
         ${moneyControl({ key: 'yourIncome', label: 'Your income', value: state.yourIncome, floor: 200000, times: 2.5, step: 5000, placeholder: 'Annual income' })}
         ${state.hasPartner ? moneyControl({ key: 'partnerIncome', label: "Partner's income", value: state.partnerIncome, floor: 200000, times: 2.5, step: 5000, placeholder: 'Annual income' }) : ''}
@@ -1985,7 +2145,7 @@ function renderDashboard() {
         ${stepperControl({ key: 'slowDownAge', label: 'Spending changes at', value: state.slowDownAge, min: 55, max: 95 })}
         ${state.yourIncome > 0 ? stepperControl({ key: 'yourStopWorkAge', label: state.yourPartTimeAmount > 0 && state.yourStopWorkAge === state.yourPartTimeStart ? 'Full-time ends at' : 'Your retirement age', value: state.yourStopWorkAge, min: Math.max(state.age, 40), max: 80 }) : ''}
         ${(state.hasPartner && state.partnerIncome > 0) ? stepperControl({ key: 'partnerStopWorkAge', label: "Partner's retirement age", value: state.partnerStopWorkAge, min: Math.max(state.partnerAge, 40), max: 80 }) : ''}
-        ${stepperControl({ key: 'targetAge', label: 'Plan to age', tip: 'The plan has to last to this age. 100 is cautious; the tool counts it as lasting if the money is still there.', value: state.targetAge, min: 70, max: 110 })}
+        ${stepperControl({ key: 'targetAge', label: 'Money needs to last to', tip: 'The plan has to last to this age. 100 is cautious; the tool counts it as lasting if the money is still there.', value: state.targetAge, min: 70, max: 110 })}
       </div>
 
       <div class="sidebar-section sec-mode">
@@ -2027,7 +2187,7 @@ function renderDashboard() {
   const notFixed = state.simMode !== 'fixed';
   const main = `
     <div class="main" id="main-content" role="main">
-      <div class="print-only print-head"><div class="logo"><span class="logo-dot"></span>Spend Enough</div><div>Scenario report &middot; ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}${currentName !== 'Current' ? ' &middot; ' + currentName + ' versus ' + baselineName : ''} &middot; ${modeName(state.simMode)} mode</div></div>
+      <div class="print-only print-head"><div class="logo"><span class="logo-dot"></span>Spend Enough</div><div>Scenario report &middot; ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}${currentName !== 'Current' ? ' &middot; ' + currentName + ', compared with ' + baselineName : ''} &middot; ${modeName(state.simMode)} mode</div></div>
       <div class="verdict" aria-live="polite">
         <h1 class="verdict-head">${verdict.headline}</h1>
         <div class="verdict-body">${verdict.lead}</div>
@@ -2047,7 +2207,7 @@ function renderDashboard() {
       ${canCompare ? renderCompareSummary(baselineResult, result) : (!isPaid() && computeImpact() ? `<button class="more-toggle locked-row teaser-row" onclick="showUnlockModal()">See “${baselineName}” and “${currentName}” on one chart, with the counts side by side <span class="lock-icon">&#x1f512;</span></button>` : '')}
 
       <h2 class="section-heading explore-h">Explore spending levels</h2>
-      <div class="section-sub explore-sub">Click a row to apply that spending level and see how it changes the projection. Each level runs until age ${state.slowDownAge}; from then on the plan spends ${fmtMoney(state.lateSpending + lateHousingPart())} a year, which you can change under Your plan.${state.housing > 0 ? ' Figures include the ' + fmtMoneyShort(state.housing) + ' a year mortgage payment while it lasts.' : ''}</div>
+      <div class="section-sub explore-sub">Click a row to apply that spending level and see how it changes the projection. Each level runs until age ${state.slowDownAge}; from then on the plan spends ${fmtMoney(state.lateSpending + lateHousingPart())} a year, which you can change under Your plan.${housingPhrase(state) ? ' Figures include ' + housingPhrase(state) + '.' : ''}</div>
       ${renderSpendingExplorer()}
 
       ${renderReadFirst(result)}
@@ -2087,10 +2247,10 @@ function renderDashboard() {
         <button class="scenario-pill" onclick="goToOnboarding()">Edit basics</button>
         <button class="scenario-pill" onclick="startOver()">Start over</button>
         <button class="scenario-pill" onclick="printReport()">Print report${!isPaid() ? ' <span class="lock-icon">&#x1f512;</span>' : ''}</button>
-        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get the full version &middot; ${CONFIG.price}</button>` : ''}
+        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Get the full version &middot; ${CONFIG.price}</button>` : `<button class="scenario-pill paid-pill" onclick="showPaidInfo()" aria-label="Full version is on. What it includes">\u2713 Full version</button>`}
       </div>
       <div class="head-compact">
-        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Full version</button>` : ''}
+        ${!isPaid() ? `<button class="scenario-pill pro-pill" onclick="showUnlockModal()">Full version</button>` : `<button class="scenario-pill paid-pill" onclick="showPaidInfo()" aria-label="Full version is on. What it includes">\u2713 Full</button>`}
         <details class="head-menu">
           <summary aria-label="Menu">\u22ef</summary>
           <div class="head-menu-items">
@@ -2106,7 +2266,7 @@ function renderDashboard() {
     <div class="dashboard">${main}${sidebar}<div class="resources-row">${renderResources()}</div></div>`;
 
   // Scroll to top only on first dashboard load
-  if (isFirstDashboard) { window.scrollTo(0, 0); isFirstDashboard = false; }
+  isFirstDashboard = false; // render() starts a new view at the top
 
   updateMiniVerdict(result);
   drawMainChart(result, canCompare ? baselineResult : null);
@@ -2174,10 +2334,10 @@ function moreOptionsHTML() {
       </div>
 
       <h3 class="sub-heading">Pension or other income</h3>
-      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">If you have a pension, add it under Your plan. Here you can change whether it keeps up with prices and add a second source, such as ${state.hasPartner ? 'a partner’s pension' : 'an annuity or rent'}.</div>
+      <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">If you have a pension, add it under Your plan. Here you can change whether it keeps up with prices and add a second source, such as ${state.hasPartner ? 'a partner’s pension' : 'an annuity or rental income'}.</div>
       ${state.otherIncome > 0 ? `<div class="control">
         <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-soft);cursor:pointer"><input type="checkbox" ${state.otherIncomeFixed ? 'checked' : ''} onchange="update('otherIncomeFixed', this.checked)"> Fixed dollars, no cost of living increase</label>
-        <div class="ev-hint">Most pensions and annuities do not rise with prices, so in today’s dollars they buy a little less each year. Rent usually keeps up.</div>
+        <div class="ev-hint">Most pensions and annuities do not rise with prices, so in today’s dollars they buy a little less each year. Rental income usually keeps up.</div>
       </div>` : ''}
       <div class="control">
         <div class="control-row"><span class="control-label">A second source, per year</span><span class="control-value">${state.otherIncome2 > 0 ? fmtMoney(state.otherIncome2) : 'none'}</span></div>
@@ -2194,11 +2354,16 @@ function moreOptionsHTML() {
       </div>
       <div class="control">
         <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink-soft);cursor:pointer"><input type="checkbox" ${state.otherIncome2Fixed ? 'checked' : ''} onchange="update('otherIncome2Fixed', this.checked)"> Fixed dollars, no cost of living increase</label>
-        <div class="ev-hint">Most pensions and annuities do not rise with prices, so in today’s dollars they buy a little less each year. Rent usually keeps up.</div>
+        <div class="ev-hint">Most pensions and annuities do not rise with prices, so in today’s dollars they buy a little less each year. Rental income usually keeps up.</div>
       </div>` : ''}
 
-      <h3 class="sub-heading">Mortgage</h3>
-      <p class="ev-hint">Not sure when it ends? <button type="button" class="helper-trigger" onclick="openPayoffHelper()">Help me calculate it.</button></p>
+      <h3 class="sub-heading">Housing</h3>
+      <div class="toggle-group" role="group" aria-label="Housing" style="margin:6px 0 10px">${[['mortgage', 'Mortgage'], ['rent', 'Rent'], ['none', 'Owned outright']].map(([v, t]) => `<button type="button" class="toggle-btn ${housingKind(state) === v ? 'active' : ''}" aria-pressed="${housingKind(state) === v}" onclick="setHousingType('${v}')">${t}</button>`).join('')}</div>
+      ${housingKind(state) === 'rent' ? `<div class="control">
+        <div class="control-row"><span class="control-label">Rent per year</span><span class="control-value">${fmtMoney(state.housing)}</span></div>
+        <input type="range" min="0" max="${Math.max(120000, Math.ceil((state.housing || 0) / 1000) * 1000)}" step="1000" value="${state.housing}" oninput="slideLive(this,'housing',this.value)" onchange="sliderCommit('housing',this.value)"/>
+        <div class="ev-hint">Rent keeps up with prices, so it stays level in today’s dollars, and runs for the whole plan${hasBuy(state) ? ' until you buy at ' + state.homeBuyAge : ''}. To try buying, use ${hasBuy(state) ? '“Change the home purchase”' : '“Buy a home later”'} in the what-ifs.</div>
+      </div>` : housingKind(state) === 'none' ? `<p class="ev-hint">No housing payment. Property tax, insurance, and upkeep are part of your spending.</p>` : `<p class="ev-hint">Not sure when it ends? <button type="button" class="helper-trigger" onclick="openPayoffHelper()">Help me calculate it.</button></p>
       <div class="control">
         <div class="control-row"><span class="control-label">Mortgage payment per year</span><span class="control-value">${fmtMoney(state.housing)}</span></div>
         <input type="range" min="0" max="120000" step="1000" value="${state.housing}" oninput="slideLive(this,'housing',this.value)" onchange="sliderCommit('housing',this.value)"/>
@@ -2212,7 +2377,7 @@ function moreOptionsHTML() {
         <input type="range" min="0" max="${Math.max(120000, Math.ceil((state.postPayoffSpend || 0) / 1000) * 1000)}" step="1000" value="${state.postPayoffSpend || 0}" oninput="slideLive(this,'postPayoffSpend',this.value)" onchange="sliderCommit('postPayoffSpend',this.value)"/>
         <div class="ev-hint">Extra spending each year after the payment ends. Set it to the payment (${fmtMoney(state.housing)}) to spend all of the freed money, or higher if the plan is to spend more. At none, it stays in the portfolio.</div>
       </div>` : ''}
-      ${state.housing > 0 && state.mortgagePayoffAge > state.age + 2 ? `<button onclick="showPayoffModal()" style="margin-top:6px;font-size:14px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">+ Model accelerated payoff \u2192</button>` : ''}
+      ${state.housing > 0 && state.mortgagePayoffAge > state.age + 2 ? `<button onclick="showPayoffModal()" style="margin-top:6px;font-size:14px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit">+ Model accelerated payoff \u2192</button>` : ''}`}
 
       <h3 class="sub-heading">Taxes</h3>
       <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">Used to estimate the tax rates shown under Assumptions, where you can also edit them directly.</div>
@@ -2292,8 +2457,11 @@ function getVerdict(result) {
     v.method = 'We ran your plan through every rolling ' + yc + '-year stretch of real U.S. market returns since 1926 for a ' + mixLabel() + ' stock/bond mix: ' + totalPeriods + ' stretches, starting ' + windows.firstStart + ' through ' + windows.lastStart + '.' + shockSentence('stretch');
     const tested = '';
     if (maxSpendView) {
-      v.headline = 'You could spend about ' + fmtMoney(state.spending + state.housing) + ' a year and still make it through ' + successCount + ' of ' + totalPeriods + ' stretches';
-      v.lead = 'This is the highest spending level that lasted to age ' + state.targetAge + ' in at least ' + threshold + '% of history, with steady spending and no cuts' + (state.housing > 0 ? ', including the mortgage payment while it lasts' : '') + '.';
+      // The level is chosen with steady spending and no cuts, so the headline count is that
+      // run's count. The chart may have guardrails on, which usually lasts in more stretches.
+      const nc = state.guardrailsEnabled ? runForState({ ...state, guardrailsEnabled: false }) : result;
+      v.headline = 'You could spend about ' + fmtMoney(state.spending + state.housing) + ' a year and still make it through ' + nc.successCount + ' of ' + nc.totalPeriods + ' stretches';
+      v.lead = 'This is the highest spending level that lasted to age ' + state.targetAge + ' in at least ' + threshold + '% of history, with steady spending and no cuts' + (housingPhrase(state) ? ', including ' + housingPhrase(state) : '') + '.' + (state.guardrailsEnabled && nc.successCount !== successCount ? ' With guardrails on, as in the chart, it lasted in ' + successCount + ' of ' + totalPeriods + '.' : '');
       v.detail = tested + ' The spending explorer below shows how the count moves if you spend a little more or less.';
     } else if (successCount === totalPeriods) {
       v.headline = 'This plan lasted through every stretch of the market since 1926';
@@ -2340,12 +2508,13 @@ function getVerdict(result) {
   return v;
 }
 
-const IMPACT_FIELDS = () => ({ spending: 'Spending (besides the mortgage)', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: 'Mortgage payment', targetAge: 'Plan to age', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', extraSpend: 'Extra spending', extraSpendStart: 'Extra spending from', extraSpendEnd: 'Extra spending until', otherIncome: 'Pension or other income', otherIncomeStart: 'Other income from', otherIncomeEnd: 'Other income until', otherIncomeFixed: 'Other income in fixed dollars', otherIncome2: 'Second income source', otherIncome2Start: 'Second income source from', otherIncome2End: 'Second income source until', otherIncome2Fixed: 'Second income source in fixed dollars', postPayoffSpend: 'Freed payment spent', homeSaleAge: 'House sold at', homeSaleProceeds: 'Sale proceeds', postSaleHousing: 'Housing after sale', shockEra: 'Bad decade', shockAge: 'Bad decade starts', yourPartTimeAmount: 'Part-time income', yourPartTimeStart: 'Part-time from', yourPartTimeEnd: 'Part-time until' });
+const IMPACT_FIELDS = () => ({ housingType: 'Housing', spending: 'Spending (besides housing)', lateSpending: 'Late-life spending', yourStopWorkAge: state.yourIncome > 0 ? 'Your retirement age' : null, partnerStopWorkAge: "Partner's retirement age", yourIncome: 'Your income', partnerIncome: "Partner's income", portfolio: 'Portfolio', ssStartAge: 'SS start age', mortgagePayoffAge: 'Mortgage payoff age', housing: housingKind(state) === 'rent' ? 'Rent' : 'Mortgage payment', targetAge: 'Money needs to last to', returnRate: 'Steady return', stockPct: 'Stocks', feeRate: 'Fees', guardrailsEnabled: 'Guardrails', taxRate: 'Wage tax', capGainsTax: 'Withdrawal tax', yourBreakStart: 'Break starts', yourBreakEnd: 'Back to work', partnerBreakStart: 'Partner break starts', partnerBreakEnd: 'Partner back to work', extraSpend: 'Extra spending', extraSpendStart: 'Extra spending from', extraSpendEnd: 'Extra spending until', otherIncome: 'Pension or other income', otherIncomeStart: 'Other income from', otherIncomeEnd: 'Other income until', otherIncomeFixed: 'Other income in fixed dollars', otherIncome2: 'Second income source', otherIncome2Start: 'Second income source from', otherIncome2End: 'Second income source until', otherIncome2Fixed: 'Second income source in fixed dollars', postPayoffSpend: 'Freed payment spent', homeBuyAge: 'Home bought at', homeBuyDownPayment: 'Down payment', homeBuyPayment: 'New mortgage payment', homeBuyPayoffAge: 'New mortgage paid off at', homeBuyUpkeep: 'Cost of owning', homeSaleAge: 'House sold at', homeSaleProceeds: 'Sale proceeds', postSaleHousing: 'Housing after sale', shockEra: 'Bad decade', shockAge: 'Bad decade starts', yourPartTimeAmount: 'Part-time income', yourPartTimeStart: 'Part-time from', yourPartTimeEnd: 'Part-time until' });
 function fmtField(k, v) {
   if ((k === 'otherIncomeEnd' || k === 'otherIncome2End') && (v === null || v === undefined)) return 'plan end';
   if (v === null || v === undefined) return 'none';
   if (k === 'shockEra') return shockLabel(v);
-  if (['spending','lateSpending','portfolio','yourIncome','partnerIncome','housing','extraSpend','yourPartTimeAmount','postPayoffSpend','homeSaleProceeds','postSaleHousing','otherIncome','otherIncome2'].includes(k)) return v > 0 ? fmtMoneyShort(v) : (k === 'postSaleHousing' ? '$0' : 'none');
+  if (k === 'housingType') return { mortgage: 'mortgage', rent: 'renting', none: 'owned outright' }[v] || String(v);
+  if (['spending','lateSpending','portfolio','yourIncome','partnerIncome','housing','extraSpend','yourPartTimeAmount','postPayoffSpend','homeSaleProceeds','postSaleHousing','otherIncome','otherIncome2','homeBuyDownPayment','homeBuyPayment','homeBuyUpkeep'].includes(k)) return v > 0 ? fmtMoneyShort(v) : (k === 'postSaleHousing' ? '$0' : 'none');
   if (k === 'otherIncomeFixed' || k === 'otherIncome2Fixed') return v ? 'yes' : 'no';
   if (['returnRate','stockPct'].includes(k)) return pct(v, k === 'stockPct' ? 0 : 1);
   if (k === 'feeRate') return pct(v, 2);
@@ -2364,14 +2533,24 @@ function computeImpact() {
   if (!changes.length) return null;
   return { changes, successDelta: lastSimResult.successRate - baselineResult.successRate, finalDelta: lastSimResult.medianFinal - baselineResult.medianFinal };
 }
+// The result of the change, in words: how often it lasted before and now, and how the middle
+// outcome's ending balance moved.
+function impactResultText(a, b, finalDelta) {
+  if (!a || !b) return '';
+  let lasted;
+  if (b.mode === 'historical') lasted = 'Lasted in <strong style="color:var(--ink)">' + b.successCount + ' of ' + b.totalPeriods + '</strong> stretches' + (b.successCount === a.successCount ? ', the same as before' : ', ' + (b.successCount > a.successCount ? 'up' : 'down') + ' from ' + a.successCount);
+  else if (b.mode === 'montecarlo') { const pa = Math.round(a.successRate * 100), pb = Math.round(b.successRate * 100); lasted = 'Lasted in <strong style="color:var(--ink)">' + pb + '%</strong> of simulated futures' + (pa === pb ? ', the same as before' : ', ' + (pb > pa ? 'up' : 'down') + ' from ' + pa + '%'); }
+  else { const said = (r) => r.successRate >= 1 ? 'lasts to ' + state.targetAge : 'runs out at ' + r.medianRunOutAge; lasted = 'At a steady return it <strong style="color:var(--ink)">' + said(b) + '</strong>' + (said(a) === said(b) ? ', the same as before' : '; before, it ' + said(a)); }
+  const moved = Math.abs(finalDelta) < 1000 ? 'about the same' : fmtMoneyShort(Math.abs(finalDelta)) + (finalDelta > 0 ? ' more' : ' less');
+  return lasted + '. The middle outcome ends with ' + moved + ' at ' + state.targetAge + '.';
+}
 function renderSidebarImpact() {
   const im = computeImpact();
   const compareBtn = `<button class="compare-btn" onclick="toggleCompare()">${compareOn && isPaid() ? 'Stop comparing' : 'Compare side by side'}${!isPaid() ? ' <span class="lock-icon">&#x1f512;</span>' : ''}</button>`;
   if (!im) {
-    if (compareOn && isPaid()) return `<div class="impact">Comparing against <strong style="color:var(--ink)">${baselineName}</strong>. Change something to see the two futures diverge. ${compareBtn}</div>`;
+    if (compareOn && isPaid()) return `<div class="impact">Side by side is on, against <strong style="color:var(--ink)">${baselineName}</strong>. Change something and both futures show on the chart. ${compareBtn}</div>`;
     return '';
   }
-  const fdTxt = (im.finalDelta >= 0 ? '+' : '') + fmtMoneyShort(im.finalDelta);
   const changeRows = im.changes.map(c =>
     `<div style="display:flex;align-items:baseline;gap:6px;line-height:1;margin-bottom:3px">
       <span style="flex:1;min-width:0;font-size:13px;color:var(--ink-soft)"><strong style="color:var(--ink)">${c.label}:</strong> ${c.from} \u2192 ${c.to}</span>
@@ -2379,11 +2558,11 @@ function renderSidebarImpact() {
     </div>`
   ).join('');
   return `<div class="impact">
-    <div class="impact-title">${currentName !== 'Current' ? currentName + ' versus ' + baselineName : 'Versus ' + baselineName}</div>
+    <div class="impact-title">${currentName !== 'Current' ? currentName + ', compared with ' + baselineName : 'Compared with ' + baselineName}</div>
     ${changeRows}
-    <div style="font-size:13px;color:var(--ink-mute);margin-top:6px;padding-top:6px;border-top:1px solid var(--line-soft)">Success ${succLabel(baselineResult)} \u2192 <strong style="color:var(--ink)">${succLabel(lastSimResult)}</strong> &middot; ${fdTxt} median ending</div>
+    <div style="font-size:13px;color:var(--ink-mute);margin-top:6px;padding-top:6px;border-top:1px solid var(--line-soft);line-height:1.45">${impactResultText(baselineResult, lastSimResult, im.finalDelta)}</div>
     <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <button style="font-size:13px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;margin-top:2px" onclick="resetBaseline()">Set current as new baseline</button>
+      <button style="font-size:13px;color:var(--rust);background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;margin-top:2px" onclick="resetBaseline()">Make this the new starting point</button>
       ${compareBtn}
     </div>
   </div>`;
@@ -2405,7 +2584,7 @@ function renderReadFirst(result) {
       <p>${bandLine}</p>
       ${v.caveat ? `<p class="verdict-caveat">${v.caveat}</p>` : ''}
       <p>Running out here means the balance hits zero before age ${state.targetAge} in that ${result.mode === 'historical' ? 'stretch' : 'run'}. It usually happens in the last few years, after decades of the plan working. We’re assuming most people would notice a bad run and adjust long before then. The guardrails setting under Assumptions is a rough version of that adjustment.</p>
-      <p>The model covers your portfolio, wages until the age you stop, Social Security from the age you set, housing until the payoff age, one-time events you add, and taxes as one flat rate on wages and one on withdrawals, both of which you can change under Assumptions. Healthcare is not a separate line, so it belongs in your spending number. It does not model tax brackets, required minimum distributions, or Medicare surcharges. The portfolio is your stock/bond mix rebalanced once a year, minus the fee you set. The market history is U.S. returns since 1926, and ${yrs}-year stretches overlap, so ${result.mode === 'historical' ? n + ' stretches are not ' + n + ' separate tests' : 'the historical count is not a count of separate tests'}.</p>
+      <p>The model covers your portfolio, wages until the age you stop, Social Security from the age you set, housing (a mortgage until it is paid off, or rent), one-time events you add, and taxes as one flat rate on wages and one on withdrawals, both of which you can change under Assumptions. Healthcare is not a separate line, so it belongs in your spending number. It does not model tax brackets, required minimum distributions, or Medicare surcharges. The portfolio is your stock/bond mix rebalanced once a year, minus the fee you set. The market history is U.S. returns since 1926, and ${yrs}-year stretches overlap, so ${result.mode === 'historical' ? n + ' stretches are not ' + n + ' separate tests' : 'the historical count is not a count of separate tests'}.</p>
       <p>If you are about to make a decision based on this, take the scenario to a planner or tax professional first.</p>
     </div></details>`;
 }
@@ -2414,7 +2593,7 @@ function renderReadFirst(result) {
 function chWidth(v) { const s = String(v); const dots = (s.match(/[.,-]/g) || []).length; return (s.length - dots + dots * 0.35 + 0.15).toFixed(2) + 'ch'; }
 function asmInput(key, val, opts) {
   const w = chWidth(val);
-  return `<input type="number" class="asm-input" style="width:${w}" min="${opts.min}" max="${opts.max}" step="${opts.step}" value="${val}" onchange="update('${key}', +this.value/100)" oninput="this.style.width=chWidth(this.value)" aria-label="${opts.label}"/>%`;
+  return `<input type="number" class="asm-input" style="width:${w}" min="${opts.min}" max="${opts.max}" step="${opts.step}" value="${val}" onchange="update('${key}', clampIn(this)/100)" oninput="this.style.width=chWidth(this.value)" aria-label="${opts.label}"/>%`;
 }
 function asmRow(label, html) { return `<div class="asm-row"><div class="asm-label">${label}</div><div class="asm-text">${html}</div></div>`; }
 function renderAssumptions(result) {
@@ -2432,16 +2611,20 @@ function renderAssumptions(result) {
   rows.push(asmRow('Asset mix', `<strong>${mixWords}</strong>, rebalanced yearly. Stocks are the S&amp;P composite with dividends reinvested; bonds are 10-year U.S. Treasuries. History for this mix, 1926–${HISTORICAL_END_YEAR}: average ${pct(h.mean)}, volatility ${pct(h.sd)}, compound ${pct(h.geo)}, worst year ${pct(h.min)}, best ${pct(h.max)}.
     <div class="asm-slider"><span>All bonds</span><input type="range" class="asm-range" min="0" max="100" step="5" value="${Math.round(mix * 100)}" oninput="this.parentElement.querySelector('output').textContent=this.value+'% stocks / '+(100-this.value)+'% bonds'" onchange="update('stockPct', +this.value/100)" aria-label="Percent in stocks"/><span>All stocks</span><output>${Math.round(mix * 100)}% stocks / ${Math.round((1 - mix) * 100)}% bonds</output></div>`));
   rows.push(asmRow('Fees', `${asmInput('feeRate', ((state.feeRate || 0) * 100).toFixed(2), { min: 0, max: 3, step: 0.05, label: 'Annual fee percent' })} a year is subtracted from every year’s return. That covers fund expense ratios and any advisor fee. The default, 0.10%, is a typical low-cost index fund. Index funds run about 0.03 to 0.2%, and with an advisor the total is often near 1%.`));
-  rows.push(asmRow('Inflation', `Everything is in today’s dollars. Spending and Social Security are held constant in real terms, and the return data is already inflation-adjusted. The mortgage payment is the exception, since it is fixed in nominal dollars: each year it is deflated by that year’s inflation in Historical mode, and by the long-run average in the other modes. Wages grow <strong>${pct(state.yourIncomeGrowth)}</strong> a year above inflation${isPaid() ? ' (change it under More options)' : ''}. A fixed mortgage payment is treated as if it rose with inflation, which slightly overstates housing cost in later years.`));
+  rows.push(asmRow('Inflation', `Everything is in today’s dollars. Spending, Social Security${housingKind(state) === 'rent' ? ', rent' : ''} and the return data are all held constant in real terms.${hasMortgage(state) || hasBuy(state) ? ' A mortgage payment is the exception, since it is fixed in nominal dollars: each year it is deflated by that year’s inflation in Historical mode, and by the long-run average in the other modes.' : ''} Wages grow <strong>${pct(state.yourIncomeGrowth)}</strong> a year above inflation${isPaid() ? ' (change it under More options)' : ''}.`));
   const gr = state.guardrailsEnabled;
-  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending + state.housing)}</strong> a year${state.housing > 0 ? ', of which ' + fmtMoney(state.housing) + ' is the mortgage payment until it ends at ' + state.mortgagePayoffAge : ''}. From age ${state.slowDownAge}, <strong>${fmtMoney(state.lateSpending)}</strong> a year besides any housing${state.extraSpend > 0 && has(state.extraSpendStart) ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is part of the full version)'}. Guardrails are <select class="asm-select" style="width:${gr ? '2.3ch' : '2.7ch'}" onchange="update('guardrailsEnabled', this.value === 'on')" aria-label="Guardrails on or off"><option value="on" ${gr ? 'selected' : ''}>on</option><option value="off" ${gr ? '' : 'selected'}>off</option></select>. ${gr
+  rows.push(asmRow('Spending rule', `<strong>${fmtMoney(state.spending + state.housing)}</strong> a year${hasMortgage(state) ? ', of which ' + fmtMoney(state.housing) + ' is the mortgage payment until it ends at ' + state.mortgagePayoffAge : (housingKind(state) === 'rent' && state.housing > 0) ? ', of which ' + fmtMoney(state.housing) + ' is rent' : ''}. From age ${state.slowDownAge}, <strong>${fmtMoney(state.lateSpending)}</strong> a year besides any housing${state.extraSpend > 0 && has(state.extraSpendStart) ? ', plus <strong>' + fmtMoney(state.extraSpend) + '</strong> a year from ' + state.extraSpendStart + ' to ' + state.extraSpendEnd : ''}${isPaid() ? '' : ' (late-life spending defaults to 85% and is part of the full version)'}. Guardrails are <select class="asm-select" style="width:${gr ? '2.3ch' : '2.7ch'}" onchange="update('guardrailsEnabled', this.value === 'on')" aria-label="Guardrails on or off"><option value="on" ${gr ? 'selected' : ''}>on</option><option value="off" ${gr ? '' : 'selected'}>off</option></select>. ${gr
     ? `Starting from the withdrawal rate in your first retired year, spending is cut <strong>${pct(state.guardrailCutPct, 0)}</strong> in any year the rate runs more than ${pct(state.guardrailBandPct, 0)} above it, and boosted <strong>${pct(state.guardrailBoostPct, 0)}</strong> when more than ${pct(state.guardrailBandPct, 0)} below. Cuts do not compound. The median path shown cut spending in <strong>${result.medianRunFlexCuts || 0}</strong> year${(result.medianRunFlexCuts || 0) === 1 ? '' : 's'}.${isPaid() ? ' Cut and boost sizes are under Spending flexibility below.' : ''}`
     : 'The same amount is withdrawn every year no matter what markets do.'}`));
-  if (state.housing > 0 || has(state.homeSaleAge)) {
+  if (state.housing > 0 || hasSale(state) || hasBuy(state)) {
     const h = [];
-    if (state.housing > 0) h.push('The mortgage payment is <strong>' + fmtMoney(state.housing) + '</strong> a year until it is paid off at ' + state.mortgagePayoffAge + (state.postPayoffSpend > 0 ? (state.postPayoffSpend > state.housing ? ', after which that money is spent along with ' + fmtMoney(state.postPayoffSpend - state.housing) + ' more a year' : state.postPayoffSpend === state.housing ? ', after which that money is spent' : ', after which ' + fmtMoney(state.postPayoffSpend) + ' of it is spent and the rest stays in the portfolio') : ', after which it stays in the portfolio') + '. Property tax and insurance are part of your spending and continue.');
-    if (has(state.homeSaleAge)) h.push('At ' + state.homeSaleAge + ' the house is sold: <strong>' + fmtMoney(state.homeSaleProceeds) + '</strong> goes into the portfolio and housing costs ' + fmtMoney(state.postSaleHousing || 0) + ' a year from then on.');
-    h.push('The mortgage payment is fixed in nominal dollars, so in today’s dollars it shrinks a little every year with inflation. Rent after a sale is held in today’s dollars.');
+    if (housingKind(state) === 'rent') h.push('Rent is <strong>' + fmtMoney(state.housing) + '</strong> a year, held level in today’s dollars' + (hasBuy(state)
+      ? ', until you buy at ' + state.homeBuyAge + '. That year <strong>' + fmtMoney(state.homeBuyDownPayment) + '</strong> comes out of the portfolio for the down payment and closing costs. ' + (state.homeBuyPayment > 0 ? 'The new mortgage is <strong>' + fmtMoney(state.homeBuyPayment) + '</strong> a year until ' + state.homeBuyPayoffAge + ', fixed from the purchase year. ' : '') + (state.homeBuyUpkeep > 0 ? 'Property tax, insurance, and upkeep add <strong>' + fmtMoney(state.homeBuyUpkeep) + '</strong> a year for as long as you own it.' : '')
+      : ', for the whole plan.'));
+    else if (state.housing > 0) h.push('The mortgage payment is <strong>' + fmtMoney(state.housing) + '</strong> a year until it is paid off at ' + state.mortgagePayoffAge + (state.postPayoffSpend > 0 ? (state.postPayoffSpend > state.housing ? ', after which that money is spent along with ' + fmtMoney(state.postPayoffSpend - state.housing) + ' more a year' : state.postPayoffSpend === state.housing ? ', after which that money is spent' : ', after which ' + fmtMoney(state.postPayoffSpend) + ' of it is spent and the rest stays in the portfolio') : ', after which it stays in the portfolio') + '. Property tax and insurance are part of your spending and continue.');
+    if (hasSale(state)) h.push('At ' + state.homeSaleAge + ' the house is sold: <strong>' + fmtMoney(state.homeSaleProceeds) + '</strong> goes into the portfolio and housing costs ' + fmtMoney(state.postSaleHousing || 0) + ' a year from then on.');
+    if (hasMortgage(state) || hasBuy(state)) h.push('A mortgage payment is fixed in nominal dollars, so in today’s dollars it shrinks a little every year with inflation.');
+    if (hasSale(state)) h.push('Rent after a sale is held in today’s dollars.');
     rows.push(asmRow('Housing', h.join(' ')));
   }
   if (state.yourIncome > 0 || (state.hasPartner && state.partnerIncome > 0)) {
@@ -2491,11 +2674,11 @@ function renderWhatItTakes(result) {
   const nowSpend = state.spending + state.housing;
   if (c.clears) {
     const room = c.maxSpend - nowSpend;
-    if (c.noCuts && c.noCuts.successRate < c.th) return `<div class="wwit"><div class="wwit-title">Where the room comes from</div>This plan lasts in at least ${c.need} of ${c.total} stretches (${pctTh}% of history) because the guardrails cut spending in bad stretches. With steady spending and no cuts it lasts in ${c.noCuts.successCount} of ${c.total}, and the line would be <strong>${fmtMoney(c.maxSpend)}</strong> a year all in, ${fmtMoneyShort(nowSpend - c.maxSpend)} less than now.</div>`;
-    return `<div class="wwit"><div class="wwit-title">Room to spend</div>This plan lasts in at least ${c.need} of ${c.total} stretches (${pctTh}% of history) with steady spending and no guardrail cuts. ${room >= 1000 ? 'Spending could go up to <strong>' + fmtMoney(c.maxSpend) + '</strong> a year all in, ' + fmtMoneyShort(room) + ' more than now, and still clear that line.' : 'At ' + fmtMoney(nowSpend) + ' a year it is right at that line.'}</div>`;
+    if (c.noCuts && c.noCuts.successRate < c.th) return `<div class="wwit"><div class="wwit-title">Where the room comes from</div>This plan lasts in at least ${c.need} of ${c.total} stretches (${pctTh}% of history) because the guardrails cut spending in bad stretches. With steady spending and no cuts it lasts in ${c.noCuts.successCount} of ${c.total}, and the line would be <strong>${fmtMoney(c.maxSpend)}</strong> a year in total, ${fmtMoneyShort(nowSpend - c.maxSpend)} less than now.</div>`;
+    return `<div class="wwit"><div class="wwit-title">Room to spend</div>This plan lasts in at least ${c.need} of ${c.total} stretches (${pctTh}% of history) with steady spending and no guardrail cuts. ${room >= 1000 ? 'Spending could go up to <strong>' + fmtMoney(c.maxSpend) + '</strong> a year in total, ' + fmtMoneyShort(room) + ' more than now, and still clear that line.' : 'At ' + fmtMoney(nowSpend) + ' a year it is right at that line.'}</div>`;
   }
   const items = [];
-  if (c.maxSpend < nowSpend) items.push('Spend <strong>' + fmtMoney(c.maxSpend) + '</strong> a year all in, ' + fmtMoneyShort(nowSpend - c.maxSpend) + ' less than now.');
+  if (c.maxSpend < nowSpend) items.push('Spend <strong>' + fmtMoney(c.maxSpend) + '</strong> a year in total, ' + fmtMoneyShort(nowSpend - c.maxSpend) + ' less than now.');
   if (c.age && c.age.age > state.yourStopWorkAge) items.push('Work until <strong>' + c.age.age + '</strong> instead of ' + state.yourStopWorkAge + ', ' + (c.age.age - state.yourStopWorkAge) + ' more year' + (c.age.age - state.yourStopWorkAge > 1 ? 's' : '') + '.');
   if (c.portfolio && !c.portfolio.alreadyThere) items.push('Have <strong>' + fmtMoney(c.portfolio.portfolio) + '</strong> saved today, ' + fmtMoneyShort(c.portfolio.portfolio - state.portfolio) + ' more than now.');
   if (!items.length) return '';
@@ -2514,14 +2697,14 @@ function renderYearTable(result) {
   const all = yearRows(result);
   if (!all.length) return '';
   // A handful of milestone ages: now, the ages where something changes, then the end.
-  const marks = [state.age, state.yourIncome > 0 ? state.yourStopWorkAge : null, (state.yourSSAmount > 0 || state.partnerSSAmount > 0) ? state.ssStartAge : null, state.otherIncome > 0 ? state.otherIncomeStart : null, state.housing > 0 ? state.mortgagePayoffAge : null, state.lateSpending !== state.spending ? state.slowDownAge : null, state.yourBreakStart, state.homeSaleAge, state.shockAge, state.extraSpendStart, state.yourPartTimeAmount > 0 ? state.yourPartTimeStart : null, state.targetAge]
+  const marks = [state.age, state.yourIncome > 0 ? state.yourStopWorkAge : null, (state.yourSSAmount > 0 || state.partnerSSAmount > 0) ? state.ssStartAge : null, state.otherIncome > 0 ? state.otherIncomeStart : null, hasMortgage(state) ? state.mortgagePayoffAge : null, hasBuy(state) ? state.homeBuyAge : null, state.lateSpending !== state.spending ? state.slowDownAge : null, state.yourBreakStart, hasSale(state) ? state.homeSaleAge : null, state.shockAge, state.extraSpendStart, state.yourPartTimeAmount > 0 ? state.yourPartTimeStart : null, state.targetAge]
     .filter(v => has(v) && v >= state.age && v <= state.targetAge);
   const ages = [...new Set(marks)].sort((a, b) => a - b).slice(0, 7);
   const printing = document.body.classList.contains('printing');
   const rows = printing ? all : ages.map(a => all.find(r => r.age === a)).filter(Boolean);
   const notFixed = result.mode !== 'fixed';
   const flow = (r) => r.fromPortfolio > 0 ? '\u2212' + fmtMoneyShort(r.fromPortfolio) : r.added > 0 ? '+' + fmtMoneyShort(r.added) : '';
-  const label = (a) => a === state.age ? 'Now' : a === state.targetAge ? 'Plan ends' : (a === state.yourStopWorkAge && state.yourIncome > 0) ? 'Retire' : a === state.ssStartAge ? 'Social Security' : (state.otherIncome > 0 && a === state.otherIncomeStart) ? 'Pension' : (a === state.mortgagePayoffAge && state.housing > 0) ? 'Mortgage paid' : a === state.slowDownAge ? 'Spending eases' : has(state.homeSaleAge) && a === state.homeSaleAge ? 'House sold' : has(state.yourBreakStart) && a === state.yourBreakStart ? 'Career break' : has(state.shockAge) && a === state.shockAge ? 'Bad decade' : has(state.extraSpendStart) && a === state.extraSpendStart ? 'Extra spending' : state.yourPartTimeAmount > 0 && a === state.yourPartTimeStart ? 'Part-time' : '';
+  const label = (a) => a === state.age ? 'Now' : a === state.targetAge ? 'Plan ends' : (a === state.yourStopWorkAge && state.yourIncome > 0) ? 'Retire' : a === state.ssStartAge ? 'Social Security' : (state.otherIncome > 0 && a === state.otherIncomeStart) ? 'Pension' : (a === state.mortgagePayoffAge && hasMortgage(state)) ? 'Mortgage paid' : a === state.slowDownAge ? 'Spending eases' : hasBuy(state) && a === state.homeBuyAge ? 'Home bought' : hasSale(state) && a === state.homeSaleAge ? 'House sold' : has(state.yourBreakStart) && a === state.yourBreakStart ? 'Career break' : has(state.shockAge) && a === state.shockAge ? 'Bad decade' : has(state.extraSpendStart) && a === state.extraSpendStart ? 'Extra spending' : state.yourPartTimeAmount > 0 && a === state.yourPartTimeStart ? 'Part-time' : '';
   if (printing) return `<h2 class="section-heading">Year by year</h2>
     <div class="section-sub">The median path, in today’s dollars. In / out is money taken from the portfolio (\u2212) or added to it (+).${notFixed ? ' Range is where the worst 10% and the best 10% of ' + (result.mode === 'historical' ? 'stretches' : 'futures') + ' stood at that age.' : ''}</div>
     <div class="data-table-wrapper"><table class="data-table year-preview year-full"><thead><tr><th>Age</th><th>Income</th><th>Spending</th><th>In / out</th><th>Balance</th>${notFixed ? '<th>Range</th>' : ''}</tr></thead><tbody>
@@ -2537,7 +2720,7 @@ window.downloadCsv = function() {
   if (!isPaid()) { showUnlockModal(); return; }
   const r = lastSimResult; if (!r) return;
   const rows = yearRows(r);
-  const head = ['Age', 'Year', 'Wages', 'Social Security', 'Spending (all in)', 'From portfolio', 'Added to portfolio', 'Tax on withdrawals', 'Real return', 'Balance (median path)', 'Balance worst 10%', 'Balance best 10%', 'Ran out'];
+  const head = ['Age', 'Year', 'Wages', 'Social Security', 'Total spending', 'From portfolio', 'Added to portfolio', 'Tax on withdrawals', 'Real return', 'Balance (median path)', 'Balance worst 10%', 'Balance best 10%', 'Ran out'];
   const lines = [head.join(',')].concat(rows.map(x => [x.age, x.year, Math.round(x.wages), Math.round(x.ss), Math.round(x.spending), Math.round(x.fromPortfolio), Math.round(x.added), Math.round(x.tax), (x.ret * 100).toFixed(2) + '%', Math.round(x.balance), Math.round(x.p10 || 0), Math.round(x.p90 || 0), x.ranOut ? 'yes' : 'no'].join(',')));
   lines.push('');
   lines.push('Exported,' + new Date().toISOString().slice(0, 10));
@@ -2572,14 +2755,15 @@ function renderCompareSummary(a, b) {
   const last = r => r.percentiles[r.percentiles.length - 1];
   const range = r => r.mode === 'fixed' ? fmtMoneyShort(last(r).p50) + ' (steady return)' : (last(r).p10 <= 0 ? 'ran out' : fmtMoneyShort(last(r).p10)) + ' to ' + fmtMoneyShort(last(r).p90);
   const im = computeImpact();
-  const diffs = im ? im.changes.map(c => c.label + ' ' + c.from + ' → ' + c.to).join('; ') : 'no inputs differ yet';
+  const diffs = im ? im.changes.map(c => c.label + ' ' + c.from + ' → ' + c.to).join('; ') : '';
+  const basis = b.mode === 'historical' ? 'Both are tested against the same market history since 1926.' : b.mode === 'montecarlo' ? 'Both are tested against the same simulated markets.' : 'Both use the same steady return.';
   return `<h2 class="section-heading">Side by side</h2>
-    <div class="section-sub">${baselineName} and ${currentName}, both run in ${modeName(b.mode)} mode. What differs: ${diffs}. <button class="link-btn" onclick="toggleCompare()">Stop comparing</button></div>
+    <div class="section-sub"><strong>${baselineName}</strong> compared with <strong>${currentName}</strong>. ${basis} ${diffs ? 'What changed: ' + diffs + '.' : 'Nothing differs yet.'} <button class="link-btn" onclick="toggleCompare()">Stop comparing</button></div>
     <div class="data-table-wrapper"><table class="data-table compare-table"><thead><tr><th></th><th>${baselineName}</th><th>${currentName}</th></tr></thead><tbody>
       <tr><td>Lasted to age ${state.targetAge}</td><td>${periodsLabel(a)}</td><td style="font-weight:600;color:var(--ink)">${periodsLabel(b)}</td></tr>
       <tr><td>Ending balance, worst 10% to best 10%</td><td>${range(a)}</td><td>${range(b)}</td></tr>
       <tr><td>Median ending balance</td><td>${fmtMoneyShort(a.medianFinal)}</td><td>${fmtMoneyShort(b.medianFinal)}</td></tr>
-      <tr><td>Spending, all in</td><td>${fmtMoney(baselineState.spending + baselineState.housing)}</td><td>${fmtMoney(state.spending + state.housing)}</td></tr>
+      <tr><td>Total yearly spending</td><td>${fmtMoney(baselineState.spending + baselineState.housing)}</td><td>${fmtMoney(state.spending + state.housing)}</td></tr>
       <tr><td>Portfolio today</td><td>${fmtMoneyShort(baselineState.portfolio)}</td><td>${fmtMoneyShort(state.portfolio)}</td></tr>
     </tbody></table></div>`;
 }
@@ -2614,8 +2798,12 @@ function renderEventTimeline() {
   }
   else if (state.yourStopWorkAge > state.age && state.yourIncome > 0) events.push({ age: state.yourStopWorkAge, label: 'You retire', detail: 'Income drops from ' + fmtMoneyShort(state.yourIncome) + ' to $0' });
   if (state.hasPartner && state.partnerStopWorkAge > state.partnerAge && state.partnerIncome > 0) events.push({ age: state.partnerStopWorkAge, label: 'Partner retires', detail: 'Partner income drops to $0' });
-  if (state.housing > 0 && state.mortgagePayoffAge > state.age && (!has(state.homeSaleAge) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr payment ends' + (state.postPayoffSpend > 0 ? (state.postPayoffSpend < state.housing ? '; ' + fmtMoneyShort(state.postPayoffSpend) + '/yr of it goes to spending' : state.postPayoffSpend === state.housing ? '; all of it goes to spending' : '; spending rises by ' + fmtMoneyShort(state.postPayoffSpend) + '/yr') : '') });
-  if (has(state.homeSaleAge)) events.push({ age: state.homeSaleAge, label: 'House sold', detail: fmtMoneyShort(state.homeSaleProceeds) + ' into the portfolio; housing ' + fmtMoneyShort(state.postSaleHousing || 0) + '/yr after' });
+  if (hasBuy(state)) {
+    events.push({ age: state.homeBuyAge, label: 'Home bought', detail: fmtMoneyShort(state.homeBuyDownPayment) + ' from the portfolio; rent ends' });
+    if (state.homeBuyPayment > 0 && has(state.homeBuyPayoffAge) && state.homeBuyPayoffAge < state.targetAge && (!hasSale(state) || state.homeBuyPayoffAge < state.homeSaleAge)) events.push({ age: state.homeBuyPayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.homeBuyPayment) + '/yr payment ends' });
+  }
+  if (hasMortgage(state) && state.mortgagePayoffAge > state.age && (!hasSale(state) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage paid off', detail: fmtMoneyShort(state.housing) + '/yr payment ends' + (state.postPayoffSpend > 0 ? (state.postPayoffSpend < state.housing ? '; ' + fmtMoneyShort(state.postPayoffSpend) + '/yr of it goes to spending' : state.postPayoffSpend === state.housing ? '; all of it goes to spending' : '; spending rises by ' + fmtMoneyShort(state.postPayoffSpend) + '/yr') : '') });
+  if (hasSale(state)) events.push({ age: state.homeSaleAge, label: 'House sold', detail: fmtMoneyShort(state.homeSaleProceeds) + ' into the portfolio; housing ' + fmtMoneyShort(state.postSaleHousing || 0) + '/yr after' });
   if (has(state.yourBreakStart) && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Career break', detail: 'No wages from ' + state.yourBreakStart + ' to ' + state.yourBreakEnd }); events.push({ age: state.yourBreakEnd, label: 'Back to work', detail: 'Wages resume' }); }
   if (state.hasPartner && has(state.partnerBreakStart)) { events.push({ age: state.age + (state.partnerBreakStart - state.partnerAge), label: 'Partner’s break', detail: 'Partner has no wages for ' + (state.partnerBreakEnd - state.partnerBreakStart) + ' years' }); }
   if (state.shockEra && has(state.shockAge)) events.push({ age: state.shockAge, label: 'Bad decade starts', detail: shockLabel(state.shockEra) + ' returns for ten years' });
@@ -2631,7 +2819,7 @@ function renderEventTimeline() {
   const byAge = new Map();
   events.sort((a, b) => a.age - b.age).forEach(ev => { if (!byAge.has(ev.age)) byAge.set(ev.age, []); byAge.get(ev.age).push(ev); });
   const clause = {
-    'You retire': 'you retire', 'Partner retires': 'your partner retires', 'Mortgage paid off': 'the mortgage is paid off',
+    'You retire': 'you retire', 'Partner retires': 'your partner retires', 'Mortgage paid off': 'the mortgage is paid off', 'Home bought': 'you buy a home',
     'Social Security begins': 'Social Security begins', 'Other income begins': 'your pension or other income begins', 'Second source begins': 'your second income source begins', 'Spending changes': 'spending changes', 'Career break': 'your career break starts',
     'Back to work': 'you go back to work', 'Partner\u2019s break': 'your partner\u2019s break starts', 'Part-time': 'you go part-time',
     'You stop working': 'you stop working', 'Back to full time': 'you go back to full time', 'House sold': 'the house is sold',
@@ -2648,7 +2836,14 @@ function renderEventTimeline() {
 
 // ===== SPENDING EXPLORER =====
 // The mortgage payment is still part of spending after the change age if it is not paid off yet.
-function lateHousingPart() { return state.housing > 0 && state.mortgagePayoffAge > state.slowDownAge ? state.housing : 0; }
+// The same goes for rent, which never stops, and for a home bought before that age.
+function lateHousingPart() {
+  if (housingKind(state) === 'rent') {
+    if (!hasBuy(state) || state.homeBuyAge > state.slowDownAge) return state.housing;
+    return ((!has(state.homeBuyPayoffAge) || state.homeBuyPayoffAge > state.slowDownAge) ? state.homeBuyPayment : 0) + (state.homeBuyUpkeep || 0);
+  }
+  return hasMortgage(state) && state.mortgagePayoffAge > state.slowDownAge ? state.housing : 0;
+}
 function computeSpendingLevels() {
   if (!spendingLevelsStale && spendingLevelsCache) return spendingLevelsCache;
   const base = state.spending || 50000;
@@ -2923,7 +3118,7 @@ function renderResources() {
           <li><strong>Roth conversions and tax-loss harvesting</strong> are not modeled. An accountant may find savings here that no simple model will.</li>
           <li><strong>Spousal and survivor Social Security benefits</strong> are entered manually but not calculated automatically from each other's records.</li>
           <li><strong>State income tax</strong> is approximated for most states. Set your state under More about you for a closer number, or edit the rates directly under Assumptions.</li>
-          <li><strong>A fixed mortgage payment</strong> is treated as if it rose with inflation. In reality it shrinks in today's dollars each year, so late-year housing cost is slightly overstated.</li>
+          <li><strong>Property tax, insurance, and upkeep</strong> for a home you already own are part of your spending number, not a separate line. Only a home bought later in the plan adds them as their own cost.</li>
         </ul>
         <p>Take the numbers to a professional before making a major decision.</p>
       </div>
@@ -2975,8 +3170,9 @@ function drawMainChart(result, compare) {
   else if (state.yourStopWorkAge > state.age && state.yourStopWorkAge < state.targetAge) events.push({ age: state.yourStopWorkAge, label: 'Retire' });
   if (state.ssStartAge > state.age) events.push({ age: state.ssStartAge, label: 'SS starts' });
   if (state.otherIncome > 0 && state.otherIncomeStart > state.age) events.push({ age: state.otherIncomeStart, label: 'Pension starts' });
-  if (state.mortgagePayoffAge > state.age && state.housing > 0 && (!has(state.homeSaleAge) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
-  if (has(state.homeSaleAge)) events.push({ age: state.homeSaleAge, label: 'House sold' });
+  if (state.mortgagePayoffAge > state.age && hasMortgage(state) && (!hasSale(state) || state.mortgagePayoffAge < state.homeSaleAge)) events.push({ age: state.mortgagePayoffAge, label: 'Mortgage done' });
+  if (hasBuy(state)) events.push({ age: state.homeBuyAge, label: 'Home bought' });
+  if (hasSale(state)) events.push({ age: state.homeSaleAge, label: 'House sold' });
   if (has(state.yourBreakStart) && state.yourBreakStart >= state.age) { events.push({ age: state.yourBreakStart, label: 'Break' }); events.push({ age: state.yourBreakEnd, label: 'Back to work' }); }
   if (state.extraSpend > 0 && has(state.extraSpendStart)) events.push({ age: state.extraSpendStart, label: 'Extra spending' });
   if (state.shockEra && has(state.shockAge)) events.push({ age: state.shockAge, label: 'Bad decade' });
@@ -3223,7 +3419,7 @@ function drawCashflowChart(result) {
 // UPDATES & HANDLERS
 // ============================================================================
 function invalidateCaches() { maxSpendStale = true; spendingLevelsStale = true; wwitStale = true; }
-window.update = function(key, val) { state[key] = val; maxSpendView = false; invalidateCaches(); render(); noteChanged(); };
+window.update = function(key, val) { state[key] = val; maxSpendView = false; invalidateCaches(); renderSoon(noteChanged); };
 window.updateAccount = function(key, val) { state.accounts[key] = val; state.portfolio = state.accounts.traditional + state.accounts.roth + state.accounts.taxable; invalidateCaches(); render(); };
 window.toggleAccounts = function(enabled) {
   state.accountsEnabled = enabled;
@@ -3354,7 +3550,7 @@ function moneyControl(o) {
 function stepperControl(o) {
   return `<div class="control control-step">
           <div class="control-row"><span class="control-label">${o.label}${helpMark(o.tip)}</span>
-            <span class="stepper"><button type="button" class="step-btn" onclick="stepValue(this,'${o.key}',-1)">\u2212</button><input type="number" min="${o.min}" max="${o.max}" step="1" value="${o.value}" onchange="sliderCommit('${o.key}',this.value)"/><button type="button" class="step-btn" onclick="stepValue(this,'${o.key}',1)">+</button></span>
+            <span class="stepper"><button type="button" class="step-btn" onclick="stepValue(this,'${o.key}',-1)">\u2212</button><input type="number" min="${o.min}" max="${o.max}" step="1" value="${o.value}" aria-label="${o.label}" onchange="sliderCommit('${o.key}',clampIn(this))"/><button type="button" class="step-btn" onclick="stepValue(this,'${o.key}',1)">+</button></span>
           </div>
         </div>`;
 }
@@ -3366,6 +3562,7 @@ window.stepValue = function(btn, key, delta) {
 };
 
 window.slideLive = function(el, key, rawVal) {
+  if (outOfRange(el)) return; // half-typed ("6" on the way to "66"); the commit clamps it
   let val = +rawVal;
   if (el.type === 'range') el.style.setProperty('--pct', trackPct(+el.value, +el.min, +el.max));
   if (key === 'totalSpending') { key = 'spending'; val = Math.max(0, val - state.housing); }
@@ -3412,10 +3609,7 @@ window.sliderCommit = function(key, rawVal) {
     }
   }
   invalidateCaches();
-  const scrollY = window.scrollY;
-  render();
-  window.scrollTo(0, scrollY);
-  noteChanged();
+  renderSoon(noteChanged);
 };
 
 window.updateLive2 = function(el, k1, k2, rawVal) {
@@ -3427,8 +3621,25 @@ window.updateLive2 = function(el, k1, k2, rawVal) {
   liveChartTimer = setTimeout(() => { invalidateCaches(); const r = runForState(state); lastSimResult = r; drawMainChart(r, liveCompare()); if (isPaid()) drawCashflowChart(r); }, 150);
 };
 
-window.resetBaseline = function() { baselineState = JSON.parse(JSON.stringify(state)); baselineResult = lastSimResult; baselineName = 'Baseline'; currentName = 'Current'; render(); };
-window.revertChange = function(key) { if (!baselineState) return; state[key] = baselineState[key]; invalidateCaches(); render(); };
+window.resetBaseline = function() { baselineState = JSON.parse(JSON.stringify(state)); baselineResult = lastSimResult; baselineName = 'Your plan'; currentName = 'Current'; render(); };
+// Undoing the housing type puts the whole housing setup back, so the type and its amounts
+// cannot disagree (for example "owned outright" with a payment still stored).
+const HOUSING_KEYS = ['housingType', 'housing', 'mortgagePayoffAge', 'mortgageBalance', 'mortgageRate', 'postPayoffSpend', 'homeBuyAge', 'homeBuyDownPayment', 'homeBuyPayment', 'homeBuyPayoffAge', 'homeBuyUpkeep', 'homeSaleAge', 'homeSaleProceeds', 'postSaleHousing'];
+window.revertChange = function(key) {
+  if (!baselineState) return;
+  (key === 'housingType' ? HOUSING_KEYS : [key]).forEach(k => { state[k] = baselineState[k]; });
+  normalizeHousing(state);
+  currentName = 'Current'; // after an undo the what-if's name may no longer describe what is left
+  invalidateCaches(); render();
+};
+// Mortgage, rent, or owned outright, from More about you.
+window.setHousingType = function(t) {
+  if (housingKind(state) === t) return;
+  state.housingType = t;
+  normalizeHousing(state);
+  maxSpendView = false;
+  invalidateCaches(); render(); noteChanged();
+};
 
 window.applySSAge = function(age) {
   const factors = { 62: 0.70, 67: 1.00, 70: 1.24 };
@@ -3457,22 +3668,22 @@ function showResultChanged() {
 
 // ===== PRESETS =====
 // Every scenario button shows its result next to where you were: the pre-click state
-// becomes the baseline ("Before"), the button label names the current side.
+// becomes the baseline ("Your plan"), the button label names the current side.
 function startComparison(label) {
-  if (!compareOn || !baselineState) { baselineState = JSON.parse(JSON.stringify(state)); baselineName = 'Before'; }
+  if (!compareOn || !baselineState) { baselineState = JSON.parse(JSON.stringify(state)); baselineName = 'Your plan'; }
   currentName = label;
   compareOn = isPaid();
   maxSpendView = false;
 }
 // Scenario dialogs: the button opens a small form with the two or three numbers the
 // scenario needs, prefilled with what is already set. "Run it" captures the pre-change
-// state as "Before" and applies. "Remove" clears it. Cancel leaves everything alone.
-const SCENARIO_TITLES = { careerBreak: 'Take time off, then go back', partnerBreak: 'Partner takes time off', spendMore: 'Spend more for a while', shockAtRetirement: 'A bad decade', partTime: 'Go part-time for a while', sellHouse: 'Sell the house later' };
+// state as "Your plan" and applies. "Remove" clears it. Cancel leaves everything alone.
+const SCENARIO_TITLES = { careerBreak: 'Take time off, then go back', partnerBreak: 'Partner takes time off', spendMore: 'Spend more for a while', shockAtRetirement: 'A bad decade', partTime: 'Go part-time for a while', sellHouse: 'Sell the house later', buyHome: 'Buy a home later' };
 function dlgField(label, id, val, attrs, hint) {
   return `<div class="field" style="margin-top:10px"><label>${label}</label><input type="number" id="${id}" value="${val === null || val === undefined ? '' : val}" ${attrs}/>${hint ? `<span class="field-hint">${hint}</span>` : ''}</div>`;
 }
 window.showScenarioModal = function(id) {
-  const isSet = { careerBreak: has(state.yourBreakStart), partnerBreak: has(state.partnerBreakStart), spendMore: has(state.extraSpendStart), shockAtRetirement: !!state.shockEra, partTime: state.yourPartTimeAmount > 0, sellHouse: has(state.homeSaleAge) }[id];
+  const isSet = { careerBreak: has(state.yourBreakStart), partnerBreak: has(state.partnerBreakStart), spendMore: has(state.extraSpendStart), shockAtRetirement: !!state.shockEra, partTime: state.yourPartTimeAmount > 0, sellHouse: hasSale(state), buyHome: hasBuy(state) }[id];
   let body = '', intro = '';
   if (id === 'careerBreak') {
     intro = 'No wages between these ages, and no raises while you are off. Everything else stays the same.';
@@ -3485,9 +3696,19 @@ window.showScenarioModal = function(id) {
     intro = 'Extra spending on top of your usual amount for these years. College, childcare, a parent’s care, a year of travel, or money you would otherwise have invested. It is treated as committed, so the guardrails do not cut it.';
     body = dlgField('Extra spending per year', 'sc_c', on ? state.extraSpend : '', 'min="0" step="1000" placeholder="e.g. 25000"', 'In today’s dollars, before any tax.') + dlgField('From age', 'sc_a', on ? state.extraSpendStart : state.age, `min="${state.age}" max="${state.targetAge - 1}" step="1"`) + dlgField('Until age', 'sc_b', on ? state.extraSpendEnd : state.age + 4, `min="${state.age + 1}" max="${state.targetAge}" step="1"`);
   } else if (id === 'sellHouse') {
-    const on = has(state.homeSaleAge);
-    intro = 'What you clear from the sale goes into the portfolio that year. From then on, instead of the mortgage payment, you pay whatever housing costs next (rent, or zero if you move somewhere paid for).';
-    body = dlgField('Sell at age', 'sc_a', on ? state.homeSaleAge : Math.max(state.age + 1, state.mortgagePayoffAge), `min="${state.age + 1}" max="${state.targetAge}" step="1"`) + dlgField('What you clear after costs and any mortgage', 'sc_c', on ? state.homeSaleProceeds : '', 'min="0" step="10000" placeholder="e.g. 400000"', 'In today’s dollars.') + dlgField('Housing cost per year after the sale', 'sc_b', on ? state.postSaleHousing : 0, 'min="0" step="1000"', 'Rent, or 0.');
+    const on = hasSale(state);
+    intro = 'What you clear from the sale goes into the portfolio that year. From then on, instead of what you pay for this home, you pay whatever housing costs next (rent, or zero if you move somewhere paid for).';
+    const minSale = hasBuy(state) ? state.homeBuyAge + 1 : state.age + 1;
+    body = dlgField('Sell at age', 'sc_a', on ? state.homeSaleAge : Math.max(minSale, hasMortgage(state) ? state.mortgagePayoffAge : minSale), `min="${minSale}" max="${state.targetAge}" step="1"`) + dlgField('What you clear after costs and any mortgage', 'sc_c', on ? state.homeSaleProceeds : '', 'min="0" step="10000" placeholder="e.g. 400000"', 'In today’s dollars.') + dlgField('Housing cost per year after the sale', 'sc_b', on ? state.postSaleHousing : 0, 'min="0" step="1000"', 'Rent, or 0.');
+  } else if (id === 'buyHome') {
+    const on = hasBuy(state);
+    const buyAt = on ? state.homeBuyAge : Math.min(state.age + 5, state.targetAge - 1);
+    intro = 'Rent stops the year you buy. The down payment and closing costs come out of the portfolio that year. After that you pay the mortgage until it is paid off, plus the costs of owning for as long as you own the home.';
+    body = dlgField('Buy at age', 'sc_a', buyAt, `min="${state.age}" max="${state.targetAge - 1}" step="1"`)
+      + dlgField('Down payment and closing costs', 'sc_c', on ? state.homeBuyDownPayment : '', 'min="0" step="5000" placeholder="e.g. 120000"', 'Comes out of the portfolio that year, in today’s dollars.')
+      + dlgField('Mortgage payment per year', 'sc_b', on ? state.homeBuyPayment : '', 'min="0" step="1000" placeholder="e.g. 30000"', 'Principal and interest, in today’s dollars. It is fixed from then on, so it shrinks with inflation. 0 if you pay cash.')
+      + dlgField('Mortgage paid off at age', 'sc_d', on && has(state.homeBuyPayoffAge) ? state.homeBuyPayoffAge : buyAt + 30, `min="${state.age + 1}" max="130" step="1"`)
+      + dlgField('Property tax, insurance, and upkeep per year', 'sc_e', on ? state.homeBuyUpkeep : '', 'min="0" step="1000" placeholder="e.g. 10000"', 'Renters usually do not pay these, so they are added on top of your spending for as long as you own the home.');
   } else if (id === 'partTime') {
     const pt = state.yourPartTimeAmount > 0;
     const glide = pt && state.yourStopWorkAge === state.yourPartTimeStart;
@@ -3508,6 +3729,15 @@ window.pickThen = function(btn) {
   const hint = document.getElementById('sc_then_hint');
   if (hint) hint.textContent = btn.dataset.then === 'stop' ? 'Wages end for good at the second age.' : 'Full-time wages come back until your retirement age of ' + state.yourStopWorkAge + '.';
 };
+// Marks a dialog field as wrong and says why under it.
+function dlgError(id, msg) {
+  const el = document.getElementById(id); if (!el) return;
+  el.style.borderColor = 'var(--danger)';
+  let hint = el.parentElement.querySelector('.field-hint');
+  if (!hint) { hint = document.createElement('span'); hint.className = 'field-hint'; el.parentElement.appendChild(hint); }
+  hint.textContent = msg; hint.style.color = 'var(--danger)';
+  el.focus();
+}
 function dlgNum(id) { const el = document.getElementById(id); const v = el ? parseFloat(el.value) : NaN; return isNaN(v) ? null : Math.round(v); }
 window.applyScenarioModal = function(id) {
   const a = dlgNum('sc_a'), b = dlgNum('sc_b');
@@ -3516,13 +3746,23 @@ window.applyScenarioModal = function(id) {
     if (a === null || b === null || b <= a) { bad(document.getElementById('sc_b')); return; }
   }
   if (id === 'spendMore') { const c = dlgNum('sc_c'); if (!(c > 0)) { bad(document.getElementById('sc_c')); return; } }
-  if (id === 'sellHouse') { const c = dlgNum('sc_c'); if (a === null) { bad(document.getElementById('sc_a')); return; } if (c === null || c < 0) { bad(document.getElementById('sc_c')); return; } }
+  if (id === 'sellHouse') { const c = dlgNum('sc_c'); if (a === null) { bad(document.getElementById('sc_a')); return; } if (c === null || c < 0) { bad(document.getElementById('sc_c')); return; }
+    if (hasBuy(state) && a <= state.homeBuyAge) { dlgError('sc_a', 'You buy this home at ' + state.homeBuyAge + ', so the sale has to come after that.'); return; } }
+  if (id === 'buyHome') {
+    if (a === null || a < state.age) { bad(document.getElementById('sc_a')); return; }
+    if (has(state.homeSaleAge) && a >= state.homeSaleAge) { dlgError('sc_a', 'You sell this home at ' + state.homeSaleAge + '. Buy before then, or change the sale first.'); return; }
+    const c = dlgNum('sc_c'); if (c === null || c < 0) { bad(document.getElementById('sc_c')); return; }
+    if (b !== null && b < 0) { bad(document.getElementById('sc_b')); return; }
+    const d = dlgNum('sc_d'); if (b > 0 && (d === null || d <= a)) { dlgError('sc_d', 'The payoff age has to come after the purchase.'); return; }
+    const e = dlgNum('sc_e'); if (e !== null && e < 0) { bad(document.getElementById('sc_e')); return; }
+  }
   if (id === 'partTime') { const c = dlgNum('sc_c'); if (c === null || c < 0) { bad(document.getElementById('sc_c')); return; } }
   startComparison(presetLabel(id));
   if (id === 'careerBreak') { state.yourBreakStart = a; state.yourBreakEnd = b; }
   else if (id === 'partnerBreak') { state.partnerBreakStart = a; state.partnerBreakEnd = b; }
   else if (id === 'spendMore') { state.extraSpend = dlgNum('sc_c'); state.extraSpendStart = a; state.extraSpendEnd = b; }
   else if (id === 'sellHouse') { state.homeSaleAge = a; state.homeSaleProceeds = dlgNum('sc_c'); state.postSaleHousing = Math.max(0, b || 0); }
+  else if (id === 'buyHome') { state.homeBuyAge = a; state.homeBuyDownPayment = dlgNum('sc_c'); state.homeBuyPayment = b || 0; state.homeBuyPayoffAge = b > 0 ? dlgNum('sc_d') : null; state.homeBuyUpkeep = dlgNum('sc_e') || 0; }
   else if (id === 'shockAtRetirement') { state.shockEra = document.getElementById('sc_era').value; state.shockAge = a; }
   else if (id === 'partTime') {
     const stopAfter = !!document.querySelector('.modal .toggle-btn[data-then="stop"].active');
@@ -3535,9 +3775,11 @@ window.removeScenario = function(id) {
   if (id === 'careerBreak') state.yourBreakStart = state.yourBreakEnd = null;
   else if (id === 'partnerBreak') state.partnerBreakStart = state.partnerBreakEnd = null;
   else if (id === 'spendMore') { state.extraSpend = 0; state.extraSpendStart = state.extraSpendEnd = null; }
-  else if (id === 'sellHouse') { state.homeSaleAge = null; state.homeSaleProceeds = 0; state.postSaleHousing = 0; }
+  else if (id === 'sellHouse') clearHomeSale(state);
+  else if (id === 'buyHome') { clearHomeBuy(state); normalizeHousing(state); } // a sale of that home goes too
   else if (id === 'shockAtRetirement') { state.shockEra = null; state.shockAge = null; }
   else if (id === 'partTime') { if (state.yourStopWorkAge === state.yourPartTimeStart) state.yourStopWorkAge = state.yourPartTimeEnd; state.yourPartTimeAmount = 0; }
+  currentName = 'Current'; // the what-if is gone, so the box stops naming it
   closeModal(); maxSpendView = false; invalidateCaches(); render();
 };
 window.applyPreset = function(id) {
