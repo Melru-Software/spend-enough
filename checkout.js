@@ -16,7 +16,11 @@
     loader.innerHTML = '<style>@keyframes checkout-pulse{0%{opacity:1;transform:scale(.2)}100%{opacity:0;transform:scale(1)}}</style>' +
       '<div style="width:40px;height:40px;border-radius:50%;background:#b5472e;animation:checkout-pulse 1s ease-out infinite"></div>';
     frame = document.createElement('iframe');
-    frame.setAttribute('style', 'position:fixed;inset:0;width:100%;height:100%;border:0;margin:0;padding:0;background:transparent;z-index:2147483647');
+    // Sized to the dynamic viewport (100dvh), not height:100%, which on iPhone Safari is the
+    // height with the toolbar showing: when the toolbar collapses, a strip of the page showed
+    // below the checkout's backdrop (the thank-you screen did not reach the bottom). 100vh is
+    // the fallback for browsers without dvh.
+    frame.setAttribute('style', 'position:fixed;top:0;left:0;width:100%;height:100vh;height:100dvh;border:0;margin:0;padding:0;background:transparent;z-index:2147483647');
     frame.allow = 'payment';
     frame.title = 'Checkout';
     frame.src = u.toString();
