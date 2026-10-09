@@ -28,15 +28,15 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,400;1,8..60,500&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=Reddit+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --ground: #fbf8f1;
-    --ground-2: #f4efe6;
+    --ground-2: #f3eee3;
     --ink: #1a1814;
     --ink-soft: #3d3830;
     --mute: #6b6356;
-    --faint: #8d8577;
+    --faint: #776f61;
     --line: #d4cab8;
     --line-soft: #e6dfd0;
     --rust: #a04a28;
@@ -48,120 +48,136 @@
     --danger: #a8331f;
     --grid: rgba(26,24,20,0.06);
     --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
-    --sans: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
+    --sans: 'Reddit Sans', 'Helvetica Neue', Arial, sans-serif;
+    /* one type scale */
+    --t-1: 15px;
+    --t0: 17px;
+    --t1: 20px;
+    --t2: 26px;
+    --t3: clamp(30px, 3.2vw, 40px);
+    --display: clamp(40px, 4.5vw, 60px);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  [hidden] { display: none !important; } /* sections are display:grid, which would otherwise beat the hidden attribute */
-  body { background: var(--ground); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  [hidden] { display: none !important; }
+  html { overflow-x: hidden; }
+  body { background: var(--ground); color: var(--ink); font-family: var(--sans); font-size: var(--t0); line-height: 1.6; -webkit-font-smoothing: antialiased; }
   a { color: inherit; }
   a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--rust); outline-offset: 3px; }
+  ::selection { background: var(--rust); color: var(--ground); }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 40px; }
+  h1, h2, h3 { font-family: var(--serif); text-wrap: balance; }
+  h2 { font-weight: 500; font-size: var(--t3); line-height: 1.12; letter-spacing: -0.02em; max-width: 18em; }
+  .serif { font-family: var(--serif); }
 
-  /* ---- header: one rule, nothing floating ---- */
+  /* ---- header ---- */
   .top { display: flex; align-items: baseline; justify-content: space-between; padding: 26px 0 18px; border-bottom: 1px solid var(--line); }
   .logo { font-family: var(--serif); font-size: 22px; font-weight: 500; letter-spacing: -0.02em; text-decoration: none; display: inline-flex; align-items: baseline; gap: 7px; }
   .logo i { width: 8px; height: 8px; border-radius: 50%; background: var(--rust); display: inline-block; transform: translateY(-2px); }
-  .top nav { display: flex; gap: 28px; font-size: 14px; }
+  .top nav { display: flex; gap: 28px; font-size: var(--t-1); }
   .top nav a { text-decoration: none; color: var(--mute); white-space: nowrap; }
   .top nav a:hover { color: var(--ink); }
   .top nav a.strong { color: var(--ink); font-weight: 600; }
 
-  /* ---- hero: thesis on the left, the real chart on the right ---- */
-  .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: start; padding: 64px 0 56px; border-bottom: 1px solid var(--line); }
-  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(40px, 4.8vw, 64px); line-height: 1.02; letter-spacing: -0.028em; text-wrap: balance; }
-  .sub { font-family: var(--serif); font-size: 21px; line-height: 1.5; color: var(--ink-soft); margin-top: 26px; max-width: 26em; }
+  /* ---- hero ---- */
+  .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: start; padding: 64px 0 56px; }
+  h1 { font-weight: 400; font-size: var(--display); line-height: 1.06; letter-spacing: -0.028em; }
+  .sub { font-family: var(--serif); font-size: 21px; line-height: 1.5; color: var(--ink-soft); margin-top: 24px; max-width: 26em; }
   .actions { display: flex; gap: 14px; align-items: center; margin-top: 30px; flex-wrap: wrap; }
-  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; border-radius: 3px; font-weight: 600; font-size: 15px; text-decoration: none; font-family: var(--sans); cursor: pointer; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; border-radius: 3px; font-weight: 600; font-size: var(--t-1); text-decoration: none; font-family: var(--sans); cursor: pointer; }
   .btn-ink { background: var(--ink); color: var(--ground); border: 1px solid var(--ink); }
   .btn-ink:hover { background: var(--rust); border-color: var(--rust); }
   .btn-line { background: transparent; color: var(--ink); border: 1px solid var(--line); }
   .btn-line:hover { border-color: var(--ink); }
-  .fine { font-size: 14px; color: var(--faint); margin-top: 16px; }
+  .fine { font-size: var(--t-1); color: var(--faint); margin-top: 16px; }
   .fine a { color: var(--rust); text-decoration: none; }
   .fine a:hover { text-decoration: underline; }
 
   .live { position: relative; }
-  .figure { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
-  .figure .big { font-family: var(--serif); font-weight: 400; font-size: clamp(56px, 6vw, 84px); line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
-  .figure .big em { font-style: italic; font-weight: 300; font-size: 0.72em; color: var(--mute); margin: 0 0.04em; }
-  .figure .cap { font-size: 15px; color: var(--mute); max-width: 22em; line-height: 1.4; }
-  .verdict { font-family: var(--serif); font-size: 19px; line-height: 1.4; margin-top: 10px; min-height: 2.8em; }
+  .figure { display: flex; align-items: baseline; gap: 10px 18px; flex-wrap: wrap; }
+  .figure .big { font-family: var(--serif); font-weight: 400; font-size: clamp(50px, 5.4vw, 76px); line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .figure .big output { font: inherit; }
+  .figure .big em { font-style: italic; font-weight: 400; font-size: 0.5em; color: var(--mute); letter-spacing: -0.01em; margin-left: 0.1em; }
+  .figure .cap { font-family: var(--serif); font-size: 19px; line-height: 1.35; color: var(--ink-soft); max-width: 22em; }
+  .figure .cap b { font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .verdict { font-family: var(--serif); font-size: 19px; line-height: 1.4; margin-top: 10px; min-height: 2.8em; color: var(--ink-soft); }
   .verdict b { font-weight: 500; color: var(--rust); }
-  .chartbox { position: relative; height: 340px; margin-top: 16px; }
+  .chartbox { position: relative; height: 340px; margin-top: 14px; }
   .chartbox canvas { width: 100% !important; height: 100% !important; }
-  .note { position: absolute; font-family: var(--serif); font-style: italic; font-size: 15px; line-height: 1.25; color: var(--rust); max-width: 12em; pointer-events: none; }
-  .note svg { position: absolute; overflow: visible; }
-  .note path { fill: none; stroke: var(--rust); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
-  .note polygon { fill: var(--rust); }
+  .key { display: none; font-size: 14px; color: var(--mute); margin-top: 8px; line-height: 1.45; }
+  .dash-key { font-family: var(--serif); font-size: var(--t-1); color: var(--mute); margin-top: 8px; }
+  .method { font-size: 14px; color: var(--faint); margin-top: 4px; }
 
-  .control { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-soft); font-size: 14px; }
+  .control { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-soft); font-size: var(--t-1); }
   .control label { color: var(--mute); white-space: nowrap; }
-  .control output { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 5.5em; text-align: right; }
-  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 2px; background: var(--line); border-radius: 1px; outline-offset: 6px; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--ink); border: 3px solid var(--ground); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
-  input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--ink); border: 3px solid var(--ground); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
-  .control .hint { grid-column: 1 / -1; color: var(--faint); font-size: 13px; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: var(--line); border-radius: 2px; outline-offset: 6px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); border: 3px solid var(--ground); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+  input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--ink); border: 3px solid var(--ground); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+  input[type=range]:focus-visible { outline: 2px solid var(--rust); }
+  .control .hint { grid-column: 1 / -1; font-family: var(--serif); font-size: var(--t-1); line-height: 1.5; color: var(--mute); }
 
-  /* ---- editorial sections: label in the margin, prose in the column ---- */
-  .sec { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 32px; padding: 56px 0; border-bottom: 1px solid var(--line); }
-  .sec:last-of-type { border-bottom: none; }
-  .label { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); padding-top: 8px; }
-  h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.12; letter-spacing: -0.02em; text-wrap: balance; max-width: 18em; }
-  .prose { max-width: 34em; font-family: var(--serif); font-size: 19px; line-height: 1.55; }
+  /* ---- sections: no labels, no rules; space and scale do the sectioning ---- */
+  .sec { padding: 72px 0 0; }
+  .sec h2 + .lead, .sec h2 + .prose { margin-top: 18px; }
+  .prose { max-width: 34em; font-family: var(--serif); font-size: var(--t1); line-height: 1.55; }
   .prose p + p { margin-top: 16px; }
   .prose p { color: var(--ink-soft); }
-  .lead { font-family: var(--serif); font-size: 20px; color: var(--ink-soft); margin-top: 12px; max-width: 30em; }
+  .lead { font-family: var(--serif); font-size: var(--t1); color: var(--ink-soft); max-width: 30em; }
 
-  .qs { list-style: none; margin-top: 26px; border-top: 1px solid var(--line-soft); max-width: 44em; }
-  .qs li { border-bottom: 1px solid var(--line-soft); }
-  .qs li:last-child { border-bottom: none; }   /* the section's own rule closes the list */
-  .qs a { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; padding: 18px 0; text-decoration: none; font-family: var(--serif); font-size: clamp(21px, 2.2vw, 27px); line-height: 1.25; letter-spacing: -0.01em; }
+  /* What if: the reader's questions, set large */
+  .qs { list-style: none; margin-top: 28px; max-width: 30em; display: flex; flex-direction: column; gap: 14px; }
+  .qs a { display: block; text-decoration: none; font-family: var(--serif); font-size: var(--t2); line-height: 1.32; letter-spacing: -0.012em; color: var(--ink); }
   .qs a:hover { color: var(--rust); }
+  .qs a::after { content: " \2192"; color: var(--rust); font-size: 0.8em; }
 
-  .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 30px; }
-  .three h3 { font-family: var(--serif); font-weight: 500; font-size: 22px; line-height: 1.2; letter-spacing: -0.01em; margin-bottom: 10px; }
-  .three p { font-family: var(--serif); font-size: 17.5px; color: var(--ink-soft); line-height: 1.5; }
+  /* What it shows: a question on the left, three answers on the right */
+  .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px 64px; align-items: start; }
+  .three { display: flex; flex-direction: column; gap: 22px; max-width: 34em; }
+  .three h3 { font-weight: 500; font-size: var(--t1); line-height: 1.3; margin-bottom: 4px; }
+  .three p { font-family: var(--serif); font-size: var(--t0); color: var(--ink-soft); line-height: 1.55; }
 
-  .photo { margin: 32px 0 0; max-width: 900px; }
-  .photo img { display: block; width: 100%; height: auto; border-radius: 3px; }
-  .photo figcaption { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--mute); margin-top: 10px; }
-  .essay { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 48px; margin-top: 8px; }
-  .essay .body { grid-column: 1; grid-row: 1; }
-  .essay .aside { grid-column: 2; grid-row: 1; }
-  .essay .body { font-family: var(--serif); font-size: 20px; line-height: 1.55; max-width: 34em; }
+  /* Founder: the letter on the left, her photo and byline beside it */
+  .essay { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 48px 64px; margin-top: 28px; align-items: start; }
+  .essay .body { font-family: var(--serif); font-size: var(--t1); line-height: 1.55; max-width: 34em; }
   .essay .body p + p { margin-top: 18px; }
-  .essay .body p::first-letter { font-size: 1.05em; }
-  .aside { align-self: start; border-top: 1px solid var(--line); padding-top: 12px; }
-  .more { margin-top: 20px; font-size: 15px; }
+  .more { margin-top: 20px; font-size: var(--t-1); font-family: var(--sans); }
   .more a { color: var(--rust); text-decoration: none; }
   .more a:hover { text-decoration: underline; }
-  .by { font-family: var(--serif); font-style: italic; color: var(--mute); font-size: 15px; margin-top: 14px; }
+  .aside { position: sticky; top: 24px; }
+  .photo { margin: 0; }
+  .photo img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: 60% 50%; border-radius: 3px; }
+  .photo figcaption { font-family: var(--serif); font-style: italic; font-size: var(--t-1); color: var(--mute); margin-top: 10px; line-height: 1.45; }
+  .by { font-family: var(--serif); color: var(--ink); font-size: var(--t0); margin-top: 14px; }
 
-  .modes { display: flex; gap: 0; margin-top: 26px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); max-width: 44em; }
-  .modes div { flex: 1; padding: 14px 0; font-size: 14px; color: var(--mute); }
-  .modes div + div { border-left: 1px solid var(--line-soft); padding-left: 18px; }
-  .modes b { display: block; font-family: var(--serif); font-weight: 500; font-size: 17px; color: var(--ink); margin-bottom: 2px; }
+  .modes { display: flex; gap: 0; margin-top: 26px; max-width: 44em; }
+  .modes div { flex: 1; padding: 0 18px 0 0; font-size: var(--t-1); color: var(--mute); }
+  .modes div + div { border-left: 1px solid var(--line); padding-left: 18px; }
+  .modes b { display: block; font-family: var(--serif); font-weight: 500; font-size: var(--t0); color: var(--ink); margin-bottom: 2px; }
 
-  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 30px; max-width: 52em; }
-  .plan { padding: 8px 40px 8px 0; }
-  .plan + .plan { border-left: 1px solid var(--line); padding-left: 40px; padding-right: 0; }
-  .plan h3 { font-family: var(--serif); font-weight: 400; font-size: 32px; line-height: 1.1; letter-spacing: -0.02em; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-  .plan h3 span { font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--rust); font-variant-numeric: tabular-nums; }
-  .plan p { font-family: var(--serif); font-size: 17.5px; color: var(--ink-soft); margin-top: 12px; line-height: 1.5; }
-  .plan ul { list-style: none; margin-top: 14px; font-family: var(--serif); font-size: 17.5px; line-height: 1.45; color: var(--ink-soft); }
-  .plan li { padding: 9px 0; border-top: 1px solid var(--line-soft); }
+  /* Pricing: one tinted band across the whole page */
+  .band { background: var(--ground-2); margin: 80px 0 0; padding: 64px 0 72px; }
+  .band .sec { padding: 0; }
+  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 32px; max-width: 58em; }
+  .plan h3 { font-weight: 400; font-size: var(--t2); line-height: 1.1; letter-spacing: -0.02em; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .plan h3 span { font-family: var(--serif); font-size: 1em; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .plan p { font-family: var(--serif); font-size: var(--t0); color: var(--ink-soft); margin-top: 12px; line-height: 1.5; }
+  .plan ul { list-style: none; margin-top: 14px; font-family: var(--serif); font-size: var(--t0); line-height: 1.45; color: var(--ink-soft); }
+  .plan li { padding: 9px 0; border-top: 1px solid var(--line); }
   .plan li b { font-weight: 500; color: var(--ink); }
-  .plan .anchor { font-size: 13px; color: var(--faint); }
-  .plan .btn { margin-top: 18px; }
-  .terms-line { font-size: 12.5px; color: var(--faint); margin-top: 8px; }
-  .plan .have-it { font-family: inherit; font-size: 14px; line-height: 1.5; color: var(--mute); margin: 18px 0 10px; }
+  .plan .btn { margin-top: 20px; }
+  .terms-line { font-size: 13px; color: var(--faint); margin-top: 8px; }
+  .plan .have-it { font-family: inherit; font-size: var(--t-1); line-height: 1.5; color: var(--mute); margin: 18px 0 10px; }
   .terms-line a { color: var(--mute); }
-  .refund { font-size: 14px; color: var(--mute); margin-top: 22px; }
+  .refund { font-size: var(--t-1); color: var(--mute); margin-top: 14px; }
 
-  .isnt p { max-width: 34em; }
+  .isnt .prose { max-width: 34em; }
+
+  /* the close: her question again, then the fine print */
+  .close { padding: 88px 0 0; }
+  .close h2 { max-width: 16em; }
+  .close .actions { margin-top: 26px; }
 
   .capture form { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; max-width: 34em; }
-  .capture label { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); }
+  .capture label { font-size: 13px; color: var(--mute); }
   .capture input[type=email] { font: inherit; font-size: 16px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 3px; background: var(--ground); color: var(--ink); width: 100%; }
   .capture input[type=email]:focus { outline: none; border-color: var(--ink); }
   .capture .row { display: flex; flex-direction: column; gap: 10px; }
@@ -173,33 +189,40 @@
   .capture .lead { margin-top: 10px; }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   @media (min-width: 600px) { .capture .row { flex-direction: row; } .capture .row input[type=email] { flex: 1; } }
-  footer { padding: 36px 0 56px; font-size: 13px; color: var(--mute); display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 32px; }
-  footer nav { display: flex; gap: 20px; margin-top: 10px; }
+
+  footer { margin-top: 72px; padding: 28px 0 56px; border-top: 1px solid var(--line); font-size: 13px; color: var(--mute); max-width: 52em; }
+  footer nav { display: flex; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
   footer a { color: var(--ink-soft); text-decoration: none; }
+  footer a:hover { color: var(--rust); }
 
   @media (max-width: 900px) {
     .wrap { padding: 0 20px; }
-    .hero { grid-template-columns: 1fr; gap: 40px; padding: 40px 0; }
-    .sec, footer { grid-template-columns: 1fr; gap: 12px; padding: 40px 0; }
-    .three { grid-template-columns: 1fr; gap: 24px; }
+    .hero { grid-template-columns: 1fr; gap: 36px; padding: 40px 0 36px; }
+    .sec { padding: 56px 0 0; }
+    .split { grid-template-columns: 1fr; gap: 20px; }
     .essay { grid-template-columns: 1fr; gap: 24px; }
-    .essay .aside { grid-column: 1; grid-row: 1; border-top: none; padding-top: 0; }
-    .essay .body { grid-column: 1; grid-row: 2; }
-    .plans { grid-template-columns: 1fr; }
-    .plan + .plan { border-left: none; border-top: 1px solid var(--line); padding-left: 0; padding-top: 28px; margin-top: 20px; }
-    .plan { padding-right: 0; }
+    .aside { position: static; order: -1; }
+    .photo img { aspect-ratio: 16 / 10; }
+    .plans { grid-template-columns: 1fr; gap: 36px; }
+    .band { margin-top: 64px; padding: 48px 0 56px; }
     .chartbox { height: 280px; }
-    .note { font-size: 13.5px; }
+    .key { display: block; }
+    .dash-key { display: none; }
+    .close { padding-top: 64px; }
+    footer { margin-top: 56px; }
   }
   @media (max-width: 520px) {
     .top nav { gap: 16px; }
-    .top nav a:not(.strong) { display: none; } /* both are on the page and in the footer */
-    .qs a { flex-direction: column; gap: 4px; }
-    .control { grid-template-columns: 1fr auto; }
-    .control input { grid-column: 1 / -1; }
+    .top nav a:not(.strong) { display: none; }
+    .figure .big { font-size: 44px; }
+    .figure .cap { font-size: var(--t0); }
+    .control { grid-template-columns: 1fr; gap: 10px; }
+    input[type=range] { height: 6px; }
+    input[type=range]::-webkit-slider-thumb { width: 26px; height: 26px; }
+    .qs a { font-size: 22px; }
   }
   @media (prefers-reduced-motion: no-preference) {
-    .qs a, .btn { transition: color .15s ease, background .15s ease, border-color .15s ease; }
+    .qs a, .btn, footer a { transition: color .15s ease, background .15s ease, border-color .15s ease; }
   }
 </style>
 </head>
@@ -208,7 +231,7 @@
 <div class="wrap">
   <header class="top">
     <a class="logo" href="/"><i></i>Spend Enough</a>
-    <nav><a href="why.html">Why I built it</a><a href="#price">Pricing</a><a class="strong" href="app.html">Try it free</a></nav>
+    <nav><a href="#why">Why I built it</a><a href="#price">Pricing</a><a class="strong" href="app.html">Try it free</a></nav>
   </header>
 
   <section class="hero">
@@ -219,37 +242,38 @@
       <p class="fine">Free to try. No account, nothing to link, your numbers stay on your device. <span id="hero-price"><a href="#price">The full version is $39</a> if you want to go deeper.</span></p>
     </div>
 
-    <div class="live" aria-label="A live example from the tool">
-      <div class="figure"><div class="big"><span id="ok">51</span> <em>of</em> <span id="tot">52</span></div><div class="cap">stretches of the market since 1926 that this plan lasts through to age 100</div></div>
+    <figure class="live" role="group" aria-labelledby="verdict">
+      <div class="figure">
+        <div class="big"><output id="spv" for="sp">$86,000</output><em>a year</em></div>
+        <div class="cap">and this plan lasts to 100 in <b><span id="ok">45</span> of <span id="tot">45</span></b> stretches of the market since 1926.</div>
+      </div>
       <p class="verdict" id="verdict"></p>
       <div class="chartbox">
-        <canvas id="c"></canvas>
+        <canvas id="c" role="img" aria-label="The plan's portfolio from age 45 to 100 across every market stretch since 1926: a shaded range, the middle outcome as a line, and a dashed line for spending $10,000 more a year."></canvas>
       </div>
+      <p class="key">Lighter band: the worst tenth to the best tenth of outcomes. Darker band: the middle half. Solid line: the middle outcome. Dashed line: the same plan spending $10,000 more a year.</p>
+      <p class="dash-key">The dashed line is the same plan spending $10,000 more a year.</p>
+      <p class="method">In today's dollars. US stocks and 10-year Treasuries, every starting year since 1926.</p>
       <div class="control">
         <label for="sp">Total yearly spending</label>
         <input id="sp" type="range" min="66000" max="126000" step="2000" value="86000" aria-describedby="sp-hint">
-        <output id="spv">$80,000</output>
         <div class="hint" id="sp-hint">An example: a couple, 45 and 44, with $300,000 saved, $120,000 a year coming in between them, and a $2,000 a month mortgage they pay off at 62, the year they both retire. Move the spending to see a new chart.</div>
       </div>
-    </div>
+    </figure>
   </section>
 
   <section class="sec" id="whatif">
-    <div class="label">Scenarios</div>
-    <div>
-      <h2>What if…</h2>
-      <ul class="qs">
-        <li><a href="app.html?scenario=spendMore"><span class="q">What if we spend $10,000 more a year while the kids are small?</span></a></li>
-        <li><a href="app.html?scenario=careerBreak"><span class="q">What if I don't go back to work for two years?</span></a></li>
-        <li><a href="app.html?scenario=payoffHouse"><span class="q">What if we pay off the house instead of investing the money?</span></a></li>
-        <li><a href="app.html"><span class="q">What if I save everything and end up with more than I'll ever use?</span></a></li>
-      </ul>
-    </div>
+    <h2>What if…</h2>
+    <ul class="qs">
+      <li><a href="app.html?scenario=spendMore">What if we spend $10,000 more a year while the kids are small?</a></li>
+      <li><a href="app.html?scenario=careerBreak">What if I don't go back to work for two years?</a></li>
+      <li><a href="app.html?scenario=payoffHouse">What if we pay off the house instead of investing the money?</a></li>
+      <li><a href="app.html">What if I save everything and end up with more than I'll ever use?</a></li>
+    </ul>
   </section>
 
   <section class="sec">
-    <div class="label">What it shows</div>
-    <div>
+    <div class="split">
       <h2>What you can afford to live on, and how sure you can be of it.</h2>
       <div class="three">
         <div><h3>How much you can spend.</h3><p>Most calculators ask what you'll spend and check whether it lasts. This one starts from what you have and finds the most you could spend each year and still make it to the end.</p></div>
@@ -260,89 +284,85 @@
   </section>
 
   <section class="sec" id="why">
-    <div class="label">Why I built it</div>
-    <div>
-      <h2>If we don't save every spare dollar, are we still okay?</h2>
-      <div class="essay">
-        <div class="aside"><p class="by">Hannah, the founder</p></div>
-        <div class="body">
-          <p>I've always been good at saving and bad at spending. Even when the numbers said we were fine, I didn't feel it. On maternity leave I wanted to know whether we could afford for me not to go back to work, and I couldn't find a tool that showed me in a way I understood, at a price I'd pay. So I built one. It told me we could live on one salary, but that stopping now would mean about ten more years of work at the end of my career to make up the lost income. I finally understood what the decision could cost. Then my husband got laid off. I put the new numbers in and realized there was no need to panic.</p>
-          <p>I was looking for a number that is safe in every future, but I learned there isn't one. What I got instead was the range, and how much each choice moves it. I chose to keep working. I work from home with my kid here, and we spend more on a nanny so I can. It gave me a way to look at a decision and see what it would do, and that has helped me let go of needing to over save out of fear. It is giving me the confidence to spend enough on our life today instead of saving all of it for later. I hope it can do the same for you.</p>
-          <p class="more"><a href="why.html">Read the whole story</a></p>
-        </div>
+    <h2>If we don't save every spare dollar, are we still okay?</h2>
+    <div class="essay">
+      <div class="body">
+        <p>I've always been good at saving and bad at spending. Even when the numbers said we were fine, I didn't feel it. On maternity leave I wanted to know whether we could afford for me not to go back to work, and I couldn't find a tool that showed me in a way I understood, at a price I'd pay. So I built one. It told me we could live on one salary, but that stopping now would mean about ten more years of work at the end of my career to make up the lost income. I finally understood what the decision could cost. Then my husband got laid off. I put the new numbers in and realized there was no need to panic.</p>
+        <p>I was looking for a number that is safe in every future, but I learned there isn't one. What I got instead was the range, and how much each choice moves it. I chose to keep working. I work from home with my kid here, and we spend more on a nanny so I can. It gave me a way to look at a decision and see what it would do, and that has helped me let go of needing to over save out of fear. It is giving me the confidence to spend enough on our life today instead of saving all of it for later. I hope it can do the same for you.</p>
+        <p class="more"><a href="why.html">Read the whole story</a></p>
       </div>
-      <figure class="photo">
-        <img src="founder.jpg" width="1159" height="647" loading="lazy" alt="A laptop open on a bed, next to a baby asleep on their front with a pacifier and a stuffed animal." />
-      </figure>
+      <div class="aside">
+        <figure class="photo">
+          <img src="founder.jpg" width="1159" height="647" loading="lazy" alt="A laptop open on a bed, next to a baby asleep on their front with a pacifier and a stuffed animal." />
+          <figcaption>Where it was built.</figcaption>
+        </figure>
+        <p class="by">Hannah, the founder</p>
+      </div>
     </div>
   </section>
 
   <section class="sec" id="how">
-    <div class="label">How it works</div>
-    <div>
-      <h2>It tests your plan against every market since 1926.</h2>
-      <div class="prose" style="margin-top:14px">
-        <p>You enter what you have, what comes in, what goes out, and when you'd like to stop working. Every assumption behind the result can be changed, the stock and bond mix, fees, tax rates, and the spending guardrails included.</p>
-        <p>The tool runs your numbers three ways. Historical mode replays your plan through every stretch of real US market returns since 1926, so you can see how it would have gone if you'd started in 1929, or 1966, or 2000. Simulated mode runs your plan through randomized futures, 500 unless you change it, with the average return and volatility of your mix, and you can change those too. Fixed mode uses one steady return every year, which is what most calculators do, so you can see the difference.</p>
-      </div>
-      <div class="modes"><div><b>Historical</b>every period, 1926 to 2025</div><div><b>Simulated</b>randomized futures, 500 by default</div><div><b>Fixed</b>one steady return</div></div>
+    <h2>It tests your plan against every market since 1926.</h2>
+    <div class="prose">
+      <p>You enter what you have, what comes in, what goes out, and when you'd like to stop working. Every assumption behind the result can be changed, the stock and bond mix, fees, tax rates, and the spending guardrails included.</p>
+      <p>The tool runs your numbers three ways. Historical mode replays your plan through every stretch of real US market returns since 1926, so you can see how it would have gone if you'd started in 1929, or 1966, or 2000. Simulated mode runs your plan through randomized futures, 500 unless you change it, with the average return and volatility of your mix, and you can change those too. Fixed mode uses one steady return every year, which is what most calculators do, so you can see the difference.</p>
     </div>
+    <div class="modes"><div><b>Historical</b>every period, 1926 to 2025</div><div><b>Simulated</b>randomized futures, 500 by default</div><div><b>Fixed</b>one steady return</div></div>
   </section>
+</div>
 
+<div class="band">
+  <div class="wrap">
   <section class="sec" id="price">
-    <div class="label">Free and full</div>
-    <div>
-      <h2>Try it free. Pay once if you want to go deeper.</h2>
-      <p class="lead">There's no account to create and no subscription to remember to cancel. Your numbers are safe since nothing you type is sent anywhere.</p>
-      <div class="plans">
-        <div class="plan">
-          <h3>Free</h3>
-          <ul>
-            <li>Historical mode, your plan run through every market period since 1926, with the chart and the historical analysis.</li>
-            <li>Your numbers, including spending later in life, a pension, and how long to plan for, and all seven what-if scenarios.</li>
-            <li>The spending explorer, which shows how that changes at each spending level.</li>
-            <li>The assumptions behind the result, open to change: stock and bond mix, fees, tax rates, and the guardrails.</li>
-          </ul>
-          <a class="btn btn-line" id="free-try" href="app.html">Try it free</a>
-          <p class="have-it" id="free-have" hidden>This browser already has the full version. To use your key on another device, choose <em>Deactivate this browser</em> at the bottom of the app first.</p>
-        </div>
-        <div class="plan">
-          <h3>Full version <span id="pro-price">$39</span></h3>
-          <p>Everything in Free, plus:</p>
-          <ul>
-            <li>Simulated mode, which runs randomized futures, and Fixed mode, which uses one steady return.</li>
-            <li>The spending, retirement age, or savings that would get a plan over the line.</li>
-            <li>Two decisions side by side on one chart.</li>
-            <li>Up to 8 saved scenarios, with notes.</li>
-            <li>Five stress tests that start your plan in a known bad stretch, 1929 and 1966 among them.</li>
-            <li>Best and worst outcomes, spending flexibility, Social Security timing, and a cashflow chart.</li>
-            <li>Filing status, your state, and traditional, Roth, and taxable accounts with the order you draw from them.</li>
-            <li>Add one-time financial events like an inheritance or a large purchase.</li>
-            <li>Paying the mortgage off early, income growth, and the details of a pension or other income.</li>
-            <li>A printable one-page report, and the year-by-year table as a spreadsheet.</li>
-          </ul>
-          <a class="btn btn-ink checkout-button" id="pro-buy" href="app.html" target="_blank" rel="noopener" onclick="track('clicked_checkout')" hidden>Get the full version</a>
-          <p class="terms-line" id="pro-terms" hidden>By purchasing you agree to the <a href="terms.html">Terms of Service</a>.</p>
-          <div id="pro-have" hidden><p class="have-it">You already have this. This browser is unlocked.</p><a class="btn btn-ink" href="app.html">Open the app</a></div>
-        </div>
+    <h2>Try it free. Pay once if you want to go deeper.</h2>
+    <p class="lead">There's no account to create and no subscription to remember to cancel. Your numbers are safe since nothing you type is sent anywhere.</p>
+    <div class="plans">
+      <div class="plan">
+        <h3>Free</h3>
+        <ul>
+          <li>Historical mode, your plan run through every market period since 1926, with the chart and the historical analysis.</li>
+          <li>Your numbers, including spending later in life, a pension, and how long to plan for, and all seven scenarios.</li>
+          <li>The spending explorer, which shows how that changes at each spending level.</li>
+          <li>The assumptions behind the result, open to change: stock and bond mix, fees, tax rates, and the guardrails.</li>
+        </ul>
+        <a class="btn btn-line" id="free-try" href="app.html">Try it free</a>
+        <p class="have-it" id="free-have" hidden>This browser already has the full version. To use your key on another device, choose <em>Deactivate this browser</em> at the bottom of the app first.</p>
       </div>
-      <p class="refund">Not for you? Full refund within 14 days, no questions asked.</p>
+      <div class="plan">
+        <h3>Full version <span id="pro-price">$39</span></h3>
+        <p>Everything in Free, plus:</p>
+        <ul>
+          <li>A printable one-page report, and the year-by-year table as a spreadsheet.</li>
+          <li>Simulated mode, which runs randomized futures, and Fixed mode, which uses one steady return.</li>
+          <li>The spending, retirement age, or savings that would get a plan over the line.</li>
+          <li>Two decisions side by side on one chart.</li>
+          <li>Up to 8 saved scenarios, with notes.</li>
+          <li>Five stress tests that start your plan in a known bad stretch, 1929 and 1966 among them.</li>
+          <li>Best and worst outcomes, spending flexibility, Social Security timing, and a cashflow chart.</li>
+          <li>Filing status, your state, and traditional, Roth, and taxable accounts with the order you draw from them.</li>
+          <li>Add one-time financial events like an inheritance or a large purchase.</li>
+          <li>Paying the mortgage off early, income growth, and the details of a pension or other income.</li>
+        </ul>
+        <a class="btn btn-ink checkout-button" id="pro-buy" href="app.html" target="_blank" rel="noopener" onclick="track('clicked_checkout')" hidden>Get the full version</a>
+        <p class="terms-line" id="pro-terms" hidden>By purchasing you agree to the <a href="terms.html">Terms of Service</a>.</p>
+        <p class="refund">Not for you? Full refund within 14 days, no questions asked.</p>
+        <div id="pro-have" hidden><p class="have-it">You already have this. This browser is unlocked.</p><a class="btn btn-ink" href="app.html">Open the app</a></div>
+      </div>
     </div>
   </section>
+  </div>
+</div>
 
+<div class="wrap">
   <section class="sec isnt" id="isnt">
-    <div class="label">Limits</div>
-    <div>
-      <h2>What it leaves out.</h2>
-      <div class="prose" style="margin-top:14px">
-        <p>It's not advice and it's not a planner. It doesn't know your taxes beyond a rough estimate, and it doesn't know your life. It's a way to see the shape of the outcomes so you can have a better conversation, with yourself or with a professional.</p>
-        <p>It doesn't model healthcare costs before Medicare, required minimum distributions, or Roth conversions. If you're optimizing those, you want a subscription planner. If you want to get a sense of how different scenarios could play out, this is built for that.</p>
-      </div>
+    <h2>What it leaves out.</h2>
+    <div class="prose">
+      <p>It's not advice and it's not a planner. It doesn't know your taxes beyond a rough estimate, and it doesn't know your life. It's a way to see the shape of the outcomes so you can have a better conversation, with yourself or with a professional.</p>
+      <p>It doesn't model healthcare costs before Medicare, required minimum distributions, or Roth conversions. If you're optimizing those, you want a subscription planner. If you want to get a sense of how different scenarios could play out, this is built for that.</p>
     </div>
   </section>
 
   <section class="sec capture" id="capture" aria-labelledby="capture-h" hidden>
-    <div class="label">Updates</div>
     <div>
       <h2 id="capture-h">Get a note when something new ships.</h2>
       <p class="lead">An email when something meaningful changes, and nothing else. No list-sharing, unsubscribe any time.</p>
@@ -360,13 +380,16 @@
     </div>
   </section>
 
+  <section class="close">
+    <h2>Are you spending enough for the life you want?</h2>
+    <div class="actions"><a class="btn btn-ink" href="app.html">Try it free</a></div>
+    <p class="fine">No account, nothing to link, your numbers stay on your device.</p>
+  </section>
+
   <footer>
-    <div class="label">Spend Enough</div>
-    <div>
-      <p>Educational modelling tool, not financial, tax, investment, or legal advice. Results are ranges under the assumptions shown. They are not predictions. Talk to a qualified professional before acting on them.</p>
-      <nav><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="why.html">Why I built it</a><a href="app.html">Open the app</a></nav>
-      <p style="margin-top:10px">&copy; <span id="year">2026</span> Spend Enough. Every data source is cited in the app.</p>
-    </div>
+    <p>Educational modelling tool, not financial, tax, investment, or legal advice. Results are ranges under the assumptions shown. They are not predictions. Talk to a qualified professional before acting on them.</p>
+    <nav><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="why.html">Why I built it</a><a href="app.html">Open the app</a></nav>
+    <p style="margin-top:10px">&copy; <span id="year">2026</span> Spend Enough. Every data source is cited in the app.</p>
   </footer>
 </div>
 
@@ -388,6 +411,9 @@
     var s = Object.assign({}, base, { spending: spending - base.housing });
     var r = runForState(s);
     var p = r.percentiles;
+    // the same plan, spending $10,000 more a year: the dashed line
+    var r2 = runForState(Object.assign({}, base, { spending: spending + 10000 - base.housing }));
+    var p2 = r2.percentiles;
     var labels = p.map(function (x) { return x.age; });
     document.getElementById('ok').textContent = r.successCount;
     document.getElementById('tot').textContent = r.totalPeriods;
@@ -406,7 +432,8 @@
         { data: p.map(function (x) { return x.p10; }), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, tension: 0.15 },
         { data: p.map(function (x) { return x.p75; }), borderColor: 'transparent', backgroundColor: tok('--band-2'), pointRadius: 0, fill: '+1', tension: 0.15 },
         { data: p.map(function (x) { return x.p25; }), borderColor: 'transparent', backgroundColor: 'transparent', pointRadius: 0, fill: false, tension: 0.15 },
-        { data: p.map(function (x) { return x.p50; }), borderColor: tok('--rust'), borderWidth: 2, pointRadius: 0, fill: false, tension: 0.15 }
+        { data: p.map(function (x) { return x.p50; }), borderColor: tok('--rust'), borderWidth: 2, pointRadius: 0, fill: false, tension: 0.15 },
+        { data: p2.map(function (x) { return x.p50; }), borderColor: tok('--mute'), borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, tension: 0.15 }
       ]
     };
     if (chart) { chart.data = data; chart.update('none'); return; }
@@ -429,25 +456,26 @@
     var mark = { id: 'mark', afterDraw: function (ch) {
       var xs = ch.scales.x, ys = ch.scales.y, c = ch.ctx, pr = ch.data.datasets;
       var px = function (age) { return xs.getPixelForValue(labels.indexOf(age)); };
+      var narrow = ch.width < 560;   // on a phone, the written key below the chart does the explaining
       c.save();
       c.font = 'italic 14px ' + tok('--serif'); c.fillStyle = tok('--rust'); c.strokeStyle = tok('--rust'); c.lineWidth = 1.3; c.lineCap = 'round';
       // the dashed line at 62, with its note under the axis
       var x62 = px(62);
       if (x62 > 0) {
-        c.save(); c.strokeStyle = tok('--line'); c.setLineDash([4, 3]); c.beginPath(); c.moveTo(x62, ys.top); c.lineTo(x62, ys.bottom); c.stroke(); c.restore();
+        c.save(); c.strokeStyle = 'rgba(160,74,40,0.4)'; c.setLineDash([3, 5]); c.beginPath(); c.moveTo(x62, ys.top); c.lineTo(x62, ys.bottom); c.stroke(); c.restore();
         note(c, ['retire and pay off', 'the house at 62'], x62 + 46, ys.bottom - 34, 'left');
         arrow(c, x62 + 42, ys.bottom - 30, x62 + 2, ys.bottom - 8);
       }
       // the band: point at the top edge of the shaded range around age 78
       var i78 = labels.indexOf(78);
-      if (i78 > 0) {
+      if (i78 > 0 && !narrow) {
         var bx = px(78), by = ys.getPixelForValue(pr[0].data[i78]);
         note(c, ['the lighter band runs from the', 'worst tenth to the best tenth,', 'the darker band is the middle half'], bx - 60, ys.top - 22, 'right');
         arrow(c, bx - 56, ys.top - 6, bx, by - 3);
       }
       // the median line, near the right end
       var i92 = labels.indexOf(92);
-      if (i92 > 0) {
+      if (i92 > 0 && !narrow) {
         var mx2 = px(92), my2 = ys.getPixelForValue(pr[4].data[i92]);
         note(c, ['the middle outcome'], mx2 - 18, my2 - 40, 'right');
         arrow(c, mx2 - 22, my2 - 34, mx2 - 2, my2 - 4);
@@ -462,7 +490,7 @@
         layout: { padding: { top: 58, right: 8 } },
         plugins: { legend: { display: false }, tooltip: { enabled: false } },
         scales: {
-          x: { grid: { color: tok('--grid') }, ticks: { color: tok('--mute'), font: { family: tok('--sans'), size: 12 }, maxTicksLimit: 9 }, border: { color: tok('--line') } },
+          x: { grid: { color: tok('--grid') }, ticks: { color: tok('--mute'), font: { family: tok('--sans'), size: 12 }, autoSkip: false, callback: function (v, i) { var a = labels[i]; return [45, 50, 62, 70, 80, 90, 100].indexOf(a) >= 0 ? a : null; } }, border: { color: tok('--line') } },
           y: { grid: { color: tok('--grid') }, ticks: { color: tok('--mute'), font: { family: tok('--sans'), size: 12 }, callback: function (v) { return money(v); }, maxTicksLimit: 6 }, border: { display: false }, beginAtZero: true }
         }
       }
@@ -470,6 +498,7 @@
   }
   var sp = document.getElementById('sp'), out = document.getElementById('spv');
   sp.addEventListener('input', function () { out.textContent = full(+sp.value); run(+sp.value); });
+  out.textContent = full(+sp.value);
   run(+sp.value);
 })();
 </script>
