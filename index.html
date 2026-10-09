@@ -118,14 +118,15 @@
   /* ---- sections: no labels, no rules; space and scale do the sectioning ---- */
   .sec { padding: 72px 0 0; }
   .sec h2 + .lead, .sec h2 + .prose { margin-top: 18px; }
-  .prose { max-width: 34em; font-family: var(--serif); font-size: var(--t1); line-height: 1.55; }
+  .split .prose { margin-top: 6px; }
+  .prose { max-width: 36em; font-family: var(--serif); font-size: var(--t1); line-height: 1.55; }
   .prose p + p { margin-top: 16px; }
   .prose p { color: var(--ink-soft); }
   .lead { font-family: var(--serif); font-size: var(--t1); color: var(--ink-soft); max-width: 30em; }
 
   /* What if: the reader's questions, set large */
-  .qs { list-style: none; margin-top: 28px; max-width: 30em; display: flex; flex-direction: column; gap: 14px; }
-  .qs a { display: block; text-decoration: none; font-family: var(--serif); font-size: var(--t2); line-height: 1.32; letter-spacing: -0.012em; color: var(--ink); }
+  .qs { list-style: none; margin-top: 28px; max-width: 44em; display: flex; flex-direction: column; gap: 16px; }
+  .qs a { display: block; text-decoration: none; font-family: var(--serif); font-size: clamp(22px, 2.3vw, 30px); line-height: 1.32; letter-spacing: -0.012em; color: var(--ink); }
   .qs a:hover { color: var(--rust); }
   .qs a::after { content: " \2192"; color: var(--rust); font-size: 0.8em; }
 
@@ -173,8 +174,9 @@
 
   /* the close: her question again, then the fine print */
   .close { padding: 88px 0 0; }
-  .close h2 { max-width: 16em; }
-  .close .actions { margin-top: 26px; }
+  .close h2 { font-size: clamp(34px, 4.2vw, 54px); max-width: 22em; line-height: 1.08; }
+  .close .actions { margin-top: 28px; }
+  .close .fine { margin-top: 14px; }
 
   .capture form { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; max-width: 34em; }
   .capture label { font-size: 13px; color: var(--mute); }
@@ -302,12 +304,16 @@
   </section>
 
   <section class="sec" id="how">
+    <div class="split">
     <h2>It tests your plan against every market since 1926.</h2>
+    <div>
     <div class="prose">
       <p>You enter what you have, what comes in, what goes out, and when you'd like to stop working. Every assumption behind the result can be changed, the stock and bond mix, fees, tax rates, and the spending guardrails included.</p>
       <p>The tool runs your numbers three ways. Historical mode replays your plan through every stretch of real US market returns since 1926, so you can see how it would have gone if you'd started in 1929, or 1966, or 2000. Simulated mode runs your plan through randomized futures, 500 unless you change it, with the average return and volatility of your mix, and you can change those too. Fixed mode uses one steady return every year, which is what most calculators do, so you can see the difference.</p>
     </div>
     <div class="modes"><div><b>Historical</b>every period, 1926 to 2025</div><div><b>Simulated</b>randomized futures, 500 by default</div><div><b>Fixed</b>one steady return</div></div>
+    </div>
+    </div>
   </section>
 </div>
 
@@ -355,10 +361,12 @@
 
 <div class="wrap">
   <section class="sec isnt" id="isnt">
+    <div class="split">
     <h2>What it leaves out.</h2>
     <div class="prose">
       <p>It's not advice and it's not a planner. It doesn't know your taxes beyond a rough estimate, and it doesn't know your life. It's a way to see the shape of the outcomes so you can have a better conversation, with yourself or with a professional.</p>
       <p>It doesn't model healthcare costs before Medicare, required minimum distributions, or Roth conversions. If you're optimizing those, you want a subscription planner. If you want to get a sense of how different scenarios could play out, this is built for that.</p>
+    </div>
     </div>
   </section>
 
@@ -382,7 +390,7 @@
 
   <section class="close">
     <h2>Are you spending enough for the life you want?</h2>
-    <div class="actions"><a class="btn btn-ink" href="app.html">Try it free</a></div>
+    <div class="actions"><a class="btn btn-ink" href="app.html">Try it free</a><a class="btn btn-line" href="#price">Pricing</a></div>
     <p class="fine">No account, nothing to link, your numbers stay on your device.</p>
   </section>
 
