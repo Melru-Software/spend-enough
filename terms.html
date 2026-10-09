@@ -30,7 +30,8 @@
   a { color: var(--rust); }
   .todo { background: rgba(160,74,40,0.08); border-left: 3px solid var(--rust); padding: 8px 12px; font-size: 14px; color: var(--ink-soft); margin: 12px 0; }
   footer { border-top: 1px solid var(--line); padding: 24px 32px; text-align: center; font-size: 13px; color: var(--ink-mute); }
-  footer a { color: var(--rust); text-decoration: none; margin: 0 6px; }
+  footer a { color: var(--rust); text-decoration: underline; text-underline-offset: 2px; margin: 0 6px; display: inline-block; padding: 6px 0; }
+  footer nav { display: inline; }
   @media (max-width: 600px) {
     header { padding: 12px 20px; }
     .logo { font-size: 18px; white-space: nowrap; }
@@ -43,11 +44,11 @@
 <body>
 <header>
   <a class="logo" href="/"><span class="logo-dot"></span>Spend Enough</a>
-  <nav><a class="keep" href="app.html">Open the app</a><a href="why.html">Why I built it</a><a href="privacy.html">Privacy</a></nav>
+  <nav aria-label="Primary"><a href="why.html">Why I built it</a><a href="privacy.html">Privacy</a><a class="keep" href="app.html">Try it free</a></nav>
 </header>
 <main>
   <h1>Terms of service</h1>
-  <p class="updated">Last updated: September 19, 2026</p>
+  <p class="updated">Last updated: October 9, 2026</p>
   <p>These terms are an agreement between you and Melru Software LLC ("we", "us") covering your use of Spend Enough (the "Service"), including the free and paid versions. By using the Service you agree to them. If you do not agree, do not use the Service.</p>
 
   <h2>1. What the Service is</h2>
@@ -106,7 +107,7 @@
   <h2>15. Contact</h2>
   <p>Melru Software LLC, <a href="mailto:support@spendenough.com">support@spendenough.com</a>.</p>
 </main>
-<footer>Educational modelling tool, not financial, tax, investment, or legal advice. <a href="privacy.html">Privacy</a> · <a href="why.html">Why I built it</a> · <a href="/">Home</a></footer>
+<footer>Educational modelling tool, not financial, tax, investment, or legal advice. <nav aria-label="Footer"><a href="why.html">Why I built it</a> · <a href="privacy.html">Privacy</a> · <a href="/">Home</a></nav></footer>
 <script src="config.js"></script>
 </body>
 </html>

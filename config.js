@@ -8,7 +8,7 @@
 
    Loaded by index.html (landing), app.html (the app), privacy.html, terms.html.
    Edit the values below, commit, deploy. Empty strings mean "not configured";
-   the pages degrade gracefully (checkout button disabled, email form hidden).
+   the pages degrade gracefully (checkout button disabled).
 ============================================================================ */
 window.SPENDENOUGH_CONFIG = {
   // Phase 6 — hosted checkout URL from Lemon Squeezy (merchant of record, handles
@@ -27,10 +27,6 @@ window.SPENDENOUGH_CONFIG = {
   // Display price on the unlock screen. Founder lifetime: $39 one-time.
   price: '$39',
 
-  // Phase 5 — landing-page email capture. POST endpoint of your form/email
-  // provider (Buttondown, ConvertKit, Formspree, ...). The form sends `email`
-  // as application/x-www-form-urlencoded. Empty = the sign-up section is hidden.
-  emailEndpoint: '',
 
   // Phase 5 — optional privacy-respecting analytics (Plausible, Fathom, ...).
   // Set the script URL and site/domain; pages add the <script> tag only when set.
