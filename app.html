@@ -43,9 +43,7 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
-    background-image:
-      radial-gradient(circle at 20% 0%, rgba(184,92,56,0.04) 0%, transparent 50%),
-      radial-gradient(circle at 80% 100%, rgba(91,110,58,0.04) 0%, transparent 50%);
+    background-image: none;
   }
 
   /* Data tables - horizontal scroll on mobile */
@@ -148,7 +146,8 @@
 </head>
 <style>
   /* ========== DASHBOARD LAYOUT ========== */
-  .dashboard { display: grid; grid-template-columns: 360px 1fr; grid-template-areas: "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
+  .dashboard { display: grid; grid-template-columns: 400px 1fr; grid-template-areas: "sidebar main" "resources resources"; min-height: calc(100vh - 73px); }
+  @media (min-width: 1500px) { .dashboard { grid-template-columns: 440px 1fr; } }
   .resources-row { grid-area: resources; border-top: 1px solid var(--line); padding: 22px 32px 30px; text-align: center; }
   .sidebar { grid-area: sidebar; background: var(--paper); border-right: 1px solid var(--line); padding: 22px 20px; overflow-y: auto; }
   .sidebar-section { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
@@ -168,9 +167,9 @@
   .control-label { color: var(--ink-soft); flex: 1; font-size: inherit; }
   .control-value { font-size: 14px; font-weight: 500; color: var(--ink); font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .control input[type=range] { width: 100%; height: 4px; -webkit-appearance: none; appearance: none; background: var(--line); border-radius: 2px; outline: none; }
-  .control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; transition: background 0.12s; }
+  .control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--ink); border-radius: 50%; cursor: pointer; transition: background 0.12s; }
   .control input[type=range]::-webkit-slider-thumb:hover { background: var(--rust); }
-  .control input[type=range]::-moz-range-thumb { width: 16px; height: 16px; background: var(--ink); border-radius: 50%; cursor: pointer; border: none; }
+  .control input[type=range]::-moz-range-thumb { width: 20px; height: 20px; background: var(--ink); border-radius: 50%; cursor: pointer; border: none; }
   .control input[type=number] { width: 100%; background: var(--bone); border: 1px solid var(--line); padding: 7px 9px; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; font-size: 14px; color: var(--ink); border-radius: 2px; }
   .control input[type=number]:focus { outline: none; border-color: var(--ink); }
   .help-mark { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; min-width: 15px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-mute); font-size: 10px; font-style: italic; margin-left: 4px; cursor: help; font-family: 'Source Serif 4', serif; vertical-align: middle; overflow: hidden; box-sizing: border-box; }
@@ -274,7 +273,7 @@
   .scenario-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
   .scenario-card { background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s ease; }
   .scenario-card:hover { border-color: var(--rust); }
-  .scenario-card.failed { border-left: 3px solid var(--danger-soft); }
+  .scenario-card.failed { border-left: 3px solid var(--danger); }
   .scenario-card.survived { border-left: 3px solid var(--moss); }
   .scenario-name { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
   .scenario-years { font-size: 14px; color: var(--ink-mute); margin-bottom: 5px; font-family: 'Inter Tight', system-ui, sans-serif; font-variant-numeric: tabular-nums; }
@@ -424,7 +423,13 @@
   .modal.modal-wide .compare-list li { padding: 5px 0 5px 18px; }
   .modal h2 { font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 500; margin-bottom: 16px; }
   .modal p { font-size: 14px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 12px; }
-  .modal .modal-close { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-mute); }
+  .modal .modal-close { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--ink-mute); min-width: 44px; min-height: 44px; margin: -10px -12px 0 0; }
+  /* Keyboard focus is visible on everything, whatever an older rule says. */
+  :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline: 2px solid var(--rust) !important; outline-offset: 2px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  /* The help mark is a button now; keep it the small round "i" it always was, with a 24px tap area around it. */
+  button.help-mark { width: 16px; height: 16px; min-width: 16px; min-height: 16px; padding: 0; line-height: 1; box-shadow: none; position: relative; cursor: help; }
+  button.help-mark::before { content: ""; position: absolute; inset: -5px; }
 
   .detail-narrative { background: var(--bone-2); border-radius: 4px; padding: 14px 18px; font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 14px; }
 
@@ -682,7 +687,7 @@
   .locked-note { background: transparent; border-left-color: var(--line); padding-left: 12px; }
 
   /* results: the sidebar */
-  .sidebar { background: var(--bone); padding: 26px 24px; }
+  .sidebar { background: var(--bone); padding: 28px 32px; }
   .sidebar-heading { font-size: 12px; letter-spacing: 0.14em; font-weight: 600; color: var(--ink-mute); margin-bottom: 10px; }
   .preset-btn { background: transparent; border: none; border-bottom: 1px solid var(--line-soft); border-radius: 0; padding: 10px 0; font-family: 'Source Serif 4', serif; font-size: 16px; color: var(--ink); }
   .preset-btn:first-of-type { border-top: 1px solid var(--line-soft); }
@@ -717,12 +722,14 @@
 
   /* results footer */
   .resources-row { text-align: left; padding: 22px 40px 44px !important; border-top: 1px solid var(--line); }
-  .foot-nav { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: baseline; font-size: 14px; }
+  .foot-nav { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: baseline; font-size: 14px; max-width: 980px; margin: 0 auto; }
+  .foot-nav > a:nth-child(2) { margin-left: auto; }
   .foot-nav a { color: var(--ink-mute); text-decoration: none; }
   .foot-nav a:hover { color: var(--ink); }
   .faq-toggle { width: auto; padding: 0; font-size: 14px; color: var(--ink); font-weight: 600; justify-content: flex-start; gap: 6px; }
   .faq-inner { padding: 18px 0 0; }
-  .faq { margin: 0; max-width: 720px; }
+  .faq { margin: 0 auto; max-width: 760px; }
+  @media (max-width: 900px) { .foot-nav > a:nth-child(2) { margin-left: 0; } }
   .faq-item summary { font-family: 'Source Serif 4', serif; font-weight: 500; font-size: 17px; color: var(--ink); }
   .faq-body { font-size: 15px; color: var(--ink-soft); }
   .pro-status { margin-bottom: 14px; }
@@ -731,7 +738,9 @@
 
   /* results: smaller pieces */
   .event-line { font-family: 'Source Serif 4', serif; font-size: 15.5px; color: var(--ink-mute); line-height: 1.5; margin: 0 0 18px; max-width: none; }
-  .impact { margin: 12px 0 0; padding: 10px 0 12px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); font-size: 13px; color: var(--ink-mute); }
+  /* The box sits in its own sidebar section, whose rule already separates it; its own top and
+     bottom lines doubled up with the neighbouring sections' rules. */
+  .impact { margin: 0; padding: 0; font-size: 13px; color: var(--ink-mute); }
   .impact-title { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 6px; }
   .compare-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--ink); border-radius: 3px; background: transparent; color: var(--ink); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s ease, color .15s ease; }
   .compare-btn:hover { background: var(--ink); color: var(--paper); }
@@ -841,8 +850,8 @@
   .more-body .ev-hint, .more-body .acct-total { font-size: 12.5px; color: var(--ink-faint); }
 
   /* ---- onboarding: the landing page's margin-column grid, so a form reads as a sequence ---- */
-  .onboarding { max-width: 880px; }
-  .onboard-step { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; align-items: start; max-width: none; }
+  .onboarding { max-width: 1060px; }
+  .onboard-step { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 40px; align-items: start; max-width: none; }
   .step-side { display: flex; gap: 10px; align-items: baseline; }
   .step-num { font-family: 'Source Serif 4', serif; font-size: 15px; font-weight: 400; color: var(--rust); font-variant-numeric: tabular-nums; line-height: 1.5; flex-shrink: 0; }
   .step-title { font-size: 21px; line-height: 1.25; margin-bottom: 4px; }
@@ -871,9 +880,10 @@
   }
   .plan-for { display: inline-flex; align-self: flex-start; margin-top: 6px; }   /* .field stretches children; keep the frame on the buttons */
   .plan-for .toggle-btn { flex: 0 0 auto; padding: 8px 18px; }
-  .step-actions { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 28px; margin-top: 30px; align-items: start; }
-  .step-actions > * { grid-column: 2; justify-self: stretch; }
-  .step-actions .btn-primary { justify-self: start; }
+  .step-actions { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0; margin-top: 36px; }
+  .step-actions .btn-primary { justify-self: center; }
+  .step-actions .blank-note { max-width: 84ch; margin-top: 22px; }
+  .step-actions .onboard-fine { width: 100%; }
   @media (max-width: 720px) {
     .onboard-step, .step-actions { grid-template-columns: 1fr; gap: 14px; }
     .step-actions > * { grid-column: 1; justify-self: stretch; text-align: left; }
@@ -893,6 +903,16 @@
   @keyframes tick { to { transform: rotate(-45deg) scale(1); opacity: 1; } }
   .onboard-step.done .step-title { color: var(--ink-mute); transition: color .2s ease; }
   .blank-note { font-size: 14px; color: var(--ink-faint); margin-top: 14px; max-width: 70ch; line-height: 1.5; }
+  /* Onboarding reads as questions a person is asking, not fields on a system. */
+  .onboarding .step-title { font-size: 27px; }
+  .onboarding .step-hint { font-family: 'Source Serif 4', serif; font-size: 16px; line-height: 1.5; color: var(--ink-mute); }
+  .onboarding .field label { font-size: 15px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--ink); }
+  .onboarding .field input, .onboarding .field select { background: var(--bone); border: 1px solid #a89f90; border-radius: 4px; padding: 13px 14px; font-size: 16px; }
+  .onboarding .field input::placeholder { color: var(--ink-faint); }
+  .onboarding .field-hint { font-family: 'Source Serif 4', serif; font-size: 15px; line-height: 1.45; color: var(--ink-mute); }
+  .onboarding .toggle-group { border-color: #a89f90; background: var(--bone); }
+  .onboarding .toggle-btn { font-size: 15px; padding: 10px 8px; background: var(--bone); }
+  .onboarding .toggle-btn.active { background: var(--ink); }
   @media (prefers-reduced-motion: reduce) { .onboard-step.done .step-num::after { animation: none; opacity: 1; transform: rotate(-45deg) scale(1); } }
   input.money::placeholder { font-weight: 400; color: var(--ink-faint); letter-spacing: 0; }
 
@@ -1058,6 +1078,7 @@
 </style>
 <body>
 <div id="app"></div>
+<div id="announce" class="sr-only" role="status" aria-live="polite"></div>
 <div id="modal-root"></div>
 <div id="tip-popup"></div>
 <script src="config.js"></script>
@@ -1395,7 +1416,7 @@ window.showUnlockModal = function(opts) {
         <ul class="compare-list">
           <li>Historical mode: your plan run through every stretch of the market since 1926, with the full range on the chart</li>
           <li>Your numbers: savings, spending now and later in life, incomes, a pension, retirement ages, your mortgage or rent, and how long the money needs to last</li>
-          <li>All seven what-if scenarios, from taking time off to a bad decade</li>
+          <li>All seven scenarios, from taking time off to a bad decade</li>
           <li>The spending explorer</li>
           <li>The assumptions behind the result, open to change: stock and bond mix, fees, tax rates, and the guardrails</li>
         </ul>
@@ -1513,7 +1534,7 @@ window.showPayoffModal = function(fromPreset) {
         </label>
       </div>
       <div id="po_preview" style="margin-top:12px;font-size:14px;color:var(--ink-mute);min-height:18px"></div>
-      <div class="field" style="margin-top:12px"><label>Once it is paid off, how much more do you spend each year? The payment frees ${fmtMoney(state.housing)}. Enter more if the plan is to spend more.</label><input type="number" id="po_spend" min="0" step="1000" value="${Math.min(state.housing, state.postPayoffSpend || 0)}" style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;background:var(--bone)"/><span class="field-hint">The rest goes into the portfolio, or is not drawn from it. 0 means all of it is invested.</span></div>
+      <div class="field" style="margin-top:12px"><label for="po_spend">Once it is paid off, how much more do you spend each year? The payment frees ${fmtMoney(state.housing)}. Enter more if the plan is to spend more.</label><input type="number" id="po_spend" min="0" step="1000" value="${Math.min(state.housing, state.postPayoffSpend || 0)}" style="display:block;width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:3px;font-size:14px;background:var(--bone)"/><span class="field-hint">The rest goes into the portfolio, or is not drawn from it. 0 means all of it is invested.</span></div>
       <div style="display:flex;gap:8px;margin-top:16px">
         <button onclick="applyPayoffModal()" style="flex:1;padding:10px;background:var(--rust);color:var(--paper);border:none;border-radius:3px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit">Apply to plan</button>
         <button onclick="closeModal()" style="padding:10px 16px;background:none;border:1px solid var(--line);border-radius:3px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--ink-soft)">Cancel</button>
@@ -1778,10 +1799,32 @@ function restoreAnchor(a) {
   if (Math.abs(drift) > 1) window.scrollBy(0, drift);
   if (a.focused) again.focus({ preventScroll: true });
 }
+// Every slider's track is filled up to its thumb (the --pct the CSS reads). Set here for all
+// of them after each render and on every drag, so sliders that are drawn without it (More
+// about you, income growth, spending flexibility) match the ones under Your plan.
+function fillRange(el) { el.style.setProperty('--pct', trackPct(+el.value, +el.min, +el.max)); }
+document.addEventListener('input', e => { if (e.target && e.target.type === 'range') fillRange(e.target); }, true);
+let lastAnnounced = '';
+function announce(text) {
+  const el = document.getElementById('announce');
+  if (!el || !text || text === lastAnnounced) return;
+  lastAnnounced = text;
+  // Re-render rebuilds the page's own live regions, so the headline is repeated here, in a region that never moves.
+  el.textContent = ''; setTimeout(() => { el.textContent = text; }, 50);
+}
+function markInvalid(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.setAttribute('aria-invalid', 'true');
+  el.setAttribute('aria-describedby', 'ob_validation');
+  el.focus();
+}
 function render() {
   const anchor = lastRenderedView === activeView ? captureAnchor() : null;
   if (activeView === 'onboarding') renderOnboarding(); else renderDashboard();
+  app.querySelectorAll('input[type=range]').forEach(fillRange);
   wireTooltips(); savePlan();
+  if (activeView === 'dashboard' && lastVerdict && lastVerdict.headline) announce(lastVerdict.headline);
   lastRenderedView = activeView;
   if (anchor) restoreAnchor(anchor); else window.scrollTo(0, 0);
 }
@@ -1809,15 +1852,24 @@ function outOfRange(el) {
 }
 
 const tipEl = document.getElementById('tip-popup');
+function showTip(el, e) {
+  tipEl.textContent = el.dataset.tip;
+  tipEl.style.display = 'block';
+  el.setAttribute('aria-describedby', 'tip-popup');
+  if (e && e.clientX !== undefined) positionTip(e);
+  else { const r = el.getBoundingClientRect(); positionTip({ clientX: r.left + r.width / 2, clientY: r.bottom }); }
+}
+function hideTip(el) { tipEl.style.display = 'none'; if (el) el.removeAttribute('aria-describedby'); }
 function wireTooltips() {
+  tipEl.setAttribute('role', 'tooltip');
   document.querySelectorAll('[data-tip]').forEach(el => {
-    el.addEventListener('mouseenter', e => {
-      tipEl.textContent = el.dataset.tip;
-      tipEl.style.display = 'block';
-      positionTip(e);
-    });
+    el.addEventListener('mouseenter', e => showTip(el, e));
     el.addEventListener('mousemove', positionTip);
-    el.addEventListener('mouseleave', () => { tipEl.style.display = 'none'; });
+    el.addEventListener('mouseleave', () => hideTip(el));
+    el.addEventListener('focus', () => showTip(el));
+    el.addEventListener('blur', () => hideTip(el));
+    el.addEventListener('keydown', e => { if (e.key === 'Escape') { hideTip(el); e.stopPropagation(); } });
+    el.addEventListener('click', e => { e.preventDefault(); tipEl.style.display === 'block' ? hideTip(el) : showTip(el); });
   });
 }
 function positionTip(e) {
@@ -1855,8 +1907,8 @@ function renderOnboarding() {
               <button type="button" class="toggle-btn${state.hasPartner ? ' active' : ''}" aria-pressed="${!!state.hasPartner}" onclick="setPlanFor(true)">Me and a partner</button>
             </div>
             <input type="hidden" id="ob_hasPartner" value="${state.hasPartner ? '1' : ''}"/></div>
-          <div class="field"><label>Your age</label><input type="number" id="ob_age" value="${state.age || ''}" placeholder="e.g. 45" min="18" max="90" oninput="stepProgress()"/></div>
-          <div class="field partner-field"><label>Partner's age</label><input type="number" id="ob_partnerAge" value="${state.partnerAge || ''}" placeholder="e.g. 44" min="18" max="90" oninput="stepProgress()"/></div>
+          <div class="field"><label for="ob_age">Your age</label><input type="number" id="ob_age" value="${state.age || ''}" placeholder="e.g. 45" min="18" max="90" oninput="stepProgress()"/></div>
+          <div class="field partner-field"><label for="ob_partnerAge">Partner's age</label><input type="number" id="ob_partnerAge" value="${state.partnerAge || ''}" placeholder="e.g. 44" min="18" max="90" oninput="stepProgress()"/></div>
         </div>
       </div>
 
@@ -1864,8 +1916,8 @@ function renderOnboarding() {
         <div class="step-side"><span class="step-num">2</span><div><h2 class="step-title">Your savings and spending</h2>
         <p class="step-hint">How much you've saved, and what you spend each year.</p></div></div>
         <div class="field-grid">
-          <div class="field"><label>Investment portfolio</label><input type="text" id="ob_portfolio" class="money" inputmode="numeric" value="${moneyText(state.portfolio || '')}" placeholder="e.g. $600,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">401k, IRA, brokerage, combined</span></div>
-          <div class="field"><label>Total yearly spending</label><input type="text" id="ob_spending" class="money" inputmode="numeric" value="${moneyText(state.spending ? state.spending + state.housing : '')}" placeholder="e.g. $90,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Everything you spend in a year, including rent or mortgage. Leave blank to find your "enough" number.</span></div>
+          <div class="field"><label for="ob_portfolio">Investment portfolio</label><input type="text" id="ob_portfolio" class="money" inputmode="numeric" value="${moneyText(state.portfolio || '')}" placeholder="e.g. $600,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">401k, IRA, brokerage, combined</span></div>
+          <div class="field"><label for="ob_spending">Total yearly spending</label><input type="text" id="ob_spending" class="money" inputmode="numeric" value="${moneyText(state.spending ? state.spending + state.housing : '')}" placeholder="e.g. $90,000" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Everything you spend in a year, including rent or mortgage. Leave blank to find your "enough" number.</span></div>
         </div>
       </div>
 
@@ -1873,8 +1925,8 @@ function renderOnboarding() {
         <div class="step-side"><span class="step-num">3</span><div><h2 class="step-title">Other income and housing</h2>
         <p class="step-hint" id="ob_hint3">Work income, partner income, and what you pay for housing.</p></div></div>
         <div class="field-grid">
-          <div class="field"><label>Your gross income</label><input type="text" id="ob_yourIncome" class="money" inputmode="numeric" value="${moneyText(state.yourIncome || '')}" placeholder="e.g. $110,000" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_yourIncome','ob_yourSS')"/><span class="field-hint">From work, before tax \u00b7 It stops at your retirement age</span></div>
-          <div class="field partner-field"><label>Partner's gross income</label><input type="text" id="ob_partnerIncome" class="money" inputmode="numeric" value="${moneyText(state.partnerIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_partnerIncome','ob_partnerSS')"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
+          <div class="field"><label for="ob_yourIncome">Your gross income</label><input type="text" id="ob_yourIncome" class="money" inputmode="numeric" value="${moneyText(state.yourIncome || '')}" placeholder="e.g. $110,000" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_yourIncome','ob_yourSS')"/><span class="field-hint">From work, before tax \u00b7 It stops at your retirement age</span></div>
+          <div class="field partner-field"><label for="ob_partnerIncome">Partner's gross income</label><input type="text" id="ob_partnerIncome" class="money" inputmode="numeric" value="${moneyText(state.partnerIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); autoEstimateSS('ob_partnerIncome','ob_partnerSS')"/><span class="field-hint">Before tax \u00b7 0 if not working</span></div>
           <div class="field span-2"><label id="ob_homeLabel">Your home</label>
             <div class="toggle-group home-type" role="group" aria-labelledby="ob_homeLabel">
               <button type="button" class="toggle-btn" data-ht="mortgage" onclick="setHousingChoice('mortgage')">Mortgage</button>
@@ -1891,10 +1943,10 @@ function renderOnboarding() {
         <div class="step-side"><span class="step-num">4</span><div><h2 class="step-title">Social Security and other income</h2>
         <p class="step-hint">A rough annual figure is fine. Your ssa.gov statement has the exact number, and the benefit is federal, so it is the same in every state. A pension, an annuity, or rental income has its own box.</p></div></div>
         <div class="field-grid">
-          <div class="field"><label>Your SS at full age</label><input type="text" id="ob_yourSS" class="money" inputmode="numeric" value="${moneyText(state.yourSSAmount || '')}" placeholder="e.g. $30,000" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_yourSS')"/><span class="field-hint" id="ob_yourSS_hint">Annual, in today\u2019s dollars</span></div>
-          <div class="field partner-field"><label>Partner's SS at full age</label><input type="text" id="ob_partnerSS" class="money" inputmode="numeric" value="${moneyText(state.partnerSSAmount || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_partnerSS')"/><span class="field-hint" id="ob_partnerSS_hint">Annual, in today\u2019s dollars</span></div>
-          <div class="field"><label>Pension or other income after work</label><input type="text" id="ob_otherIncome" class="money" inputmode="numeric" value="${moneyText(state.otherIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Money that keeps coming after you stop working, besides Social Security. Per year, before tax.</span></div>
-          <div class="field"><label>It starts at age</label><input type="number" id="ob_otherIncomeStart" value="${state.otherIncome > 0 ? state.otherIncomeStart : ''}" placeholder="e.g. 65" min="18" max="100" oninput="stepProgress()"/><span class="field-hint">Blank means your retirement age.</span></div>
+          <div class="field"><label for="ob_yourSS">Your SS at full age</label><input type="text" id="ob_yourSS" class="money" inputmode="numeric" value="${moneyText(state.yourSSAmount || '')}" placeholder="e.g. $30,000" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_yourSS')"/><span class="field-hint" id="ob_yourSS_hint">Annual, in today\u2019s dollars</span></div>
+          <div class="field partner-field"><label for="ob_partnerSS">Partner's SS at full age</label><input type="text" id="ob_partnerSS" class="money" inputmode="numeric" value="${moneyText(state.partnerSSAmount || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress(); this.dataset.auto = '0'; ssHint('ob_partnerSS')"/><span class="field-hint" id="ob_partnerSS_hint">Annual, in today\u2019s dollars</span></div>
+          <div class="field"><label for="ob_otherIncome">Pension or other income after work</label><input type="text" id="ob_otherIncome" class="money" inputmode="numeric" value="${moneyText(state.otherIncome || '')}" placeholder="0 if none" oninput="moneyType(this); stepProgress()"/><span class="field-hint">Money that keeps coming after you stop working, besides Social Security. Per year, before tax.</span></div>
+          <div class="field"><label for="ob_otherIncomeStart">It starts at age</label><input type="number" id="ob_otherIncomeStart" value="${state.otherIncome > 0 ? state.otherIncomeStart : ''}" placeholder="e.g. 65" min="18" max="100" oninput="stepProgress()"/><span class="field-hint">Blank means your retirement age.</span></div>
         </div>
       </div>
 
@@ -1904,7 +1956,7 @@ function renderOnboarding() {
         <p style="margin-top:12px;font-size:14px"><a onclick="loadSample()" style="color:var(--rust);cursor:pointer;font-family:'Source Serif 4',serif;font-style:italic">or see a sample \u2192</a></p>
         <p class="onboard-fine">An educational planning tool, not financial advice. <a onclick="showFullDisclaimer()">Disclaimer</a></p>
       </div>
-      <div class="validation-msg" id="ob_validation"></div>
+      <div class="validation-msg" id="ob_validation" role="alert"></div>
     </div>
   `;
 }
@@ -1929,7 +1981,7 @@ function syncPartnerFields() {
 // so the draft remembers it; blank (a new plan) means mortgage.
 const OB_HOUSING_COPY = {
   mortgage: { label: 'Of that, your mortgage payment', hint: 'Principal and interest per year, the part that ends when it is paid off. Taxes and insurance stay in spending.' },
-  rent: { label: 'Of that, your rent', hint: 'Per year. Rent continues for the whole plan. You can try buying a home later from the what-ifs.' }
+  rent: { label: 'Of that, your rent', hint: 'Per year. Rent continues for the whole plan. You can try buying a home later under Try a scenario.' }
 };
 function obHousingType() { const el = document.getElementById('ob_housingType'); const v = el ? el.value : ''; return v === 'rent' || v === 'none' ? v : 'mortgage'; }
 function syncHousingFields() {
@@ -1988,14 +2040,15 @@ window.finishOnboarding = function() {
   const mortgage = housingType === 'none' ? 0 : num('ob_housing');
   const spending = num('ob_spending') > 0 ? Math.max(0, num('ob_spending') - mortgage) : 0; // spending excludes the housing payment internally
   const msgEl = document.getElementById('ob_validation');
-  if (age < 18) { msgEl.textContent = 'Please enter your age to continue.'; msgEl.dataset.field = 'age'; document.getElementById('ob_age').focus(); return; }
-  if (portfolio <= 0) { msgEl.textContent = 'Enter your portfolio value to get started.'; msgEl.dataset.field = 'portfolio'; document.getElementById('ob_portfolio').focus(); return; }
+  if (age < 18) { msgEl.textContent = 'Please enter your age to continue.'; msgEl.dataset.field = 'age'; markInvalid('ob_age'); return; }
+  if (portfolio <= 0) { msgEl.textContent = 'Enter your portfolio value to get started.'; msgEl.dataset.field = 'portfolio'; markInvalid('ob_portfolio'); return; }
   const withPartner = planHasPartner();
   const pAge = withPartner ? num('ob_partnerAge') : 0;
-  if (withPartner && pAge < 18) { msgEl.textContent = "Enter your partner's age, or choose Just me."; msgEl.dataset.field = 'partnerAge'; document.getElementById('ob_partnerAge').focus(); return; }
-  if (age > 100 || pAge > 100) { msgEl.textContent = 'Check the ages. They should be between 18 and 100.'; msgEl.dataset.field = ''; document.getElementById(age > 100 ? 'ob_age' : 'ob_partnerAge').focus(); return; }
-  if (housingType === 'mortgage' && mortgage > 0 && num('ob_mortgagePayoff') > 0 && num('ob_mortgagePayoff') <= age) { msgEl.textContent = 'The mortgage payoff age should be after your current age. If it is already paid off, choose Own it outright.'; msgEl.dataset.field = ''; document.getElementById('ob_mortgagePayoff').focus(); return; }
+  if (withPartner && pAge < 18) { msgEl.textContent = "Enter your partner's age, or choose Just me."; msgEl.dataset.field = 'partnerAge'; markInvalid('ob_partnerAge'); return; }
+  if (age > 100 || pAge > 100) { msgEl.textContent = 'Check the ages. They should be between 18 and 100.'; msgEl.dataset.field = ''; markInvalid(age > 100 ? 'ob_age' : 'ob_partnerAge'); return; }
+  if (housingType === 'mortgage' && mortgage > 0 && num('ob_mortgagePayoff') > 0 && num('ob_mortgagePayoff') <= age) { msgEl.textContent = 'The mortgage payoff age should be after your current age. If it is already paid off, choose Own it outright.'; msgEl.dataset.field = ''; markInvalid('ob_mortgagePayoff'); return; }
   msgEl.textContent = ''; msgEl.dataset.field = '';
+  document.querySelectorAll('[aria-invalid="true"]').forEach(el => { el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby'); });
 
   state.age = age;
   const hadPartner = !!state.hasPartner, firstPlan = !baselineState;
@@ -2128,7 +2181,7 @@ function renderDashboard() {
       <div class="sidebar-section sec-plan">
         <h2 class="sidebar-heading">Your plan</h2>
         ${state.simMode==='fixed' ? `<div class="control">
-          <div class="control-row"><span class="control-label">Real return<span class="help-mark" tabindex="0" data-tip="Return after inflation. 5% real ≈ 7-8% nominal.">i</span></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
+          <div class="control-row"><span class="control-label">Real return<button type="button" class="help-mark" aria-label="More about this" data-tip="Return after inflation. 5% real ≈ 7-8% nominal.">i</button></span><span class="control-value">${(state.returnRate*100).toFixed(1)}%</span></div>
           <input type="range" min="0" max="10" step="0.25" value="${state.returnRate*100}" style="--pct:${trackPct(state.returnRate*100, 0, 10)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',this.value/100)" class="slider-input"/>
           <input type="number" min="0" max="10" step="0.25" value="${(state.returnRate*100).toFixed(2)}" oninput="slideLive(this,'returnRate',this.value/100)" onchange="sliderCommit('returnRate',clampIn(this)/100)" placeholder="%" class="mobile-input"/>
         </div>` : ''}
@@ -2195,8 +2248,8 @@ function renderDashboard() {
       ${verdict.wedge ? `<div class="verdict-wedge ${result.failureCount === 0 ? 'good' : ''}">In the median outcome you leave <span class="wedge-amount">${verdict.wedge}</span> unspent.<div class="wedge-sub">${verdict.wedgeSub}</div></div>` : ''}
 
       <h2 class="section-heading chart-h">Portfolio projection</h2>
-      <div class="section-sub chart-sub">${state.simMode==='historical' ? 'The shaded area is where the portfolio stood across all '+result.totalPeriods+' stretches of the market since 1926. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : state.simMode==='montecarlo' ? 'The shaded area is where the portfolio stood across '+result.mcSims+' simulated futures. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : 'One steady return every year, so a single line and no range.'}${canCompare ? ' The dashed line and the faint band are ' + baselineName + '.' : ''}</div>
-      <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
+      <div class="section-sub chart-sub" id="chart-desc">${state.simMode==='historical' ? 'The shaded area is where the portfolio stood across all '+result.totalPeriods+' stretches of the market since 1926. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : state.simMode==='montecarlo' ? 'The shaded area is where the portfolio stood across '+result.mcSims+' simulated futures. The lighter band runs from the worst tenth to the best tenth, the darker band is the middle half, and the line is the middle outcome at each age.' : 'One steady return every year, so a single line and no range.'}${canCompare ? ' The dashed line and the faint band are ' + baselineName + '.' : ''}</div>
+      <div class="chart-card"><div class="chart-wrap"><canvas id="mainChart" role="img" aria-label="Portfolio projection from age ${state.age} to ${state.targetAge}" aria-describedby="chart-desc">The year-by-year table below carries the same numbers.</canvas></div></div>
       ${renderEventTimeline()}
       <div class="verdict-notes">
         <p>${verdict.detail.trim()}</p>
@@ -2227,7 +2280,7 @@ function renderDashboard() {
             </div>
           </div>
           <div class="section-sub" id="cf-desc">${cashflowMode==='net' ? 'Green bars mean you\'re adding to the portfolio. Red means you\'re drawing from it. Shown for the median path.' : 'Income sources stacked against spending, for the median path. The gap is what comes from or goes to the portfolio.'}</div>
-          <div class="chart-card"><div class="chart-wrap short"><canvas id="cashflowChart"></canvas></div></div>
+          <div class="chart-card"><div class="chart-wrap short"><canvas id="cashflowChart" role="img" aria-label="Cash flow by age for the median path" aria-describedby="cf-desc"></canvas></div></div>
           ${notFixed ? renderFlexibilityImpact() : ''}
           ${notFixed && state.yourSSAmount > 0 ? renderSSComparison() : ''}
           ${notFixed && state.accountsEnabled ? renderTaxComparison() : ''}
@@ -2279,21 +2332,16 @@ function renderDashboard() {
     // The help-mark "i" is not part of the name.
     const name = Array.from(label.childNodes).filter(n => !(n.classList && n.classList.contains('help-mark'))).map(n => n.textContent).join('').trim();
     // Each control renders a slider (desktop) and a number box (mobile); label both.
-    c.querySelectorAll('input[type=range], input[type=number]').forEach(input => {
+    c.querySelectorAll('input, select').forEach(input => {
       if (name && !input.getAttribute('aria-label')) input.setAttribute('aria-label', name);
     });
     c.querySelectorAll('.step-btn').forEach((b, i) => { if (name) b.setAttribute('aria-label', name + (i === 0 ? ', one less' : ', one more')); });
-  });
-  // Label clickable table rows
-  document.querySelectorAll('.data-table .clickable').forEach(row => {
-    row.setAttribute('role', 'button');
-    row.setAttribute('tabindex', '0');
-    row.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } });
   });
   // Label SS cards
   document.querySelectorAll('.ss-card[onclick]').forEach(card => {
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-pressed', card.classList.contains('highlight') ? 'true' : 'false');
     card.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } });
   });
   // Label scenario cards
@@ -2362,7 +2410,7 @@ function moreOptionsHTML() {
       ${housingKind(state) === 'rent' ? `<div class="control">
         <div class="control-row"><span class="control-label">Rent per year</span><span class="control-value">${fmtMoney(state.housing)}</span></div>
         <input type="range" min="0" max="${Math.max(120000, Math.ceil((state.housing || 0) / 1000) * 1000)}" step="1000" value="${state.housing}" oninput="slideLive(this,'housing',this.value)" onchange="sliderCommit('housing',this.value)"/>
-        <div class="ev-hint">Rent keeps up with prices, so it stays level in today’s dollars, and runs for the whole plan${hasBuy(state) ? ' until you buy at ' + state.homeBuyAge : ''}. To try buying, use ${hasBuy(state) ? '“Change the home purchase”' : '“Buy a home later”'} in the what-ifs.</div>
+        <div class="ev-hint">Rent keeps up with prices, so it stays level in today’s dollars, and runs for the whole plan${hasBuy(state) ? ' until you buy at ' + state.homeBuyAge : ''}. To try buying, use ${hasBuy(state) ? '“Change the home purchase”' : '“Buy a home later”'} under Try a scenario.</div>
       </div>` : housingKind(state) === 'none' ? `<p class="ev-hint">No housing payment. Property tax, insurance, and upkeep are part of your spending.</p>` : `<p class="ev-hint">Not sure when it ends? <button type="button" class="helper-trigger" onclick="openPayoffHelper()">Help me calculate it.</button></p>
       <div class="control">
         <div class="control-row"><span class="control-label">Mortgage payment per year</span><span class="control-value">${fmtMoney(state.housing)}</span></div>
@@ -2383,15 +2431,15 @@ function moreOptionsHTML() {
       <div style="font-size:14px;color:var(--ink-faint);margin-bottom:8px">Used to estimate the tax rates shown under Assumptions, where you can also edit them directly.</div>
       <div class="control">
         <div class="control-row"><span class="control-label">Filing status</span></div>
-        <select onchange="updateTax('filingStatus',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:14px;font-family:inherit;border-radius:2px;color:var(--ink)">
+        <select aria-label="Filing status" onchange="updateTax('filingStatus',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:14px;font-family:inherit;border-radius:2px;color:var(--ink)">
           <option value="mfj" ${state.filingStatus==='mfj'?'selected':''}>Married filing jointly</option>
           <option value="single" ${state.filingStatus==='single'?'selected':''}>Single</option>
         </select>
       </div>
       <div class="control" style="margin-top:8px">
         <div class="control-row"><span class="control-label">State</span></div>
-        <select onchange="updateTax('stateCode',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:14px;font-family:inherit;border-radius:2px;color:var(--ink)">
-          ${Object.keys(STATE_CONFIG).map(k => `<option value="${k}" ${state.stateCode===k?'selected':''}>${STATE_CONFIG[k].name}</option>`).join('')}
+        <select aria-label="State" onchange="updateTax('stateCode',this.value)" style="width:100%;background:var(--bone);border:1px solid var(--line);padding:6px 8px;font-size:14px;font-family:inherit;border-radius:2px;color:var(--ink)">
+          ${Object.keys(STATE_CONFIG).sort((a, b) => STATE_CONFIG[a].name.localeCompare(STATE_CONFIG[b].name)).map(k => `<option value="${k}" ${state.stateCode===k?'selected':''}>${STATE_CONFIG[k].name}</option>`).join('')}
         </select>
       </div>
       <div style="font-size:14px;color:var(--ink-mute);margin-top:8px">Estimated rate on wages: <strong style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums">${effRate}%</strong> &middot; in retirement: <strong style="font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums">${Math.round(retirementTaxRate(state)*100)}%</strong></div>
@@ -2707,12 +2755,12 @@ function renderYearTable(result) {
   const label = (a) => a === state.age ? 'Now' : a === state.targetAge ? 'Plan ends' : (a === state.yourStopWorkAge && state.yourIncome > 0) ? 'Retire' : a === state.ssStartAge ? 'Social Security' : (state.otherIncome > 0 && a === state.otherIncomeStart) ? 'Pension' : (a === state.mortgagePayoffAge && hasMortgage(state)) ? 'Mortgage paid' : a === state.slowDownAge ? 'Spending eases' : hasBuy(state) && a === state.homeBuyAge ? 'Home bought' : hasSale(state) && a === state.homeSaleAge ? 'House sold' : has(state.yourBreakStart) && a === state.yourBreakStart ? 'Career break' : has(state.shockAge) && a === state.shockAge ? 'Bad decade' : has(state.extraSpendStart) && a === state.extraSpendStart ? 'Extra spending' : state.yourPartTimeAmount > 0 && a === state.yourPartTimeStart ? 'Part-time' : '';
   if (printing) return `<h2 class="section-heading">Year by year</h2>
     <div class="section-sub">The median path, in today’s dollars. In / out is money taken from the portfolio (\u2212) or added to it (+).${notFixed ? ' Range is where the worst 10% and the best 10% of ' + (result.mode === 'historical' ? 'stretches' : 'futures') + ' stood at that age.' : ''}</div>
-    <div class="data-table-wrapper"><table class="data-table year-preview year-full"><thead><tr><th>Age</th><th>Income</th><th>Spending</th><th>In / out</th><th>Balance</th>${notFixed ? '<th>Range</th>' : ''}</tr></thead><tbody>
+    <div class="data-table-wrapper"><table class="data-table year-preview year-full"><thead><tr><th scope="col">Age</th><th scope="col">Income</th><th scope="col">Spending</th><th scope="col">In / out</th><th scope="col">Balance</th>${notFixed ? '<th scope="col">Range</th>' : ''}</tr></thead><tbody>
     ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td class="agecell">${r.age}${label(r.age) ? '<span class="ms">' + label(r.age) + '</span>' : ''}</td><td>${r.wages + r.ss > 0 ? fmtMoneyShort(r.wages + r.ss) : ''}</td><td>${fmtMoneyShort(r.spending)}</td><td>${flow(r)}</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td>${notFixed ? '<td>' + (r.p10 <= 0 ? 'ran out' : fmtMoneyShort(r.p10)) + '\u2013' + fmtMoneyShort(r.p90) + '</td>' : ''}</tr>`).join('')}
     </tbody></table></div>`;
   return `<h2 class="section-heading">Year by year</h2>
     <div class="section-sub">A few milestones along the median path, in today’s dollars. To see every year as a readable table, <button class="link-btn" onclick="printReport()">print the report</button>. To get all the raw numbers, <button class="link-btn" onclick="downloadCsv()">download the spreadsheet</button>.</div>
-    <div class="data-table-wrapper"><table class="data-table year-preview"><thead><tr><th></th><th>Age</th><th>Income</th><th>Spending</th><th>Balance</th></tr></thead><tbody>
+    <div class="data-table-wrapper"><table class="data-table year-preview"><thead><tr><th scope="col"></th><th scope="col">Age</th><th scope="col">Income</th><th scope="col">Spending</th><th scope="col">Balance</th></tr></thead><tbody>
     ${rows.map(r => `<tr class="${r.ranOut ? 'out' : ''}"><td class="milestone">${label(r.age)}</td><td>${r.age}</td><td>${r.wages + r.ss > 0 ? fmtMoneyShort(r.wages + r.ss) : '\u2014'}</td><td>${fmtMoneyShort(r.spending)}</td><td>${r.ranOut ? 'ran out' : fmtMoneyShort(r.balance)}</td></tr>`).join('')}
     </tbody></table></div>`;
 }
@@ -2759,7 +2807,7 @@ function renderCompareSummary(a, b) {
   const basis = b.mode === 'historical' ? 'Both are tested against the same market history since 1926.' : b.mode === 'montecarlo' ? 'Both are tested against the same simulated markets.' : 'Both use the same steady return.';
   return `<h2 class="section-heading">Side by side</h2>
     <div class="section-sub"><strong>${baselineName}</strong> compared with <strong>${currentName}</strong>. ${basis} ${diffs ? 'What changed: ' + diffs + '.' : 'Nothing differs yet.'} <button class="link-btn" onclick="toggleCompare()">Stop comparing</button></div>
-    <div class="data-table-wrapper"><table class="data-table compare-table"><thead><tr><th></th><th>${baselineName}</th><th>${currentName}</th></tr></thead><tbody>
+    <div class="data-table-wrapper"><table class="data-table compare-table"><thead><tr><th scope="col"></th><th scope="col">${baselineName}</th><th scope="col">${currentName}</th></tr></thead><tbody>
       <tr><td>Lasted to age ${state.targetAge}</td><td>${periodsLabel(a)}</td><td style="font-weight:600;color:var(--ink)">${periodsLabel(b)}</td></tr>
       <tr><td>Ending balance, worst 10% to best 10%</td><td>${range(a)}</td><td>${range(b)}</td></tr>
       <tr><td>Median ending balance</td><td>${fmtMoneyShort(a.medianFinal)}</td><td>${fmtMoneyShort(b.medianFinal)}</td></tr>
@@ -2862,8 +2910,8 @@ function computeSpendingLevels() {
 function renderSpendingExplorer() {
   const rows = computeSpendingLevels();
   const isHist = state.simMode === 'historical';
-  return `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Spending</th><th>Lasted in</th><th>Median ending</th><th>Worst 10%</th></tr></thead><tbody>
-    ${rows.map(r => `<tr class="${r.isCurrent?'current-row':''} clickable" onclick="applySpending(${r.spending})" title="Click to set spending to ${fmtMoney(r.spending)}/yr"><td>${fmtMoney(r.spending + state.housing)}/yr ${r.isCurrent?'<span class="tag-current">current</span>':''}</td><td>${isHist ? r.successCount+' of '+r.totalPeriods : Math.round(r.successRate*100)+'%'}</td><td>${fmtMoneyShort(r.medianFinal)}</td><td>${r.p10<=0?'<span class="fail">Ran out</span>':fmtMoneyShort(r.p10)}</td></tr>`).join('')}
+  return `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th scope="col">Spending</th><th scope="col">Lasted in</th><th scope="col">Median ending</th><th scope="col">Worst 10%</th><th scope="col"><span class="sr-only">Use this level</span></th></tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.isCurrent?'current-row':''} clickable" onclick="applySpending(${r.spending})"><td>${fmtMoney(r.spending + state.housing)}/yr ${r.isCurrent?'<span class="tag-current">current</span>':''}</td><td>${isHist ? r.successCount+' of '+r.totalPeriods : Math.round(r.successRate*100)+'%'}</td><td>${fmtMoneyShort(r.medianFinal)}</td><td>${r.p10<=0?'<span class="fail">Ran out</span>':fmtMoneyShort(r.p10)}</td><td><button type="button" class="link-btn" onclick="event.stopPropagation(); applySpending(${r.spending})" aria-label="Set spending to ${fmtMoney(r.spending + state.housing)} a year">Use</button></td></tr>`).join('')}
   </tbody></table></div>`;
 }
 
@@ -2880,12 +2928,12 @@ function renderFlexibilityImpact() {
   return `<h2 class="section-heading">Spending flexibility</h2>
     <div class="section-sub">What happens if you adjust spending when your portfolio is under pressure?</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
-      <div onclick="update('guardrailsEnabled',false)" style="background:var(--paper);border:${activeLeft?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeLeft?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
+      <button type="button" aria-pressed="${activeLeft}" onclick="update('guardrailsEnabled',false)" style="font:inherit;width:100%;background:var(--paper);border:${activeLeft?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeLeft?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
         <div style="font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:${activeLeft?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeLeft?'700':'500'}">Fixed spending</div>
         <div style="font-size:28px;font-weight:600;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--ink)">${fmtShort(withoutFlex)}</div>
         <div style="font-size:14px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
-      </div>
-      <div onclick="update('guardrailsEnabled',true)" style="background:var(--paper);border:${activeRight?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeRight?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
+      </button>
+      <button type="button" aria-pressed="${activeRight}" onclick="update('guardrailsEnabled',true)" style="font:inherit;width:100%;background:var(--paper);border:${activeRight?'2px solid var(--ink)':'1px solid var(--line)'};border-radius:4px;padding:${activeRight?'19px':'20px'};cursor:pointer;text-align:center;transition:border-color 0.15s">
         <div style="font-size:14px;text-transform:uppercase;letter-spacing:0.08em;color:${activeRight?'var(--ink)':'var(--ink-mute)'};margin-bottom:8px;font-weight:${activeRight?'700':'500'}">With flexibility</div>
         <div style="font-size:28px;font-weight:600;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:${improved?'var(--moss)':'var(--ink)'}">${fmtShort(withFlex)}</div>
         <div style="font-size:14px;color:var(--ink-faint);margin-top:4px">${isHist?'periods survived':'of simulations'}</div>
@@ -2893,17 +2941,17 @@ function renderFlexibilityImpact() {
           <div>
             <div style="font-size:14px;color:var(--ink-mute);margin-bottom:3px">Cut</div>
             <div style="display:inline-flex;align-items:baseline;gap:1px">
-              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailCutPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailCutPct',+this.value/100)" style="width:42px;text-align:center;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
+              <input type="number" aria-label="Cut spending by, percent" min="0" max="50" step="5" value="${Math.round(state.guardrailCutPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailCutPct',+this.value/100)" style="width:42px;text-align:center;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
             </div>
           </div>
           <div>
             <div style="font-size:14px;color:var(--ink-mute);margin-bottom:3px">Boost</div>
             <div style="display:inline-flex;align-items:baseline;gap:1px">
-              <input type="number" min="0" max="50" step="5" value="${Math.round(state.guardrailBoostPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailBoostPct',+this.value/100)" style="width:42px;text-align:center;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
+              <input type="number" aria-label="Boost spending by, percent" min="0" max="50" step="5" value="${Math.round(state.guardrailBoostPct*100)}" onclick="event.stopPropagation()" onchange="update('guardrailBoostPct',+this.value/100)" style="width:42px;text-align:center;font-family:'Inter Tight',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600;background:var(--bone);border:1px solid var(--line);border-radius:3px;padding:4px 2px;color:var(--ink)"/><span style="font-size:14px;color:var(--ink-mute)">%</span>
             </div>
           </div>
         </div>
-      </div>
+      </button>
     </div>
     <div class="flex-note">${state.guardrailsEnabled && improved ? 'Cutting spending by '+Math.round(state.guardrailCutPct*100)+'% when your portfolio is stressed improves the count. In some years you would live on less, and the portfolio recovers faster.' : state.guardrailsEnabled ? 'At these settings, flexibility has minimal impact on outcomes.' : 'With fixed spending, the same amount is withdrawn every year regardless of market conditions.'}</div>`;
 }
@@ -2967,7 +3015,7 @@ function renderTaxComparison() {
   const smartBetter = smartATW > propATW;
   return `<h2 class="section-heading">Withdrawal strategy</h2>
     <div class="section-sub">How you draw from different account types affects after-tax wealth. Preserving Roth (tax-free) growth typically leaves more usable money. These are simplified estimates at a steady ${(state.returnRate*100).toFixed(1)}% return.</div>
-    <div class="data-table-wrapper"><table class="data-table"><thead><tr><th></th><th>Proportional</th><th>Tax-aware order</th></tr></thead><tbody>
+    <div class="data-table-wrapper"><table class="data-table"><thead><tr><th scope="col"></th><th scope="col">Proportional</th><th scope="col">Tax-aware order</th></tr></thead><tbody>
       <tr><td>After-tax ending wealth</td><td>${fmtMoneyShort(propATW)}</td><td style="color:${smartBetter?'var(--moss)':'var(--ink-soft)'};font-weight:600">${fmtMoneyShort(smartATW)}</td></tr>
       <tr><td>Estimated total tax paid</td><td>${fmtMoneyShort(propTax)}</td><td>${fmtMoneyShort(smartTax)}</td></tr>
       <tr><td>Pre-tax ending balance</td><td>${fmtMoneyShort(prop.medianFinal)}</td><td>${fmtMoneyShort(smart.medianFinal)}</td></tr>
@@ -2987,10 +3035,10 @@ function renderResources() {
       <a href="terms.html">Terms</a>
       <a href="/">Home</a>
     </nav>
-    ${faqOpen ? `<div class="faq-inner"><div class="faq">
+    ${faqOpen ? `<div class="faq-inner"><div class="faq"><div class="faq-list">
 
     <details class="faq-item">
-      <summary>Why we made this tool</summary>
+      <summary>How is this different from other retirement calculators?</summary>
       <div class="faq-body">
         <p>Most retirement tools are built to keep you from running out of money. Save more and spend less. That advice has a cost. If you are 55 with a million dollars saved and a calculator tells you to spend like you have half that, you give up trips and time off you could have paid for with money you already have.</p>
         <p>Bill Perkins makes this case in <em>Die With Zero</em>. Knowing you should spend more and knowing how much you can safely spend are different problems, and this tool works on the second one. Enter your numbers and it runs your plan through every real U.S. market period since 1926, so you can see where the plan holds up and where it breaks.</p>
@@ -3008,6 +3056,15 @@ function renderResources() {
           <li><strong>State tax:</strong> California uses full 2025 CA FTB brackets (<a href="https://www.ftb.ca.gov/forms/2025/2025-540-booklet.html" target="_blank">CA FTB</a>). Nine states have no income tax (Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, Wyoming). All other states use a flat approximation based on their statutory or typical effective rate, sourced from the <a href="https://taxfoundation.org/data/all/state/state-income-tax-rates/" target="_blank">Tax Foundation</a> and each state's revenue department. Set your state in More options.</li>
         </ul>
         <p>All projections use real (inflation-adjusted) dollars, so the spending amounts shown are in today's purchasing power.</p>
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary>Are the numbers in today's dollars or future dollars?</summary>
+      <div class="faq-body">
+        <p>Today's dollars, everywhere. Spending, Social Security, rent, and the market returns are all inflation-adjusted, so $80,000 a year means $80,000 of today's purchasing power in every year of the plan, and a $3M balance at 100 is $3M of what money buys now.</p>
+        <p>The one exception is a mortgage payment, which is fixed in nominal dollars. In today's dollars it shrinks a little each year until it is paid off, and the tool models that. Wages grow by the real income growth you set, which is growth above inflation.</p>
+        <p>If you are used to future-dollar projections, the balances here will look smaller than you expect. That is the inflation already taken out, not a worse result.</p>
       </div>
     </details>
 
@@ -3132,7 +3189,7 @@ function renderResources() {
       </div>
     </details>
 
-  </div></div>` : ''}
+  </div></div></div>` : ''}
   `;
 }
 window.toggleFaq = function() { faqOpen = !faqOpen; render(); };
@@ -3380,7 +3437,7 @@ function drawCashflowChart(result) {
     ] },
     options: { responsive: true, maintainAspectRatio: false, resizeDelay: 200,
       events: TOUCH ? ['click'] : ['mousemove', 'mouseout', 'click', 'touchstart'],
-      animation: { duration: 700, easing: 'easeInOutQuart' },
+      animation: { duration: window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700, easing: 'easeInOutQuart' },
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: cashflowMode === 'breakdown', labels: { color: '#6b6356', font: { size: 11 }, boxWidth: 10, padding: 12, filter: (item) => item.text !== '' } },
@@ -3536,14 +3593,14 @@ function fmtSliderVal(key, val) {
 // reads as an amount.
 function trackPct(v, lo, hi) { return (hi > lo ? Math.max(0, Math.min(100, (v - lo) / (hi - lo) * 100)) : 0).toFixed(1) + '%'; }
 function sliderMax(value, floor, times, step) { return Math.max(floor, Math.ceil(value * times / step) * step); }
-function helpMark(tip) { return tip ? `<span class="help-mark" tabindex="0" data-tip="${tip}">i</span>` : ''; }
+function helpMark(tip) { return tip ? `<button type="button" class="help-mark" aria-label="More about this" data-tip="${tip}">i</button>` : ''; }
 function moneyControl(o) {
   const min = o.min || 0, max = Math.max(sliderMax(o.value, o.floor, o.times, o.step), min + o.step);
   const shown = o.none && !(o.value > 0) ? 'none' : fmtMoney(o.value);
   return `<div class="control">
           <div class="control-row"><span class="control-label">${o.label}${helpMark(o.tip)}</span><span class="control-value">${shown}</span></div>
           <input type="range" min="${min}" max="${max}" step="${o.step}" value="${o.value}" style="--pct:${trackPct(o.value, min, max)}" oninput="slideLive(this,'${o.key}',this.value)" onchange="sliderCommit('${o.key}',this.value)" class="slider-input"/>
-          <input type="text" inputmode="numeric" class="mobile-input money" value="${o.value > 0 || !o.none ? moneyText(o.value) : ''}" oninput="moneyType(this); slideLive(this,'${o.key}',moneyValue(this))" onchange="sliderCommit('${o.key}',moneyValue(this))" placeholder="${o.placeholder || ''}"/>
+          <input type="text" inputmode="numeric" class="mobile-input money" aria-label="${o.label}" value="${o.value > 0 || !o.none ? moneyText(o.value) : ''}" oninput="moneyType(this); slideLive(this,'${o.key}',moneyValue(this))" onchange="sliderCommit('${o.key}',moneyValue(this))" placeholder="${o.placeholder || ''}"/>
         </div>`;
 }
 // Ages are steppers: one year per tap, or type the number.
@@ -3564,7 +3621,6 @@ window.stepValue = function(btn, key, delta) {
 window.slideLive = function(el, key, rawVal) {
   if (outOfRange(el)) return; // half-typed ("6" on the way to "66"); the commit clamps it
   let val = +rawVal;
-  if (el.type === 'range') el.style.setProperty('--pct', trackPct(+el.value, +el.min, +el.max));
   if (key === 'totalSpending') { key = 'spending'; val = Math.max(0, val - state.housing); }
   if (key === 'totalLateSpending') { key = 'lateSpending'; val = Math.max(0, val - lateHousingPart()); }
   state[key] = val;
@@ -3824,9 +3880,33 @@ window.deleteScenario = function(i) { savedScenarios.splice(i, 1); persistScenar
 // ============================================================================
 // MODALS
 // ============================================================================
-function openModal(html, cls) { modalRoot.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal ${cls || ''}" role="dialog" aria-modal="true"><button class="modal-close" onclick="closeModal()" aria-label="Close">\u00d7</button>${html}</div></div>`; }
-window.closeModal = function() { modalRoot.innerHTML = ''; };
-document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modalRoot.innerHTML) closeModal(); });
+let modalOpener = null;
+function openModal(html, cls) {
+  modalOpener = document.activeElement;
+  modalRoot.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal ${cls || ''}" role="dialog" aria-modal="true"><button class="modal-close" onclick="closeModal()" aria-label="Close">\u00d7</button>${html}</div></div>`;
+  const dlg = modalRoot.querySelector('.modal');
+  const h = dlg.querySelector('h2, h3');
+  if (h) { if (!h.id) h.id = 'modal-title'; dlg.setAttribute('aria-labelledby', h.id); }
+  // Focus goes to the first field if there is one, else the heading, so the dialog is announced.
+  const first = dlg.querySelector('input:not([type=hidden]), select, textarea');
+  if (first) first.focus(); else if (h) { h.setAttribute('tabindex', '-1'); h.focus(); } else dlg.querySelector('.modal-close').focus();
+}
+window.closeModal = function() {
+  modalRoot.innerHTML = '';
+  if (modalOpener && document.contains(modalOpener)) { try { modalOpener.focus(); } catch (e) {} }
+  modalOpener = null;
+};
+document.addEventListener('keydown', function(e) {
+  if (!modalRoot.innerHTML) return;
+  if (e.key === 'Escape') { closeModal(); return; }
+  if (e.key !== 'Tab') return;
+  // Keep Tab inside the dialog.
+  const items = Array.from(modalRoot.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+  if (!items.length) return;
+  const firstEl = items[0], lastEl = items[items.length - 1];
+  if (e.shiftKey && (document.activeElement === firstEl || !modalRoot.contains(document.activeElement))) { e.preventDefault(); lastEl.focus(); }
+  else if (!e.shiftKey && document.activeElement === lastEl) { e.preventDefault(); firstEl.focus(); }
+});
 
 window.showFullDisclaimer = function() {
   openModal(`<h2>Important disclaimer</h2>
@@ -3857,7 +3937,7 @@ window.showScenarioDetail = function(id) {
   narrative += survived ? 'The portfolio still lasted to age ' + state.targetAge + ', ending near ' + fmtMoneyShort(final.portfolio) + '.' : 'The portfolio was depleted around age ' + years.find(y => y.ranOut).age + '.';
 
   const sampleRows = years.filter((y, i) => i % 5 === 0 || y.ranOut).slice(0, 16);
-  const table = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Age</th><th>Market</th><th>Portfolio</th><th>Spending</th></tr></thead><tbody>${sampleRows.map(y => `<tr><td>${y.age}</td><td style="color:${y.marketReturn<0?'var(--danger)':'var(--moss)'}">${(y.marketReturn*100).toFixed(0)}%</td><td>${fmtMoneyShort(y.portfolio)}</td><td>${fmtMoneyShort(y.spending)}</td></tr>`).join('')}</tbody></table></div>`;
+  const table = `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th scope="col">Age</th><th scope="col">Market</th><th scope="col">Portfolio</th><th scope="col">Spending</th></tr></thead><tbody>${sampleRows.map(y => `<tr><td>${y.age}</td><td style="color:${y.marketReturn<0?'var(--danger)':'var(--moss)'}">${(y.marketReturn*100).toFixed(0)}%</td><td>${fmtMoneyShort(y.portfolio)}</td><td>${fmtMoneyShort(y.spending)}</td></tr>`).join('')}</tbody></table></div>`;
   openModal(`<h2>${s.name} \u00b7 ${s.startYear}\u2013${s.startYear + (state.targetAge - state.age)}${run.padded?'*':''}</h2>
     <div class="detail-narrative">${narrative}</div>
     ${table}
@@ -3899,10 +3979,10 @@ window.openPayoffHelper = function(targetId) {
   openModal(`<h2>When is the mortgage paid off?</h2>
     <p>From what is left on it today, the rate, and what you pay in a year.</p>
     <div class="field-grid">
-      ${knownAge >= 18 ? '' : `<div class="field"><label>Your age</label><input type="number" id="mp_age" min="18" max="90" placeholder="e.g. 45" oninput="runPayoffHelper()"/></div>`}
-      <div class="field"><label>Balance left</label><input type="text" id="mp_balance" class="money" inputmode="numeric" value="${state.mortgageBalance ? moneyText(state.mortgageBalance) : ''}" placeholder="e.g. $250,000" oninput="moneyType(this); runPayoffHelper()"/></div>
-      <div class="field"><label>Interest rate</label><input type="number" id="mp_rate" step="0.05" min="0" max="20" value="${state.mortgageRate ? (state.mortgageRate * 100).toFixed(2) : ''}" placeholder="e.g. 6.5" oninput="runPayoffHelper()"/><span class="field-hint">Percent a year</span></div>
-      <div class="field"><label>You pay per year</label><input type="text" id="mp_payment" class="money" inputmode="numeric" value="${pay ? moneyText(pay) : ''}" placeholder="e.g. $24,000" oninput="moneyType(this); runPayoffHelper()"/><span class="field-hint">Principal and interest only</span></div>
+      ${knownAge >= 18 ? '' : `<div class="field"><label for="mp_age">Your age</label><input type="number" id="mp_age" min="18" max="90" placeholder="e.g. 45" oninput="runPayoffHelper()"/></div>`}
+      <div class="field"><label for="mp_balance">Balance left</label><input type="text" id="mp_balance" class="money" inputmode="numeric" value="${state.mortgageBalance ? moneyText(state.mortgageBalance) : ''}" placeholder="e.g. $250,000" oninput="moneyType(this); runPayoffHelper()"/></div>
+      <div class="field"><label for="mp_rate">Interest rate</label><input type="number" id="mp_rate" step="0.05" min="0" max="20" value="${state.mortgageRate ? (state.mortgageRate * 100).toFixed(2) : ''}" placeholder="e.g. 6.5" oninput="runPayoffHelper()"/><span class="field-hint">Percent a year</span></div>
+      <div class="field"><label for="mp_payment">You pay per year</label><input type="text" id="mp_payment" class="money" inputmode="numeric" value="${pay ? moneyText(pay) : ''}" placeholder="e.g. $24,000" oninput="moneyType(this); runPayoffHelper()"/><span class="field-hint">Principal and interest only</span></div>
     </div>
     <div id="mp_result" class="mp-result"></div>`);
   runPayoffHelper();
