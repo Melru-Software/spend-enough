@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blog | Spend Enough</title>
+<meta name="description" content="Notes on playing out money decisions before you make them: time off work, spending more now, paying off the house, and how much is enough." />
+<link rel="canonical" href="https://spendenough.com/blog/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="The Spend Enough blog" />
+<meta property="og:url" content="https://spendenough.com/blog/" />
+<meta property="og:image" content="https://spendenough.com/og-image.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #1a1814; --ink-soft: #3d3830; --ink-mute: #6b6356; --rust: #a04a28; --paper: #fbf8f1; --ground-2: #f4efe6; --line: #d4cab8; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter Tight', system-ui, sans-serif; background: var(--paper); color: var(--ink); font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  header { padding: 18px 32px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-family: 'Source Serif 4', serif; font-size: 22px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; display: inline-flex; align-items: baseline; gap: 6px; }
+  .logo-dot { width: 8px; height: 8px; background: var(--rust); border-radius: 50%; display: inline-block; transform: translateY(-2px); }
+  header nav { display: flex; gap: 18px; }
+  header nav a { color: var(--ink-mute); text-decoration: none; font-size: 14px; white-space: nowrap; padding: 6px 0; }
+  header nav a:hover, header nav a[aria-current] { color: var(--ink); }
+  a:focus-visible { outline: 2px solid var(--rust); outline-offset: 3px; }
+  main { max-width: 680px; margin: 0 auto; padding: 56px 24px 88px; }
+  h1 { font-family: 'Source Serif 4', serif; font-size: 42px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.12; margin-bottom: 12px; }
+  .meta { color: var(--ink-mute); font-size: 14px; margin-bottom: 36px; }
+  .lede { font-family: 'Source Serif 4', serif; font-size: 21px; line-height: 1.55; color: var(--ink); margin-bottom: 20px; }
+  h2 { font-family: 'Source Serif 4', serif; font-size: 25px; font-weight: 500; margin: 44px 0 12px; letter-spacing: -0.01em; line-height: 1.25; }
+  p, li { color: var(--ink-soft); margin-bottom: 14px; }
+  ul { padding-left: 22px; margin-bottom: 14px; }
+  strong { color: var(--ink); }
+  a { color: var(--rust); }
+  .try { margin-top: 48px; padding: 28px; background: var(--ground-2); border-left: 3px solid var(--rust); }
+  .try h2 { margin-top: 0; }
+  .btn { display: inline-block; margin-top: 8px; background: var(--ink); color: var(--paper); padding: 12px 22px; border-radius: 3px; font-weight: 600; font-size: 15px; text-decoration: none; }
+  .btn:hover { background: var(--rust); }
+  .posts { list-style: none; padding: 0; }
+  .posts li { padding: 24px 0; border-top: 1px solid var(--line); margin: 0; }
+  .posts li:last-child { border-bottom: 1px solid var(--line); }
+  .posts h2 { margin: 0 0 6px; font-size: 24px; }
+  .posts h2 a { color: var(--ink); text-decoration: none; }
+  .posts h2 a:hover { color: var(--rust); }
+  .posts .meta { margin-bottom: 8px; }
+  .posts p { margin: 0; }
+  footer { border-top: 1px solid var(--line); padding: 24px 32px; text-align: center; font-size: 13px; color: var(--ink-mute); }
+  footer a { color: var(--rust); text-underline-offset: 2px; margin: 0 6px; display: inline-block; padding: 6px 0; }
+  @media (max-width: 600px) {
+    header { padding: 12px 20px; }
+    .logo { font-size: 18px; white-space: nowrap; }
+    header nav a:not(.keep) { display: none; }
+    main { padding: 32px 20px 64px; }
+    h1 { font-size: 30px; }
+    .lede { font-size: 19px; }
+    .try { padding: 22px 20px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><span class="logo-dot"></span>Spend Enough</a>
+  <nav aria-label="Primary"><a href="/blog/" aria-current="page">Blog</a><a href="/why">Why I built it</a><a class="keep" href="/app.html">Try it free</a></nav>
+</header>
+<main>
+  <h1>The Spend Enough blog</h1>
+  <p class="meta">Playing out money decisions before you make them.</p>
+  <ul class="posts">
+    <li>
+      <h2><a href="/blog/can-i-afford-to-quit-my-job">Can I afford to quit my job for a while?</a></h2>
+      <p class="meta">November 11, 2026</p>
+      <p>How to tell if you can live without your paycheck for a while, and what it costs you later.</p>
+    </li>
+  </ul>
+</main>
+<footer>Educational modelling tool, not financial, tax, investment, or legal advice. <nav aria-label="Footer"><a href="/blog/">Blog</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/">Home</a></nav></footer>
+<script src="/config.js"></script>
+</body>
+</html>

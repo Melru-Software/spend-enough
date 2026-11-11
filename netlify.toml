@@ -13,3 +13,9 @@
   to = "/"
   status = 301
   force = true
+
+# The first blog post was renamed before launch; send the old address to the new one.
+[[redirects]]
+  from = "/blog/can-we-afford-to-stay-home"
+  to = "/blog/can-i-afford-to-quit-my-job"
+  status = 301
