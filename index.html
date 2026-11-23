@@ -353,7 +353,7 @@
             <li>Add one-time financial events like an inheritance or a large purchase.</li>
             <li>Paying the mortgage off early, income growth, and the details of a pension or other income.</li>
           </ul>
-          <a class="btn btn-ink checkout-button" id="pro-buy" href="app.html" target="_blank" rel="noopener" onclick="track('clicked_checkout')" hidden>Get the full version<span class="sr-only"> (opens in a new tab)</span></a>
+          <a class="btn btn-ink checkout-button" id="pro-buy" href="app.html" target="_blank" rel="noopener" hidden>Get the full version<span class="sr-only"> (opens in a new tab)</span></a>
           <p class="terms-line" id="pro-terms" hidden>By purchasing you agree to the <a href="terms.html">Terms of Service</a>.</p>
           <p class="refund">Not for you? Full refund within 14 days, no questions asked.</p>
           <div id="pro-have" hidden><p class="have-it">You already have this. This browser is unlocked.</p><a class="btn btn-ink" href="app.html">Open the app</a></div>
@@ -504,9 +504,7 @@
 <script src="config.js"></script>
 <script src="paywall.js"></script>
 <script src="checkout.js" defer></script>
-<script>/* Optional privacy-respecting analytics (Plausible/Fathom-style), only when config.js sets it. */
-(function(){var c=window.SPENDENOUGH_CONFIG||{};if(!c.analyticsScript)return;var s=document.createElement('script');s.defer=true;s.src=c.analyticsScript;if(c.analyticsSite){s.setAttribute('data-domain',c.analyticsSite);s.setAttribute('data-site',c.analyticsSite);}document.head.appendChild(s);})();
-window.track=function(n){try{if(window.plausible)window.plausible(n);else if(window.fathom&&window.fathom.trackEvent)window.fathom.trackEvent(n);}catch(e){}};</script>
+<script src="analytics.js"></script>
 <script>
   // ---------- Config ----------
   // Public deployment values live in config.js (window.SPENDENOUGH_CONFIG). No secrets.

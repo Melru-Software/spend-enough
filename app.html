@@ -1083,9 +1083,7 @@
 <div id="tip-popup"></div>
 <script src="config.js"></script>
 <script src="checkout.js" defer></script>
-<script>/* Optional privacy-respecting analytics (Plausible/Fathom-style), only when config.js sets it. */
-(function(){var c=window.SPENDENOUGH_CONFIG||{};if(!c.analyticsScript)return;var s=document.createElement('script');s.defer=true;s.src=c.analyticsScript;if(c.analyticsSite){s.setAttribute('data-domain',c.analyticsSite);s.setAttribute('data-site',c.analyticsSite);}document.head.appendChild(s);})();
-window.track=function(n){try{if(window.plausible)window.plausible(n);else if(window.fathom&&window.fathom.trackEvent)window.fathom.trackEvent(n);}catch(e){}};</script>
+<script src="analytics.js"></script>
 <script src="engine.js"></script>
 <script src="paywall.js"></script>
 <script>
@@ -1400,7 +1398,7 @@ window.showUnlockModal = function(opts) {
   opts = opts || {};
   if (!opts.silent) track('hit_paywall');
   const buy = CONFIG.checkoutUrl
-    ? `<a class="btn-primary checkout-button" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" onclick="track('clicked_checkout')" style="width:100%;justify-content:center;text-decoration:none">Get the full version &middot; ${CONFIG.price}</a>`
+    ? `<a class="btn-primary checkout-button" href="${CONFIG.checkoutUrl}" target="_blank" rel="noopener" style="width:100%;justify-content:center;text-decoration:none">Get the full version &middot; ${CONFIG.price}</a>`
     : `<button class="btn-primary" disabled style="width:100%;justify-content:center;opacity:0.6;cursor:default">Get the full version &middot; ${CONFIG.price} &middot; checkout opens soon</button>`;
   const keyAttr = opts.key && KEY_RE.test(opts.key) ? ` value="${opts.key}"` : '';
   const dis = opts.busy ? ' disabled' : '';

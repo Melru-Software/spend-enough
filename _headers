@@ -1,19 +1,21 @@
 # Response headers for every page (Netlify _headers format).
 #
 # Content-Security-Policy, what each source is for:
-#   script-src   inline scripts and onclick handlers in the pages, Chart.js from jsDelivr
+#   script-src   inline scripts and onclick handlers in the pages, Chart.js from jsDelivr,
+#                the Umami analytics script (cloud.umami.is)
 #   style-src    inline styles, Google Fonts stylesheet
 #   font-src     Google Fonts files
-#   connect-src  Lemon Squeezy License API (activate / validate / deactivate)
+#   connect-src  Lemon Squeezy License API (activate / validate / deactivate), Umami analytics
+#                (the cloud script sends to gateway.umami.is; cloud.umami.is kept as a fallback)
 #   frame-src    the Lemon Squeezy checkout overlay (an iframe of our store)
 #   img-src      local images and data: URIs
-# When you turn on analytics or the email form in config.js, add that provider's host to
-# script-src and connect-src (analytics), or connect-src / form-action (email endpoint).
+# Analytics (analytics.js) is Umami Cloud. If you change provider, swap its hosts in script-src
+# and connect-src. When you turn on the email form, add its host to connect-src / form-action.
 # checkout.js opens the store checkout in an iframe with allow="payment", so Permissions-Policy
 # has to let the store use the Payment Request API (Apple Pay / Google Pay), and COOP allows
 # popups so a PayPal window can report back.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.lemonsqueezy.com; frame-src https://spendenough.lemonsqueezy.com https://app.lemonsqueezy.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cloud.umami.is; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.lemonsqueezy.com https://gateway.umami.is https://cloud.umami.is; frame-src https://spendenough.lemonsqueezy.com https://app.lemonsqueezy.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

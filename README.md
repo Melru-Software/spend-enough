@@ -21,6 +21,7 @@ what you may and may not do with it. Contributions are not accepted at this time
 | `engine.js`  | The pure simulation engine + tax/Social-Security estimators. **No DOM.** Loaded by `app.html` (attaches its exports to `window`) and by `tests.js` (via `require`). |
 | `paywall.js` | Pure license-decision logic (is Pro unlocked, does the key need a re-check, how to read a Lemon Squeezy License API reply). **No DOM, no network.** Loaded by `app.html` and by `tests.js`. |
 | `config.js`  | Public deployment values (checkout URL, price, email endpoint, analytics, site URL). No secrets; every value is visible to visitors by design. |
+| `analytics.js` | Cookie-free analytics (Umami Cloud), loaded on every page after `config.js`. Defines `track(name)` and counts clicks on any `.checkout-button`. Does nothing until `config.js` has a Umami Website ID. |
 | `privacy.html`, `terms.html` | Legal pages. Drafts with `[BUSINESS NAME]`-style placeholders the owner must fill before launch. |
 | `data/shiller_stock_market_data.csv` | Snapshot of Robert Shiller's monthly dataset (through 2025-12). |
 | `data/build_returns.js` | Rebuilds the two annual real-return arrays in `engine.js` from the snapshot and documents the method. |
@@ -86,11 +87,11 @@ The site is static files at the repo root, so any static host works. It is deplo
 repo root, and `_headers` sets the Content-Security-Policy and other security headers.
 Every push to `main` deploys.
 
-1. Fill in `config.js` (checkout URL from the payment provider, optional email endpoint
-   and analytics). If you enable analytics or the email form, add the provider's host to
-   the policy in `_headers` (the comments there say where).
-2. Set `[DATE]` in `privacy.html` and `terms.html`, fill `[ANALYTICS PROVIDER]` if used, and
-   review the remaining `TODO` boxes.
+1. Fill in `config.js` (checkout URL from the payment provider, optional email endpoint,
+   and the Umami Website ID for analytics). Umami's hosts are already in the policy in
+   `_headers`; if you enable the email form, add its host there too (the comments say where).
+2. Review `privacy.html` and `terms.html`. If you change what `analytics.js` records,
+   update the Analytics section of `privacy.html` to match.
 3. Replace the results-screen mock and the `og:image` placeholder in `index.html` with real
    images (`results-screen.png`, `og-image.png`).
 4. Add the custom domain in the Netlify dashboard and follow its DNS instructions.

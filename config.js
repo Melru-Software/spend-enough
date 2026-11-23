@@ -28,10 +28,12 @@ window.SPENDENOUGH_CONFIG = {
   price: '$39',
 
 
-  // Phase 5 — optional privacy-respecting analytics (Plausible, Fathom, ...).
-  // Set the script URL and site/domain; pages add the <script> tag only when set.
-  analyticsScript: '',
-  analyticsSite: '',
+  // Cookie-free analytics with Umami Cloud (free Hobby plan), loaded by analytics.js.
+  // Paste the Website ID from Umami (Settings > Websites > Edit) into analyticsWebsiteId.
+  // While it is empty, no analytics script loads on any page. If you change provider,
+  // update analytics.js, the Content-Security-Policy in _headers, and privacy.html together.
+  analyticsScript: 'https://cloud.umami.is/script.js',
+  analyticsWebsiteId: '',
 
   // Public site URL, used for canonical and Open Graph tags on the landing page.
   siteUrl: 'https://spendenough.com',
