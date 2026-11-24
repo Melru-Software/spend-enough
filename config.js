@@ -33,7 +33,7 @@ window.SPENDENOUGH_CONFIG = {
   // While it is empty, no analytics script loads on any page. If you change provider,
   // update analytics.js, the Content-Security-Policy in _headers, and privacy.html together.
   analyticsScript: 'https://cloud.umami.is/script.js',
-  analyticsWebsiteId: '',
+  analyticsWebsiteId: 'b8961917-b11f-43a5-ae05-7afdf2dbbe80',
 
   // Public site URL, used for canonical and Open Graph tags on the landing page.
   siteUrl: 'https://spendenough.com',
